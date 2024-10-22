@@ -19,14 +19,15 @@ const useVaultState = ({
   selectedRound?: number | string;
   getRounds: boolean;
 }) => {
-  const contractData = useMemo(() => {
-    return {
-      abi: vaultABI,
-      address: conn === "rpc" ? address : "",
-    };
-  }, [address, conn]);
+  const contractData = {
+    abi: vaultABI,
+    address:
+      "0x078c96c4238c1d0294b6cfacfbfdba1cc289e978685231284a3bd2ae00dd3f56",
+  };
 
-  const { address: accountAddress } = useAccount();
+  const { address: accountAddress } = {
+    address: "0x8ef103ecee8d069b10ccdb8658e9dbced4da8160b51c37e517510d86ea21d9",
+  };
   //Read States
 
   //States without a param
@@ -163,6 +164,7 @@ const useVaultState = ({
     [optionBuyerState]
   );
   const roundActions = useMemo(() => roundAction, [roundAction]);
+
 
   console.log("VAULT STATE TEST: ", {
     address,

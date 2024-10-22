@@ -49,34 +49,39 @@ const useVaultActions = (address?: string) => {
 
   //Write Calls
 
-
-
   const callContract = useCallback(
-    (functionName: string) => async (args?: DepositArgs | WithdrawLiquidityArgs) => {
-      if (!typedContract) return;
-      let argsData;
-      if (args) argsData = Object.values(args).map((value) => value);
-      let data;
-      if (argsData) {
-        data = await typedContract?.[functionName](...argsData);
-      } else {
-        data = await typedContract?.[functionName]();
-      }
-      const typedData = data as TransactionResult;
-      setPendingTx(typedData.transaction_hash);
-      // const data = await writeAsync({ calls: [callData] });
-      return typedData;
-    },
+    (functionName: string) =>
+      async (args?: DepositArgs | WithdrawLiquidityArgs) => {
+        if (!typedContract) return;
+        let argsData;
+        if (args) argsData = Object.values(args).map((value) => value);
+        let data;
+        if (argsData) {
+          data = await typedContract?.[functionName](...argsData);
+        } else {
+          data = await typedContract?.[functionName]();
+        }
+        const typedData = data as TransactionResult;
+        setPendingTx(typedData.transaction_hash);
+        // const data = await writeAsync({ calls: [callData] });
+        return typedData;
+      },
     [typedContract, setPendingTx],
   );
 
-  const depositLiquidity = useCallback(async (depositArgs: DepositArgs) => {
-    await callContract("deposit_liquidity")(depositArgs);
-  }, [callContract]);
+  const depositLiquidity = useCallback(
+    async (depositArgs: DepositArgs) => {
+      await callContract("deposit_liquidity")(depositArgs);
+    },
+    [callContract],
+  );
 
-  const withdrawLiquidity = useCallback(async (withdrawArgs: WithdrawLiquidityArgs) => {
-    await callContract("withdraw_liquidity")(withdrawArgs);
-  }, [callContract]);
+  const withdrawLiquidity = useCallback(
+    async (withdrawArgs: WithdrawLiquidityArgs) => {
+      await callContract("withdraw_liquidity")(withdrawArgs);
+    },
+    [callContract],
+  );
 
   const startAuction = useCallback(async () => {
     await callContract("start_auction")();
@@ -87,7 +92,7 @@ const useVaultActions = (address?: string) => {
   }, [callContract]);
 
   const settleOptionRound = useCallback(async () => {
-    await callContract("settle_option_round")();
+    await callContract("settle_round")();
   }, [callContract]);
   //State Transition
 
