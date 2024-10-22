@@ -1,4 +1,4 @@
-import { useAccount, useContractRead, useNetwork } from "@starknet-react/core";
+import { useAccount, useContractRead } from "@starknet-react/core";
 import { vaultABI } from "@/abi";
 import { LiquidityProviderStateType, VaultStateType } from "@/lib/types";
 import { stringToHex } from "@/lib/utils";
@@ -30,78 +30,97 @@ const useVaultState = ({
   //Read States
 
   //States without a param
-  const {
-    vaultType,
-    alpha,
-    strikeLevel,
-    ethAddress,
-    currentRoundId,
-    lockedBalance,
-    unlockedBalance,
-    stashedBalance,
-    queuedBps,
-  } = useContractReads({
-    contractData,
-    states: [
-      { functionName: "get_vault_type", key: "vaultType" }, // will rm
-      {
-        functionName: "get_alpha",
-        key: "alpha",
-      },
-      {
-        functionName: "get_strike_level",
-        key: "strikeLevel",
-      },
 
-      { functionName: "get_eth_address", key: "ethAddress" },
-      // fossil client address
-      {
-        functionName: "get_current_round_id",
-        key: "currentRoundId",
-      },
-      // round addresses ?
-      {
-        functionName: "get_vault_locked_balance",
-        key: "lockedBalance",
-      },
-      {
-        functionName: "get_vault_unlocked_balance",
-        key: "unlockedBalance",
-      },
-      {
-        functionName: "get_vault_stashed_balance",
-        key: "stashedBalance",
-      },
-      { functionName: "get_vault_queued_bps", key: "queuedBps" },
-    ],
+  const { data: vaultType } = useContractRead({
+    ...contractData,
+    functionName: "get_vault_type",
+    args: [],
+    watch: true,
+  });
+  const { data: alpha } = useContractRead({
+    ...contractData,
+    functionName: "get_alpha",
+    args: [],
+    watch: true,
+  });
+
+  const { data: strikeLevel } = useContractRead({
+    ...contractData,
+    functionName: "get_strike_level",
+    args: [],
+    watch: true,
+  });
+
+  const { data: ethAddress } = useContractRead({
+    ...contractData,
+    functionName: "get_eth_address",
+    args: [],
+    watch: true,
+  });
+
+  const { data: currentRoundId } = useContractRead({
+    ...contractData,
+    functionName: "get_current_round_id",
+    args: [],
+    watch: true,
+  });
+
+  const { data: lockedBalance } = useContractRead({
+    ...contractData,
+    functionName: "get_vault_locked_balance",
+    args: [],
+    watch: true,
+  });
+
+  const { data: unlockedBalance } = useContractRead({
+    ...contractData,
+    functionName: "get_vault_unlocked_balance",
+    args: [],
+    watch: true,
+  });
+
+  const { data: stashedBalance } = useContractRead({
+    ...contractData,
+    functionName: "get_vault_stashed_balance",
+    args: [],
+    watch: true,
+  });
+
+  const { data: queuedBps } = useContractRead({
+    ...contractData,
+    functionName: "get_vault_queued_bps",
+    args: [],
+    watch: true,
   });
 
   //Wallet states
-  const lpState = useContractReads({
-    contractData,
-    states: [
-      {
-        functionName: "get_account_locked_balance",
-        args: [accountAddress as string],
-        key: "lockedBalance",
-      },
-      {
-        functionName: "get_account_unlocked_balance",
-        args: [accountAddress as string],
-        key: "unlockedBalance",
-      },
-      {
-        functionName: "get_account_stashed_balance",
-        args: [accountAddress as string],
-        key: "stashedBalance",
-      },
-      {
-        functionName: "get_account_queued_bps",
-        args: [accountAddress as string],
-        key: "queuedBps",
-      },
-    ],
-  }) as unknown as LiquidityProviderStateType;
+  const { data: lockedBalanceLP } = useContractRead({
+    ...contractData,
+    functionName: "get_account_locked_balance",
+    args: [accountAddress as string],
+    watch: true,
+  });
+
+  const { data: unlockedBalanceLP } = useContractRead({
+    ...contractData,
+    functionName: "get_account_unlocked_balance",
+    args: [accountAddress as string],
+    watch: true,
+  });
+
+  const { data: stashedBalanceLP } = useContractRead({
+    ...contractData,
+    functionName: "get_account_stashed_balance",
+    args: [accountAddress as string],
+    watch: true,
+  });
+
+  const { data: queuedBpsLP } = useContractRead({
+    ...contractData,
+    functionName: "get_account_queued_bps",
+    args: [accountAddress as string],
+    watch: true,
+  });
 
   const { data: currentRoundAddress } = useContractRead({
     ...contractData,
@@ -113,27 +132,37 @@ const useVaultState = ({
     ...contractData,
     functionName: "get_round_address",
     args:
-      selectedRound && selectedRound !== 0
-        ? [selectedRound.toString()]
-        : currentRoundId
-        ? [currentRoundId.toString()]
-        : [1],
+      selectedRound && selectedRound !== 0 ? [selectedRound.toString()] : [],
   });
   const usableString = useMemo(() => {
+    if (selectedRound === 0) return "";
     return stringToHex(selectedRoundAddress?.toString());
   }, [selectedRoundAddress]);
-  console.log("SELECTEDRTOUNDADDRESS", usableString);
-  const {
-    optionRoundState,
-    optionBuyerState,
-} = useOptionRoundState(usableString);
+  const { optionRoundState, optionBuyerState } =
+    useOptionRoundState(usableString);
 
-const roundAction = useOptionRoundActions(usableString);
+  const roundAction = useOptionRoundActions(usableString);
 
-// Memoize the states and actions
-const selectedRoundState = useMemo(() => optionRoundState, [optionRoundState]);
-const selectedRoundBuyerState = useMemo(() => optionBuyerState, [optionBuyerState]);
-const roundActions = useMemo(() => roundAction, [roundAction]);
+  const lpState = useMemo(() => {
+    return {
+      address: accountAddress,
+      lockedBalance: lockedBalanceLP,
+      unlockedBalance: unlockedBalanceLP,
+      stashedBalance: stashedBalanceLP,
+      queuedBps: queuedBpsLP,
+    } as LiquidityProviderStateType;
+  }, [lockedBalanceLP, unlockedBalanceLP, stashedBalanceLP, queuedBpsLP]);
+
+  // Memoize the states and actions
+  const selectedRoundState = useMemo(
+    () => optionRoundState,
+    [optionRoundState]
+  );
+  const selectedRoundBuyerState = useMemo(
+    () => optionBuyerState,
+    [optionBuyerState]
+  );
+  const roundActions = useMemo(() => roundAction, [roundAction]);
 
   console.log("VAULT STATE TEST: ", {
     address,

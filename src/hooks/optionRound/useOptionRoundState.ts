@@ -11,157 +11,187 @@ const useOptionRoundState = (address: string | undefined) => {
   }, [address]);
   const { account } = useAccount();
   //Read States
-
-  const {
-    vaultAddress,
-    roundId,
-    roundState,
-    deploymentDate,
-    auctionStartDate,
-    auctionEndDate,
-    optionSettleDate,
-    startingLiquidity,
-    soldLiquidity,
-    unsoldLiquidity,
-    reservePrice,
-    strikePrice,
-    capLevel,
-    clearingPrice,
-    optionsSold,
-    availableOptions,
-    premiums,
-    settlementPrice,
-    totalPayout,
-  } = useContractReads({
-    contractData,
+  const { data: vaultAddress } = useContractRead({
+    ...contractData,
+    functionName: "get_vault_address",
+    args: [],
     watch: true,
-    states: [
-      { 
-        functionName: "get_vault_address", key: "vaultAddress" },
-      {
-        functionName: "get_round_id",
-        key: "roundId",
-      },
-      {
-        functionName: "get_state",
-        key: "roundState",
-      },
-      {
-        functionName: "get_deployment_date",
-        key: "deploymentDate",
-      },
-      {
-        functionName: "get_auction_start_date",
-        key: "auctionStartDate",
-      },
-      {
-        functionName: "get_auction_end_date",
-        key: "auctionEndDate",
-      },
-      {
-        functionName: "get_option_settlement_date",
-        key: "optionSettleDate",
-      },
-      {
-        functionName: "get_starting_liquidity",
-        key: "startingLiquidity",
-      },
-      {
-        functionName: "get_sold_liquidity",
-        key: "soldLiquidity",
-      },
-      {
-        functionName: "get_unsold_liquidity",
-        key: "unsoldLiquidity",
-      },
-      {
-        functionName: "get_reserve_price",
-        key: "reservePrice",
-      },
-      {
-        functionName: "get_strike_price",
-        key: "strikePrice",
-      },
-      {
-        functionName: "get_cap_level",
-        key: "capLevel",
-      },
-      {
-        functionName: "get_options_available",
-        key: "availableOptions",
-      },
-      {
-        functionName: "get_options_sold",
-        key: "optionsSold",
-      },
-      {
-        functionName: "get_clearing_price",
-        key: "clearingPrice",
-      },
-      {
-        functionName: "get_total_premium",
-        key: "premiums",
-      },
-      {
-        functionName: "get_settlement_price",
-        key: "settlementPrice",
-      },
-      {
-        functionName: "get_total_payout",
-        key: "totalPayout",
-      },
-    ],
+  });
+  
+  const { data: roundId } = useContractRead({
+    ...contractData,
+    functionName: "get_round_id",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: roundState } = useContractRead({
+    ...contractData,
+    functionName: "get_state",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: deploymentDate } = useContractRead({
+    ...contractData,
+    functionName: "get_deployment_date",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: auctionStartDate } = useContractRead({
+    ...contractData,
+    functionName: "get_auction_start_date",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: auctionEndDate } = useContractRead({
+    ...contractData,
+    functionName: "get_auction_end_date",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: optionSettleDate } = useContractRead({
+    ...contractData,
+    functionName: "get_option_settlement_date",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: startingLiquidity } = useContractRead({
+    ...contractData,
+    functionName: "get_starting_liquidity",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: soldLiquidity } = useContractRead({
+    ...contractData,
+    functionName: "get_sold_liquidity",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: unsoldLiquidity } = useContractRead({
+    ...contractData,
+    functionName: "get_unsold_liquidity",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: reservePrice } = useContractRead({
+    ...contractData,
+    functionName: "get_reserve_price",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: strikePrice } = useContractRead({
+    ...contractData,
+    functionName: "get_strike_price",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: capLevel } = useContractRead({
+    ...contractData,
+    functionName: "get_cap_level",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: clearingPrice } = useContractRead({
+    ...contractData,
+    functionName: "get_clearing_price",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: optionsSold } = useContractRead({
+    ...contractData,
+    functionName: "get_options_sold",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: availableOptions } = useContractRead({
+    ...contractData,
+    functionName: "get_options_available",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: premiums } = useContractRead({
+    ...contractData,
+    functionName: "get_total_premium",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: settlementPrice } = useContractRead({
+    ...contractData,
+    functionName: "get_settlement_price",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: totalPayout } = useContractRead({
+    ...contractData,
+    functionName: "get_total_payout",
+    args: [],
+    watch: true,
   });
 
   //Wallet States
-  const {
-    treeNonce,
-    biddingNonce,
-    bids,
-    refundableBids,
-    tokenizableOptions,
-    totalOptions,
-    payoutBalance,
-  } = useContractReads({
-    contractData,
-
-    states: [
-      {
-        functionName: "get_bid_tree_nonce",
-        key: "treeNonce",
-      },
-      {
-        functionName: "get_account_bidding_nonce",
-        args: [account?.address as string],
-        key: "biddingNonce",
-      },
-      {
-        functionName: "get_account_bids",
-        args: [account?.address as string],
-        key: "bids",
-      },
-      {
-        functionName: "get_account_refundable_balance",
-        args: [account?.address as string],
-        key: "refundableBids",
-      },
-      {
-        functionName: "get_account_mintable_options",
-        args: [account?.address as string],
-        key: "tokenizableOptions",
-      },
-
-      {
-        functionName: "get_account_total_options",
-        args: [account?.address as string],
-        key: "totalOptions",
-      },
-      {
-        functionName: "get_account_payout_balance",
-        args: [account?.address as string],
-        key: "payoutBalance",
-      },
-    ],
+  const { data: treeNonce } = useContractRead({
+    ...contractData,
+    functionName: "get_bid_tree_nonce",
+    args: [],
+    watch: true,
+  });
+  
+  const { data: biddingNonce } = useContractRead({
+    ...contractData,
+    functionName: "get_account_bidding_nonce",
+    args: [account?.address as string],
+    watch: true,
+  });
+  
+  const { data: bids } = useContractRead({
+    ...contractData,
+    functionName: "get_account_bids",
+    args: [account?.address as string],
+    watch: true,
+  });
+  
+  const { data: refundableBids } = useContractRead({
+    ...contractData,
+    functionName: "get_account_refundable_balance",
+    args: [account?.address as string],
+    watch: true,
+  });
+  
+  const { data: tokenizableOptions } = useContractRead({
+    ...contractData,
+    functionName: "get_account_mintable_options",
+    args: [account?.address as string],
+    watch: true,
+  });
+  
+  const { data: totalOptions } = useContractRead({
+    ...contractData,
+    functionName: "get_account_total_options",
+    args: [account?.address as string],
+    watch: true,
+  });
+  
+  const { data: payoutBalance } = useContractRead({
+    ...contractData,
+    functionName: "get_account_payout_balance",
+    args: [account?.address as string],
+    watch: true,
   });
 
   //  const { data:  } = useMemo(
