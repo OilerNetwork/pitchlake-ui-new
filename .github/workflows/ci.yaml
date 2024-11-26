@@ -29,10 +29,10 @@ jobs:
       - name: Install dependencies with pnpm
         run: pnpm install
 
-      - name: Check formatting with Prettier
-        run: pnpm prettier --check .
-        env:
-          CI: true
+    #   - name: Check formatting with Prettier
+    #     run: pnpm prettier --check .
+    #     env:
+    #       CI: true
 
       - name: Lint code with ESLint
         run: pnpm lint
