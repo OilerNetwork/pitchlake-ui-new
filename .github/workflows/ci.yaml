@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      -ci_cd_pitchlake
+      - feat/ci_cd_pitchlake
   pull_request:
     branches:
       - main
