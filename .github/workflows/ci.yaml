@@ -24,7 +24,10 @@ jobs:
           cache: 'pnpm'
 
       - name: Setup pnpm
-        run: npm install -g pnpm@9.3.0
+        run: |
+          corepack enable # Enable Corepack to manage pnpm
+          corepack prepare pnpm@9.3.0 --activate # Install the specific pnpm version
+          pnpm --version # Confirm pnpm is installed
 
       - name: Install dependencies with pnpm
         run: pnpm install
