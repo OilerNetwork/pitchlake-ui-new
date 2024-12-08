@@ -11,7 +11,7 @@ import {
 import { useState } from "react";
 import useMockOptionRounds from "./useMockOptionRounds";
 
-const useMockVault = (selectedRound: number, address?: string) => {
+const useMockVault = (selectedRound: number, timestamp:number,address?: string) => {
   const { address: accountAddress } = useAccount();
   //Read States
   const [vaultState, setVaultState] = useState<VaultStateType>({
@@ -27,7 +27,7 @@ const useMockVault = (selectedRound: number, address?: string) => {
     queuedBps: "0",
     strikeLevel: "-1111",
     now: "0",
-    deploymentDate: "0",
+    deploymentDate: "1",
   });
   //States without a param
 
@@ -107,13 +107,13 @@ const useMockVault = (selectedRound: number, address?: string) => {
           payoutPerOption: "",
           vaultAddress: "",
           reservePrice: "2000000000",
+          deploymentDate:timestamp.toString(),
           auctionStartDate:
-            200000 + Number(newState[selectedRound - 1].auctionEndDate),
+            200000 + timestamp,
           auctionEndDate:
-            400000 + Number(newState[selectedRound - 1].auctionEndDate),
+            400000 + timestamp,
           optionSettleDate:
-            600000 + Number(newState[selectedRound - 1].auctionEndDate),
-          deploymentDate: "",
+            600000 + timestamp,
           soldLiquidity: "",
           unsoldLiquidity: "",
           optionSold: "",
@@ -131,9 +131,9 @@ const useMockVault = (selectedRound: number, address?: string) => {
         ...prevState,
         {
           address: address ?? "0x1",
-          roundId: BigInt(vaultState.currentRoundId) + BigInt(1),
-          tokenizableOptions: "",
-          refundableBalance: "",
+          roundAddress: "0x1",
+          mintableOptions: "",
+          refundableOptions: "",
           bids: [],
           totalOptions: "0",
           payoutBalance: "0",

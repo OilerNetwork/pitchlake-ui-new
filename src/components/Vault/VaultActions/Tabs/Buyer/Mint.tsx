@@ -36,7 +36,7 @@ const Mint: React.FC<MintProps> = ({ showConfirmation }) => {
           {formatNumberText(
             Number(
               selectedRoundBuyerState
-                ? selectedRoundBuyerState.tokenizableOptions
+                ? selectedRoundBuyerState.mintableOptions
                 : "0",
             ),
           )}
@@ -52,7 +52,7 @@ const Mint: React.FC<MintProps> = ({ showConfirmation }) => {
     if (pendingTx) return true;
     if (
       !selectedRoundBuyerState ||
-      Number(selectedRoundBuyerState.tokenizableOptions) === 0
+      Number(selectedRoundBuyerState.mintableOptions) === 0
     )
       return true;
 
@@ -72,7 +72,7 @@ const Mint: React.FC<MintProps> = ({ showConfirmation }) => {
           <br />
           <span className="font-semibold text-[#fafafa]">
             {formatNumberText(
-              Number(selectedRoundBuyerState?.tokenizableOptions),
+              Number(selectedRoundBuyerState?.mintableOptions),
             )}
           </span>
         </p>

@@ -24,7 +24,7 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
   const { roundActions, selectedRoundBuyerState } = useProtocolContext();
   const { pendingTx } = useTransactionContext();
 
-  const payoutBalanceWei = selectedRoundBuyerState
+  const payoutBalanceWei = selectedRoundBuyerState?.payoutBalance
     ? selectedRoundBuyerState.payoutBalance
     : "0";
   const payoutBalanceEth = formatEther(num.toBigInt(payoutBalanceWei));
@@ -50,6 +50,8 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
     );
   };
 
+  console.log("BUYERSTATE",selectedRoundBuyerState)
+
   const isButtonDisabled = (): boolean => {
     if (!account) return true;
     if (pendingTx) return true;
@@ -73,7 +75,7 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
         <p className="max-w-[290px] text-[#bfbfbf] text-center">
           You currently have{" "}
           <span className="font-semibold text-[#fafafa]">
-            {formatNumberText(Number(selectedRoundBuyerState?.totalOptions))}
+            {selectedRoundBuyerState?.totalOptions?formatNumberText(Number(selectedRoundBuyerState?.totalOptions)):0}
           </span>{" "}
           options worth
           <br />{" "}

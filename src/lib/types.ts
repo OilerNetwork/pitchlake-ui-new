@@ -69,10 +69,10 @@ export type LiquidityProviderStateType = {
 
 export type OptionBuyerStateType = {
   address: string;
-  bids: string[];
-  roundId: bigint | number | string;
-  tokenizableOptions: bigint | number | string;
-  refundableBalance: bigint | number | string;
+  bids: string[]|Bid[];
+  roundAddress: string;
+  mintableOptions: bigint | number | string;
+  refundableOptions: bigint | number | string;
   totalOptions: bigint | number | string;
   payoutBalance: bigint | number | string;
 };
@@ -118,7 +118,7 @@ export type OptionRoundStateType = {
 
 export type Bid = {
   address: string; //owner ?
-  roundId: bigint | number | string;
+  roundAddress: string;
   bidId: string;
   treeNonce: string;
   amount: bigint | number | string;

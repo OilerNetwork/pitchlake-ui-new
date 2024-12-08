@@ -1,12 +1,9 @@
 import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useProvider, useAccount } from "@starknet-react/core";
-import useLatestTimestamp from "@/hooks/chain/useLatestTimestamp";
 import { useMemo, useState, useEffect } from "react";
 import useFossilStatus from "@/hooks/fossil/useFossilStatus";
 import { getDurationForRound, getTargetTimestampForRound } from "@/lib/utils";
-import { makeFossilCall } from "@/services/fossilRequest";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import { num } from "starknet";
 import { useRoundState } from "@/hooks/stateTransition/useRoundState";
 import { useIsDisabled } from "@/hooks/stateTransition/useIsDisabled";
 import { getIconByRoundState } from "@/hooks/stateTransition/getIconByRoundState";
@@ -19,11 +16,10 @@ const StateTransition = ({
   isPanelOpen: boolean;
   setModalState: any;
 }) => {
-  const { vaultState, vaultActions, selectedRoundState } = useProtocolContext();
+  const { vaultState, vaultActions, selectedRoundState,timestamp:timestampRaw,conn } = useProtocolContext();
   const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
   const { provider } = useProvider();
-  const { timestamp: timestampRaw } = useLatestTimestamp(provider);
   const timestamp = timestampRaw ? timestampRaw : "0";
   const {
     status: fossilStatus,
@@ -54,6 +50,7 @@ const StateTransition = ({
     selectedRoundState,
     FOSSIL_DELAY,
   );
+  
 
   const actions: Record<string, string> = useMemo(
     () => ({
@@ -68,6 +65,9 @@ const StateTransition = ({
 
   const handleAction = async () => {
     if (roundState === "FossilReady") {
+      if(conn!=="mock"){
+        
+      
       const response = await fetch("/api/sendFossilRequest", {
         method: "POST",
         headers: {
@@ -89,6 +89,7 @@ const StateTransition = ({
       } else {
         setFossilStatus({ status: "Pending", error: undefined });
       }
+    }
     } else if (roundState === "Open") {
       await vaultActions.startAuction();
     } else if (roundState === "Auctioning") {
@@ -125,11 +126,15 @@ const StateTransition = ({
   }, [roundState, prevRoundState]);
 
   if (!vaultState?.currentRoundId || !selectedRoundState || !vaultActions)
-    return null;
+   
+   
+   {
+    console.log("FAIL HERE")
+     return null;}
 
   if (
     roundState === "Settled" ||
-    vaultState.currentRoundId !== selectedRoundState.roundId
+    Number(vaultState.currentRoundId) !== Number(selectedRoundState.roundId)
   ) {
     return null;
   }

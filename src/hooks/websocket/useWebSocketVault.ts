@@ -30,7 +30,7 @@ const useWebSocketVault = (conn: string, vaultAddress?: string) => {
     OptionBuyerStateType[] | null
   >(null);
   const ws = useRef<WebSocket | null>(null);
-  const { address: accountAddress } = useAccount();
+const {address:accountAddress} = useAccount()
   const [isLoaded, setIsLoaded] = useState(false);
   useEffect(() => {
     setIsLoaded(true);
@@ -55,7 +55,6 @@ const useWebSocketVault = (conn: string, vaultAddress?: string) => {
 
       ws.current.onmessage = (event: MessageEvent) => {
         const wsResponse: wsResponseType = JSON.parse(event.data);
-        console.log("RESPONSE",wsResponse)
         if (wsResponse.payloadType === "initial") {
           setWsVaultState(wsResponse.vaultState);
           const roundStates = wsResponse.optionRoundStates?.map((state) => {

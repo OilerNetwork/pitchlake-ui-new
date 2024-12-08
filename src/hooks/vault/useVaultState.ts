@@ -123,6 +123,7 @@ const useVaultState = ({
     args: currentRoundId ? [currentRoundId.toString()] : [],
     watch: true,
   });
+  
 
   const { data: selectedRoundAddress } = useContractRead({
     ...contractData,
@@ -137,19 +138,18 @@ const useVaultState = ({
   const usableString = useMemo(() => {
     return stringToHex(selectedRoundAddress?.toString());
   }, [selectedRoundAddress]);
-  const { optionRoundState, optionBuyerState } =
+  const { optionRoundState:selectedRoundState, optionBuyerState:selectedRoundBuyerState } =
     useOptionRoundState(usableString);
 
-  const roundAction = useOptionRoundActions(usableString);
-  const selectedRoundState = useMemo(
-    () => optionRoundState,
-    [optionRoundState],
-  );
-  const selectedRoundBuyerState = useMemo(
-    () => optionBuyerState,
-    [optionBuyerState],
-  );
-  const roundActions = useMemo(() => roundAction, [roundAction]);
+
+
+  const { data: prevRoundAddress } = useContractRead({
+    ...contractData,
+    functionName: "get_round_address",
+    args: currentRoundId && Number(currentRoundId)>1 ? [(Number(currentRoundId)-1).toString()] : [],
+    watch: true,
+  });
+  const roundActions = useOptionRoundActions(usableString);
 
   const k = strikeLevel ? Number(strikeLevel.toString()) : 0;
   const vaultType = k > 0 ? "OTM" : k == 0 ? "ATM" : "ITM";

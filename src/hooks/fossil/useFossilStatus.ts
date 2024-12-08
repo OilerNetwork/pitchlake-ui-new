@@ -12,10 +12,9 @@ export interface StatusData {
 }
 
 const useFossilStatus = () => {
-  const { selectedRoundState } = useProtocolContext();
+  const { selectedRoundState, conn } = useProtocolContext();
   const targetTimestamp = getTargetTimestampForRound(selectedRoundState);
   const roundDuration = getDurationForRound(selectedRoundState);
-
   const [statusData, setStatusData] = useState<StatusData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -23,12 +22,24 @@ const useFossilStatus = () => {
   const fetchStatus = useCallback(async () => {
     if (!selectedRoundState) return;
     if (targetTimestamp === 0) return;
+    if (conn === "mock") {
+      if (
+        selectedRoundState.roundState === "FossilReady" ||
+        selectedRoundState.roundState === "Running"
+      ) {
+        setStatusData({
+          status: "Completed",
+        } as StatusData);
+      }
+      return;
+    }
 
     setLoading(true);
     try {
+
       const jobId = createJobId(targetTimestamp, roundDuration);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_FOSSIL_API_URL}/job_status/${jobId}`,
+        `${process.env.NEXT_PUBLIC_FOSSIL_API_URL}/job_status/${jobId}`
       );
 
       if (!response.ok) throw new Error("Network response was not ok");
@@ -41,7 +52,7 @@ const useFossilStatus = () => {
     } finally {
       setLoading(false);
     }
-  }, [targetTimestamp]);
+  }, [targetTimestamp, conn]);
 
   useEffect(() => {
     if (
@@ -65,7 +76,7 @@ const useFossilStatus = () => {
     return () => {
       clearInterval(intervalId);
     };
-  }, [fetchStatus, targetTimestamp]);
+  }, [fetchStatus, targetTimestamp, selectedRoundState?.roundState]);
 
   return { status: statusData, error, loading, setStatusData };
 };

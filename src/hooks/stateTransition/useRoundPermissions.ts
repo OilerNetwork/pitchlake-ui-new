@@ -28,6 +28,7 @@ export const useRoundPermissions = (
 
   const canSendFossilRequest = useMemo(() => {
     // account for fossil delay
+    console.log("cns",timestamp, selectedRoundState?.optionSettleDate, FOSSIL_DELAY)
     return (
       num.toBigInt(timestamp) >=
       Number(selectedRoundState?.optionSettleDate) + FOSSIL_DELAY
