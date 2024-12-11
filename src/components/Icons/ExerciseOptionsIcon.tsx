@@ -26,7 +26,7 @@ const ExerciseOptionsIcon = ({
         fill="url(#paint0_radial_1239_95941)"
         stroke="#262626"
       />
-      <g clip-path="url(#clip0_1239_95941)">
+      <g clipPath="url(#clip0_1239_95941)">
         <path
           d="M36.9468 49.751C43.7012 49.751 49.1768 44.2754 49.1768 37.521C49.1768 30.7666 43.7012 25.291 36.9468 25.291C30.1923 25.291 24.7168 30.7666 24.7168 37.521C24.7168 44.2754 30.1923 49.751 36.9468 49.751Z"
           fill="#ADA478"
@@ -96,8 +96,8 @@ const ExerciseOptionsIcon = ({
           fill="#ADA478"
         />
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M57.0007 52.5C58.1681 52.5 59.2325 52.6741 60.0097 52.9554C60.8976 53.2769 61.4468 53.7675 61.4468 54.3511C61.4468 54.9347 60.8976 55.4254 60.0097 55.7468C59.2325 56.0282 58.1681 56.2023 57.0007 56.2023C55.8334 56.2023 54.7689 56.0282 53.9917 55.7468C53.1039 55.4254 52.5547 54.9347 52.5547 54.3511C52.5547 53.7675 53.1039 53.2769 53.9917 52.9554C54.7689 52.6741 55.8334 52.5 57.0007 52.5Z"
           fill="#F5EBB8"
         />
@@ -111,8 +111,8 @@ const ExerciseOptionsIcon = ({
           gradientUnits="userSpaceOnUse"
           gradientTransform="translate(47.25 47.252) rotate(90) scale(47.25)"
         >
-          <stop stop-color="#030303" />
-          <stop offset="1" stop-color="#171717" />
+          <stop stopColor="#030303" />
+          <stop offset="1" stopColor="#171717" />
         </radialGradient>
         <clipPath id="clip0_1239_95941">
           <rect

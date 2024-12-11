@@ -41,7 +41,7 @@ import useIsMobile from "@/hooks/window/useIsMobile";
 
 export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { conn, mockTimestamp, mockTimeForward, vaultState } =
+  const { conn, timestamp, mockTimeForward, vaultState } =
     useProtocolContext();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const isDropdownOpenRef = useRef(isDropdownOpen);
@@ -53,7 +53,6 @@ export default function Header() {
   const { balance } = useERC20(
     "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
     vaultState?.address,
-    account,
   );
 
   const { lockedBalance, unlockedBalance, stashedBalance } = useAccountBalances(
@@ -141,7 +140,7 @@ export default function Header() {
         <div className="flex items-center space-x-4 text-[14px] font-medium">
           {conn === "mock" && (
             <div>
-              <p>{mockTimestamp.toString()}</p>
+              <p>{timestamp.toString()}</p>
               <button onClick={() => mockTimeForward()}>
                 Forward Mock Time
               </button>
@@ -213,7 +212,7 @@ export default function Header() {
                       </div>
                       {connectors.map((connector) => (
                         <div
-                          key={connector.name}
+                          key={connector.id}
                           onClick={() => connect({ connector })}
                           className="cursor-pointer sticky p-2 px-3 bg-[#161616] w-full text-[#FAFAFA] text-[14px] font-medium hover:bg-[#262626]"
                         >
@@ -221,11 +220,11 @@ export default function Header() {
                             <div className="flex flex-row items-center">
                               <Image
                                 src={
-                                  connector.name === "braavos"
+                                  connector.id === "braavos"
                                     ? braavosIcon
-                                    : connector.name === "argentX"
-                                      ? argent
-                                      : keplr
+                                    : connector.id === "keplr"
+                                      ? keplr
+                                      : argent
                                 }
                                 alt="Login"
                                 width={20}
@@ -234,7 +233,7 @@ export default function Header() {
                                 color="#BFBFBF"
                                 style={{ objectFit: "contain" }}
                               />
-                              {connector.name.toLocaleUpperCase()}
+                              {connector.id.toLocaleUpperCase()}
                             </div>
                           }
                         </div>

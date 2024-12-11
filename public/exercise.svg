@@ -2,8 +2,8 @@
 <rect x="0.5" y="1.00195" width="93.5" height="93.5" rx="15.5" fill="url(#paint0_radial_561_43096)" stroke="#262626"/>
 <defs>
 <radialGradient id="paint0_radial_561_43096" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(47.25 47.752) rotate(90) scale(47.25)">
-<stop stop-color="#030303"/>
-<stop offset="1" stop-color="#171717"/>
+<stop stopColor="#030303"/>
+<stop offset="1" stopColor="#171717"/>
 </radialGradient>
 </defs>
 </svg>

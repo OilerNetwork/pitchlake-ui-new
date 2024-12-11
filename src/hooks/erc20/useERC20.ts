@@ -15,7 +15,6 @@ import { getDevAccount } from "@/lib/constants";
 const useERC20 = (
   tokenAddress: string | undefined,
   target?: string,
-  account?: AccountInterface | undefined,
 ) => {
   //   const typedContract = useContract({abi:erc20ABI,address}).contract?.typedv2(erc20ABI)
   const contractData = {
@@ -28,9 +27,9 @@ const useERC20 = (
   const { isDev, devAccount, setPendingTx, pendingTx } =
     useTransactionContext();
 
+  const {account} = useAccount()
   const [balance, setBalance] = useState<number>(0);
   const [allowance, setAllowance] = useState<number>(0);
-  const [acc, setAcc] = useState<string>("");
 
   // const { writeAsync } = useContractWrite({});
 
@@ -179,8 +178,7 @@ const useERC20 = (
   useEffect(() => {
     setBalance(balanceRaw ? Number(balanceRaw) : 0);
     setAllowance(allowanceRaw ? Number(allowanceRaw) : 0);
-    setAcc(account ? account.address : "");
-  }, [account, balanceRaw, allowanceRaw, pendingTx]);
+  }, [ balanceRaw, allowanceRaw, pendingTx]);
 
   return {
     balance,

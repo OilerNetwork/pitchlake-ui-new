@@ -45,8 +45,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
 
   const { allowance, balance } = useERC20(
     vaultState?.ethAddress,
-    selectedRoundState?.address,
-    account,
+    selectedRoundState?.address
   );
   const [needsApproving, setNeedsApproving] = useState<string>("0");
 

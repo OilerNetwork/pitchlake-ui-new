@@ -64,7 +64,6 @@ const EditModal: React.FC<EditModalProps> = ({
   const { allowance, balance } = useERC20(
     vaultState?.ethAddress,
     selectedRoundState?.address,
-    account,
   );
 
   const [needsApproving, setNeedsApproving] = useState<string>("0");

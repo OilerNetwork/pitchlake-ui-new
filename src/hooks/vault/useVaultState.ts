@@ -26,6 +26,12 @@ const useVaultState = ({
     };
   }, [address, conn]);
 
+  const actionsContractData = useMemo(() => {
+    return {
+      abi: vaultABI,
+      address: address,
+    };
+  }, [address]);
   const { account } = useAccount();
 
   //Read States
@@ -125,7 +131,7 @@ const useVaultState = ({
   });
 
   const { data: selectedRoundAddress } = useContractRead({
-    ...contractData,
+    ...actionsContractData,
     functionName: "get_round_address",
     args:
       selectedRound && selectedRound !== 0
@@ -137,19 +143,11 @@ const useVaultState = ({
   const usableString = useMemo(() => {
     return stringToHex(selectedRoundAddress?.toString());
   }, [selectedRoundAddress]);
-  const { optionRoundState, optionBuyerState } =
-    useOptionRoundState(usableString);
-
-  const roundAction = useOptionRoundActions(usableString);
-  const selectedRoundState = useMemo(
-    () => optionRoundState,
-    [optionRoundState],
-  );
-  const selectedRoundBuyerState = useMemo(
-    () => optionBuyerState,
-    [optionBuyerState],
-  );
-  const roundActions = useMemo(() => roundAction, [roundAction]);
+  const {
+    optionRoundState: selectedRoundState,
+    optionBuyerState: selectedRoundBuyerState,
+  } = useOptionRoundState(usableString);
+  const roundActions = useOptionRoundActions(usableString);
 
   const k = strikeLevel ? Number(strikeLevel.toString()) : 0;
   const vaultType = k > 0 ? "OTM" : k == 0 ? "ATM" : "ITM";

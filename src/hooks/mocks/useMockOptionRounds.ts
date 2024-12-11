@@ -16,7 +16,7 @@ const useMockOptionRounds = (selectedRound: number) => {
     // Initial mock data for option round states
     [
       {
-        roundId: 0,
+        roundId: 1,
         clearingPrice: "0",
         strikePrice: "10000000000",
         address: "0x1",
@@ -33,7 +33,7 @@ const useMockOptionRounds = (selectedRound: number) => {
         auctionStartDate: date + 200000,
         auctionEndDate: date + 400000,
         optionSettleDate: date + 600000,
-        deploymentDate: "",
+        deploymentDate: "1",
         soldLiquidity: "",
         unsoldLiquidity: "",
         optionSold: "",
@@ -49,10 +49,10 @@ const useMockOptionRounds = (selectedRound: number) => {
 
   const [buyerStates, setBuyerStates] = useState<OptionBuyerStateType[]>([
     {
-      address: address ?? "0x1",
-      roundId: 0,
-      tokenizableOptions: 11,
-      refundableBalance: 24,
+      address: address ?? "0xbuyer",
+      roundAddress: "0x1",
+      mintableOptions: 11,
+      refundableOptions: 24,
       totalOptions: 35,
       payoutBalance: 100,
       bids: [],
@@ -68,13 +68,13 @@ const useMockOptionRounds = (selectedRound: number) => {
       const newBid: Bid = {
         bidId: "3",
         address: address ?? "",
-        roundId: selectedRound,
+        roundAddress: rounds[selectedRound-1].address??"",
 
         treeNonce: "2",
         amount: placeBidArgs.amount,
         price: placeBidArgs.price,
       };
-      newState[selectedRound].bids.push();
+      newState[selectedRound].bids?.push();
       return newState;
     });
   };

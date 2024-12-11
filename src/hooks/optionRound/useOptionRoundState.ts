@@ -121,7 +121,7 @@ const useOptionRoundState = (address: string | undefined) => {
     biddingNonce,
     bids,
     refundableBids,
-    tokenizableOptions,
+    mintableOptions,
     totalOptions,
     payoutBalance,
   } = useContractReads({
@@ -150,7 +150,7 @@ const useOptionRoundState = (address: string | undefined) => {
       {
         functionName: "get_account_mintable_options",
         args: [account?.address as string],
-        key: "tokenizableOptions",
+        key: "mintableOptions",
       },
 
       {
@@ -240,11 +240,11 @@ const useOptionRoundState = (address: string | undefined) => {
     optionBuyerState: {
       address: account?.address as string,
       bids: bids ? bids : [],
-      roundId: roundId ? roundId.toString() : 0,
+      roundAddress:address,
       bidderNonce: biddingNonce ? biddingNonce.toString() : 0,
-      refundableBalance: refundableBids ? refundableBids.toString() : 0,
-      tokenizableOptions: tokenizableOptions
-        ? tokenizableOptions.toString()
+      refundableOptions: refundableBids ? refundableBids.toString() : 0,
+      mintableOptions: mintableOptions
+        ? mintableOptions.toString()
         : 0,
       totalOptions: totalOptions ? totalOptions.toString() : 0,
       payoutBalance: payoutBalance ? payoutBalance.toString() : 0,

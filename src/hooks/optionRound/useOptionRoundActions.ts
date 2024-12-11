@@ -17,8 +17,6 @@ const useOptionRoundActions = (address?: string) => {
     address,
   });
 
-  const { isDev, devAccount } = useTransactionContext();
-  const { account: connectorAccount } = useAccount();
   const { setPendingTx } = useTransactionContext();
 
   //  const account = useMemo(() => {
@@ -42,6 +40,7 @@ const useOptionRoundActions = (address?: string) => {
     (functionName: string) =>
       async (args?: PlaceBidArgs | UpdateBidArgs | RefundBidsArgs) => {
         if (!typedContract) return;
+
         let argsData;
         if (args) argsData = Object.values(args).map((value) => value);
         let data;
@@ -49,7 +48,6 @@ const useOptionRoundActions = (address?: string) => {
           provider && account
             ? await provider.getNonceForAddress(account.address)
             : "0";
-
         if (argsData) {
           data = await typedContract?.[functionName](...argsData, { nonce });
         } else {

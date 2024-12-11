@@ -13,7 +13,6 @@ interface BlockData {
 
 /// Get the latest block data from the database
 export async function GET(request: Request) {
-  console.log("receivbed");
   try {
     // SQL Query to select the latest block based on the highest block number
     const query = `

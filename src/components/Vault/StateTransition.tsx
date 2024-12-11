@@ -1,12 +1,9 @@
 import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useProvider, useAccount } from "@starknet-react/core";
-import useLatestTimestamp from "@/hooks/chain/useLatestTimestamp";
 import { useMemo, useState, useEffect } from "react";
 import useFossilStatus from "@/hooks/fossil/useFossilStatus";
 import { getDurationForRound, getTargetTimestampForRound } from "@/lib/utils";
-import { makeFossilCall } from "@/services/fossilRequest";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import { num } from "starknet";
 import { useRoundState } from "@/hooks/stateTransition/useRoundState";
 import { useIsDisabled } from "@/hooks/stateTransition/useIsDisabled";
 import { getIconByRoundState } from "@/hooks/stateTransition/getIconByRoundState";
@@ -19,11 +16,16 @@ const StateTransition = ({
   isPanelOpen: boolean;
   setModalState: any;
 }) => {
-  const { vaultState, vaultActions, selectedRoundState } = useProtocolContext();
+  const {
+    vaultState,
+    vaultActions,
+    selectedRoundState,
+    timestamp: timestampRaw,
+    conn,
+  } = useProtocolContext();
   const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
   const { provider } = useProvider();
-  const { timestamp: timestampRaw } = useLatestTimestamp(provider);
   const timestamp = timestampRaw ? timestampRaw : "0";
   const {
     status: fossilStatus,
@@ -52,7 +54,7 @@ const StateTransition = ({
   } = useRoundPermissions(
     timestamp.toString(),
     selectedRoundState,
-    FOSSIL_DELAY,
+    FOSSIL_DELAY
   );
 
   const actions: Record<string, string> = useMemo(
@@ -63,31 +65,33 @@ const StateTransition = ({
       Running: "Settle Round",
       Pending: "Pending",
     }),
-    [],
+    []
   );
 
   const handleAction = async () => {
     if (roundState === "FossilReady") {
-      const response = await fetch("/api/sendFossilRequest", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          targetTimestamp: getTargetTimestampForRound(selectedRoundState),
-          roundDuration: getDurationForRound(selectedRoundState),
-          clientAddress: vaultState?.fossilClientAddress,
-          vaultAddress: vaultState?.address,
-        }),
-      });
+      if (conn !== "mock") {
+        const response = await fetch("/api/sendFossilRequest", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            targetTimestamp: getTargetTimestampForRound(selectedRoundState),
+            roundDuration: getDurationForRound(selectedRoundState),
+            clientAddress: vaultState?.fossilClientAddress,
+            vaultAddress: vaultState?.address,
+          }),
+        });
 
-      const data = await response.json();
-      console.log("Fossil response:", data);
+        const data = await response.json();
+        console.log("Fossil response:", data);
 
-      if (!response.ok) {
-        setFossilStatus({ status: "Error", error: data.error });
-      } else {
-        setFossilStatus({ status: "Pending", error: undefined });
+        if (!response.ok) {
+          setFossilStatus({ status: "Error", error: data.error });
+        } else {
+          setFossilStatus({ status: "Pending", error: undefined });
+        }
       }
     } else if (roundState === "Open") {
       await vaultActions.startAuction();
@@ -124,12 +128,13 @@ const StateTransition = ({
     }
   }, [roundState, prevRoundState]);
 
-  if (!vaultState?.currentRoundId || !selectedRoundState || !vaultActions)
+  if (!vaultState?.currentRoundId || !selectedRoundState || !vaultActions) {
     return null;
+  }
 
   if (
     roundState === "Settled" ||
-    vaultState.currentRoundId !== selectedRoundState.roundId
+    Number(vaultState.currentRoundId) !== Number(selectedRoundState.roundId)
   ) {
     return null;
   }
