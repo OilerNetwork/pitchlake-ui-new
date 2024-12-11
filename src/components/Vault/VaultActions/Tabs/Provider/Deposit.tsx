@@ -10,7 +10,7 @@ import ButtonTabs from "../ButtonTabs";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEthereum } from "@fortawesome/free-brands-svg-icons";
 import { num, Call } from "starknet";
-import { useContractWrite, useContract } from "@starknet-react/core";
+import {useSendTransaction, useContract } from "@starknet-react/core";
 import { erc20ABI, vaultABI } from "@/lib/abi";
 import useERC20 from "@/hooks/erc20/useERC20";
 import { shortenString } from "@/lib/utils";
@@ -54,7 +54,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   const { account } = useAccount();
   const { pendingTx, setPendingTx } = useTransactionContext();
   const { allowance, balance } = useERC20(
-    vaultState?.ethAddress,
+    vaultState?.ethAddress as `0x${string}`,
     vaultState?.address
   );
 
@@ -65,7 +65,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   // Vault Contract
   const { contract: vaultContractRaw } = useContract({
     abi: vaultABI,
-    address: vaultState?.address,
+    address: vaultState?.address as `0x${string}`,
   });
   const vaultContract = useMemo(() => {
     if (!vaultContractRaw) return;
@@ -77,7 +77,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   // ETH Contract
   const { contract: ethContractRaw } = useContract({
     abi: erc20ABI,
-    address: vaultState?.ethAddress,
+    address: vaultState?.ethAddress as `0x${string}`,
   });
   const ethContract = useMemo(() => {
     if (!ethContractRaw) return;
@@ -128,7 +128,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
     ethContract,
     vaultContract,
   ]);
-  const { writeAsync } = useContractWrite({ calls });
+  const { sendAsync } = useSendTransaction({ calls });
 
   // Send confirmation
   const handleSubmitForMulticall = () => {
@@ -160,7 +160,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
 
   // Open wallet
   const handleMulticall = async () => {
-    const data = await writeAsync();
+    const data = await sendAsync();
     setPendingTx(data?.transaction_hash);
     localStorage.removeItem(LOCAL_STORAGE_KEY);
   };

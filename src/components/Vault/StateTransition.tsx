@@ -1,5 +1,5 @@
 import { useProtocolContext } from "@/context/ProtocolProvider";
-import { useProvider, useAccount } from "@starknet-react/core";
+import { useProvider, useAccount, useBlock, useBlockNumber } from "@starknet-react/core";
 import { useMemo, useState, useEffect } from "react";
 import useFossilStatus from "@/hooks/fossil/useFossilStatus";
 import { getDurationForRound, getTargetTimestampForRound } from "@/lib/utils";
@@ -23,9 +23,9 @@ const StateTransition = ({
     timestamp: timestampRaw,
     conn,
   } = useProtocolContext();
-  const { pendingTx } = useTransactionContext();
+  const { pendingTx,lastBlock } = useTransactionContext();
   const { account } = useAccount();
-  const { provider } = useProvider();
+
   const timestamp = timestampRaw ? timestampRaw : "0";
   const {
     status: fossilStatus,
@@ -102,6 +102,8 @@ const StateTransition = ({
     }
     setIsAwaitingRoundStateUpdate(true);
 
+    if(roundState!=="FossilReady")
+    setCheck(true)
     setModalState((prev: any) => ({
       ...prev,
       show: false,
@@ -120,8 +122,13 @@ const StateTransition = ({
     canRoundSettle,
   });
 
-  const icon = getIconByRoundState(roundState, isDisabled);
 
+  const [check,setCheck]= useState(false)
+  const icon = getIconByRoundState(roundState, isDisabled||check);
+
+  useEffect(()=>{
+    setCheck(false)
+  },[selectedRoundState?.roundState])
   useEffect(() => {
     if (prevRoundState !== roundState) {
       setIsAwaitingRoundStateUpdate(false);
@@ -149,7 +156,7 @@ const StateTransition = ({
     >
       <div className="px-6">
         <button
-          disabled={isDisabled}
+          disabled={isDisabled||check}
           className={`${isPanelOpen ? "flex" : "hidden"} ${
             roundState === "Settled" ? "hidden" : ""
           } border border-greyscale-700 text-primary disabled:text-greyscale rounded-md mt-4 p-2 w-full justify-center items-center`}

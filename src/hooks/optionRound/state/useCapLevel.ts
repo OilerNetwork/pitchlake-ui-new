@@ -5,7 +5,7 @@ import { useMemo } from "react";
 const useCapLevel = (address: string, args?: { watch?: boolean }) => {
   const watch = args?.watch ?? false;
   const contractData = useMemo(() => {
-    return { abi: optionRoundABI, address };
+    return { abi: optionRoundABI, address:address as `0x${string}` };
   }, [address]);
 
   const { capLevel } = useContractReads({

@@ -1,20 +1,19 @@
 import React, { useState, ReactNode, useMemo, useEffect } from "react";
 import InputField from "@/components/Vault/Utils/InputField";
-import { Layers3, Currency } from "lucide-react";
+import { Layers3 } from "lucide-react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
-import { PlaceBidArgs } from "@/lib/types";
 import { useProtocolContext } from "@/context/ProtocolProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEthereum } from "@fortawesome/free-brands-svg-icons";
 import { formatUnits, parseUnits, parseEther, formatEther } from "ethers";
-import { useAccount } from "@starknet-react/core";
+import { useAccount, useSendTransaction } from "@starknet-react/core";
 import useERC20 from "@/hooks/erc20/useERC20";
 import { num, Call } from "starknet";
 import { formatNumberText } from "@/lib/utils";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import useLatestTimetamp from "@/hooks/chain/useLatestTimestamp";
 import { useProvider } from "@starknet-react/core";
-import { useContractWrite, useContract } from "@starknet-react/core";
+import {  useContract } from "@starknet-react/core";
 import { erc20ABI, optionRoundABI } from "@/lib/abi";
 
 interface PlaceBidProps {
@@ -44,7 +43,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
   const { timestamp } = useLatestTimetamp(provider);
 
   const { allowance, balance } = useERC20(
-    vaultState?.ethAddress,
+    vaultState?.ethAddress as `0x${string}`,
     selectedRoundState?.address
   );
   const [needsApproving, setNeedsApproving] = useState<string>("0");
@@ -52,7 +51,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
   // Option Round Contract
   const { contract: optionRoundContractRaw } = useContract({
     abi: optionRoundABI,
-    address: selectedRoundState?.address,
+    address: selectedRoundState?.address as `0x${string}`,
   });
   const optionRoundContract = useMemo(() => {
     if (!optionRoundContractRaw) return;
@@ -64,7 +63,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
   // ETH Contract
   const { contract: ethContractRaw } = useContract({
     abi: erc20ABI,
-    address: vaultState?.ethAddress,
+    address: vaultState?.ethAddress as `0x${string}`,
   });
   const ethContract = useMemo(() => {
     if (!ethContractRaw) return;
@@ -124,7 +123,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
     allowance,
     needsApproving,
   ]);
-  const { writeAsync } = useContractWrite({ calls });
+  const { sendAsync } = useSendTransaction({ calls });
 
   // Send confirmation
   const handleSubmitForMulticall = () => {
@@ -154,7 +153,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
 
   // Open wallet
   const handleMulticall = async () => {
-    const data = await writeAsync();
+    const data = await sendAsync();
     setPendingTx(data?.transaction_hash);
     localStorage.removeItem(LOCAL_STORAGE_KEY1);
     localStorage.removeItem(LOCAL_STORAGE_KEY2);

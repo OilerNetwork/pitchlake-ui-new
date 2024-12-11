@@ -46,6 +46,7 @@ export const RoundStateLabels: { [key in RoundState]: string } = {
 export type VaultStateType = {
   address: string;
   vaultType: string;
+  latestBlock?:string;
   alpha: number | bigint | string;
   strikeLevel: number | bigint | string;
   ethAddress: string;

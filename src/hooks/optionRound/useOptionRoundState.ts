@@ -1,13 +1,13 @@
 import { optionRoundABI } from "@/lib/abi";
 import { OptionBuyerStateType, OptionRoundStateType } from "@/lib/types";
 import useContractReads from "@/lib/useContractReads";
-import { useAccount, useContract, useContractRead } from "@starknet-react/core";
+import { useAccount, useContract, useReadContract } from "@starknet-react/core";
 import { useMemo } from "react";
 import { CairoCustomEnum, num } from "starknet";
 
 const useOptionRoundState = (address: string | undefined) => {
   const contractData = useMemo(() => {
-    return { abi: optionRoundABI, address };
+    return { abi: optionRoundABI, address:address as `0x${string}` };
   }, [address]);
   const { account } = useAccount();
   //Read States
