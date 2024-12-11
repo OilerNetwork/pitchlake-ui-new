@@ -213,7 +213,7 @@ const useWebSocketVault = (conn: string, vaultAddress?: string) => {
       updateRound(wsResponse.operation)(wsResponse.payload as OptionRoundStateType);
     } else if (wsResponse.type === "optionBuyerState") {
       updateBuyer(wsResponse.payload as OptionBuyerStateType);
-    } else if (wsResponse.type === "vaultUpdate") {
+    } else if (wsResponse.type === "vaultState") {
       const payload = wsResponse.payload as VaultStateType;
       setWsVaultState(payload);
     }
