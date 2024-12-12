@@ -167,6 +167,14 @@ export const stringToHex = (decimalString?: string): string => {
   return `0x${num.toString(16)}`;
 };
 
+export const removeLeadingZeroes=(hash: string) =>{
+  if (!hash.startsWith("0x")) {
+    throw new Error("Invalid hash: must start with 0x");
+  }
+  const prefix = "0x";
+  const trimmed = hash.slice(2).replace(/^0+/, ''); // Remove leading zeroes
+  return prefix + (trimmed || "0"); // Return "0x0" if everything is zero
+}
 // Utility function to format the number
 export const formatNumberText = (number: number) => {
   if (number < 100_000) {

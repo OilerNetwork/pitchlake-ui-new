@@ -23,6 +23,7 @@ interface RoundData {
   error?: string;
 }
 
+
 /// GET historical round params for a given vault (from round 1 to current round)
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

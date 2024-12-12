@@ -1,30 +1,28 @@
 import {
   useAccount,
   useContract,
-  useContractRead,
+  useReadContract,
   useProvider,
-  useContractWrite,
 } from "@starknet-react/core";
 import { useEffect, useCallback, useMemo, useState } from "react";
 import { ApprovalArgs, TransactionResult } from "@/lib/types";
 import { erc20ABI } from "@/lib/abi";
-import { Account, AccountInterface, RpcProvider } from "starknet";
+import { Account } from "starknet";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import { getDevAccount } from "@/lib/constants";
 
 const useERC20 = (
-  tokenAddress: string | undefined,
+  tokenAddress: `0x${string}` | undefined,
   target?: string,
 ) => {
   //   const typedContract = useContract({abi:erc20ABI,address}).contract?.typedv2(erc20ABI)
   const contractData = {
     abi: erc20ABI,
-    address: tokenAddress,
+    address: tokenAddress as `0x${string}`,
   };
 
   const { contract } = useContract({ ...contractData });
   const { provider } = useProvider();
-  const { isDev, devAccount, setPendingTx, pendingTx } =
+  const {  setPendingTx, pendingTx } =
     useTransactionContext();
 
   const {account} = useAccount()
@@ -39,14 +37,6 @@ const useERC20 = (
   //   } else return connectorAccount;
   // }, [connectorAccount, isDev, devAccount]);
 
-  const devAcc = () => {
-    const _address = process.env.NEXT_PUBLIC_DEV_ADDRESS;
-    const _pk = process.env.NEXT_PUBLIC_DEV_PK;
-    const address = _address ? _address : "";
-    const pk = _pk ? _pk : "";
-
-    return new Account(provider, address, pk);
-  };
 
   const typedContract = useMemo(() => {
     if (!contract) return;
@@ -55,26 +45,9 @@ const useERC20 = (
 
     return typedContract;
   }, [contract, account]);
-
-  //  const typedContractFunding = useMemo(() => {
-  //    if (!contract) return;
-  //    const typedContract = contract.typedv2(erc20ABI);
-  //
-  //    // Build dev (funded) account
-  //    const address = process.env.NEXT_PUBLIC_DEV_ADDRESS;
-  //    const pk = process.env.NEXT_PUBLIC_DEV_PK;
-  //
-  //    const _address = address ? address : "";
-  //    const _pk = pk ? pk : "";
-  //    const acc = new Account(provider, _address, _pk);
-  //
-  //    if (target) typedContract.connect(devAcc());
-  //    return typedContract;
-  //  }, [contract, account]);
-
   //Read States
 
-  const { data: balanceRaw } = useContractRead({
+  const { data: balanceRaw } = useReadContract({
     abi: erc20ABI,
     address: tokenAddress ? tokenAddress : undefined,
     functionName: "balance_of",
@@ -82,7 +55,7 @@ const useERC20 = (
     watch: true,
   });
 
-  const { data: allowanceRaw } = useContractRead({
+  const { data: allowanceRaw } = useReadContract({
     abi: erc20ABI,
     address: tokenAddress ? tokenAddress : undefined,
     functionName: "allowance",

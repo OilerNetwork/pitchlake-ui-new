@@ -7,7 +7,7 @@ const useVaultBalances = (address: string, args?: { watch?: boolean }) => {
   // Determine if args were provided
   const watch = args?.watch ?? false;
   const contractData = useMemo(() => {
-    return { abi: optionRoundABI, address };
+    return { abi: optionRoundABI, address:address as `0x${string}` };
   }, [address]);
 
   const { lockedBalance, unlockedBalance, stashedBalance } = useContractReads({
