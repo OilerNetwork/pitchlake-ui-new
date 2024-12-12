@@ -92,10 +92,11 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
     } else if (Number(state.amount) == 0) {
       amountReason = "Amount must be greater than 0";
     } else if (
-      lpState?.unlockedBalance &&
-      parseEther(state.amount) > num.toBigInt(lpState.unlockedBalance)
+      parseEther(state.amount) > BigInt(lpState?.unlockedBalance || "0")
     ) {
-      amountReason = `Exceeds balance (${parseFloat(formatEther(lpState?.unlockedBalance?.toString())).toFixed(4)} ETH)`;
+      amountReason = `Exceeds balance (${parseFloat(
+        formatEther(lpState?.unlockedBalance?.toString() || "0"),
+      )} ETH)`;
     }
 
     const isButtonDisabled = (): boolean => {

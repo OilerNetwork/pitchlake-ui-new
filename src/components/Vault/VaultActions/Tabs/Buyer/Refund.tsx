@@ -24,8 +24,8 @@ const Refund: React.FC<RefundProps> = ({ showConfirmation }) => {
   const { roundActions, selectedRoundBuyerState } = useProtocolContext();
   const { pendingTx } = useTransactionContext();
 
-  const refundBalanceWei = selectedRoundBuyerState
-    ? selectedRoundBuyerState.refundableBalance
+  const refundBalanceWei = selectedRoundBuyerState?.refundableOptions && selectedRoundBuyerState?.hasRefunded===false
+    ? selectedRoundBuyerState.refundableOptions
     : "0";
   const refundBalanceEth = formatEther(num.toBigInt(refundBalanceWei));
 

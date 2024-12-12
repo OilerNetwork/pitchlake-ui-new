@@ -7,11 +7,18 @@ import PanelRight from "./PanelRight";
 import PanelLeft from "./PanelLeft";
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import useIsMobile from "@/hooks/window/useIsMobile";
+import MobileScreen from "../BaseComponents/MobileScreen";
 
 export const Vault = () => {
   const [isProviderView, setIsProviderView] = useState(true);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const { isMobile } = useIsMobile();
   const router = useRouter();
+
+  if (isMobile) {
+    return <MobileScreen />;
+  }
 
   return (
     <div className="px-6 py-4 flex-grow flex-box overflow-auto">

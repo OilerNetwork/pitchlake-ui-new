@@ -121,7 +121,7 @@ const useOptionRoundState = (address: string | undefined) => {
     biddingNonce,
     bids,
     refundableBids,
-    tokenizableOptions,
+    mintableOptions,
     totalOptions,
     payoutBalance,
   } = useContractReads({
@@ -150,7 +150,7 @@ const useOptionRoundState = (address: string | undefined) => {
       {
         functionName: "get_account_mintable_options",
         args: [account?.address as string],
-        key: "tokenizableOptions",
+        key: "mintableOptions",
       },
 
       {
@@ -167,28 +167,30 @@ const useOptionRoundState = (address: string | undefined) => {
   });
 
   const getPerformanceLP = () => {
-    const soldLiq = soldLiquidity ? Number(soldLiquidity.toString()) : 0;
-    const prem = premiums ? Number(premiums.toString()) : 0;
-    const payout = totalPayout ? Number(totalPayout.toString()) : 0;
+    const soldLiq = soldLiquidity
+      ? BigInt(soldLiquidity.toString())
+      : BigInt(0);
+    const prem = premiums ? BigInt(premiums.toString()) : BigInt(0);
+    const payout = totalPayout ? BigInt(totalPayout.toString()) : BigInt(0);
 
-    if (soldLiq == 0) return 0;
+    if (soldLiq === BigInt(0)) return 0;
 
     const gainLoss = prem - payout;
-    const percentage = Number(((gainLoss / soldLiq) * 100).toFixed(2));
+    const percentage = Number((Number(gainLoss / soldLiq) * 100).toFixed(2));
 
     const sign = percentage > 0 ? "+" : "";
     return `${sign}${percentage}`;
   };
 
   const getPerformanceOB = () => {
-    const prem = premiums ? Number(premiums.toString()) : 0;
-    const payout = totalPayout ? Number(totalPayout.toString()) : 0;
+    const prem = premiums ? BigInt(premiums.toString()) : BigInt(0);
+    const payout = totalPayout ? BigInt(totalPayout.toString()) : BigInt(0);
 
-    if (prem == 0) {
+    if (prem === BigInt(0)) {
       return 0;
     } else {
       const gainLoss = payout - prem;
-      const percentage = Number(((gainLoss / prem) * 100).toFixed(2));
+      const percentage = Number((Number(gainLoss / prem) * 100).toFixed(2));
 
       const sign = percentage > 0 ? "+" : "";
       return `${sign}${percentage}`;
@@ -238,11 +240,11 @@ const useOptionRoundState = (address: string | undefined) => {
     optionBuyerState: {
       address: account?.address as string,
       bids: bids ? bids : [],
-      roundId: roundId ? roundId.toString() : 0,
+      roundAddress:address,
       bidderNonce: biddingNonce ? biddingNonce.toString() : 0,
-      refundableBalance: refundableBids ? refundableBids.toString() : 0,
-      tokenizableOptions: tokenizableOptions
-        ? tokenizableOptions.toString()
+      refundableOptions: refundableBids ? refundableBids.toString() : 0,
+      mintableOptions: mintableOptions
+        ? mintableOptions.toString()
         : 0,
       totalOptions: totalOptions ? totalOptions.toString() : 0,
       payoutBalance: payoutBalance ? payoutBalance.toString() : 0,

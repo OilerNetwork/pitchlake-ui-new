@@ -64,7 +64,6 @@ const EditModal: React.FC<EditModalProps> = ({
   const { allowance, balance } = useERC20(
     vaultState?.ethAddress,
     selectedRoundState?.address,
-    account,
   );
 
   const [needsApproving, setNeedsApproving] = useState<string>("0");
@@ -198,6 +197,8 @@ const EditModal: React.FC<EditModalProps> = ({
       error = "Auction ended";
     } else if (!account) {
       error = "Connect account";
+    } else if (!state.newPriceGwei) {
+      // error = "Enter price";
     } else if (parseFloat(newPriceGwei) <= parseFloat(oldPriceGwei)) {
       error = "Bid price must increase";
     }
@@ -205,6 +206,7 @@ const EditModal: React.FC<EditModalProps> = ({
     const isButtonDisabled = (): boolean => {
       if (pendingTx) return true;
       if (error !== "") return true;
+      if (!state.newPriceGwei) return true;
       return false;
     };
 

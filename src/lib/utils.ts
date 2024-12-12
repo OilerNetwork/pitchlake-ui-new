@@ -1,10 +1,11 @@
 import { poseidonHashSingle } from "@scure/starknet";
 import { bytesToNumberBE } from "@noble/curves/abstract/utils";
 import { OptionRoundStateType, FossilParams } from "@/lib/types";
+import { num } from "starknet";
 
 export const createJobRequestParams = (
   targetTimestamp: number,
-  roundDuration: number
+  roundDuration: number,
 ) => {
   return {
     // TWAP duration is 1 x round duration
@@ -45,7 +46,7 @@ export const createJobRequest = ({
 
 export const createJobId = (
   targetTimestamp: number,
-  roundDuration: number
+  roundDuration: number,
 ): string => {
   if (!targetTimestamp || !roundDuration) return "";
 
@@ -70,7 +71,7 @@ export const createJobId = (
 };
 
 export const getTargetTimestampForRound = (
-  roundState: OptionRoundStateType | undefined
+  roundState: OptionRoundStateType | undefined,
 ): number => {
   if (
     !roundState ||
@@ -86,14 +87,14 @@ export const getTargetTimestampForRound = (
   const targetTimestamp = Number(
     state === "Open" && roundId === "1"
       ? roundState.deploymentDate
-      : roundState.optionSettleDate
+      : roundState.optionSettleDate,
   );
 
   return Number(targetTimestamp);
 };
 
 export const getDurationForRound = (
-  roundState: OptionRoundStateType | undefined
+  roundState: OptionRoundStateType | undefined,
 ): number => {
   if (!roundState || !roundState.auctionEndDate || !roundState.optionSettleDate)
     return 0;
@@ -106,16 +107,20 @@ export const getDurationForRound = (
 export const getPerformanceLP = (
   soldLiquidity: bigint | string | number,
   premiums: bigint | string | number,
-  totalPayout: bigint | string | number
+  totalPayout: bigint | string | number,
 ) => {
-  const soldLiq = soldLiquidity ? Number(soldLiquidity.toString()) : 0;
-  const prem = premiums ? Number(premiums.toString()) : 0;
-  const payout = totalPayout ? Number(totalPayout.toString()) : 0;
+  const soldLiq = soldLiquidity
+    ? num.toBigInt(soldLiquidity.toString())
+    : num.toBigInt(0);
+  const prem = premiums ? num.toBigInt(premiums.toString()) : num.toBigInt(0);
+  const payout = totalPayout
+    ? num.toBigInt(totalPayout.toString())
+    : num.toBigInt(0);
 
-  if (soldLiq == 0) return 0;
+  if (soldLiq === num.toBigInt(0)) return 0;
 
   const gainLoss = prem - payout;
-  const percentage = Number(((gainLoss / soldLiq) * 100).toFixed(2));
+  const percentage = Number((Number(gainLoss / soldLiq) * 100).toFixed(2));
 
   const sign = percentage > 0 ? "+" : "";
   return `${sign}${percentage}`;
@@ -123,16 +128,16 @@ export const getPerformanceLP = (
 
 export const getPerformanceOB = (
   premiums: bigint | string | number,
-  totalPayout: bigint | string | number
+  totalPayout: bigint | string | number,
 ) => {
-  const prem = premiums ? Number(premiums.toString()) : 0;
-  const payout = totalPayout ? Number(totalPayout.toString()) : 0;
+  const prem = premiums ? BigInt(premiums.toString()) : BigInt(0);
+  const payout = totalPayout ? BigInt(totalPayout.toString()) : BigInt(0);
 
-  if (prem == 0) {
+  if (prem == BigInt(0)) {
     return 0;
   } else {
     const gainLoss = payout - prem;
-    const percentage = Number(((gainLoss / prem) * 100).toFixed(2));
+    const percentage = Number((Number(gainLoss / prem) * 100).toFixed(2));
 
     const sign = percentage > 0 ? "+" : "";
     return `${sign}${percentage}`;

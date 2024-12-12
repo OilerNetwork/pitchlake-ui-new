@@ -1,7 +1,6 @@
 import {
   useAccount,
   useContract,
-  useContractWrite,
   useNetwork,
   useProvider,
 } from "@starknet-react/core";
@@ -19,7 +18,7 @@ import { Account, RpcProvider } from "starknet";
 import { useCallback, useMemo } from "react";
 import { useTransactionContext } from "@/context/TransactionProvider";
 
-const useVaultActions = (address?: string) => {
+const useVaultActions = (address?: `0x${string}`) => {
   const { setPendingTx } = useTransactionContext();
   const { account } = useAccount();
   const { provider } = useProvider();

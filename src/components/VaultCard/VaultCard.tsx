@@ -49,11 +49,17 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
   const { auctionStartDate, auctionEndDate, optionSettleDate } = useTimestamps(
     currentRoundAddress ? currentRoundAddress : "",
   );
-  const timeUntilText = roundState === "Open" ? "STARTS IN" : "TIME LEFT";
+  const timeUntilText =
+    roundState === "Open"
+      ? "AUCTION STARTS"
+      : roundState === "Auctioning"
+        ? "AUCTION ENDS"
+        : "ROUND SETTLES";
   const timeUntilValue =
     roundState === "Loading" ||
     roundState === "" ||
     !auctionStartDate ||
+    !auctionEndDate ||
     !optionSettleDate ||
     !timestamp
       ? "0"
@@ -61,7 +67,9 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
           timestamp.toString(),
           roundState === "Open"
             ? auctionStartDate.toString()
-            : optionSettleDate.toString(),
+            : roundState === "Auctioning"
+              ? auctionEndDate.toString()
+              : optionSettleDate.toString(),
         );
 
   const router = useRouter();

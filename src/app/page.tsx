@@ -1,39 +1,33 @@
 "use client";
-import buttonClass from "@/styles/Button.module.css";
-import styles from "./page.module.css";
-import { useConnect } from "@starknet-react/core";
-import { Button } from "antd";
-import { useEffect, useRef, useState } from "react";
+import MobileScreen from "@/components/BaseComponents/MobileScreen";
 import VaultCard from "@/components/VaultCard/VaultCard";
 import useWebSocketHome from "@/hooks/websocket/useWebSocketHome";
+import useIsMobile from "@/hooks/window/useIsMobile";
 
 export default function Home() {
-  // console.log("CHECK THIS LOG", process.env.NEXT_PUBLIC_VAULT_ADDRESSES);
-  // console.log("CHECK THIS LOG", process.env.NEXT_PUBLIC_WS_URL);
-
-  //  console.log(vaultsRaw);
-  //
-  //  const vaults = [
-  //    "0x038cfc94b5626c9355910304622f8270eaef77b62cb850e1ca0e38ecedcdee5b",
-  //    "0x2cbdf2381224c850975613fb42848ae1a3a608d91bcd7d7a59dcc2b459d98d4",
-  //
-  //    // short round
-  //    "0x13257401fd2df63db6464035ab3ed13f3ef84ae71a07054f50d7bd20311e0a3",
-  //    "0x8f4e98c8c7f2698ff9a98df855116154f0482b93127dc79b15f05effbe8237",
-  //  ];
-
   const { vaults: wsVaults } = useWebSocketHome();
+  // @NOTE filtering done in this order to maintain correct ordering (until proper vault sorting is implemented)
   const vaults =
     process.env.NEXT_PUBLIC_ENVIRONMENT === "ws"
-      ? wsVaults
+      ? [
+          "0x2e0f81a9f5179c2be73cabeb92e8a6e526add4bab32e4855aa5522690c78217",
+          "0x7edaf2d262f347619f24eaa11cdc7ae125e373843d5248368887fea4aa8ee7d",
+          "0x19809922504ef98d98a406d12b2a67205a10294d3bf38f047e40239ce04c949",
+        ].filter((addr) => wsVaults?.includes(addr))
       : process.env.NEXT_PUBLIC_VAULT_ADDRESSES?.split(",");
 
+  const { isMobile } = useIsMobile();
+
+  if (isMobile) {
+    return <MobileScreen />;
+  }
+
   return (
-    <div className="flex flex-grow flex-col px-8 mt-6 w-full ">
+    <div className="flex flex-grow flex-col px-8 mt-4 w-full ">
       <p className="my-2 text-base text-white-alt py-2 font-medium">
         Popular Vaults
       </p>
-      <div className="grid grid-cols-2 w-full pt-6 gap-x-6 gap-y-6">
+      <div className="grid grid-cols-2 w-full pt-4 gap-x-6 gap-y-6">
         {vaults?.map((vault: string, index: number) => (
           // <VaultTimeline key={vault.address + idx.toString()} vault={vault} />
           <VaultCard key={index} vaultAddress={vault} />

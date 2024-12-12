@@ -56,7 +56,6 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   const { allowance, balance } = useERC20(
     vaultState?.ethAddress,
     vaultState?.address,
-    account,
   );
 
   const updateState = (updates: Partial<DepositState>) => {
@@ -172,6 +171,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
     if (!account) {
       amountReason = "Connect account";
     } else if (state.amount == "") {
+      //amountReason = "Enter amount";
     } else if (Number(state.amount) < 0) {
       amountReason = "Amount must be positive";
     } else if (Number(state.amount) === 0) {
@@ -193,7 +193,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
     const isButtonDisabled = (): boolean => {
       //if (!account) return true;
       if (pendingTx) return true;
-      if (amountReason !== "") return true;
+      if (amountReason !== "" || state.amount === "") return true;
       if (beneficiaryReason !== "") return true;
       return false;
     };
@@ -261,7 +261,9 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
             <span className="text-gray-400">Unlocked Balance</span>
             <span className="text-white">
               {parseFloat(
-                formatEther(lpState?.unlockedBalance?.toString() || "0"),
+                formatEther(
+                  BigInt(lpState?.unlockedBalance?.toString() || "0"),
+                ),
               ).toFixed(3)}{" "}
               ETH
             </span>

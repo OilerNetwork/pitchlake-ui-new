@@ -1,14 +1,10 @@
 import { useProtocolContext } from "@/context/ProtocolProvider";
-import { useProvider, useAccount } from "@starknet-react/core";
-import useLatestTimestamp from "@/hooks/chain/useLatestTimestamp";
+import { useAccount } from "@starknet-react/core";
 import { useMemo, useState, useEffect } from "react";
 import useFossilStatus from "@/hooks/fossil/useFossilStatus";
 import { getDurationForRound, getTargetTimestampForRound } from "@/lib/utils";
-import { makeFossilCall } from "@/services/fossilRequest";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import { num } from "starknet";
 import { useRoundState } from "@/hooks/stateTransition/useRoundState";
-import { useIsDisabled } from "@/hooks/stateTransition/useIsDisabled";
 import { getIconByRoundState } from "@/hooks/stateTransition/getIconByRoundState";
 import { useRoundPermissions } from "@/hooks/stateTransition/useRoundPermissions";
 
@@ -19,11 +15,15 @@ const StateTransition = ({
   isPanelOpen: boolean;
   setModalState: any;
 }) => {
-  const { vaultState, vaultActions, selectedRoundState } = useProtocolContext();
+  const {
+    vaultState,
+    vaultActions,
+    selectedRoundState,
+    timestamp: timestampRaw,
+    conn,
+  } = useProtocolContext();
   const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
-  const { provider } = useProvider();
-  const { timestamp: timestampRaw } = useLatestTimestamp(provider);
   const timestamp = timestampRaw ? timestampRaw : "0";
   const {
     status: fossilStatus,
@@ -33,13 +33,16 @@ const StateTransition = ({
 
   const [isAwaitingRoundStateUpdate, setIsAwaitingRoundStateUpdate] =
     useState(false);
+  const [expectedNextState, setExpectedNextState] = useState<string | null>(
+    null,
+  );
 
   const { roundState, prevRoundState } = useRoundState({
     selectedRoundState,
     fossilStatus,
     fossilError,
     pendingTx,
-    isAwaitingRoundStateUpdate,
+    expectedNextState,
   });
 
   const FOSSIL_DELAY = 15 * 60;
@@ -68,34 +71,42 @@ const StateTransition = ({
 
   const handleAction = async () => {
     if (roundState === "FossilReady") {
-      const response = await fetch("/api/sendFossilRequest", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          targetTimestamp: getTargetTimestampForRound(selectedRoundState),
-          roundDuration: getDurationForRound(selectedRoundState),
-          clientAddress: vaultState?.fossilClientAddress,
-          vaultAddress: vaultState?.address,
-        }),
-      });
+      if (conn !== "mock") {
+        const response = await fetch("/api/sendFossilRequest", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            targetTimestamp: getTargetTimestampForRound(selectedRoundState),
+            roundDuration: getDurationForRound(selectedRoundState),
+            clientAddress: vaultState?.fossilClientAddress,
+            vaultAddress: vaultState?.address,
+          }),
+        });
 
-      const data = await response.json();
-      console.log("Fossil response:", data);
+        const data = await response.json();
+        console.log("Fossil response:", data);
 
-      if (!response.ok) {
-        setFossilStatus({ status: "Error", error: data.error });
-      } else {
-        setFossilStatus({ status: "Pending", error: undefined });
+        if (!response.ok) {
+          setFossilStatus({ status: "Error", error: data.error });
+        } else {
+          setFossilStatus({ status: "Pending", error: undefined });
+          setExpectedNextState("Running");
+        }
       }
     } else if (roundState === "Open") {
       await vaultActions.startAuction();
+      setExpectedNextState("Auctioning");
     } else if (roundState === "Auctioning") {
       await vaultActions.endAuction();
+      setExpectedNextState("Running");
     } else if (roundState === "Running") {
       await vaultActions.settleOptionRound();
+      // Not settled because the current round being displayed will refresh
+      setExpectedNextState("Open");
     }
+
     setIsAwaitingRoundStateUpdate(true);
 
     setModalState((prev: any) => ({
@@ -104,32 +115,44 @@ const StateTransition = ({
     }));
   };
 
-  const isDisabled = useIsDisabled({
+  const isDisabled = useMemo(() => {
+    if (!account) return true;
+    if (pendingTx) return true;
+    if (isAwaitingRoundStateUpdate) return true;
+
+    if (roundState === "FossilReady" && !canSendFossilRequest) return true;
+    if (roundState === "Open" && !canAuctionStart) return true;
+    if (roundState === "Auctioning" && !canAuctionEnd) return true;
+    if (roundState === "Running" && !canRoundSettle) return true;
+
+    return false;
+  }, [
     account,
     pendingTx,
     isAwaitingRoundStateUpdate,
     roundState,
-    prevRoundState,
     canSendFossilRequest,
     canAuctionStart,
     canAuctionEnd,
     canRoundSettle,
-  });
+  ]);
 
-  const icon = getIconByRoundState(roundState, isDisabled);
+  const icon = getIconByRoundState(roundState, isDisabled, isPanelOpen);
 
   useEffect(() => {
-    if (prevRoundState !== roundState) {
+    if (expectedNextState && roundState === expectedNextState) {
       setIsAwaitingRoundStateUpdate(false);
+      setExpectedNextState(null);
     }
-  }, [roundState, prevRoundState]);
+  }, [roundState, expectedNextState]);
 
-  if (!vaultState?.currentRoundId || !selectedRoundState || !vaultActions)
+  if (!vaultState?.currentRoundId || !selectedRoundState || !vaultActions) {
     return null;
+  }
 
   if (
     roundState === "Settled" ||
-    vaultState.currentRoundId !== selectedRoundState.roundId
+    Number(vaultState.currentRoundId) !== Number(selectedRoundState.roundId)
   ) {
     return null;
   }
@@ -139,15 +162,15 @@ const StateTransition = ({
       className={`${
         isPanelOpen && roundState !== "Settled"
           ? "border border-transparent border-t-[#262626]"
-          : ""
-      } flex flex-col w-full mx-auto mt-auto mb-4`}
+          : "border border-transparent border-t-[#262626]"
+      } flex flex-col w-full mx-auto mt-auto mb-4 ${isPanelOpen ? "" : "items-center justify-center"}`}
     >
-      <div className="px-6">
+      <div className={`${isPanelOpen ? "px-6" : ""}`}>
         <button
           disabled={isDisabled}
-          className={`${isPanelOpen ? "flex" : "hidden"} ${
+          className={`flex ${!isPanelOpen && !isDisabled ? "hover-zoom-small" : ""} ${
             roundState === "Settled" ? "hidden" : ""
-          } border border-greyscale-700 text-primary disabled:text-greyscale rounded-md mt-4 p-2 w-full justify-center items-center`}
+          } ${isPanelOpen ? "p-2" : "w-[44px] h-[44px]"} border border-greyscale-700 text-primary disabled:text-greyscale rounded-md mt-4 justify-center items-center min-w-[44px] min-h-[44px] w-full`}
           onClick={() => {
             setModalState({
               show: true,
@@ -156,7 +179,7 @@ const StateTransition = ({
             });
           }}
         >
-          <p>
+          <p className={`${isPanelOpen ? "" : "hidden"}`}>
             {prevRoundState !== roundState ? "Pending" : actions[roundState]}
           </p>
           {icon}

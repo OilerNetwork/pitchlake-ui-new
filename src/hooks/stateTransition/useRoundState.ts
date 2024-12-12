@@ -7,42 +7,42 @@ const getRoundState = ({
   fossilStatus,
   fossilError,
   isPendingTx,
-  isAwaitingRoundStateUpdate,
+  expectedNextState,
 }: {
   selectedRoundState: OptionRoundStateType | undefined;
   fossilStatus: StatusData | null;
   fossilError: string | null;
   isPendingTx: boolean;
-  isAwaitingRoundStateUpdate: boolean;
+  expectedNextState: string | null;
 }): string => {
-  if (
-    isPendingTx ||
-    isAwaitingRoundStateUpdate ||
-    fossilStatus?.status === "Pending"
-  )
-    return "Pending";
+  let currentState = "Pending";
+  if (isPendingTx || fossilStatus?.status === "Pending")
+    currentState = "Pending";
+  else if (!selectedRoundState) currentState = "Settled";
+  else {
+    currentState = selectedRoundState?.roundState.toString();
 
-  if (!selectedRoundState) return "Settled";
-
-  const rawState = selectedRoundState.roundState.toString();
-  if (
-    rawState === "Open" ||
-    rawState === "Auctioning" ||
-    rawState === "Settled"
-  )
-    return rawState;
-
-  if (rawState === "Running") {
-    if (fossilStatus?.status === "Completed") return rawState;
+    // Is the contract's state the expected next state?
     if (
-      fossilError ||
-      fossilStatus === null ||
-      fossilStatus.status === "Failed"
-    )
-      return "FossilReady";
+      currentState === "Open" ||
+      currentState === "Auctioning" ||
+      currentState === "Settled"
+    ) {
+      if (expectedNextState && currentState !== expectedNextState)
+        currentState = "Pending";
+    } else if (currentState === "Running") {
+      if (fossilStatus?.status === "Completed") currentState = "Running";
+      if (
+        fossilError ||
+        fossilStatus === null ||
+        fossilStatus.status === "Failed"
+      )
+        currentState = "FossilReady";
+    } else {
+    }
   }
 
-  return "Settled";
+  return currentState;
 };
 
 export const useRoundState = ({
@@ -50,13 +50,13 @@ export const useRoundState = ({
   fossilStatus,
   fossilError,
   pendingTx,
-  isAwaitingRoundStateUpdate,
+  expectedNextState,
 }: {
   selectedRoundState: OptionRoundStateType | undefined;
   fossilStatus: StatusData | null;
   fossilError: string | null;
   pendingTx: string | undefined;
-  isAwaitingRoundStateUpdate: boolean;
+  expectedNextState: string | null;
 }) => {
   const roundState = useMemo(() => {
     return getRoundState({
@@ -64,14 +64,14 @@ export const useRoundState = ({
       fossilStatus,
       fossilError,
       isPendingTx: pendingTx ? true : false,
-      isAwaitingRoundStateUpdate,
+      expectedNextState,
     });
   }, [
     selectedRoundState,
     fossilStatus,
     fossilError,
     pendingTx,
-    isAwaitingRoundStateUpdate,
+    expectedNextState,
   ]);
 
   // Previous roundState to detect changes
