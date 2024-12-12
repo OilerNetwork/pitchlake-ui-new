@@ -21,6 +21,6 @@ services:
       - FOSSIL_API_KEY=${FOSSIL_API_KEY}
       - FOSSIL_DB_URL=${FOSSIL_DB_URL}
       - NEXT_PUBLIC_FOSSIL_API_URL=${NEXT_PUBLIC_FOSSIL_API_URL}
-      - NEXT_PUBLIC_DEV_ADDRESS=${NEXT_PUBLIC_DEV_ADDRESS}
-      - NEXT_PUBLIC_DEV_PK=${NEXT_PUBLIC_DEV_PK}
       - NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL}
+      # ⬇️⬇️⬇️ This env var is used only in the devenv. Doesn't need to be set in prod
+      - JUNO_DOCKER_HOST=http://juno_plugin:6060
