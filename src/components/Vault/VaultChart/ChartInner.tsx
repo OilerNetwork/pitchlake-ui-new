@@ -43,7 +43,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
       !historicalData.rounds ||
       !data ||
       !fromRound ||
-      !toRound
+      !toRound ||
+      !isExpandedView
     )
       return { verticalSegments: [], roundAreas: [] };
 
@@ -108,7 +109,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
     });
 
     return { verticalSegments: segments, roundAreas: areas };
-  }, [historicalData, data, fromRound, toRound]);
+  }, [isExpandedView, historicalData, data, fromRound, toRound]);
 
   // Compute the maximum Y value based on active lines
   const yMax = useMemo(() => {
@@ -329,8 +330,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
   }
 
   return (
-    <ResponsiveContainer  width="100%" maxHeight={665} className="pr-4">
-      <ComposedChart margin={{left:-20}} data={data} syncId="roundChart">
+    <ResponsiveContainer width="100%" maxHeight={665} className="pr-4">
+      <ComposedChart margin={{ left: -20 }} data={data} syncId="roundChart">
         <defs>
           <linearGradient id="capLevelGradient" x1="0" y1="0" x2="0" y2="1">
             <stop
@@ -379,7 +380,6 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
           horizontal={false}
           syncWithTicks={true}
         />
-
         <XAxis
           dataKey="timestamp"
           domain={["dataMin", "dataMax"]}
@@ -390,7 +390,6 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
           tickLine={false}
           tick={<CustomizedXAxisTick />}
         />
-
         <YAxis
           type="number"
           domain={[0, yMax]}
@@ -410,7 +409,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
           }}
         />
 
-        {activeLines.TWAP && data.length > 0 && (
+        {activeLines.TWAP && (
           <Area
             height={400}
             type="monotone"
@@ -421,10 +420,10 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
             fillOpacity={1}
             connectNulls={true}
             dot={false}
-            isAnimationActive={false}
+            isAnimationActive={true}
           />
         )}
-        {activeLines.BASEFEE && data.length > 0 && (
+        {activeLines.BASEFEE && (
           <Area
             type="monotone"
             dataKey="BASEFEE"
@@ -434,10 +433,38 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
             fillOpacity={1}
             connectNulls={true}
             dot={false}
-            isAnimationActive={false}
+            isAnimationActive={true}
           />
         )}
-        {isExpandedView &&
+        {activeLines.STRIKE && (
+          <Line
+            type="monotone"
+            dataKey="STRIKE"
+            stroke="var(--warning-300)"
+            strokeWidth={2}
+            activeDot={true}
+            dot={false}
+            fill="url(#strikeGradient)"
+            connectNulls={false}
+            isAnimationActive={true}
+          />
+        )}
+        {activeLines.CAP_LEVEL && (
+          <Area
+            type="monotone"
+            dataKey="CAP_LEVEL"
+            stroke="var(--success)"
+            strokeWidth={2}
+            label="Cap Level"
+            activeDot={true}
+            dot={false}
+            fill="url(#capLevelGradient)"
+            connectNulls={false}
+            isAnimationActive={true}
+          />
+        )}
+        {
+          // Round boundary lines (in expanded view)
           verticalSegments.map((segmentObj: any, index: any) => {
             return (
               <ReferenceLine
@@ -449,33 +476,10 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
                 strokeWidth={2}
               />
             );
-          })}
-        <Line
-          type="monotone"
-          dataKey="STRIKE"
-          stroke={activeLines.STRIKE ? "var(--warning-300)" : "none"}
-          strokeWidth={2}
-          activeDot={false}
-          dot={false}
-          fill="url(#strikeGradient)"
-          connectNulls={false}
-          isAnimationActive={false}
-        />
-        {activeLines.CAP_LEVEL && data.length > 0 && (
-          <Area
-            type="monotone"
-            dataKey="CAP_LEVEL"
-            stroke="var(--success)"
-            strokeWidth={2}
-            label="Cap Level"
-            activeDot={false}
-            dot={false}
-            fill="url(#capLevelGradient)"
-            connectNulls={false}
-            isAnimationActive={false}
-          />
-        )}
-        {isExpandedView &&
+          })
+        }
+        {
+          // Round boundary areas (in expanded view)
           roundAreas.map((area: any, index: number) => (
             <ReferenceArea
               key={`area-${index}`}
@@ -498,7 +502,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
               }}
               style={{ cursor: "pointer" }}
             />
-          ))}
+          ))
+        }
       </ComposedChart>
     </ResponsiveContainer>
   );

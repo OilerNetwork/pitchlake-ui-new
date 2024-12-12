@@ -55,7 +55,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   const { pendingTx, setPendingTx } = useTransactionContext();
   const { allowance, balance } = useERC20(
     vaultState?.ethAddress,
-    vaultState?.address
+    vaultState?.address,
   );
 
   const updateState = (updates: Partial<DepositState>) => {

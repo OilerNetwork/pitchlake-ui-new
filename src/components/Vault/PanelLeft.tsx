@@ -22,7 +22,7 @@ const FOSSIL_DELAY = 15 * 60;
 
 // comment for git
 const PanelLeft = ({ userType }: { userType: string }) => {
-  const { vaultState, selectedRoundState,timestamp } = useProtocolContext();
+  const { vaultState, selectedRoundState, timestamp } = useProtocolContext();
   const [vaultIsOpen, setVaultIsOpen] = useState<boolean>(false);
   const [optionRoundIsOpen, setOptionRoundIsOpen] = useState<boolean>(false);
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
@@ -139,7 +139,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
       <div
         className={`flex flex-col mr-4 max-w-[350px] transition-all duration-300 max-h-[834px] overflow-hidden ${
           isPanelOpen ? "w-full" : "w-[110px]"
-        } ${!isPanelOpen ? "cursor-pointer" : ""}`}
+        } ${!isPanelOpen ? "" : ""}`}
       >
         <div className="flex items-center align-center text-[14px] bg-black-alt border-[1px] border-greyscale-800 items-start rounded-lg w-full flex flex-col flex-grow h-full max-h-full">
           <div
@@ -191,9 +191,9 @@ const PanelLeft = ({ userType }: { userType: string }) => {
               }}
               className={`flex flex-row w-full mt-3 rounded-md p-3 ${
                 isPanelOpen
-                  ? "justify-between cursor-pointer bg-faded-black"
+                  ? "justify-between bg-faded-black"
                   : "justify-center"
-              }`}
+              } cursor-pointer`}
             >
               <div>
                 <SafeIcon
@@ -363,9 +363,9 @@ const PanelLeft = ({ userType }: { userType: string }) => {
               }}
               className={`flex flex-row w-full mt-3 rounded-md p-3 ${
                 isPanelOpen
-                  ? "justify-between cursor-pointer bg-faded-black"
+                  ? "justify-between bg-faded-black"
                   : "justify-center"
-              }`}
+              } cursor-pointer`}
             >
               <div>
                 <LayerStackIcon

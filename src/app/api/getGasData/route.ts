@@ -317,7 +317,19 @@ export async function GET(request: Request) {
       }
     }
 
-    return NextResponse.json(data, { status: 200 });
+    const sortedDataAgain = data.sort((a, b) => a.timestamp - b.timestamp);
+    if (sortedDataAgain.length <= 8) {
+      const midpoint =
+        (Number(sortedDataAgain[0].timestamp) +
+          Number(sortedDataAgain[sortedDataAgain.length - 1].timestamp)) /
+        2;
+      sortedDataAgain.push({
+        timestamp: midpoint,
+      });
+    }
+    const finalData = sortedDataAgain.sort((a, b) => a.timestamp - b.timestamp);
+
+    return NextResponse.json(finalData, { status: 200 });
   } catch (error: any) {
     console.error("Error fetching data", error);
     return NextResponse.json(
