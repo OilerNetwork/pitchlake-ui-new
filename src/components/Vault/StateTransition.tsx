@@ -100,7 +100,7 @@ const StateTransition = ({
       setExpectedNextState("Auctioning");
     } else if (roundState === "Auctioning") {
       await vaultActions.endAuction();
-      setExpectedNextState("Running");
+      setExpectedNextState("FossilReady");
     } else if (roundState === "Running") {
       await vaultActions.settleOptionRound();
       // Not settled because the current round being displayed will refresh
