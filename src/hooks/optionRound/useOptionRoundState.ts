@@ -176,9 +176,16 @@ const useOptionRoundState = (address: string | undefined) => {
     if (soldLiq === BigInt(0)) return 0;
 
     const gainLoss = prem - payout;
-    const percentage = Number((Number(gainLoss / soldLiq) * 100).toFixed(2));
+    const percentage = Number(
+      (
+        Number(
+          parseFloat(gainLoss.toString()) / parseFloat(soldLiq.toString()),
+        ) * 100
+      ).toFixed(2),
+    );
 
     const sign = percentage > 0 ? "+" : "";
+
     return `${sign}${percentage}`;
   };
 
@@ -240,12 +247,10 @@ const useOptionRoundState = (address: string | undefined) => {
     optionBuyerState: {
       address: account?.address as string,
       bids: bids ? bids : [],
-      roundAddress:address,
+      roundAddress: address,
       bidderNonce: biddingNonce ? biddingNonce.toString() : 0,
       refundableOptions: refundableBids ? refundableBids.toString() : 0,
-      mintableOptions: mintableOptions
-        ? mintableOptions.toString()
-        : 0,
+      mintableOptions: mintableOptions ? mintableOptions.toString() : 0,
       totalOptions: totalOptions ? totalOptions.toString() : 0,
       payoutBalance: payoutBalance ? payoutBalance.toString() : 0,
     } as OptionBuyerStateType,

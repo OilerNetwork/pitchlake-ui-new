@@ -30,9 +30,10 @@ export async function GET(request: Request) {
   const fromRound = searchParams.get("fromRound");
   const toRound = searchParams.get("toRound");
   // In the devenv, server side calls to the node need to use the docker host
-  let nodeUrl = searchParams.get("nodeUrl") === process.env.NEXT_PUBLIC_RPC_URL_JUNO_DEVNET 
-    ? process.env.JUNO_DOCKER_HOST 
-    : searchParams.get("nodeUrl");
+  let nodeUrl =
+    searchParams.get("nodeUrl") === process.env.NEXT_PUBLIC_RPC_URL_JUNO_DEVNET
+      ? process.env.JUNO_DOCKER_HOST
+      : searchParams.get("nodeUrl");
 
   // Validate required parameters
   try {
