@@ -4,6 +4,7 @@ import useContractReads from "@/lib/useContractReads";
 import { useAccount, useContract, useContractRead } from "@starknet-react/core";
 import { useMemo } from "react";
 import { CairoCustomEnum, num } from "starknet";
+import { getPerformanceLP, getPerformanceOB } from "@/lib/utils";
 
 const useOptionRoundState = (address: string | undefined) => {
   const contractData = useMemo(() => {
@@ -166,39 +167,20 @@ const useOptionRoundState = (address: string | undefined) => {
     ],
   });
 
-  const getPerformanceLP = () => {
-    const soldLiq = soldLiquidity
-      ? BigInt(soldLiquidity.toString())
-      : BigInt(0);
-    const prem = premiums ? BigInt(premiums.toString()) : BigInt(0);
-    const payout = totalPayout ? BigInt(totalPayout.toString()) : BigInt(0);
+  const performanceLP = useMemo(() => {
+    return getPerformanceLP(
+      soldLiquidity ? soldLiquidity.toString() : "0",
+      premiums ? premiums.toString() : "0",
+      totalPayout ? totalPayout.toString() : "0",
+    );
+  }, [soldLiquidity, premiums, totalPayout]);
 
-    if (soldLiq === BigInt(0)) return 0;
-
-    const gainLoss = prem - payout;
-    const percentage = Number((Number(gainLoss / soldLiq) * 100).toFixed(2));
-
-    const sign = percentage > 0 ? "+" : "";
-    return `${sign}${percentage}`;
-  };
-
-  const getPerformanceOB = () => {
-    const prem = premiums ? BigInt(premiums.toString()) : BigInt(0);
-    const payout = totalPayout ? BigInt(totalPayout.toString()) : BigInt(0);
-
-    if (prem === BigInt(0)) {
-      return 0;
-    } else {
-      const gainLoss = payout - prem;
-      const percentage = Number((Number(gainLoss / prem) * 100).toFixed(2));
-
-      const sign = percentage > 0 ? "+" : "";
-      return `${sign}${percentage}`;
-    }
-  };
-
-  const performanceLP = getPerformanceLP();
-  const performanceOB = getPerformanceOB();
+  const performanceOB = useMemo(() => {
+    return getPerformanceOB(
+      premiums ? premiums.toString() : "0",
+      totalPayout ? totalPayout.toString() : "0",
+    );
+  }, [premiums, totalPayout]);
 
   return {
     optionRoundState: {
@@ -240,12 +222,10 @@ const useOptionRoundState = (address: string | undefined) => {
     optionBuyerState: {
       address: account?.address as string,
       bids: bids ? bids : [],
-      roundAddress:address,
+      roundAddress: address,
       bidderNonce: biddingNonce ? biddingNonce.toString() : 0,
       refundableOptions: refundableBids ? refundableBids.toString() : 0,
-      mintableOptions: mintableOptions
-        ? mintableOptions.toString()
-        : 0,
+      mintableOptions: mintableOptions ? mintableOptions.toString() : 0,
       totalOptions: totalOptions ? totalOptions.toString() : 0,
       payoutBalance: payoutBalance ? payoutBalance.toString() : 0,
     } as OptionBuyerStateType,

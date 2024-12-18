@@ -29,7 +29,11 @@ export async function GET(request: Request) {
   const vaultAddress = searchParams.get("vaultAddress");
   const fromRound = searchParams.get("fromRound");
   const toRound = searchParams.get("toRound");
-  const nodeUrl = searchParams.get("nodeUrl");
+  // In the devenv, server side calls to the node need to use the docker host
+  let nodeUrl =
+    searchParams.get("nodeUrl") === process.env.NEXT_PUBLIC_RPC_URL_JUNO_DEVNET
+      ? process.env.JUNO_DOCKER_HOST
+      : searchParams.get("nodeUrl");
 
   // Validate required parameters
   try {
@@ -52,10 +56,8 @@ export async function GET(request: Request) {
         { status: 500 },
       );
     }
-
     // Get vault dispatcher
     const vaultContract = new Contract(vaultABI, vaultAddress, provider);
-
     // Get vault's current round ID
     const currentRoundId: string = num
       .toBigInt(await vaultContract.get_current_round_id())

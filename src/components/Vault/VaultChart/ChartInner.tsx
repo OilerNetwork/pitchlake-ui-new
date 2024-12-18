@@ -420,7 +420,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
             fillOpacity={1}
             connectNulls={true}
             dot={false}
-            isAnimationActive={true}
+            isAnimationActive={!isExpandedView}
           />
         )}
         {activeLines.BASEFEE && (
@@ -433,7 +433,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
             fillOpacity={1}
             connectNulls={true}
             dot={false}
-            isAnimationActive={true}
+            isAnimationActive={!isExpandedView}
           />
         )}
         {activeLines.STRIKE && (
@@ -446,7 +446,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
             dot={false}
             fill="url(#strikeGradient)"
             connectNulls={false}
-            isAnimationActive={true}
+            isAnimationActive={!isExpandedView}
           />
         )}
         {activeLines.CAP_LEVEL && (
@@ -460,7 +460,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
             dot={false}
             fill="url(#capLevelGradient)"
             connectNulls={false}
-            isAnimationActive={true}
+            isAnimationActive={!isExpandedView}
           />
         )}
         {

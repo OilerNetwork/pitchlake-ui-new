@@ -24,9 +24,14 @@ const Refund: React.FC<RefundProps> = ({ showConfirmation }) => {
   const { roundActions, selectedRoundBuyerState } = useProtocolContext();
   const { pendingTx } = useTransactionContext();
 
-  const refundBalanceWei = selectedRoundBuyerState?.refundableOptions && selectedRoundBuyerState?.hasRefunded===false
-    ? selectedRoundBuyerState.refundableOptions
+  const refundBalanceWei = selectedRoundBuyerState?.refundableOptions
+    ? process.env.NEXT_PUBLIC_ENVIRONMENT === "ws"
+      ? !selectedRoundBuyerState?.hasMinted
+        ? selectedRoundBuyerState?.refundableOptions
+        : "0"
+      : selectedRoundBuyerState?.refundableOptions
     : "0";
+
   const refundBalanceEth = formatEther(num.toBigInt(refundBalanceWei));
 
   const handleRefundBid = async (): Promise<void> => {

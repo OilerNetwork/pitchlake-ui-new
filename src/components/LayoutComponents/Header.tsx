@@ -41,8 +41,7 @@ import useIsMobile from "@/hooks/window/useIsMobile";
 
 export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { conn, timestamp, mockTimeForward, vaultState } =
-    useProtocolContext();
+  const { conn, timestamp, mockTimeForward, vaultState } = useProtocolContext();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const isDropdownOpenRef = useRef(isDropdownOpen);
   const { isMobile } = useIsMobile();
