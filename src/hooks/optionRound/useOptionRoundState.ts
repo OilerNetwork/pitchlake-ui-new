@@ -4,6 +4,7 @@ import useContractReads from "@/lib/useContractReads";
 import { useAccount, useContract, useContractRead } from "@starknet-react/core";
 import { useMemo } from "react";
 import { CairoCustomEnum, num } from "starknet";
+import { getPerformanceLP, getPerformanceOB } from "@/lib/utils";
 
 const useOptionRoundState = (address: string | undefined) => {
   const contractData = useMemo(() => {
@@ -166,46 +167,20 @@ const useOptionRoundState = (address: string | undefined) => {
     ],
   });
 
-  const getPerformanceLP = () => {
-    const soldLiq = soldLiquidity
-      ? BigInt(soldLiquidity.toString())
-      : BigInt(0);
-    const prem = premiums ? BigInt(premiums.toString()) : BigInt(0);
-    const payout = totalPayout ? BigInt(totalPayout.toString()) : BigInt(0);
-
-    if (soldLiq === BigInt(0)) return 0;
-
-    const gainLoss = prem - payout;
-    const percentage = Number(
-      (
-        Number(
-          parseFloat(gainLoss.toString()) / parseFloat(soldLiq.toString()),
-        ) * 100
-      ).toFixed(2),
+  const performanceLP = useMemo(() => {
+    return getPerformanceLP(
+      soldLiquidity ? soldLiquidity.toString() : "0",
+      premiums ? premiums.toString() : "0",
+      totalPayout ? totalPayout.toString() : "0",
     );
+  }, [soldLiquidity, premiums, totalPayout]);
 
-    const sign = percentage > 0 ? "+" : "";
-
-    return `${sign}${percentage}`;
-  };
-
-  const getPerformanceOB = () => {
-    const prem = premiums ? BigInt(premiums.toString()) : BigInt(0);
-    const payout = totalPayout ? BigInt(totalPayout.toString()) : BigInt(0);
-
-    if (prem === BigInt(0)) {
-      return 0;
-    } else {
-      const gainLoss = payout - prem;
-      const percentage = Number((Number(gainLoss / prem) * 100).toFixed(2));
-
-      const sign = percentage > 0 ? "+" : "";
-      return `${sign}${percentage}`;
-    }
-  };
-
-  const performanceLP = getPerformanceLP();
-  const performanceOB = getPerformanceOB();
+  const performanceOB = useMemo(() => {
+    return getPerformanceOB(
+      premiums ? premiums.toString() : "0",
+      totalPayout ? totalPayout.toString() : "0",
+    );
+  }, [premiums, totalPayout]);
 
   return {
     optionRoundState: {
