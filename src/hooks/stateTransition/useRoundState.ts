@@ -18,7 +18,6 @@ const getRoundState = ({
   if (!selectedRoundState) return "Settled";
   if (isPendingTx || fossilStatus?.status === "Pending") return "Pending";
   const rawState = selectedRoundState?.roundState.toString();
-
   if (
     rawState === "Open" ||
     rawState === "Auctioning" ||
