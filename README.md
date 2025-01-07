@@ -6,7 +6,7 @@
 ```bash
 pnpm install
 ```
-2.Create a `.env` file based on `.env.example`.
+2. Create a `.env` file based on `.env.example`.
 
 
 ### Running locally
