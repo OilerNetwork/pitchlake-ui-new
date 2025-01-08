@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@ant-design/icons": "^5.5.1",
@@ -38,9 +40,13 @@
     "react-toastify": "^10.0.6",
     "recharts": "^2.13.1",
     "starknet": "^6.11.0",
-    "starknetkit": "^2.3.3"
+    "starknetkit": "^2.3.3",
+    "util": "^0.12.5"
   },
   "devDependencies": {
+
+   
+    "@types/jest": "^29.5.14",
     "@types/node": "^20.17.3",
     "@types/pg": "^8.11.10",
     "@types/react": "^18.3.12",
@@ -48,8 +54,10 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^8.57.1",
     "eslint-config-next": "14.2.5",
+
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
+    "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   },
   "packageManager": "pnpm@9.3.0+sha512.ee7b93e0c2bd11409c6424f92b866f31d3ea1bef5fbe47d3c7500cdc3c9668833d2e55681ad66df5b640c61fa9dc25d546efa54d76d7f8bf54b13614ac293631"

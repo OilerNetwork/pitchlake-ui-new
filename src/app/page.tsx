@@ -32,7 +32,7 @@ export default function Home() {
     >
       {
       //Disable mainnet
-      chain.network !== "mainnet" && 
+     
       (
         <div>
           <p className="my-2 text-base text-white-alt py-2 font-medium">
