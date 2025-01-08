@@ -7,6 +7,7 @@ import useVaultState from "../hooks/vault/useVaultState";
 import { useProvider } from "@starknet-react/core";
 import useRoundState from "../hooks/optionRound/state/useRoundState";
 import { useRouter } from "next/navigation";
+import VaultCard from "../components/VaultCard/VaultCard";
 // Mock hooks
 jest.mock("@starknet-react/core", () => ({
   __esModule: true,
@@ -16,6 +17,12 @@ jest.mock("@starknet-react/core", () => ({
   useAccount:jest.fn(),
 }));
 
+jest.mock("../components/VaultCard/VaultCard", ()=>({
+  __esModule:true,
+  default:jest.fn(({ vaultAddress }: { vaultAddress: string }) => (
+    <div data-testid={`mocked-child-${vaultAddress}`}>Mocked Child {vaultAddress}</div>
+  ))
+}))
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   usePathname: jest.fn(),
@@ -74,19 +81,9 @@ describe("Home Component", () => {
       .mockReturnValue({
         account: {},
       });
-      (useVaultState as jest.Mock).mockReturnValue({
-        vaultState:{
-          selectedRoundAddress:"0x123"
-        }
-      });
+  
 
-      (useRoundState as jest.Mock).mockReturnValue({
-        roundState:{
-          roundState:{
-            activeVariant:"Open"
-          }
-        }
-      })
+   
     render(<Home />);
     screen.debug();
     expect(screen.getByText(/popular/i)).toBeInTheDocument();
