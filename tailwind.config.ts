@@ -92,6 +92,7 @@ const config: Config = {
         "white-alt": "var(--white-alt)",
         "faded-black": "var(--faded-black)",
         "black-alt": "var(--black-alt)",
+        "faded-black-alt":"var(--faded-black-alt)",
         buttonwhite: "var(--button-white)",
       },
       backgroundImage: {
