@@ -28,7 +28,7 @@ docker compose up
 
 ### Writing Tests
 
-To add tests to the codebase, create a new file in '**tests**' folder. The folder structure for this mimics the codebase and the new test may be placed accordingly. For each component all the props as well as child components may be mocked and their respective tests be created in a subsequent file. The page.test.tsx shows examples of how to mock functions and components.
+To add tests to the codebase, create a new file in `__tests__` folder. The folder structure for this mimics the codebase and the new test may be placed accordingly. For each component all the props as well as child components may be mocked and their respective tests be created in a subsequent file. The page.test.tsx shows examples of how to mock functions and components.
 
 To run tests run the following command in terminal:
 
