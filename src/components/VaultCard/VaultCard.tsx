@@ -95,7 +95,7 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
                 )
               : "Loading..."}
           </p>
-          <div className="bg-primary-800 rounded-full w-[5px] h-[5px] m-2" />
+          <div className="bg-primary-800 rounded-full w-[5px] h-[5px] m-2 vault-type" />
           <p className="text-[16px] font-regular text-[var(--buttongrey)]">
             {vaultState?.vaultType ? vaultState.vaultType : "--"}
           </p>

@@ -215,9 +215,10 @@ export default function Header() {
 
             {isDropdownChainOpen && (
               <div className="absolute right-0 bg-[#161616] text-center text-primary-400 w-full text-sm flex flex-col">
-                {chains.map((chain: Chain) => {
+                {chains.map((chain: Chain,index:number) => {
                   return (
                     <div
+                    key={index}
                       onClick={() => {
                         handleSwitchChain(chain.network);
                       }}
