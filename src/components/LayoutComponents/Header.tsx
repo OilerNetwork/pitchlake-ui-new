@@ -45,16 +45,19 @@ import { Chain } from "@starknet-react/chains";
 
 export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownChainRef = useRef<HTMLDivElement>(null);
   const { conn, timestamp, mockTimeForward, vaultState } = useProtocolContext();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownChainOpen, setIsDropdownChainOpen] = useState(false);
   const isDropdownOpenRef = useRef(isDropdownOpen);
+  const isDropdownChainOpenRef = useRef(isDropdownChainOpen);
   const { isMobile } = useIsMobile();
   const router = useRouter();
   const { connect, connectors } = useConnect();
   const { switchChainAsync } = useSwitchChain({});
   const { disconnect } = useDisconnect();
   const { chains, chain } = useNetwork();
+  console.log("CHAINS", chains);
   const { account } = useAccount();
   const { balance } = useERC20(
     "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
@@ -86,6 +89,10 @@ export default function Header() {
   }, [isDropdownOpen]);
 
   useEffect(() => {
+    isDropdownChainOpenRef.current = isDropdownChainOpen;
+  }, [isDropdownChainOpen]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         isDropdownOpenRef.current &&
@@ -94,18 +101,31 @@ export default function Header() {
         setIsDropdownOpen(false);
       }
     };
+    const handleClickOutsideChain = (event: MouseEvent) => {
+      if (
+        isDropdownChainOpenRef.current &&
+        !dropdownChainRef?.current?.contains(event.target as HTMLDivElement)
+      ) {
+        setIsDropdownChainOpen(false);
+      }
+    };
 
     const handleEscKey = (event: KeyboardEvent) => {
       if (isDropdownOpenRef.current && event.key === "Escape") {
         setIsDropdownOpen(false);
       }
+      if (isDropdownChainOpenRef.current && event.key === "Escape") {
+        setIsDropdownChainOpen(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutsideChain);
     document.addEventListener("keydown", handleEscKey);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutsideChain);
       document.removeEventListener("keydown", handleEscKey);
     };
   }, []);
@@ -179,7 +199,7 @@ export default function Header() {
             //  <BellIcon className="h-6 w-6 text-primary" />
             //</div>
           }
-          <div className="relative">
+          <div className="relative" ref={dropdownChainRef}>
             {
               <button
                 className="flex flex-row min-w-16 border-[1px] border-primary-400 text-primary-400 text-sm px-4 py-3 rounded-md  items-center justify-center"

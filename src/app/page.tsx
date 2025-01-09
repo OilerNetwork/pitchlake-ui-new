@@ -26,13 +26,11 @@ export default function Home() {
 
   return (
     <div
-      className={`flex flex-grow flex-col px-8 py-4 pt-[84px]  w-full bg-faded-black-alt ${
-        chain.network === "mainnet"?"opacity-90":""
-      } `}
+      className={`flex flex-grow flex-col px-8 py-4 pt-[84px]  w-full bg-faded-black-alt `}
     >
       {
       //Disable mainnet
-     
+     chain.network !== "mainnet" &&
       (
         <div>
           <p className="my-2 text-base text-white-alt py-2 font-medium">
@@ -52,7 +50,7 @@ export default function Home() {
 {
   chain.network === "mainnet"&&
 //Disabled Mainnet Prompt
-<div className="fixed h-full w-full text-error-900 justify-center text-center mt-[-40px] text-[40px]  flex flex-col">
+<div className="fixed h-full w-full text-error-400 justify-center text-center mt-[-80px] text-[40px]  flex flex-col">
   <p>
     {
       "Mainnet is not yet released. Please switch to a supported network"
