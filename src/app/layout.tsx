@@ -38,7 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html className={`${montserrat.variable}`} lang="en">
-      <body className="flex flex-col min-h-[100vh]">
+      <body className="flex flex-col min-h-[100vh] text-white">
         <QueryProvider>
           <StarknetProvider>
             <TransactionProvider>
