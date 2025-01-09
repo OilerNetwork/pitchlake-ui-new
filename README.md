@@ -7,9 +7,12 @@
 ```bash
 pnpm install
 ```
+2. Create a `.env` file based on `.env.example`.
 
-2. Run the development server:
 
+
+### Running locally
+To run the development server, use the following command:
 ```bash
 pnpm dev
 ```
@@ -22,6 +25,7 @@ Alternatively, to run the application using Docker, follow these steps:
 
 2. Run with docker compose:
 
+Alternatively, to run the application using Docker, run with docker compose:
 ```bash
 docker compose up
 ```
