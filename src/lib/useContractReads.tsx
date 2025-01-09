@@ -1,5 +1,4 @@
-import { useContractRead, UseContractReadProps } from "@starknet-react/core";
-import { stat } from "fs";
+import { useReadContract } from "@starknet-react/core";
 import { useMemo } from "react";
 import { Abi, Result } from "starknet";
 
@@ -8,17 +7,17 @@ const useContractReads = ({
   states,
   watch,
 }: {
-  contractData: { abi?: Abi; address?: string };
+  contractData: { abi?: Abi; address?: `0x${string}` };
   watch?: boolean;
   states: Array<{ functionName: string; args?: Array<any>; key: string }>;
 }) => {
   // Create an object to store results
   const results: { [key: string]: Result | undefined } = {};
 
-  // Iterate over the states array and call useContractRead for each state
+  // Iterate over the states array and call useReadContract for each state
   states.forEach((state) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { data } = useContractRead({
+    const { data } = useReadContract({
       ...contractData,
       functionName: state.functionName,
       args: state.args ?? [], // Default to an empty array if no args are provided

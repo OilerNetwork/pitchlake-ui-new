@@ -14,8 +14,7 @@ import useLatestTimetamp from "@/hooks/chain/useLatestTimestamp";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useProvider } from "@starknet-react/core";
 import {
-  useContractWrite,
-  useWaitForTransaction,
+  useSendTransaction,
   useContract,
 } from "@starknet-react/core";
 import { erc20ABI, optionRoundABI } from "@/lib/abi";
@@ -62,7 +61,7 @@ const EditModal: React.FC<EditModalProps> = ({
     error: "",
   });
   const { allowance, balance } = useERC20(
-    vaultState?.ethAddress,
+    vaultState?.ethAddress as `0x${string}`,
     selectedRoundState?.address,
   );
 
@@ -70,7 +69,7 @@ const EditModal: React.FC<EditModalProps> = ({
   // Option Round Contract
   const { contract: optionRoundContractRaw } = useContract({
     abi: optionRoundABI,
-    address: selectedRoundState?.address,
+    address: selectedRoundState?.address as `0x${string}`,
   });
   const optionRoundContract = useMemo(() => {
     if (!optionRoundContractRaw) return;
@@ -81,7 +80,7 @@ const EditModal: React.FC<EditModalProps> = ({
   // ETH Contract
   const { contract: ethContractRaw } = useContract({
     abi: erc20ABI,
-    address: vaultState?.ethAddress,
+    address: vaultState?.ethAddress as `0x${string}`,
   });
   const ethContract = useMemo(() => {
     if (!ethContractRaw) return;
@@ -151,7 +150,7 @@ const EditModal: React.FC<EditModalProps> = ({
     ethContract,
     bidId,
   ]);
-  const { writeAsync } = useContractWrite({ calls });
+  const { sendAsync} = useSendTransaction({ calls });
 
   // Send confirmation
   const handleSubmitForMulticall = () => {
@@ -174,7 +173,7 @@ const EditModal: React.FC<EditModalProps> = ({
 
   // Open wallet
   const handleMulticall = async () => {
-    const data = await writeAsync();
+    const data = await sendAsync();
     setPendingTx(data?.transaction_hash);
     setState((prevState) => ({ ...prevState, newPriceGwei: "" }));
     localStorage.removeItem(LOCAL_STORAGE_KEY);

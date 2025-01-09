@@ -25,6 +25,7 @@ import {
 } from "@/lib/types";
 import { useHistoricalRoundParams } from "@/hooks/chart/useHistoricalRoundParams";
 import { useBlock, useNetwork } from "@starknet-react/core";
+import { GetBlockResponse } from "starknet";
 
 /*This is the bridge for any transactions to go through, it's disabled by isTxDisabled if there is data loading or if
   there's a pending transaction. The data loading is enforced to ensure no transaction is done without latest data.
@@ -51,6 +52,7 @@ export type ProtocolContextType = {
   timestamp: number;
   selectedRoundAddress: string | undefined;
   currentRoundAddress: string | undefined;
+  block:GetBlockResponse | undefined;
 };
 
 export const ProtocolContext = createContext<ProtocolContextType>(
@@ -214,6 +216,7 @@ const ProtocolProvider = ({ children }: { children: ReactNode }) => {
     timestamp,
     selectedRoundAddress: undefined,
     currentRoundAddress,
+    block,
   };
 
   return (

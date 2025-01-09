@@ -21,7 +21,7 @@ export const Vault = () => {
   }
 
   return (
-    <div className="px-6 py-4 flex-grow flex-box overflow-auto">
+    <div className="px-6 py-4 bg-faded-black-alt flex-grow flex-box overflow-auto">
       <div className="flex flex-row-reverse text-primary">
         <div className="flex flex-row rounded-md border-[1px] border-greyscale-800 ">
           <div

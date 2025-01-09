@@ -14,7 +14,7 @@ import { Account } from "starknet";
 const useOptionRoundActions = (address?: string) => {
   const { contract } = useContract({
     abi: optionRoundABI,
-    address,
+    address: address as `0x${string}` ,
   });
 
   const { setPendingTx } = useTransactionContext();

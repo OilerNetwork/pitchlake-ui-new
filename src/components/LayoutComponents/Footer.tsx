@@ -20,7 +20,7 @@ const Footer: React.FC = () => {
 
   return (
     !isMobile && (
-      <footer className="w-full bg-black h-[82px] flex flex-row text-white py-6 px-8 border-t border-greyscale-800 opacity-90 font-regular text-[14px]">
+      <footer className="w-full bg-black h-[82px] flex flex-row text-white py-6 px-8 border-t border-greyscale-800 font-regular text-[14px]">
         <div className="w-full flex flex-row justify-between items-center">
           <div className="text-sm mb-4 md:mb-0 ml-0">
             Copyright © {new Date().getFullYear()} by Oiler
