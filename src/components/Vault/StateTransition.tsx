@@ -11,9 +11,11 @@ import { useRoundPermissions } from "@/hooks/stateTransition/useRoundPermissions
 const StateTransition = ({
   isPanelOpen,
   setModalState,
+  fossilDelay,
 }: {
   isPanelOpen: boolean;
   setModalState: any;
+  fossilDelay: number;
 }) => {
   const {
     vaultState,
@@ -45,8 +47,6 @@ const StateTransition = ({
     expectedNextState,
   });
 
-  const FOSSIL_DELAY = 15 * 60;
-
   const {
     canAuctionStart,
     canAuctionEnd,
@@ -55,7 +55,7 @@ const StateTransition = ({
   } = useRoundPermissions(
     timestamp.toString(),
     selectedRoundState,
-    FOSSIL_DELAY,
+    fossilDelay
   );
 
   const actions: Record<string, string> = useMemo(
@@ -100,7 +100,7 @@ const StateTransition = ({
       setExpectedNextState("Auctioning");
     } else if (roundState === "Auctioning") {
       await vaultActions.endAuction();
-      setExpectedNextState("Running");
+      setExpectedNextState("FossilReady");
     } else if (roundState === "Running") {
       await vaultActions.settleOptionRound();
       // Not settled because the current round being displayed will refresh

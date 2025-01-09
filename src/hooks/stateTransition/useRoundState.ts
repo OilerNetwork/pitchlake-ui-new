@@ -15,34 +15,33 @@ const getRoundState = ({
   isPendingTx: boolean;
   expectedNextState: string | null;
 }): string => {
-  let currentState = "Pending";
-  if (isPendingTx || fossilStatus?.status === "Pending")
-    currentState = "Pending";
-  else if (!selectedRoundState) currentState = "Settled";
-  else {
-    currentState = selectedRoundState?.roundState.toString();
-
+  if (!selectedRoundState) return "Settled";
+  if (isPendingTx || fossilStatus?.status === "Pending") return "Pending";
+  const rawState = selectedRoundState?.roundState.toString();
+  if (
+    rawState === "Open" ||
+    rawState === "Auctioning" ||
+    rawState === "Settled"
+  ) {
     // Is the contract's state the expected next state?
-    if (
-      currentState === "Open" ||
-      currentState === "Auctioning" ||
-      currentState === "Settled"
-    ) {
-      if (expectedNextState && currentState !== expectedNextState)
-        currentState = "Pending";
-    } else if (currentState === "Running") {
-      if (fossilStatus?.status === "Completed") currentState = "Running";
-      if (
-        fossilError ||
-        fossilStatus === null ||
-        fossilStatus.status === "Failed"
-      )
-        currentState = "FossilReady";
-    } else {
-    }
+    if (expectedNextState && rawState !== expectedNextState) return "Pending";
+    return rawState;
   }
 
-  return currentState;
+  if (rawState === "Running") {
+    if (fossilStatus?.status === "Completed") {
+      if (expectedNextState === "Open") return "Pending";
+      return rawState;
+    }
+    if (
+      fossilError ||
+      fossilStatus === null ||
+      fossilStatus.status === "Failed"
+    )
+      return "FossilReady";
+  }
+
+  return "Pending";
 };
 
 export const useRoundState = ({

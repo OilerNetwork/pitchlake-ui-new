@@ -17,7 +17,7 @@ import { BalanceTooltip } from "@/components/BaseComponents/Tooltip";
 import StateTransition from "@/components/Vault/StateTransition";
 import { useProvider } from "@starknet-react/core";
 
-const FOSSIL_DELAY = 15 * 60;
+const FOSSIL_DELAY = process.env.NEXT_PUBLIC_FOSSIL_USE_MOCK_PRICING_DATA === "true" ? 0 : 15 * 60;
 
 // comment for git
 const PanelLeft = ({ userType }: { userType: string }) => {
@@ -617,6 +617,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
           <StateTransition
             isPanelOpen={isPanelOpen}
             setModalState={setModalState}
+            fossilDelay={FOSSIL_DELAY}
           />
         </div>
       </div>

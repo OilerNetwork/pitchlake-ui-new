@@ -119,11 +119,11 @@ export const getPerformanceLP = (
 
   if (soldLiq === num.toBigInt(0)) return 0;
 
-  const gainLoss = prem - payout;
-  const percentage = Number((Number(gainLoss / soldLiq) * 100).toFixed(2));
+  const gainLoss = Number(prem) - Number(payout);
+  const percentage = (gainLoss / Number(soldLiq.toString())) * 100.0;
 
   const sign = percentage > 0 ? "+" : "";
-  return `${sign}${percentage}`;
+  return `${sign}${percentage.toFixed(2)}`;
 };
 
 export const getPerformanceOB = (
@@ -133,14 +133,14 @@ export const getPerformanceOB = (
   const prem = premiums ? BigInt(premiums.toString()) : BigInt(0);
   const payout = totalPayout ? BigInt(totalPayout.toString()) : BigInt(0);
 
-  if (prem == BigInt(0)) {
+  if (prem === BigInt(0)) {
     return 0;
   } else {
-    const gainLoss = payout - prem;
-    const percentage = Number((Number(gainLoss / prem) * 100).toFixed(2));
+    const gainLoss = Number(payout) - Number(prem);
+    const percentage = (gainLoss / Number(prem)) * 100;
 
     const sign = percentage > 0 ? "+" : "";
-    return `${sign}${percentage}`;
+    return `${sign}${percentage.toFixed(2)}`;
   }
 };
 

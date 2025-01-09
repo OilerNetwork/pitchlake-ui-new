@@ -45,7 +45,6 @@ import { Chain } from "@starknet-react/chains";
 
 export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
-
   const { conn, timestamp, mockTimeForward, vaultState } = useProtocolContext();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownChainOpen, setIsDropdownChainOpen] = useState(false);
