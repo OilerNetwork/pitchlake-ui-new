@@ -1,20 +1,20 @@
 import { render, screen } from "@testing-library/react";
-import Home from "../app/page";
+import Home from "../../app/page";
 import { useAccount, useNetwork, useReadContract } from "@starknet-react/core";
-import useWebSocketHome from "../hooks/websocket/useWebSocketHome";
-import useIsMobile from "../hooks/window/useIsMobile";
-import useVaultState from "../hooks/vault/useVaultState";
+import useWebSocketHome from "../../hooks/websocket/useWebSocketHome";
+import useIsMobile from "../../hooks/window/useIsMobile";
+import useVaultState from "../../hooks/vault/useVaultState";
 import { useProvider } from "@starknet-react/core";
-import useRoundState from "../hooks/optionRound/state/useRoundState";
+import useRoundState from "../../hooks/optionRound/state/useRoundState";
 import { useRouter } from "next/navigation";
-import VaultCard from "../components/VaultCard/VaultCard";
+import VaultCard from "../../components/VaultCard/VaultCard";
 // Mock hooks
 jest.mock("@starknet-react/core", () => ({
   __esModule: true,
   useNetwork: jest.fn(),
 }));
 
-jest.mock("../components/VaultCard/VaultCard", () => ({
+jest.mock("../../components/VaultCard/VaultCard", () => ({
   __esModule: true,
   default: jest.fn(({ vaultAddress }: { vaultAddress: string }) => (
     <div data-testid={`mocked-child-${vaultAddress}`}>
@@ -23,12 +23,12 @@ jest.mock("../components/VaultCard/VaultCard", () => ({
   )),
 }));
 
-jest.mock("../hooks/websocket/useWebSocketHome", () => ({
+jest.mock("../../hooks/websocket/useWebSocketHome", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
 
-jest.mock("../hooks/window/useIsMobile", () => ({
+jest.mock("../../hooks/window/useIsMobile", () => ({
   __esModule: true, // This makes sure Jest treats it as a module with exports
   default: jest.fn(), // Mock the default export
 }));
@@ -58,7 +58,7 @@ describe("Home Component", () => {
     });
 
     render(<Home />);
-    screen.debug();
+    //screen.debug();
     
     //Update to checks for MobileScreen
     expect(screen.getByText(/device not supported/i)).toBeInTheDocument();
@@ -68,7 +68,7 @@ describe("Home Component", () => {
       isMobile:false,
     });
     render(<Home />);
-    screen.debug();
+    //screen.debug();
     expect(screen.getByText(/popular/i)).toBeInTheDocument();
   });
 });
