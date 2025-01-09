@@ -8,7 +8,7 @@ const useLPState = (vaultAddress: string|undefined, conn: string) => {
   const contractData = useMemo(() => {
     return {
       abi: vaultABI,
-      address: conn === "rpc" ? vaultAddress : undefined,
+      address: conn === "rpc" ? vaultAddress as `0x${string}` : undefined,
     };
   }, [vaultAddress, conn]);
   const { address: accountAddress } = useAccount();

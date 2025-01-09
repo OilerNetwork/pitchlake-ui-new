@@ -30,7 +30,7 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
   } = useProtocolContext();
   const { pendingTx } = useTransactionContext();
 
-  const { balance } = useERC20(selectedRoundState?.address);
+  const { balance } = useERC20(selectedRoundState?.address as `0x${string}`);
   const totalOptions =
     selectedRoundBuyerState?.mintableOptions &&
     selectedRoundBuyerState.hasMinted === false

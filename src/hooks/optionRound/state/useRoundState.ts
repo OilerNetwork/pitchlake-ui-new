@@ -6,7 +6,7 @@ import { CairoCustomEnum, num } from "starknet";
 const useRoundState = (address: string, args?: { watch?: boolean }) => {
   const watch = args?.watch ?? false;
   const contractData = useMemo(() => {
-    return { abi: optionRoundABI, address };
+    return { abi: optionRoundABI, address:address as `0x${string}` };
   }, [address]);
 
   const { roundState } = useContractReads({

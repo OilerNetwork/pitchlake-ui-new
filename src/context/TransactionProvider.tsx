@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useWaitForTransaction } from "@starknet-react/core";
+import { useBlock, useBlockNumber, useTransactionReceipt } from "@starknet-react/core";
 import { getDevAccount } from "@/lib/constants";
 import { Account, RpcProvider } from "starknet";
 
@@ -21,37 +21,38 @@ import { Account, RpcProvider } from "starknet";
 //Make transactions accepted only after 2 confirmations
 
 export type TransactionContextType = {
-  isDev: boolean;
-  devAccount: Account | undefined;
   isTxDisabled: boolean;
   pendingTx: string | undefined;
-  setIsDev: Dispatch<SetStateAction<boolean>>;
   setIsTxDisabled: Dispatch<SetStateAction<boolean>>;
   setPendingTx: Dispatch<SetStateAction<string | undefined>>;
   status: "error" | "success" | "pending";
+  lastBlock?:number|undefined
 };
 
 export const TransactionContext = createContext<TransactionContextType>(
   {} as TransactionContextType,
 );
 const TransactionProvider = ({ children }: { children: ReactNode }) => {
-  const [isDev, setIsDev] = useState<boolean>(false);
-  const devAccount = getDevAccount(
-    new RpcProvider({ nodeUrl: "http://localhost:5050/rpc" }),
-  );
   const [isTxDisabled, setIsTxDisabled] = useState<boolean>(false);
 
   const [pendingTx, setPendingTx] = useState<string | undefined>();
-  const { status } = useWaitForTransaction({ hash: pendingTx });
+  const { status,data } = useTransactionReceipt({ hash: pendingTx });
 
+  
+  const {data:lastBlock,refetch} = useBlockNumber({
+    refetchInterval:false
+  })
   const resetState = () => {
+    
     setPendingTx(undefined);
     setIsTxDisabled(false);
   };
-  const clearTransaction = () => {
+  const clearTransaction = async() => {
+    
     resetState();
   };
 
+  console.log("lastBlock",lastBlock)
   useEffect(() => {
     if (pendingTx)
       switch (status) {
@@ -79,14 +80,14 @@ const TransactionProvider = ({ children }: { children: ReactNode }) => {
   return (
     <TransactionContext.Provider
       value={{
-        isDev,
-        devAccount,
         isTxDisabled,
         pendingTx,
-        setIsDev,
+
         setIsTxDisabled,
         setPendingTx,
         status,
+        lastBlock,
+
       }}
     >
       {children}

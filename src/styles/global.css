@@ -87,6 +87,7 @@
   --black: #111111;
   --faded-black: #1a1a16;
   --black-alt: #121212;
+  --faded-black-alt:#0d0d0d;
   --white: #ffffff;
   --white-alt: #fafafa;
   --buttonwhite: var(--white-alt);
@@ -173,11 +174,6 @@
 }
 
 html,
-body {
-  font-family: var(--mainFont);
-  background: #0d0d0d;
-  color: white;
-}
 
 *[class^="Mui"] {
   font-family: var(--mainFont) !important;
