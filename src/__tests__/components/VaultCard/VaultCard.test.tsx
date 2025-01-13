@@ -123,7 +123,7 @@ describe("VaultCard Component", () => {
 
   it("navigates to the vault page on click", () => {
     const mockPush = jest.fn();
-    mockHooks({ routerPush: mockPush, vaultType: "Test Vault" });
+    mockHooks({ routerPush: mockPush, vaultType: "Test Vault"   });
     render(<VaultCard vaultAddress="0x123" />);
 
     fireEvent.click(screen.getByText(/Test Vault/i));

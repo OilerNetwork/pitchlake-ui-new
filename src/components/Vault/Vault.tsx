@@ -76,7 +76,7 @@ export const Vault = () => {
             onClick={() => {
               router.push("/");
             }}
-            className="flex items-center justify-center w-[44px] h-[44px] border border-[#262626] rounded-lg cursor-pointer"
+            className="back-button flex items-center justify-center w-[44px] h-[44px] border border-[#262626] rounded-lg cursor-pointer"
           >
             <ChevronLeft className="w-[16px] h-[16px] stroke-[#F5EBB8]" />
           </div>

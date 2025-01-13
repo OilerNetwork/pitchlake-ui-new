@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import { RpcProvider } from "starknet";
 import { sepolia, mainnet, devnet, Chain } from "@starknet-react/chains";
 import {
   StarknetConfig,
@@ -11,6 +10,7 @@ import {
   jsonRpcProvider,
 } from "@starknet-react/core";
 
+const newDevnet = { ...devnet, id: BigInt("0x534e5f4a554e4f5f53455155454e434552") };
 export const juno = {
   id: BigInt("0x534e5f4a554e4f5f53455155454e434552"), // SN_JUNO_SEQUENCER
   network: "juno",
