@@ -1,8 +1,6 @@
 "use client";
-import MobileScreen from "@/components/BaseComponents/MobileScreen";
 import VaultCard from "@/components/VaultCard/VaultCard";
 import useWebSocketHome from "@/hooks/websocket/useWebSocketHome";
-import useIsMobile from "@/hooks/window/useIsMobile";
 import { useNetwork } from "@starknet-react/core";
 
 export default function Home() {
@@ -18,49 +16,29 @@ export default function Home() {
         ].filter((addr) => wsVaults?.includes(addr))
       : process.env.NEXT_PUBLIC_VAULT_ADDRESSES?.split(",");
 
-  const { isMobile } = useIsMobile();
-
-  if (isMobile) {
-    return <MobileScreen />;
-  }
-
   return (
-    <div
-      className={`flex flex-grow flex-col px-8 py-4 pt-[84px]  w-full bg-faded-black-alt `}
-    >
-      {
-      //Disable mainnet
-     chain.network !== "mainnet" &&
-      (
-        <div>
+    <div className="px-4 sm:px-8 pt-[84px] sm:pt-[100px] pb-4 sm:pb-8">
+      {chain.network !== "mainnet" && (
+        <div className="max-w-[1920px] mx-auto">
           <p className="my-2 text-base text-white-alt py-2 font-medium">
             Popular Vaults
           </p>
-          <div className="grid grid-cols-2 w-full pt-4 gap-x-6 gap-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {vaults?.map((vault: string, index: number) => (
-              // <VaultTimeline key={vault.address + idx.toString()} vault={vault} />
               <VaultCard key={index} vaultAddress={vault} />
             ))}
-
-            {/* <CreateVault {...{ handleCreateClick }} /> */}
           </div>
         </div>
       )}
 
-{
-  chain.network === "mainnet"&&
-//Disabled Mainnet Prompt
-<div className="fixed h-full w-full text-error-400 justify-center text-center mt-[-80px] text-[40px]  flex flex-col">
-  <p>
-    {
-      "Mainnet is not yet released. Please switch to a supported network"
-    }
-  </p>
-  </div>
-}
-      {
-        // <CreateVaultModal isModalVisible={isModalVisible} closeModal={() => setIsModalVisible(false)} />
-      }
+      {chain.network === "mainnet" && (
+        <div className="fixed inset-0 flex items-center justify-center text-error-400 text-center px-4">
+          <p className="text-[40px] leading-tight max-w-[80%]">
+            Mainnet is not yet released. Please switch to a supported network
+          </p>
+        </div>
+      )}
     </div>
   );
 }
+
