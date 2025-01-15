@@ -23,15 +23,15 @@ const InfoItem: React.FC<{
   isPending: boolean;
   plPercentage?: string;
 }> = ({ label, value, isPending, plPercentage }) => (
-  <div>
-    <p className="text-regular text-[var(--buttongrey)] text-[14px]">{label}</p>
-    <p className="flex flex-row items-center text-medium text-[14px] mt-2 text-base font-medium">
+  <div className="vault-info-item">
+    <p className="vault-info-label text-regular text-[var(--buttongrey)] text-[14px]">{label}</p>
+    <p className="vault-info-value flex flex-row items-center text-medium text-[14px] mt-2 text-base font-medium">
       {isPending && <Clock size={14} />}
       &nbsp;
       {value}
       {plPercentage && (
-        <div
-          className={`ml-2 ${styles.bg} ${styles.text} font-medium rounded-full px-2 py-[1px] flex flex-row items-center text-[14px]`}
+        <span
+          className={`vault-info-percentage ml-2 ${styles.bg} ${styles.text} font-medium rounded-full px-2 py-[1px] flex flex-row items-center text-[14px]`}
         >
           {Math.abs(Number(plPercentage))}%&nbsp;
           {Number(plPercentage) > 0 ? (
@@ -39,7 +39,7 @@ const InfoItem: React.FC<{
           ) : (
             <ArrowDown size={14} />
           )}
-        </div>
+        </span>
       )}
     </p>
   </div>
@@ -75,11 +75,10 @@ const styles =
 // - if running, premiums received is known
 // - if settled, the rest is known
 const MyInfo: React.FC = () => (
-  <div className="text-white p rounded-lg">
-    <div className="space-y-4 p-6">
+  <div className="vault-provider-info text-white p rounded-lg">
+    <div className="vault-provider-info-content space-y-4 p-6">
       <InfoItem
         label="My P&L"
-        //value="+1.43 ETH"
         value={`${performance > 0 ? "+" : "-"}${gain} ETH`}
         isPending={false}
         plPercentage={performance.toString()}

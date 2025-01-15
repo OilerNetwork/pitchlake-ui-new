@@ -2,11 +2,11 @@ import React from "react";
 import { TabsProps } from "@/lib/types";
 
 const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, setActiveTab }) => (
-  <div className="flex flex-row items-center border-b border-gray-700 align-center justify-left">
+  <div className="vault-tabs flex flex-row items-center border-b border-gray-700 align-center justify-left">
     {tabs.map((tab) => (
-      <div key={tab} className="flex flex-row">
+      <div key={tab} className="vault-tab-wrapper flex flex-row">
         <button
-          className={`h-[56px] px-6 py-4 relative text-[14px] ${
+          className={`vault-tab h-[56px] px-6 py-4 relative text-[14px] ${
             activeTab === tab ? "text-[#F5EBB8]" : "text-gray-400"
           }`}
           onClick={() => {
@@ -15,7 +15,7 @@ const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, setActiveTab }) => (
         >
           {tab}
           {activeTab === tab && (
-            <p className="absolute bottom-0 left-0 w-full h-0.5 bg-[#F5EBB8] text-[14px] font-medium"></p>
+            <p className="vault-tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-[#F5EBB8] text-[14px] font-medium"></p>
           )}
         </button>
       </div>

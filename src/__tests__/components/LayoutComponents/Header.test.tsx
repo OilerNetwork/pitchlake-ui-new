@@ -7,6 +7,14 @@ import useAccountBalances from "../../../hooks/vault/state/useAccountBalances";
 import { useProtocolContext } from "../../../context/ProtocolProvider";
 import { useRouter } from "next/navigation";
 
+// Mock SVG imports
+jest.mock("@/../public/logo_full.svg", () => "logo_full.svg");
+jest.mock("@/../public/login.svg", () => "login.svg");
+jest.mock("@/../public/braavos.svg", () => "braavos.svg");
+jest.mock("@/../public/argent.svg", () => "argent.svg");
+jest.mock("@/../public/keplr.svg", () => "keplr.svg");
+jest.mock("@/../public/avatar.svg", () => "avatar.svg");
+
 // Mock all the hooks
 jest.mock("@starknet-react/core", () => ({
   useNetwork: jest.fn(),
