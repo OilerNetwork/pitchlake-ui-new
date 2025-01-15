@@ -31,6 +31,9 @@ export async function GET(request: Request) {
   const fromRound = searchParams.get("fromRound");
   const toRound = searchParams.get("toRound");
   // In the devenv, server side calls to the node need to use the docker host
+  // This logic does not apply to prod. JUNO_DOCKER_HOST does not need to be set in prod
+  // TODO: To get rid of this workaround and remove JUNO_DOCKER_HOST from the env, we need to
+  // all the calls to the node need to be either on the clients side, or on the server side.
   let nodeUrl =
     searchParams.get("nodeUrl") === process.env.NEXT_PUBLIC_RPC_URL_JUNO_DEVNET
       ? process.env.JUNO_DOCKER_HOST
