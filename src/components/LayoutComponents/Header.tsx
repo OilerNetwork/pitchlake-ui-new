@@ -169,7 +169,7 @@ export default function Header() {
   };
 
   return (
-    <nav className="absolute top-0 z-50 w-full h-[64px] sm:h-[84px] bg-[#121212] px-4 sm:px-8 py-4 sm:py-6 flex justify-between items-center border-b border-[#262626]">
+    <nav className="header-component absolute top-0 z-50 w-full h-[64px] sm:h-[84px] bg-[#121212] px-4 sm:px-8 py-4 sm:py-6 flex justify-between items-center border-b border-[#262626]">
       <div className="flex-shrink-0">
         <Image
           onClick={() => {
@@ -196,7 +196,7 @@ export default function Header() {
         <div className="relative" ref={dropdownChainRef}>
           {
             <button
-              className="flex flex-row min-w-16 border-[1px] border-primary-400 text-primary-400 text-sm px-2 sm:px-4 py-2 sm:py-3 rounded-md items-center justify-center"
+              className="network-selector flex flex-row min-w-16 border-[1px] border-primary-400 text-primary-400 text-sm px-2 sm:px-4 py-2 sm:py-3 rounded-md items-center justify-center"
               onClick={() => setIsDropdownChainOpen(true)}
             >
               <p>{chain.network}</p>
@@ -208,7 +208,7 @@ export default function Header() {
           }
 
           {isDropdownChainOpen && (
-            <div className="absolute right-0 bg-[#161616] text-center text-primary-400 w-full text-sm flex flex-col">
+            <div className="network-dropdown absolute right-0 bg-[#161616] text-center text-primary-400 w-full text-sm flex flex-col">
               {chains.map((chain: Chain,index:number) => {
                 return (
                   <div
@@ -232,7 +232,7 @@ export default function Header() {
             <>
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 py-2 px-2 sm:px-3 rounded-md border border-greyscale-800 w-[140px] sm:w-[164px] h-[38px] sm:h-[44px]"
+                className="wallet-account-button flex items-center gap-2 py-2 px-2 sm:px-3 rounded-md border border-greyscale-800 w-[140px] sm:w-[164px] h-[38px] sm:h-[44px]"
               >
                 <Image
                   src={avatar}
@@ -255,20 +255,13 @@ export default function Header() {
                     disconnect={disconnect}
                     copyToClipboard={copyToClipboard}
                   />
-                  {/* <ToastContainer
-                    autoClose={3000}
-                    closeOnClick
-                    hideProgressBar={false}
-                    transition={Bounce}
-                    //theme="dark"
-                  /> */}
                 </>
               )}
             </>
           ) : (
             <>
               <button
-                className="flex flex-row min-w-16 bg-primary-400 text-black text-sm px-6 sm:px-8 py-3 sm:py-4 rounded-md w-[110px] sm:w-[123px] h-[38px] sm:h-[44px] items-center justify-center"
+                className="wallet-connect-button flex flex-row min-w-16 bg-primary-400 text-black text-sm px-6 sm:px-8 py-3 sm:py-4 rounded-md w-[110px] sm:w-[123px] h-[38px] sm:h-[44px] items-center justify-center"
                 onClick={() => setIsDropdownOpen((state) => !state)}
               >
                 <p>Connect</p>
@@ -282,7 +275,7 @@ export default function Header() {
               </button>
 
               {isDropdownOpen && (
-                <div className="absolute right-0 h-[148px] w-[196px] text-sm flex flex-col mt-3 ">
+                <div className="wallet-dropdown absolute right-0 h-[148px] w-[196px] text-sm flex flex-col mt-3">
                   <div className="bg-[#161616] rounded-md">
                     <div className="p-4 font-regular text-[12px] border border-transparent border-b-[#454545] ">
                       CHOOSE A WALLET
