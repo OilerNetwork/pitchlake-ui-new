@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - feat/ci_jfrog
 
 env:
   DOCKER_REGISTRY: nethermind.jfrog.io
