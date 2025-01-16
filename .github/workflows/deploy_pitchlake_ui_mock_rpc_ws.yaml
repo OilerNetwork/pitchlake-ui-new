@@ -2,22 +2,25 @@ name: Docker Build, Push and Deploy Pitchlake UI
 on:
   push:
     branches:
-      - main
-      - feat/deploy-ui
+      - develop
 
 env:
   AWS_REGION: eu-central-1
   ECR_REPOSITORY: pitchlake-ui-new_images_repository
+  # Mock service configuration
   ECS_SERVICE_MOCK: pitchlake-ui-new-mock-app
-  ECS_SERVICE_RPC: pitchlake-ui-new-rpc-app
-  ECS_SERVICE_WS: pitchlake-ui-new-ws-app
-  ECS_CLUSTER: pitchlake-ui-new-ecs-cluster
   CONTAINER_NAME_MOCK: pitchlake-ui-new-mock
+  TASK_NAME_MOCK: pitchlake-ui-new-mock-app
+  # RPC service configuration
+  ECS_SERVICE_RPC: pitchlake-ui-new-rpc-app
   CONTAINER_NAME_RPC: pitchlake-ui-new-rpc
+  TASK_NAME_RPC: pitchlake-ui-new-rpc-app
+  # WS service configuration
+  ECS_SERVICE_WS: pitchlake-ui-new-ws-app
   CONTAINER_NAME_WS: pitchlake-ui-new-ws
-  TASK_NAME_MOCK: pitchlake-ui-new-mock
-  TASK_NAME_RPC: pitchlake-ui-new-rpc
-  TASK_NAME_WS: pitchlake-ui-new-ws
+  TASK_NAME_WS: pitchlake-ui-new-ws-app
+  # Shared configuration
+  ECS_CLUSTER: pitchlake-ui-new-ecs-cluster
   NODE_ENV: production
   PORT: ${{vars.PORT}}
   NEXT_PUBLIC_VAULT_ADDRESSES: ${{vars.VAULT_ADDRESSES}}
@@ -37,10 +40,11 @@ permissions:
   contents: write
 
 jobs:
-  build_push_deploy:
+  build_and_push:
     runs-on: ubuntu-latest
-    environment: staging
-
+    outputs:
+      image_uri: ${{ steps.build-image.outputs.image_uri }}
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -75,7 +79,7 @@ jobs:
         run: |
           IMAGE_TAG=pitchlake-ui-${{ github.sha }}
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+          echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
           docker buildx build \
             --platform=linux/amd64 \
             --build-arg PORT=${{ env.PORT }} \
@@ -96,59 +100,101 @@ jobs:
             ./
           docker push $IMAGE_URI
 
-      - name: Download task definition
+  deploy_mock:
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::654654236251:role/terraform-20241003185909187100000001
+          role-session-name: Github
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Download Mock task definition
         run: |
-          aws ecs describe-task-definition --task-definition ${{ env.TASK_NAME_MOCK }} --query taskDefinition > task-definition-mock.json
-          aws ecs describe-task-definition --task-definition ${{ env.TASK_NAME_RPC }} --query taskDefinition > task-definition-rpc.json
-          aws ecs describe-task-definition --task-definition ${{ env.TASK_NAME_WS }} --query taskDefinition > task-definition-ws.json
+          aws ecs describe-task-definition --task-definition ${{ env.TASK_NAME_MOCK }} \
+            --query taskDefinition > task-definition-mock.json
 
-      - name: Log task definition
-        run: cat task-definition-ws.json
-
-      - name: Fill in the new image ID in the Amazon ECS task definition for mock
-        id: task-def
+      - name: Fill in the new image ID in the Mock task definition
+        id: task-def-mock
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: task-definition-mock.json
           container-name: ${{ env.CONTAINER_NAME_MOCK }}
-          image: ${{ env.IMAGE_URI }}
+          image: ${{ needs.build_and_push.outputs.image_uri }}
 
-      - name: Fill in the new image ID in the Amazon ECS task definition for rpc
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: task-definition-rpc.json
-          container-name: ${{ env.CONTAINER_NAME_RPC }}
-          image: ${{ env.IMAGE_URI }}
-
-      - name: Fill in the new image ID in the Amazon ECS task definition for ws
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: task-definition-ws.json
-          container-name: ${{ env.CONTAINER_NAME_WS }}
-          image: ${{ env.IMAGE_URI }}
-
-      - name: Deploy Amazon ECS task definition of mock
+      - name: Deploy Mock service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          task-definition: ${{ steps.task-def-mock.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE_MOCK }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
 
-      - name: Deploy Amazon ECS task definition of rpc
+  deploy_rpc:
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::654654236251:role/terraform-20241003185909187100000001
+          role-session-name: Github
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Download RPC task definition
+        run: |
+          aws ecs describe-task-definition --task-definition ${{ env.TASK_NAME_RPC }} \
+            --query taskDefinition > task-definition-rpc.json
+
+      - name: Fill in the new image ID in the RPC task definition
+        id: task-def-rpc
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition-rpc.json
+          container-name: ${{ env.CONTAINER_NAME_RPC }}
+          image: ${{ needs.build_and_push.outputs.image_uri }}
+
+      - name: Deploy RPC service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          task-definition: ${{ steps.task-def-rpc.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE_RPC }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
 
-      - name: Deploy Amazon ECS task definition of ws
+  deploy_ws:
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::654654236251:role/terraform-20241003185909187100000001
+          role-session-name: Github
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Download WS task definition
+        run: |
+          aws ecs describe-task-definition --task-definition ${{ env.TASK_NAME_WS }} \
+            --query taskDefinition > task-definition-ws.json
+
+      - name: Fill in the new image ID in the WS task definition
+        id: task-def-ws
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition-ws.json
+          container-name: ${{ env.CONTAINER_NAME_WS }}
+          image: ${{ needs.build_and_push.outputs.image_uri }}
+
+      - name: Deploy WS service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          task-definition: ${{ steps.task-def-ws.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE_WS }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
