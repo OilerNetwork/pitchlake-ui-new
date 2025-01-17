@@ -96,7 +96,7 @@ const EditModal: React.FC<EditModalProps> = ({
   const priceIncreaseWei = useMemo(() => {
     const newPriceWei = stringGweiToWei(state.newPriceGwei);
     if (newPriceWei <= oldPriceWei) return num.toBigInt(0);
-    else return newPriceWei - oldPriceWei;
+    else return num.toBigInt(newPriceWei) - num.toBigInt(oldPriceWei);
   }, [state.newPriceGwei, oldPriceWei]);
 
   const totalNewCostWei = useMemo((): bigint => {

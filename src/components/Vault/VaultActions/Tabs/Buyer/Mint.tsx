@@ -51,7 +51,7 @@ const Mint: React.FC<MintProps> = ({ showConfirmation }) => {
     if (!account) return true;
     if (pendingTx) return true;
     if (
-      !selectedRoundBuyerState ||
+      !selectedRoundBuyerState?.mintableOptions ||
       Number(selectedRoundBuyerState.mintableOptions) === 0
     )
       return true;
@@ -65,7 +65,7 @@ const Mint: React.FC<MintProps> = ({ showConfirmation }) => {
     <div className="flex flex-col h-full">
       <div className="flex flex-col flex-grow space-y-6 items-center justify-center">
         <div className="w-[92px] h-[92px] p-6 rounded-2xl bg-icon-gradient border-[1px] border-greyscale-800 flex flex-row justify-center items-center">
-          <HammerIcon />
+          <HammerIcon classname="mint-icon" />
         </div>
         <p className="max-w-[290px] text-[#bfbfbf] text-center">
           Your mintable option balance is

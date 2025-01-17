@@ -55,7 +55,9 @@ const HistoryItem: React.FC<{
         </p>
       </div>
       {roundState === "Auctioning" && (
-        <div className="bg-[#262626] p-2 rounded-lg cursor-pointer">
+        <div 
+          className="edit-button bg-[#262626] p-2 rounded-lg cursor-pointer"
+        >
           <SquarePen
             onClick={() => {
               setBidToEdit({ item });
