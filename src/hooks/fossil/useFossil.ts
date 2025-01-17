@@ -1,9 +1,5 @@
 import {
-  useAccount,
   useContract,
-  useContractRead,
-  useProvider,
-  useContractWrite,
 } from "@starknet-react/core";
 import { useEffect, useCallback, useMemo, useState } from "react";
 import { ApprovalArgs, TransactionResult } from "@/lib/types";
@@ -18,7 +14,7 @@ const useFossil = (
 ) => {
   const contractData = {
     abi: fossilClientABI,
-    address: fossilClientAddress,
+    address: fossilClientAddress as `0x${string}`,
   };
 
   const { contract } = useContract({ ...contractData });

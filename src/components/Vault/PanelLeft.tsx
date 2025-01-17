@@ -16,7 +16,6 @@ import { useExplorer } from "@starknet-react/core";
 import { BalanceTooltip } from "@/components/BaseComponents/Tooltip";
 import StateTransition from "@/components/Vault/StateTransition";
 import { useProvider } from "@starknet-react/core";
-import useLatestTimestamp from "@/hooks/chain/useLatestTimestamp";
 
 const FOSSIL_DELAY = process.env.NEXT_PUBLIC_FOSSIL_USE_MOCK_PRICING_DATA === "true" ? 0 : 15 * 60;
 

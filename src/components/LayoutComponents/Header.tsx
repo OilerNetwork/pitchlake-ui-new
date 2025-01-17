@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 
-import { BellIcon, ChevronDownIcon, LogOutIcon } from "lucide-react";
+import { BellIcon, ChevronDownIcon } from "lucide-react";
 import logo_full from "@/../public/logo_full.svg";
 import login from "@/../public/login.svg";
 import braavosIcon from "@/../public/braavos.svg";
@@ -10,6 +10,7 @@ import argent from "@/../public/argent.svg";
 import keplr from "@/../public/keplr.svg";
 import avatar from "@/../public/avatar.svg";
 import { toast, ToastContainer, Bounce } from "react-toastify";
+import { starknetChainId, useNetwork } from "@starknet-react/core";
 import {
   braavos,
   useAccount,
@@ -18,11 +19,13 @@ import {
   useDeployAccount,
   useDisconnect,
   useProvider,
+  useSwitchChain,
 } from "@starknet-react/core";
 import ProfileDropdown from "../BaseComponents/ProfileDropdown";
 import { copyToClipboard } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useProtocolContext } from "@/context/ProtocolProvider";
+import { constants } from "starknet";
 import {
   Account,
   BigNumberish,
@@ -36,47 +39,58 @@ import {
 import { parseEther, formatEther } from "ethers";
 import useERC20 from "@/hooks/erc20/useERC20";
 import useAccountBalances from "@/hooks/vault/state/useAccountBalances";
-import { LoginIcon } from "../Icons";
+import { ArrowDownIcon, LoginIcon } from "../Icons";
 import useIsMobile from "@/hooks/window/useIsMobile";
+import { Chain } from "@starknet-react/chains";
 
 export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownChainRef = useRef<HTMLDivElement>(null);
   const { conn, timestamp, mockTimeForward, vaultState } = useProtocolContext();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDropdownChainOpen, setIsDropdownChainOpen] = useState(false);
   const isDropdownOpenRef = useRef(isDropdownOpen);
+  const isDropdownChainOpenRef = useRef(isDropdownChainOpen);
   const { isMobile } = useIsMobile();
-  const { connect, connectors } = useConnect();
-  const { disconnect } = useDisconnect();
   const router = useRouter();
+  const { connect, connectors } = useConnect();
+  const { switchChainAsync } = useSwitchChain({});
+  const { disconnect } = useDisconnect();
+  const { chains, chain } = useNetwork();
+  console.log("CHAINS", chains);
   const { account } = useAccount();
   const { balance } = useERC20(
     "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-    vaultState?.address,
+    vaultState?.address
   );
 
   const { lockedBalance, unlockedBalance, stashedBalance } = useAccountBalances(
-    vaultState ? vaultState.address : "",
+    vaultState ? vaultState.address : ""
   );
 
   // @NOTE: sum balances accross all vaults ?
   const balanceData = {
     wallet: parseFloat(formatEther(num.toBigInt(balance).toString())).toFixed(
-      3,
+      3
     ),
     locked: parseFloat(
-      formatEther(num.toBigInt(lockedBalance).toString()),
+      formatEther(num.toBigInt(lockedBalance).toString())
     ).toFixed(3),
     unlocked: parseFloat(
-      formatEther(num.toBigInt(unlockedBalance).toString()),
+      formatEther(num.toBigInt(unlockedBalance).toString())
     ).toFixed(3),
     stashed: parseFloat(
-      formatEther(num.toBigInt(stashedBalance).toString()),
+      formatEther(num.toBigInt(stashedBalance).toString())
     ).toFixed(3),
   };
 
   useEffect(() => {
     isDropdownOpenRef.current = isDropdownOpen;
   }, [isDropdownOpen]);
+
+  useEffect(() => {
+    isDropdownChainOpenRef.current = isDropdownChainOpen;
+  }, [isDropdownChainOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -87,22 +101,57 @@ export default function Header() {
         setIsDropdownOpen(false);
       }
     };
+    const handleClickOutsideChain = (event: MouseEvent) => {
+      if (
+        isDropdownChainOpenRef.current &&
+        !dropdownChainRef?.current?.contains(event.target as HTMLDivElement)
+      ) {
+        setIsDropdownChainOpen(false);
+      }
+    };
 
     const handleEscKey = (event: KeyboardEvent) => {
       if (isDropdownOpenRef.current && event.key === "Escape") {
         setIsDropdownOpen(false);
       }
+      if (isDropdownChainOpenRef.current && event.key === "Escape") {
+        setIsDropdownChainOpen(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutsideChain);
     document.addEventListener("keydown", handleEscKey);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutsideChain);
       document.removeEventListener("keydown", handleEscKey);
     };
   }, []);
 
+  const handleSwitchChain = async (chainId: string) => {
+    let chain: string | undefined = undefined;
+    switch (chainId) {
+      case "sepolia":
+        chain = constants.StarknetChainId.SN_SEPOLIA;
+        break;
+      case "mainnet":
+        chain = constants.StarknetChainId.SN_MAIN;
+        break;
+      case "juno":
+        chain = "0x534e5f4a554e4f5f53455155454e434552";
+    }
+    if (!chain) {
+      console.log("FAILED");
+      return Error("Chain not found");
+    }
+    await switchChainAsync({
+      chainId: chain,
+    });
+    console.log("CHAIN SWITCHED");
+    return;
+  };
   const copyToClipboard = (text: string) => {
     navigator.clipboard
       .writeText(text)
@@ -150,6 +199,40 @@ export default function Header() {
             //  <BellIcon className="h-6 w-6 text-primary" />
             //</div>
           }
+          <div className="relative" ref={dropdownChainRef}>
+            {
+              <button
+                className="flex flex-row min-w-16 border-[1px] border-primary-400 text-primary-400 text-sm px-4 py-3 rounded-md  items-center justify-center"
+                onClick={() => setIsDropdownChainOpen(true)}
+              >
+                <p>{chain.network}</p>
+                <ArrowDownIcon
+                  stroke="var(--primary)"
+                  classname="flex items-center ml-2 w-4 h-4"
+                />
+              </button>
+            }
+
+            {isDropdownChainOpen && (
+              <div className="absolute right-0 bg-[#161616] text-center text-primary-400 w-full text-sm flex flex-col">
+                {chains.map((chain: Chain,index:number) => {
+                  return (
+                    <div
+                    key={index}
+                      onClick={() => {
+                        handleSwitchChain(chain.network);
+                      }}
+                      className={`cursor-pointer sticky p-2 px-3 w-full text-[12px] font-medium hover:bg-[#262626] ${
+                        chain.network === "mainnet" ? "text-greyscale-400" : ""
+                      }`}
+                    >
+                      {chain.network.toLocaleUpperCase()}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
           <div className="relative" ref={dropdownRef}>
             {account ? (
               <>
@@ -178,13 +261,13 @@ export default function Header() {
                       disconnect={disconnect}
                       copyToClipboard={copyToClipboard}
                     />
-                    <ToastContainer
+                    {/* <ToastContainer
                       autoClose={3000}
                       closeOnClick
                       hideProgressBar={false}
                       transition={Bounce}
                       //theme="dark"
-                    />
+                    /> */}
                   </>
                 )}
               </>
@@ -203,6 +286,7 @@ export default function Header() {
                     />
                   </div>
                 </button>
+
                 {isDropdownOpen && (
                   <div className="absolute right-0 h-[148px] w-[196px] text-sm flex flex-col mt-3 ">
                     <div className="bg-[#161616] rounded-md">
@@ -222,8 +306,8 @@ export default function Header() {
                                   connector.id === "braavos"
                                     ? braavosIcon
                                     : connector.id === "keplr"
-                                      ? keplr
-                                      : argent
+                                    ? keplr
+                                    : argent
                                 }
                                 alt="Login"
                                 width={20}

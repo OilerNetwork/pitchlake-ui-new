@@ -24,7 +24,7 @@ const StateTransition = ({
     timestamp: timestampRaw,
     conn,
   } = useProtocolContext();
-  const { pendingTx } = useTransactionContext();
+  const { pendingTx,lastBlock } = useTransactionContext();
   const { account } = useAccount();
   const timestamp = timestampRaw ? timestampRaw : "0";
   const {
@@ -109,6 +109,8 @@ const StateTransition = ({
 
     setIsAwaitingRoundStateUpdate(true);
 
+    if(roundState!=="FossilReady")
+    setCheck(true)
     setModalState((prev: any) => ({
       ...prev,
       show: false,
@@ -137,8 +139,16 @@ const StateTransition = ({
     canRoundSettle,
   ]);
 
-  const icon = getIconByRoundState(roundState, isDisabled, isPanelOpen);
 
+ 
+
+
+  const [check,setCheck]= useState(false)
+  const icon = getIconByRoundState(roundState, isDisabled||check, isPanelOpen);
+
+  useEffect(()=>{
+    setCheck(false)
+  },[selectedRoundState?.roundState])
   useEffect(() => {
     if (expectedNextState && roundState === expectedNextState) {
       setIsAwaitingRoundStateUpdate(false);
@@ -167,7 +177,7 @@ const StateTransition = ({
     >
       <div className={`${isPanelOpen ? "px-6" : ""}`}>
         <button
-          disabled={isDisabled}
+          disabled={isDisabled||check}
           className={`flex ${!isPanelOpen && !isDisabled ? "hover-zoom-small" : ""} ${
             roundState === "Settled" ? "hidden" : ""
           } ${isPanelOpen ? "p-2" : "w-[44px] h-[44px]"} border border-greyscale-700 text-primary disabled:text-greyscale rounded-md mt-4 justify-center items-center min-w-[44px] min-h-[44px] w-full`}
