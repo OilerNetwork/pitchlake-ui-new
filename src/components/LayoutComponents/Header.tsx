@@ -231,7 +231,7 @@ export default function Header() {
             }
 
             {isDropdownChainOpen && (
-              <div className="absolute left-0 mt-[0.5rem] rounded-md border-[#262626] border-[1px] bg-[#161616] w-[167px] h-[196px] text-left text-primary-400 w-full text-sm flex flex-col justify-center">
+              <div className="absolute left-0 mt-[0.5rem] rounded-md border-[#262626] border-[1px] bg-[#161616] w-[167px] h-[196px] text-left text-primary-400 text-sm flex flex-col justify-center">
                 {chains.map((c: Chain, index: number) => {
                   return (
                     <div
