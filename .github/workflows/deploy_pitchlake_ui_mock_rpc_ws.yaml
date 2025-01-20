@@ -32,6 +32,7 @@ env:
   FOSSIL_API_KEY: ${{secrets.FOSSIL_API_KEY}}
   FOSSIL_DB_URL: ${{secrets.FOSSIL_DB_URL}}
   NEXT_PUBLIC_FOSSIL_API_URL: ${{vars.FOSSIL_API_URL}}
+  APPLICATION_PASSWORD: ${{secrets.APPLICATION_PASSWORD}}
 
 permissions:
   id-token: write
@@ -95,6 +96,7 @@ jobs:
             --build-arg FOSSIL_API_KEY=${{ env.FOSSIL_API_KEY }} \
             --build-arg FOSSIL_DB_URL=${{ env.FOSSIL_DB_URL }} \
             --build-arg NEXT_PUBLIC_FOSSIL_API_URL=${{ env.NEXT_PUBLIC_FOSSIL_API_URL }} \
+            --build-arg APPLICATION_PASSWORD=${{ env.APPLICATION_PASSWORD }} \
             --build-arg NODE_ENV={{env.NODE_ENV}} \
             -f ./Dockerfile.nginx \
             -t $IMAGE_URI \
