@@ -196,7 +196,9 @@ export const timeFromNow = (timestamp: string) => {
 export const timeUntilTarget = (timestamp: string, target: string) => {
   const timestampDate = new Date(Number(timestamp) * 1000);
   const targetDate = new Date(Number(target) * 1000);
-
+  if(targetDate<timestampDate){
+    return "Now"
+  }
   // Calculate the difference in milliseconds
   const diffInMs = targetDate.getTime() - timestampDate.getTime();
   const sign = diffInMs < 0 ? "-" : "";

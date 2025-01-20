@@ -193,7 +193,7 @@ const EditModal: React.FC<EditModalProps> = ({
     let error = "";
     const newPriceGwei = state.newPriceGwei;
     if (timestamp > Number(selectedRoundState?.auctionEndDate)) {
-      error = "Auction ended";
+      error = "Bidding Closed";
     } else if (!account) {
       error = "Connect account";
     } else if (!state.newPriceGwei) {

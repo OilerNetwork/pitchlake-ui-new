@@ -186,7 +186,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
     // Check amount
     let amountReason = "";
     if (timestamp > Number(selectedRoundState?.auctionEndDate)) {
-      amountReason = "Auction ended";
+      amountReason = "Bidding Closed";
     } else if (!account) {
       amountReason = "Connect account";
     } else if (state.bidAmount == "") {
@@ -209,7 +209,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
       "gwei",
     );
     if (timestamp > Number(selectedRoundState?.auctionEndDate)) {
-      priceReason = "Auction ended";
+      priceReason = "Bidding Closed";
     } else if (!account) {
       priceReason = "Connect account";
     } else if (state.bidPrice == "") {
