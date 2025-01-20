@@ -61,7 +61,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Create the .htpasswd file using APPLICATION_PASSWORD
-RUN htpasswd -bc /etc/nginx/.htpasswd code-audit $APPLICATION_PASSWORD
+RUN htpasswd -bc /etc/nginx/.htpasswd code-audit ${APPLICATION_PASSWORD}
 
 # Expose the ports
 EXPOSE 80
