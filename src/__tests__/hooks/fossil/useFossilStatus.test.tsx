@@ -1,7 +1,7 @@
 import { renderHook, act } from "@testing-library/react";
 import useFossilStatus from "@/hooks/fossil/useFossilStatus";
 import { useProtocolContext } from "@/context/ProtocolProvider";
-import { getTargetTimestampForRound, getDurationForRound } from "@/lib/utils";
+import { getTargetTimestampForRound } from "@/lib/utils";
 
 // Mock the hooks and fetch
 jest.mock("@/context/ProtocolProvider", () => ({
