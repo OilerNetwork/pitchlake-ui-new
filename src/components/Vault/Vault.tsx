@@ -21,9 +21,9 @@ export const Vault = () => {
   }
 
   return (
-    <div className="px-6 py-4 bg-faded-black-alt flex-grow flex-box overflow-auto">
+    <div className="px-6 py-4 pt-[120px] bg-faded-black-alt flex-grow flex-box overflow-auto">
       <div className="flex flex-row-reverse text-primary">
-        <div className="flex flex-row rounded-md border-[1px] border-greyscale-800 ">
+        <div className="flex flex-row rounded-md border-[1px] border-greyscale-800 h-[55px]">
           <div
             onClick={() => {
               setIsProviderView(true);
@@ -50,7 +50,7 @@ export const Vault = () => {
               setIsProviderView(false);
               //setIsEditOpen(false);
             }}
-            className={`flex flex-row items-center m-[1px] hover:cursor-pointer p-4 rounded-md text-[14px] h-[44px] justify-center w-[115px] ${
+            className={`flex flex-row items-center justify-center m-[1px] hover:cursor-pointer px-4 py-1 rounded-md text-[14px] w-[115px] ${
               !isProviderView ? "bg-primary-900" : ""
             }`}
           >
