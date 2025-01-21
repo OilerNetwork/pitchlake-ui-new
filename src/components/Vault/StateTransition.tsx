@@ -118,6 +118,7 @@ const StateTransition = ({
   };
 
   const isDisabled = useMemo(() => {
+    console.log("ROUNDSTATE",roundState)
     if (!account) return true;
     if (pendingTx) return true;
     if (isAwaitingRoundStateUpdate) return true;
@@ -126,7 +127,7 @@ const StateTransition = ({
     if (roundState === "Open" && !canAuctionStart) return true;
     if (roundState === "Auctioning" && !canAuctionEnd) return true;
     if (roundState === "Running" && !canRoundSettle) return true;
-
+    if (roundState === "Pending") return true;
     return false;
   }, [
     account,
@@ -177,7 +178,7 @@ const StateTransition = ({
     >
       <div className={`${isPanelOpen ? "px-6" : ""}`}>
         <button
-          disabled={isDisabled||check}
+          disabled={isDisabled || check}
           className={`flex ${!isPanelOpen && !isDisabled ? "hover-zoom-small" : ""} ${
             roundState === "Settled" ? "hidden" : ""
           } ${isPanelOpen ? "p-2" : "w-[44px] h-[44px]"} border border-greyscale-700 text-primary disabled:text-greyscale rounded-md mt-4 justify-center items-center min-w-[44px] min-h-[44px] w-full`}
