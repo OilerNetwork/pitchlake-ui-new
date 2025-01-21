@@ -9,17 +9,17 @@ env:
   AWS_REGION: eu-central-1
   ECR_REPOSITORY: pitchlake-ui-new_images_repository
   # Mock service configuration
-  ECS_SERVICE_MOCK: pitchlake-ui-new-mock-app
-  CONTAINER_NAME_MOCK: pitchlake-ui-new-mock
-  TASK_NAME_MOCK: pitchlake-ui-new-mock-app
+  ECS_SERVICE_MOCK: pitchlake-ui-mock-app
+  CONTAINER_NAME_MOCK: pitchlake-ui-mock
+  TASK_NAME_MOCK: pitchlake-ui-mock-app
   # RPC service configuration
-  ECS_SERVICE_RPC: pitchlake-ui-new-rpc-app
-  CONTAINER_NAME_RPC: pitchlake-ui-new-rpc
-  TASK_NAME_RPC: pitchlake-ui-new-rpc-app
+  ECS_SERVICE_RPC: pitchlake-ui-rpc-app
+  CONTAINER_NAME_RPC: pitchlake-ui-rpc
+  TASK_NAME_RPC: pitchlake-ui-rpc-app
   # WS service configuration
-  ECS_SERVICE_WS: pitchlake-ui-new-ws-app
-  CONTAINER_NAME_WS: pitchlake-ui-new-ws
-  TASK_NAME_WS: pitchlake-ui-new-ws-app
+  ECS_SERVICE_WS: pitchlake-ui-ws-app
+  CONTAINER_NAME_WS: pitchlake-ui-ws
+  TASK_NAME_WS: pitchlake-ui-ws-app
   # Shared configuration
   ECS_CLUSTER: pitchlake-ui-new-ecs-cluster
   NODE_ENV: production
