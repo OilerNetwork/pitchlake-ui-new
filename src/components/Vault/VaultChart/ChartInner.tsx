@@ -1,4 +1,10 @@
-import React, { useMemo, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useMemo,
+  useRef,
+  useEffect,
+  useCallback,
+} from "react";
 import {
   ComposedChart,
   Area,
@@ -13,6 +19,9 @@ import {
 } from "recharts";
 import { formatUnits } from "ethers";
 import { useProtocolContext } from "@/context/ProtocolProvider";
+import { useHelpContext } from "@/context/HelpProvider";
+
+const HOVER_DELAY = 888;
 
 interface GasPriceChartProps {
   data: any[] | undefined;
@@ -36,6 +45,10 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
   setIsExpandedView,
 }) => {
   const { setSelectedRound, selectedRoundState } = useProtocolContext();
+  const { setContent, isHoveringHelpBox } = useHelpContext();
+
+  const hoverTimer = useRef<NodeJS.Timeout | null>(null);
+
   // Compute vertical segments and round areas based on historical data
   const { verticalSegments, roundAreas } = useMemo(() => {
     if (
@@ -110,6 +123,61 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
 
     return { verticalSegments: segments, roundAreas: areas };
   }, [isExpandedView, historicalData, data, fromRound, toRound]);
+
+  const isInChartRef = useRef(false);
+  const clearHoverTimer = () => {
+    if (hoverTimer.current) {
+      clearTimeout(hoverTimer.current);
+      hoverTimer.current = null;
+    }
+  };
+
+  const handleMouseMove = useCallback(
+    (state: any) => {
+      if (!state?.chartX || !state?.chartY || isHoveringHelpBox) return;
+
+      // In chart
+      isInChartRef.current = true;
+
+      // Clear previous timer
+      if (hoverTimer.current) {
+        clearTimeout(hoverTimer.current);
+      }
+
+      hoverTimer.current = setTimeout(() => {
+        if (isInChartRef.current && !isHoveringHelpBox) {
+          setContent(
+            `Hovering at chart coords: ${state.chartX}, ${state.chartY}`,
+          );
+        }
+      }, HOVER_DELAY);
+    },
+    [isHoveringHelpBox, setContent],
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    isInChartRef.current = false;
+    clearHoverTimer();
+  }, [clearHoverTimer]);
+
+  //  const findHoveredArea = useCallback(
+  //    (chartX: number, chartY: number): string | null => {
+  //      // e.g. your roundAreas = [{ roundId, x1, x2, y1, y2 }, ...]
+  //      // If chartX, chartY is within x1..x2 and y1..y2, we consider that hovered
+  //      for (const area of roundAreas) {
+  //        if (
+  //          chartX >= area.x1 &&
+  //          chartX <= area.x2 &&
+  //          chartY >= area.y1 &&
+  //          chartY <= area.y2
+  //        ) {
+  //          return `area-${area.roundId}`;
+  //        }
+  //      }
+  //      return null;
+  //    },
+  //    [roundAreas],
+  //  );
 
   // Compute the maximum Y value based on active lines
   const yMax = useMemo(() => {
@@ -331,7 +399,13 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
 
   return (
     <ResponsiveContainer width="100%" maxHeight={665} className="pr-4">
-      <ComposedChart margin={{ left: -20 }} data={data} syncId="roundChart">
+      <ComposedChart
+        margin={{ left: -20 }}
+        data={data}
+        syncId="roundChart"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
         <defs>
           <linearGradient id="capLevelGradient" x1="0" y1="0" x2="0" y2="1">
             <stop
