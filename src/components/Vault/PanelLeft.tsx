@@ -35,7 +35,6 @@ const PanelLeft = ({ userType }: { userType: string }) => {
     onConfirm: async () => {},
   });
 
-  const { provider } = useProvider();
   const explorer = useExplorer();
 
   const hideModal = () => {

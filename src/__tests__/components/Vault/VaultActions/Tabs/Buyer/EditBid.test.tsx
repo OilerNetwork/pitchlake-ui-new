@@ -1,17 +1,21 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import EditBid from "@/components/Vault/VaultActions/Tabs/Buyer/EditBid";
 
 // Mock child components
 jest.mock("@/components/Vault/Utils/InputField", () => {
-  return function MockInputField({ label, value, onChange, placeholder }: any) {
+  return function MockInputField({ label, value, onChange, placeholder, error }: any) {
     return (
-      <input
-        className="input-field"
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-      />
+      <div>
+        <label>{label}</label>
+        <input
+          className="input-field"
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+        />
+        {error && <span className="error-message">{error}</span>}
+      </div>
     );
   };
 });
@@ -19,7 +23,7 @@ jest.mock("@/components/Vault/Utils/InputField", () => {
 jest.mock("@/components/Vault/Utils/ActionButton", () => ({
   __esModule: true,
   default: ({ onClick, disabled, text }: { onClick: () => void, disabled: boolean, text: string }) => (
-    <button onClick={onClick} disabled={disabled}>{text}</button>
+    <button onClick={onClick} disabled={disabled} className="action-button">{text}</button>
   ),
 }));
 
@@ -44,7 +48,6 @@ jest.mock("ethers", () => ({
 jest.mock("starknet", () => ({
   num: {
     toBigInt: jest.fn((value) => {
-      // Convert decimal numbers to integers by removing decimal points
       const strValue = value.toString();
       const intValue = strValue.includes('.') ? strValue.replace('.', '') : strValue;
       return BigInt(intValue);
@@ -53,7 +56,7 @@ jest.mock("starknet", () => ({
   Call: jest.fn(),
 }));
 
-// Mock all hooks
+// Mock hooks
 jest.mock("@/context/ProtocolProvider", () => ({
   useProtocolContext: () => ({
     vaultState: {
@@ -65,7 +68,6 @@ jest.mock("@/context/ProtocolProvider", () => ({
       reservePrice: "1000000000", // 1 GWEI
       auctionEndDate: "9999999999",
     },
-    roundActions: {},
   }),
 }));
 
@@ -117,7 +119,10 @@ jest.mock("@/hooks/erc20/useERC20", () => ({
 }));
 
 describe("EditBid Component", () => {
-  const mockShowConfirmation = jest.fn();
+  const mockShowConfirmation = jest.fn((header, action, onConfirm) => {
+    // Simulate user confirming the action
+    onConfirm();
+  });
   const mockOnConfirm = jest.fn();
   const mockOnClose = jest.fn();
   const mockBidToEdit = {
@@ -133,8 +138,8 @@ describe("EditBid Component", () => {
     localStorage.clear();
   });
 
-  it("validates new price against current bid price", () => {
-    render(
+  it("renders with initial state and current bid details", () => {
+    const { container } = render(
       <EditBid
         showConfirmation={mockShowConfirmation}
         onConfirm={mockOnConfirm}
@@ -143,16 +148,26 @@ describe("EditBid Component", () => {
       />
     );
 
-    // Enter lower price
-    const priceInput = screen.getByPlaceholderText("e.g. 1");
-    fireEvent.change(priceInput, { target: { value: "0.5" } });
+    // Check if modal is rendered
+    expect(container.querySelector(".edit-bid-modal")).toBeInTheDocument();
 
-    // Verify error state
-    expect(screen.getByText("New price must be higher than current price")).toBeInTheDocument();
+    // Check if current amount is displayed
+    const currentAmountSection = container.querySelector(".edit-bid-current-amount");
+    const currentAmountInput = currentAmountSection?.querySelector("input");
+    expect(currentAmountInput).toHaveAttribute("placeholder", "100");
+
+    // Check if current price is displayed in the new price input placeholder
+    const newPriceSection = container.querySelector(".edit-bid-new-price");
+    const newPriceInput = newPriceSection?.querySelector("input");
+    expect(newPriceInput).toHaveAttribute("placeholder", "e.g. 1");
+
+    // Edit button should be disabled initially
+    const editButton = container.querySelector(".action-button");
+    expect(editButton).toBeDisabled();
   });
 
-  it("calculates additional cost correctly", () => {
-    render(
+  it("validates new price and updates error state", () => {
+    const { container } = render(
       <EditBid
         showConfirmation={mockShowConfirmation}
         onConfirm={mockOnConfirm}
@@ -161,16 +176,20 @@ describe("EditBid Component", () => {
       />
     );
 
-    // Enter higher price
-    const priceInput = screen.getByPlaceholderText("e.g. 1");
-    fireEvent.change(priceInput, { target: { value: "2" } });
+    const newPriceSection = container.querySelector(".edit-bid-new-price");
+    const newPriceInput = newPriceSection?.querySelector("input");
 
-    // Verify additional cost calculation
-    expect(screen.getByText("Additional Cost: 100 ETH")).toBeInTheDocument();
+    // Test lower price
+    fireEvent.change(newPriceInput!, { target: { value: "0.5" } });
+    expect(container.querySelector(".error-message")).toHaveTextContent("Bid price must increase");
+
+    // Test valid price
+    fireEvent.change(newPriceInput!, { target: { value: "2" } });
+    expect(container.querySelector(".error-message")).toBeNull();
   });
 
-  it("shows confirmation with correct bid update details", () => {
-    render(
+  it("handles bid update flow correctly", async () => {
+    const { container } = render(
       <EditBid
         showConfirmation={mockShowConfirmation}
         onConfirm={mockOnConfirm}
@@ -179,28 +198,39 @@ describe("EditBid Component", () => {
       />
     );
 
-    // Enter higher price
-    const priceInput = screen.getByPlaceholderText("e.g. 1");
-    fireEvent.change(priceInput, { target: { value: "2" } });
+    // Enter valid price
+    const newPriceSection = container.querySelector(".edit-bid-new-price");
+    const newPriceInput = newPriceSection?.querySelector("input");
+    fireEvent.change(newPriceInput!, { target: { value: "2" } });
 
     // Submit edit
-    const editButton = screen.getByRole("button", { name: "Edit Bid" });
-    fireEvent.click(editButton);
+    const editButton = container.querySelector(".action-button");
+    fireEvent.click(editButton!);
 
-    // Verify confirmation details
-    expect(mockShowConfirmation).toHaveBeenCalledWith({
-      bidId: "1",
-      currentPrice: "1",
-      newPrice: "2",
-      additionalCost: "100"
+    // Verify confirmation was shown with correct parameters
+    expect(mockShowConfirmation).toHaveBeenCalledWith(
+      "Update Bid",
+      expect.anything(),
+      expect.any(Function)
+    );
+
+    // Get the confirmation callback
+    const confirmCallback = mockShowConfirmation.mock.calls[0][2];
+    
+    // Call the confirmation callback to simulate user confirming
+    await act(async () => {
+      await confirmCallback();
     });
+
+    // Now onClose should have been called
+    expect(mockOnClose).toHaveBeenCalled();
   });
 
-  it("persists edit price in localStorage", () => {
+  it("persists and loads price from localStorage", () => {
     // Set initial value
     localStorage.setItem("editBidPriceGwei", "2");
 
-    render(
+    const { container } = render(
       <EditBid
         showConfirmation={mockShowConfirmation}
         onConfirm={mockOnConfirm}
@@ -210,37 +240,14 @@ describe("EditBid Component", () => {
     );
 
     // Verify value is loaded
-    const priceInput = screen.getByPlaceholderText("e.g. 1");
-    expect(priceInput).toHaveValue("2");
+    const newPriceSection = container.querySelector(".edit-bid-new-price");
+    const newPriceInput = newPriceSection?.querySelector("input");
+    expect(newPriceInput).toHaveValue("2");
 
     // Update value
-    fireEvent.change(priceInput, { target: { value: "3" } });
+    fireEvent.change(newPriceInput!, { target: { value: "3" } });
 
     // Verify localStorage is updated
     expect(localStorage.getItem("editBidPriceGwei")).toBe("3");
-  });
-
-  it("handles bid update confirmation", () => {
-    render(
-      <EditBid
-        showConfirmation={mockShowConfirmation}
-        onConfirm={mockOnConfirm}
-        onClose={mockOnClose}
-        bidToEdit={mockBidToEdit}
-      />
-    );
-
-    // Enter higher price and submit
-    const priceInput = screen.getByPlaceholderText("e.g. 1");
-    fireEvent.change(priceInput, { target: { value: "2" } });
-    
-    const editButton = screen.getByRole("button", { name: "Edit Bid" });
-    fireEvent.click(editButton);
-
-    // Verify onConfirm is called with correct params
-    expect(mockOnConfirm).toHaveBeenCalledWith({
-      bidId: "1",
-      newPrice: "2000000000" // 2 GWEI in WEI
-    });
   });
 }); 

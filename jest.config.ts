@@ -17,9 +17,7 @@ const config: Config = {
   transform: {
     "^.+\\.(js|jsx|ts|tsx)$": ["babel-jest", { presets: ["next/babel"] }],
   },
-  transformIgnorePatterns: [
-    "node_modules/(?!(@starknet-react|get-starknet-core|starknet|@scure/starknet|eventemitter3)/)"
-  ],
+
   moduleDirectories: ["node_modules", "<rootDir>"]
 };
 

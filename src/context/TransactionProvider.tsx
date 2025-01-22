@@ -39,9 +39,6 @@ const TransactionProvider = ({ children }: { children: ReactNode }) => {
   const { status,data } = useTransactionReceipt({ hash: pendingTx });
 
   
-  const {data:lastBlock,refetch} = useBlockNumber({
-    refetchInterval:false
-  })
   const resetState = () => {
     
     setPendingTx(undefined);
@@ -52,7 +49,6 @@ const TransactionProvider = ({ children }: { children: ReactNode }) => {
     resetState();
   };
 
-  console.log("lastBlock",lastBlock)
   useEffect(() => {
     if (pendingTx)
       switch (status) {
@@ -86,7 +82,6 @@ const TransactionProvider = ({ children }: { children: ReactNode }) => {
         setIsTxDisabled,
         setPendingTx,
         status,
-        lastBlock,
 
       }}
     >
