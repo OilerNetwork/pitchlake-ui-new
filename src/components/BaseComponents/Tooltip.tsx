@@ -77,7 +77,7 @@ const BalanceTooltip: React.FC<BalanceTooltipProps> = ({
               <div className="p-2 px-4 pb-0 flex justify-between">
                 <span>Unlocked</span>
                 <span>
-                  {parseFloat(formatEther(balance.unlocked)).toFixed(3) || "0"}{" "}
+                  {parseFloat(formatEther(balance.unlocked)) || "0"}{" "}
                   ETH
                 </span>
               </div>

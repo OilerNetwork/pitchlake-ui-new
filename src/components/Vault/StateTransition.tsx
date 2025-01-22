@@ -23,8 +23,9 @@ const StateTransition = ({
     selectedRoundState,
     timestamp: timestampRaw,
     conn,
+    lpState
   } = useProtocolContext();
-  const { pendingTx,lastBlock } = useTransactionContext();
+  const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
   const timestamp = timestampRaw ? timestampRaw : "0";
   const {
@@ -47,6 +48,7 @@ const StateTransition = ({
     expectedNextState,
   });
 
+  console.log("state",lpState?.unlockedBalance)
   const {
     canAuctionStart,
     canAuctionEnd,
@@ -177,7 +179,7 @@ const StateTransition = ({
     >
       <div className={`${isPanelOpen ? "px-6" : ""}`}>
         <button
-          disabled={isDisabled||check}
+          disabled={isDisabled}
           className={`flex ${!isPanelOpen && !isDisabled ? "hover-zoom-small" : ""} ${
             roundState === "Settled" ? "hidden" : ""
           } ${isPanelOpen ? "p-2" : "w-[44px] h-[44px]"} border border-greyscale-700 text-primary disabled:text-greyscale rounded-md mt-4 justify-center items-center min-w-[44px] min-h-[44px] w-full`}

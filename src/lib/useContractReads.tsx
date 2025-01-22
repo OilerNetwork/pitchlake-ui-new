@@ -21,7 +21,7 @@ const useContractReads = ({
       ...contractData,
       functionName: state.functionName,
       args: state.args ?? [], // Default to an empty array if no args are provided
-      watch,
+      watch:true,
       //refetchInterval: 10000,
     });
 

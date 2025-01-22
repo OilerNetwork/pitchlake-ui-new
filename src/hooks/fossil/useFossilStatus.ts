@@ -42,7 +42,10 @@ const useFossilStatus = () => {
         `${process.env.NEXT_PUBLIC_FOSSIL_API_URL}/job_status/${jobId}`
       );
 
-      if (!response.ok) throw new Error("Network response was not ok");
+      if (!response.ok) {
+        console.log("Failed to fetch job status");
+        return;
+      }
 
       const data = await response.json();
       setStatusData(data);
