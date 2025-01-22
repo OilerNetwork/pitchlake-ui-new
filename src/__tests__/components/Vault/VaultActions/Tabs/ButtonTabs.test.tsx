@@ -12,54 +12,43 @@ describe("ButtonTabs", () => {
     jest.clearAllMocks();
   });
 
-  it("renders all tabs", () => {
+  it("renders button tabs with correct styling and handles interactions", () => {
     const { container } = render(<ButtonTabs {...defaultProps} />);
     
-    // Check container
-    expect(container.querySelector(".vault-button-tabs")).toBeInTheDocument();
+    // Check container styling
+    const tabsContainer = container.querySelector(".vault-button-tabs");
+    expect(tabsContainer).toHaveClass("flex", "space-x-3", "mb-4");
     
-    // Check tabs
-    const tabs = container.querySelectorAll(".vault-button-tab");
-    expect(tabs).toHaveLength(defaultProps.tabs.length);
-    tabs.forEach((tab, index) => {
-      expect(tab).toHaveTextContent(defaultProps.tabs[index]);
-    });
-  });
+    // Check button styling and interactions
+    const buttons = container.querySelectorAll(".vault-button-tab");
+    expect(buttons).toHaveLength(defaultProps.tabs.length);
 
-  it("applies active styles to the active tab", () => {
-    const { container } = render(<ButtonTabs {...defaultProps} />);
-    
-    const tabs = container.querySelectorAll(".vault-button-tab");
-    const activeTab = Array.from(tabs).find(tab => tab.textContent === defaultProps.activeTab);
-    const inactiveTabs = Array.from(tabs).filter(tab => tab.textContent !== defaultProps.activeTab);
-    
-    expect(activeTab).toHaveClass("bg-[#373632]", "text-[#F5EBB8]");
-    
-    inactiveTabs.forEach(tab => {
-      expect(tab).toHaveClass("text-[#BFBFBF]");
-      expect(tab).not.toHaveClass("bg-[#373632]", "text-[#F5EBB8]");
-    });
-  });
+    buttons.forEach((button, index) => {
+      // Check base styling
+      expect(button).toHaveClass(
+        "px-2",
+        "py-2",
+        "text-sm",
+        "rounded-md",
+        "transition-colors",
+        "border",
+        "border-[#373632]"
+      );
 
-  it("calls setActiveTab when a tab is clicked", () => {
-    const { container } = render(<ButtonTabs {...defaultProps} />);
-    
-    const tabs = container.querySelectorAll(".vault-button-tab");
-    tabs.forEach(tab => {
-      fireEvent.click(tab);
-      expect(defaultProps.setActiveTab).toHaveBeenCalledWith(tab.textContent);
-    });
-    
-    expect(defaultProps.setActiveTab).toHaveBeenCalledTimes(defaultProps.tabs.length);
-  });
+      // Check active/inactive state
+      if (button.textContent === defaultProps.activeTab) {
+        expect(button).toHaveClass("bg-[#373632]", "text-[#F5EBB8]");
+      } else {
+        expect(button).toHaveClass("text-[#BFBFBF]");
+        expect(button).not.toHaveClass("bg-[#373632]", "text-[#F5EBB8]");
+      }
 
-  it("maintains tab order", () => {
-    const { container } = render(<ButtonTabs {...defaultProps} />);
-    
-    const tabs = container.querySelectorAll(".vault-button-tab");
-    expect(tabs).toHaveLength(defaultProps.tabs.length);
-    tabs.forEach((tab, index) => {
-      expect(tab).toHaveTextContent(defaultProps.tabs[index]);
+      // Check content and order
+      expect(button).toHaveTextContent(defaultProps.tabs[index]);
+
+      // Test click interaction
+      fireEvent.click(button);
+      expect(defaultProps.setActiveTab).toHaveBeenCalledWith(defaultProps.tabs[index]);
     });
   });
 }); 

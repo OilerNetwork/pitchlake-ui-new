@@ -112,21 +112,23 @@ describe("VaultCard Component", () => {
       auctionEndDate: "3000",
       optionSettleDate: "4000"
     });
-    render(<VaultCard vaultAddress="0x123" />);
+    const { container } = render(<VaultCard vaultAddress="0x123" />);
 
-    expect(screen.getByText(/Test Vault/i)).toBeInTheDocument();
-    expect(screen.getByText(/0x123/i)).toBeInTheDocument();
-    expect(screen.getByText(/10%/i)).toBeInTheDocument();
-    expect(screen.getByText(/1.00 GWEI/i)).toBeInTheDocument();
-    expect(screen.getByText(/1.7 ETH/i)).toBeInTheDocument();
+    const vaultInfo = container.querySelector(".vault-info");
+    expect(vaultInfo?.querySelector(".vault-type")).toHaveTextContent("Test Vault");
+    expect(vaultInfo?.querySelector(".vault-address")).toHaveTextContent("0x123");
+    expect(container.querySelector(".cap-level")).toHaveTextContent("10%");
+    expect(container.querySelector(".strike-price")).toHaveTextContent("1.00 GWEI");
+    expect(container.querySelector(".total-balance")).toHaveTextContent("1.7 ETH");
   });
 
   it("navigates to the vault page on click", () => {
     const mockPush = jest.fn();
-    mockHooks({ routerPush: mockPush, vaultType: "Test Vault"   });
-    render(<VaultCard vaultAddress="0x123" />);
+    mockHooks({ routerPush: mockPush, vaultType: "Test Vault" });
+    const { container } = render(<VaultCard vaultAddress="0x123" />);
 
-    fireEvent.click(screen.getByText(/Test Vault/i));
+    const vaultCard = container.querySelector(".vault-card");
+    fireEvent.click(vaultCard!);
     expect(mockPush).toHaveBeenCalledWith("/vaults/0x123");
   });
 
@@ -138,9 +140,10 @@ describe("VaultCard Component", () => {
       auctionEndDate: "3000",
       optionSettleDate: "4000"
     });
-    render(<VaultCard vaultAddress="0x123" />);
+    const { container } = render(<VaultCard vaultAddress="0x123" />);
     
-    expect(screen.getByText(/AUCTION STARTS/i)).toBeInTheDocument();
+    const timeText = container.querySelector(".time-text");
+    expect(timeText).toHaveTextContent(/AUCTION STARTS/i);
   });
 
   it("displays correct time text based on round state - Auctioning", () => {
@@ -151,9 +154,10 @@ describe("VaultCard Component", () => {
       auctionEndDate: "3000",
       optionSettleDate: "4000"
     });
-    render(<VaultCard vaultAddress="0x123" />);
+    const { container } = render(<VaultCard vaultAddress="0x123" />);
     
-    expect(screen.getByText(/AUCTION ENDS/i)).toBeInTheDocument();
+    const timeText = container.querySelector(".time-text");
+    expect(timeText).toHaveTextContent(/AUCTION ENDS/i);
   });
 
   it("displays correct time text based on round state - Running", () => {
@@ -164,9 +168,10 @@ describe("VaultCard Component", () => {
       auctionEndDate: "2000",
       optionSettleDate: "4000"
     });
-    render(<VaultCard vaultAddress="0x123" />);
+    const { container } = render(<VaultCard vaultAddress="0x123" />);
     
-    expect(screen.getByText(/ROUND SETTLES/i)).toBeInTheDocument();
+    const timeText = container.querySelector(".time-text");
+    expect(timeText).toHaveTextContent(/ROUND SETTLES/i);
   });
 
   it("handles missing timestamp data gracefully", () => {
@@ -178,9 +183,10 @@ describe("VaultCard Component", () => {
       optionSettleDate: undefined,
       vaultType: "Test Vault"
     });
-    render(<VaultCard vaultAddress="0x123" />);
+    const { container } = render(<VaultCard vaultAddress="0x123" />);
     
-    expect(screen.getByText(/Loading.../i)).toBeInTheDocument();
+    const loadingText = container.querySelector(".loading-text");
+    expect(loadingText).toHaveTextContent(/Loading.../i);
   });
 
   it("correctly formats and displays zero balances", () => {
@@ -236,8 +242,9 @@ describe("VaultCard Component", () => {
     mockHooks({
       strikePrice: "2500000000" // 2.5 GWEI
     });
-    render(<VaultCard vaultAddress="0x123" />);
+    const { container } = render(<VaultCard vaultAddress="0x123" />);
     
-    expect(screen.getByText(/2.50 GWEI/i)).toBeInTheDocument();
+    const strikePrice = container.querySelector(".strike-price");
+    expect(strikePrice).toHaveTextContent(/2.50 GWEI/i);
   });
 });

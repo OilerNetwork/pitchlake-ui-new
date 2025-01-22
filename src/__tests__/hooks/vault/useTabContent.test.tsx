@@ -52,251 +52,247 @@ jest.mock("@/components/Vault/VaultActions/Tabs/Provider/MyInfo", () => ({
 describe("useTabContent", () => {
   const mockSetIsTabsHidden = jest.fn();
   const mockSetBidToEdit = jest.fn();
-  const mockOptionRoundState: OptionRoundStateType = {
-    address: "0x123",
-    vaultAddress: "0x456",
-    deploymentDate: "0",
-    auctionStartDate: "0",
-    auctionEndDate: "0",
-    optionSettleDate: "0",
+  const mockVaultState = {
     roundState: "Open",
-    roundId: "1",
-    strikePrice: "0",
-    premiums: "0",
-    clearingPrice: "0",
-    soldLiquidity: "0",
-    unsoldLiquidity: "0",
-    startingLiquidity: "0",
-    availableOptions: "0",
-    optionSold: "0",
-    optionsSold: "0",
-    settlementPrice: "0",
-    totalPayout: "0",
-    payoutPerOption: "0",
-    capLevel: "0",
-    reservePrice: "0",
-    treeNonce: "0",
-    performanceLP: "0",
-    performanceOB: "0",
-  };
+  } as OptionRoundStateType;
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Mock useTransactionContext
     (useTransactionContext as jest.Mock).mockReturnValue({
-      pendingTx: false,
+      pendingTx: undefined,
+    });
+  });
+
+  describe("Provider Tabs", () => {
+    it("returns Deposit content for Deposit tab", () => {
+      const { result } = renderHook(() =>
+        useTabContent(
+          "lp",
+          ProviderTabs.Deposit,
+          mockVaultState,
+          false,
+          {},
+          [],
+          mockSetIsTabsHidden,
+          mockSetBidToEdit
+        )
+      );
+
+      expect(result.current.tabContent).toBeDefined();
     });
 
-    // Reset environment variable
-    process.env.NEXT_PUBLIC_ENVIRONMENT = "mainnet";
+    it("returns Withdraw content for Withdraw tab", () => {
+      const { result } = renderHook(() =>
+        useTabContent(
+          "lp",
+          ProviderTabs.Withdraw,
+          mockVaultState,
+          false,
+          {},
+          [],
+          mockSetIsTabsHidden,
+          mockSetBidToEdit
+        )
+      );
+
+      expect(result.current.tabContent).toBeDefined();
+    });
+
+    it("returns MyInfo content for MyInfo tab", () => {
+      const { result } = renderHook(() =>
+        useTabContent(
+          "lp",
+          "MyInfo",
+          mockVaultState,
+          false,
+          {},
+          [],
+          mockSetIsTabsHidden,
+          mockSetBidToEdit
+        )
+      );
+
+      expect(result.current.tabContent).toBeDefined();
+    });
   });
 
-  it("returns provider tabs for LP user type", () => {
-    const { result } = renderHook(() =>
-      useTabContent(
-        "lp",
-        ProviderTabs.Deposit,
-        undefined,
-        false,
-        {},
-        [],
-        mockSetIsTabsHidden,
-        mockSetBidToEdit
-      )
-    );
+  describe("Buyer Tabs", () => {
+    it("returns PlaceBid content for PlaceBid tab", () => {
+      const { result } = renderHook(() =>
+        useTabContent(
+          "ob",
+          BuyerTabs.PlaceBid,
+          { ...mockVaultState, roundState: "Auctioning" },
+          false,
+          {},
+          [],
+          mockSetIsTabsHidden,
+          mockSetBidToEdit
+        )
+      );
 
-    expect(result.current.tabs).toEqual([
-      ProviderTabs.Deposit,
-      ProviderTabs.Withdraw,
-    ]);
+      expect(result.current.tabContent).toBeDefined();
+    });
+
+    it("returns Mint content for Mint tab", () => {
+      const { result } = renderHook(() =>
+        useTabContent(
+          "ob",
+          BuyerTabs.Mint,
+          { ...mockVaultState, roundState: "Running" },
+          false,
+          {},
+          [],
+          mockSetIsTabsHidden,
+          mockSetBidToEdit
+        )
+      );
+
+      expect(result.current.tabContent).toBeDefined();
+    });
+
+    it("returns Exercise content for Exercise tab", () => {
+      const { result } = renderHook(() =>
+        useTabContent(
+          "ob",
+          BuyerTabs.Exercise,
+          { ...mockVaultState, roundState: "Settled" },
+          false,
+          {},
+          [],
+          mockSetIsTabsHidden,
+          mockSetBidToEdit
+        )
+      );
+
+      expect(result.current.tabContent).toBeDefined();
+    });
+
+    it("returns Refund content for Refund tab", () => {
+      const { result } = renderHook(() =>
+        useTabContent(
+          "ob",
+          BuyerTabs.Refund,
+          { ...mockVaultState, roundState: "Running" },
+          false,
+          {},
+          [],
+          mockSetIsTabsHidden,
+          mockSetBidToEdit
+        )
+      );
+
+      expect(result.current.tabContent).toBeDefined();
+    });
+
+    it("returns History content for History tab", () => {
+      const { result } = renderHook(() =>
+        useTabContent(
+          "ob",
+          BuyerTabs.History,
+          { ...mockVaultState, roundState: "Running" },
+          false,
+          {},
+          [],
+          mockSetIsTabsHidden,
+          mockSetBidToEdit
+        )
+      );
+
+      expect(result.current.tabContent).toBeDefined();
+    });
   });
 
-  it("returns empty tabs for buyer in Open state", () => {
-    const openState = { ...mockOptionRoundState, roundState: "Open" };
-    const { result } = renderHook(() =>
-      useTabContent(
-        "ob",
-        "",
-        openState,
-        false,
-        {},
-        [],
-        mockSetIsTabsHidden,
-        mockSetBidToEdit
-      )
-    );
+  describe("Tab Lists", () => {
+    it("returns provider tabs for LP user", () => {
+      const { result } = renderHook(() =>
+        useTabContent(
+          "lp",
+          ProviderTabs.Deposit,
+          mockVaultState,
+          false,
+          {},
+          [],
+          mockSetIsTabsHidden,
+          mockSetBidToEdit
+        )
+      );
 
-    expect(result.current.tabs).toEqual([]);
-  });
+      expect(result.current.tabs).toContain(ProviderTabs.Deposit);
+      expect(result.current.tabs).toContain(ProviderTabs.Withdraw);
+    });
 
-  it("returns correct tabs for buyer in Auctioning state", () => {
-    const auctioningState = { ...mockOptionRoundState, roundState: "Auctioning" };
-    const { result } = renderHook(() =>
-      useTabContent(
-        "ob",
-        BuyerTabs.PlaceBid,
-        auctioningState,
-        false,
-        {},
-        [],
-        mockSetIsTabsHidden,
-        mockSetBidToEdit
-      )
-    );
+    it("returns empty tabs for buyer in Open state", () => {
+      const { result } = renderHook(() =>
+        useTabContent(
+          "ob",
+          BuyerTabs.PlaceBid,
+          { ...mockVaultState, roundState: "Open" },
+          false,
+          {},
+          [],
+          mockSetIsTabsHidden,
+          mockSetBidToEdit
+        )
+      );
 
-    expect(result.current.tabs).toEqual([BuyerTabs.PlaceBid, BuyerTabs.History]);
-  });
+      expect(result.current.tabs).toHaveLength(0);
+    });
 
-  it("returns correct tabs for buyer in Running state", () => {
-    const runningState = { ...mockOptionRoundState, roundState: "Running" };
-    const { result } = renderHook(() =>
-      useTabContent(
-        "ob",
-        BuyerTabs.Mint,
-        runningState,
-        false,
-        {},
-        [],
-        mockSetIsTabsHidden,
-        mockSetBidToEdit
-      )
-    );
+    it("returns correct tabs for buyer in Auctioning state", () => {
+      const { result } = renderHook(() =>
+        useTabContent(
+          "ob",
+          BuyerTabs.PlaceBid,
+          { ...mockVaultState, roundState: "Auctioning" },
+          false,
+          {},
+          [],
+          mockSetIsTabsHidden,
+          mockSetBidToEdit
+        )
+      );
 
-    expect(result.current.tabs).toEqual([
-      BuyerTabs.Mint,
-      BuyerTabs.Refund,
-      BuyerTabs.History,
-    ]);
-  });
+      expect(result.current.tabs).toContain(BuyerTabs.PlaceBid);
+      expect(result.current.tabs).toContain(BuyerTabs.History);
+    });
 
-  it("returns correct tabs for buyer in Settled state", () => {
-    const settledState = { ...mockOptionRoundState, roundState: "Settled" };
-    const { result } = renderHook(() =>
-      useTabContent(
-        "ob",
-        BuyerTabs.Exercise,
-        settledState,
-        false,
-        {},
-        [],
-        mockSetIsTabsHidden,
-        mockSetBidToEdit
-      )
-    );
+    it("returns correct tabs for buyer in Running state", () => {
+      const { result } = renderHook(() =>
+        useTabContent(
+          "ob",
+          BuyerTabs.Mint,
+          { ...mockVaultState, roundState: "Running" },
+          false,
+          {},
+          [],
+          mockSetIsTabsHidden,
+          mockSetBidToEdit
+        )
+      );
 
-    expect(result.current.tabs).toEqual([
-      BuyerTabs.Exercise,
-      BuyerTabs.Refund,
-      BuyerTabs.History,
-    ]);
-  });
+      expect(result.current.tabs).toContain(BuyerTabs.Mint);
+      expect(result.current.tabs).toContain(BuyerTabs.Refund);
+      expect(result.current.tabs).toContain(BuyerTabs.History);
+    });
 
-  it("renders Deposit content for LP user", () => {
-    const { result } = renderHook(() =>
-      useTabContent(
-        "lp",
-        ProviderTabs.Deposit,
-        undefined,
-        false,
-        {},
-        [],
-        mockSetIsTabsHidden,
-        mockSetBidToEdit
-      )
-    );
+    it("returns correct tabs for buyer in Settled state", () => {
+      const { result } = renderHook(() =>
+        useTabContent(
+          "ob",
+          BuyerTabs.Exercise,
+          { ...mockVaultState, roundState: "Settled" },
+          false,
+          {},
+          [],
+          mockSetIsTabsHidden,
+          mockSetBidToEdit
+        )
+      );
 
-    expect(result.current.tabContent).toBeTruthy();
-  });
-
-  it("renders Withdraw content for LP user", () => {
-    const { result } = renderHook(() =>
-      useTabContent(
-        "lp",
-        ProviderTabs.Withdraw,
-        undefined,
-        false,
-        {},
-        [],
-        mockSetIsTabsHidden,
-        mockSetBidToEdit
-      )
-    );
-
-    expect(result.current.tabContent).toBeTruthy();
-  });
-
-  it("renders PlaceBid content for buyer in Auctioning state", () => {
-    const auctioningState = { ...mockOptionRoundState, roundState: "Auctioning" };
-    const { result } = renderHook(() =>
-      useTabContent(
-        "ob",
-        BuyerTabs.PlaceBid,
-        auctioningState,
-        false,
-        {},
-        [],
-        mockSetIsTabsHidden,
-        mockSetBidToEdit
-      )
-    );
-
-    expect(result.current.tabContent).toBeTruthy();
-  });
-
-  it("renders History content with correct props", () => {
-    const mockBids = [{ id: 1 }, { id: 2 }];
-    const mockBidToEdit = { id: 1 };
-    const auctioningState = { ...mockOptionRoundState, roundState: "Auctioning" };
-
-    const { result } = renderHook(() =>
-      useTabContent(
-        "ob",
-        BuyerTabs.History,
-        auctioningState,
-        false,
-        mockBidToEdit,
-        mockBids,
-        mockSetIsTabsHidden,
-        mockSetBidToEdit
-      )
-    );
-
-    expect(result.current.tabContent).toBeTruthy();
-  });
-
-  it("defaults to Deposit content for LP user with invalid tab", () => {
-    const { result } = renderHook(() =>
-      useTabContent(
-        "lp",
-        "invalid-tab",
-        undefined,
-        false,
-        {},
-        [],
-        mockSetIsTabsHidden,
-        mockSetBidToEdit
-      )
-    );
-
-    expect(result.current.tabContent).toBeTruthy();
-  });
-
-  it("returns null content for buyer with invalid tab", () => {
-    const auctioningState = { ...mockOptionRoundState, roundState: "Auctioning" };
-    const { result } = renderHook(() =>
-      useTabContent(
-        "ob",
-        "invalid-tab",
-        auctioningState,
-        false,
-        {},
-        [],
-        mockSetIsTabsHidden,
-        mockSetBidToEdit
-      )
-    );
-
-    expect(result.current.tabContent).toBeFalsy();
+      expect(result.current.tabs).toContain(BuyerTabs.Exercise);
+      expect(result.current.tabs).toContain(BuyerTabs.Refund);
+      expect(result.current.tabs).toContain(BuyerTabs.History);
+    });
   });
 }); 

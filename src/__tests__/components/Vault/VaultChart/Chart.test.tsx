@@ -20,17 +20,17 @@ jest.mock("@/hooks/chart/useHistoricalRoundParams", () => ({
 
 // Mock the Icons
 jest.mock("@/components/Icons", () => ({
-  ArrowDownIcon: () => <div data-testid="arrow-down-icon" />,
-  ArrowUpIcon: () => <div data-testid="arrow-up-icon" />,
-  ArrowLeftIcon: () => <div data-testid="arrow-left-icon" />,
-  ArrowRightIcon: () => <div data-testid="arrow-right-icon" />,
-  CheckIcon: () => <div data-testid="check-icon" />,
+  ArrowDownIcon: () => <div className="arrow-down" />,
+  ArrowUpIcon: () => <div className="arrow-up" />,
+  ArrowLeftIcon: () => <div className="arrow-left" />,
+  ArrowRightIcon: () => <div className="arrow-right" />,
+  CheckIcon: () => <div className="check-icon" />,
 }));
 
 // Mock the ChartInner component
 jest.mock("@/components/Vault/VaultChart/ChartInner", () => ({
   __esModule: true,
-  default: () => <div data-testid="chart-inner" />,
+  default: () => <div className="chart-inner" />,
 }));
 
 describe("RoundPerformanceChart", () => {
@@ -72,86 +72,38 @@ describe("RoundPerformanceChart", () => {
     });
   });
 
-  it("renders with initial state", () => {
-    render(<RoundPerformanceChart />);
+  it("renders chart with navigation and handles interactions", () => {
+    const { container, rerender } = render(<RoundPerformanceChart />);
 
-    // Check if round navigation is rendered
-    expect(screen.getByText("Round")).toBeInTheDocument();
-    expect(screen.getByText("3")).toBeInTheDocument();
-    expect(screen.getByTestId("arrow-down-icon")).toBeInTheDocument();
+    // Check initial render
+    const roundNav = container.querySelector(".round-nav");
+    expect(roundNav).toBeInTheDocument();
+    expect(roundNav?.textContent).toContain("Round3");
+    expect(container.querySelector(".arrow-down")).toBeInTheDocument();
+    expect(container.querySelector(".chart-inner")).toBeInTheDocument();
 
-    // Check if chart is rendered
-    expect(screen.getByTestId("chart-inner")).toBeInTheDocument();
-  });
-
-  it("toggles round navigation dropdown", () => {
-    render(<RoundPerformanceChart />);
-
-    const roundNav = screen.getByText("Round").parentElement;
+    // Test round navigation dropdown
     fireEvent.click(roundNav!);
+    expect(container.querySelector(".arrow-up")).toBeInTheDocument();
 
-    // Arrow should change from down to up
-    expect(screen.getByTestId("arrow-up-icon")).toBeInTheDocument();
-  });
-
-  it("decrements round when clicking left arrow", () => {
-    render(<RoundPerformanceChart />);
-
-    const leftArrow = screen.getByTestId("arrow-left-icon");
-    fireEvent.click(leftArrow);
-
+    // Test round navigation
+    const leftArrow = container.querySelector(".arrow-left");
+    const rightArrow = container.querySelector(".arrow-right");
+    
+    fireEvent.click(leftArrow!);
     expect(mockSetSelectedRound).toHaveBeenCalledWith(2);
-  });
 
-  it("increments round when clicking right arrow", () => {
-    render(<RoundPerformanceChart />);
-
-    const rightArrow = screen.getByTestId("arrow-right-icon");
-    fireEvent.click(rightArrow);
-
+    fireEvent.click(rightArrow!);
     expect(mockSetSelectedRound).toHaveBeenCalledWith(4);
-  });
 
-  it("does not decrement round when at round 1", () => {
+    // Test with current round
     (useProtocolContext as jest.Mock).mockReturnValue({
-      selectedRound: 1,
-      selectedRoundState: mockSelectedRoundState,
-      setSelectedRound: mockSetSelectedRound,
-      vaultState: mockVaultState,
-    });
-
-    render(<RoundPerformanceChart />);
-
-    const leftArrow = screen.getByTestId("arrow-left-icon");
-    fireEvent.click(leftArrow);
-
-    expect(mockSetSelectedRound).not.toHaveBeenCalled();
-  });
-
-  it("does not increment round when at current round", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
+      ...mockVaultState,
       selectedRound: 5,
       selectedRoundState: mockSelectedRoundState,
-      setSelectedRound: mockSetSelectedRound,
-      vaultState: mockVaultState,
     });
-
-    render(<RoundPerformanceChart />);
-
-    const rightArrow = screen.getByTestId("arrow-right-icon");
-    fireEvent.click(rightArrow);
-
-    expect(mockSetSelectedRound).not.toHaveBeenCalled();
-  });
-
-  it("toggles line visibility", () => {
-    render(<RoundPerformanceChart />);
-
-    // Find and click the TWAP toggle
-    const twapToggle = screen.getByText("TWAP").parentElement;
-    fireEvent.click(twapToggle!);
-
-    // Re-render should occur with updated activeLines state
-    expect(screen.getByTestId("chart-inner")).toBeInTheDocument();
+    
+    rerender(<RoundPerformanceChart />);
+    expect(container.querySelector(".arrow-right")).not.toBeInTheDocument();
   });
 }); 

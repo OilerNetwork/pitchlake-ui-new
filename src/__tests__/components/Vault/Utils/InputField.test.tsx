@@ -10,8 +10,9 @@ describe("InputField Components", () => {
   });
 
   describe("InputField", () => {
-    it("renders with basic props", () => {
-      render(
+    it("renders with correct styling and handles interactions", () => {
+      // Test basic rendering
+      const { container, rerender } = render(
         <InputField
           label="Test Label"
           value="Test Value"
@@ -19,13 +20,29 @@ describe("InputField Components", () => {
         />
       );
 
-      expect(screen.getByText("Test Label")).toBeInTheDocument();
+      const inputContainer = container.firstChild;
+      expect(inputContainer).toHaveClass("flex", "flex-col", "gap-2");
+
+      const label = screen.getByText("Test Label");
+      expect(label).toHaveClass("text-sm", "text-[var(--buttongrey)]");
+
       const input = screen.getByRole("textbox");
       expect(input).toHaveValue("Test Value");
-    });
+      expect(input).toHaveClass(
+        "bg-[#121212]",
+        "border",
+        "border-[#262626]",
+        "rounded-lg",
+        "p-3",
+        "text-white"
+      );
 
-    it("renders with all optional props", () => {
-      render(
+      // Test input change
+      fireEvent.change(input, { target: { value: "New Value" } });
+      expect(mockOnChange).toHaveBeenCalled();
+
+      // Test with all optional props
+      rerender(
         <InputField
           label="Test Label"
           label2="Secondary Label"
@@ -33,58 +50,30 @@ describe("InputField Components", () => {
           onChange={mockOnChange}
           placeholder="Test Placeholder"
           error="Error Message"
-          icon={<div className="test-icon" />}
+          icon={<div className="input-icon" />}
           disabled={true}
           type="number"
           className="custom-class"
         />
       );
 
-      expect(screen.getByText("Test Label")).toBeInTheDocument();
-      const input = screen.getByRole("spinbutton");
-      expect(input).toBeInTheDocument();
-      expect(input).toBeDisabled();
-      expect(input).toHaveAttribute("type", "number");
-      expect(input).toHaveAttribute("placeholder", "Test Placeholder");
-      expect(screen.getByText("Secondary Label")).toBeInTheDocument();
-      expect(screen.getByText("Error Message")).toBeInTheDocument();
-      expect(document.querySelector(".test-icon")).toBeInTheDocument();
-    });
+      const inputWithOptions = screen.getByRole("spinbutton");
+      expect(inputWithOptions).toBeDisabled();
+      expect(inputWithOptions).toHaveAttribute("type", "number");
+      expect(inputWithOptions).toHaveAttribute("placeholder", "Test Placeholder");
+      expect(screen.getByText("Secondary Label")).toHaveClass("text-sm", "text-[var(--buttongrey)]");
+      expect(screen.getByText("Error Message")).toHaveClass("text-red-500", "text-sm");
+      expect(container.querySelector(".input-icon")).toBeInTheDocument();
 
-    it("calls onChange when input value changes", () => {
-      render(
-        <InputField
-          label="Test Label"
-          value="Test Value"
-          onChange={mockOnChange}
-        />
-      );
-
-      const input = screen.getByRole("textbox");
-      fireEvent.change(input, { target: { value: "New Value" } });
-      expect(mockOnChange).toHaveBeenCalled();
-    });
-
-    it("shows error state correctly", () => {
-      render(
-        <InputField
-          label="Test Label"
-          value="Test Value"
-          onChange={mockOnChange}
-          error="Error Message"
-        />
-      );
-
-      const input = screen.getByRole("textbox");
-      expect(input).toHaveClass("border-[#CC455E]");
-      expect(input).toHaveClass("text-[#CC455E]");
-      expect(screen.getByText("Error Message")).toHaveClass("text-red-500");
+      // Test error state
+      expect(inputWithOptions).toHaveClass("border-[#CC455E]", "text-[#CC455E]");
     });
   });
 
   describe("InputFieldExtra", () => {
-    it("renders with basic props", () => {
-      render(
+    it("renders with correct styling and handles interactions", () => {
+      // Test basic rendering
+      const { container, rerender } = render(
         <InputFieldExtra
           label="Test Label"
           value="Test Value"
@@ -92,13 +81,29 @@ describe("InputField Components", () => {
         />
       );
 
-      expect(screen.getByText("Test Label")).toBeInTheDocument();
+      const inputContainer = container.firstChild;
+      expect(inputContainer).toHaveClass("flex", "flex-col", "gap-2");
+
+      const label = screen.getByText("Test Label");
+      expect(label).toHaveClass("text-sm", "text-[var(--buttongrey)]");
+
       const input = screen.getByRole("textbox");
       expect(input).toHaveValue("Test Value");
-    });
+      expect(input).toHaveClass(
+        "bg-[#121212]",
+        "border",
+        "border-[#262626]",
+        "rounded-lg",
+        "p-3",
+        "text-white"
+      );
 
-    it("renders with all optional props", () => {
-      render(
+      // Test input change
+      fireEvent.change(input, { target: { value: "New Value" } });
+      expect(mockOnChange).toHaveBeenCalled();
+
+      // Test with all optional props
+      rerender(
         <InputFieldExtra
           label="Test Label"
           label2="Secondary Label"
@@ -106,50 +111,21 @@ describe("InputField Components", () => {
           onChange={mockOnChange}
           placeholder="Test Placeholder"
           error="Error Message"
-          icon={<div className="test-icon" />}
+          icon={<div className="input-icon" />}
           type="number"
           className="custom-class"
         />
       );
 
-      expect(screen.getByText("Test Label")).toBeInTheDocument();
-      const input = screen.getByRole("spinbutton");
-      expect(input).toBeInTheDocument();
-      expect(input).toHaveAttribute("type", "number");
-      expect(input).toHaveAttribute("placeholder", "Test Placeholder");
-      expect(screen.getByText("Secondary Label")).toBeInTheDocument();
-      expect(screen.getByText("Error Message")).toBeInTheDocument();
-      expect(document.querySelector(".test-icon")).toBeInTheDocument();
-    });
+      const inputWithOptions = screen.getByRole("spinbutton");
+      expect(inputWithOptions).toHaveAttribute("type", "number");
+      expect(inputWithOptions).toHaveAttribute("placeholder", "Test Placeholder");
+      expect(screen.getByText("Secondary Label")).toHaveClass("text-sm", "text-[var(--buttongrey)]");
+      expect(screen.getByText("Error Message")).toHaveClass("text-red-500", "text-sm");
+      expect(container.querySelector(".input-icon")).toBeInTheDocument();
 
-    it("calls onChange when input value changes", () => {
-      render(
-        <InputFieldExtra
-          label="Test Label"
-          value="Test Value"
-          onChange={mockOnChange}
-        />
-      );
-
-      const input = screen.getByRole("textbox");
-      fireEvent.change(input, { target: { value: "New Value" } });
-      expect(mockOnChange).toHaveBeenCalled();
-    });
-
-    it("shows error state correctly", () => {
-      render(
-        <InputFieldExtra
-          label="Test Label"
-          value="Test Value"
-          onChange={mockOnChange}
-          error="Error Message"
-        />
-      );
-
-      const input = screen.getByRole("textbox");
-      expect(input).toHaveClass("border-[#CC455E]");
-      expect(input).toHaveClass("text-[#CC455E]");
-      expect(screen.getByText("Error Message")).toHaveClass("text-red-500");
+      // Test error state
+      expect(inputWithOptions).toHaveClass("border-[#CC455E]", "text-[#CC455E]");
     });
   });
 }); 

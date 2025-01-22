@@ -15,7 +15,7 @@ jest.mock("../../hooks/window/useIsMobile", () => jest.fn());
 jest.mock("../../components/VaultCard/VaultCard", () => ({
   __esModule: true,
   default: jest.fn(({ vaultAddress }: { vaultAddress: string }) => (
-    <div data-testid={`vault-${vaultAddress}`}>Vault {vaultAddress}</div>
+    <div className={`vault-card-${vaultAddress}`}>Vault {vaultAddress}</div>
   )),
 }));
 
@@ -45,14 +45,14 @@ describe("Home Component", () => {
   describe("Network handling", () => {
     it("renders mainnet warning when network is mainnet", () => {
       mockHooks({ network: "mainnet" });
-      render(<Home />);
-      expect(screen.getByText(/mainnet is not yet released/i)).toBeInTheDocument();
+      const { container } = render(<Home />);
+      expect(container.querySelector(".mainnet-warning")).toBeInTheDocument();
     });
 
     it("renders content when network is testnet", () => {
       mockHooks({ network: "testnet" });
-      render(<Home />);
-      expect(screen.getByText(/popular vaults/i)).toBeInTheDocument();
+      const { container } = render(<Home />);
+      expect(container.querySelector(".popular-vaults")).toBeInTheDocument();
     });
   });
 
@@ -65,11 +65,10 @@ describe("Home Component", () => {
     it("renders vaults from websocket when environment is 'ws'", () => {
       process.env.NEXT_PUBLIC_ENVIRONMENT = "ws";
       mockHooks({ vaults: testVaults });
-
-      render(<Home />);
+      const { container } = render(<Home />);
       
       testVaults.forEach(vault => {
-        expect(screen.getByTestId(`vault-${vault}`)).toBeInTheDocument();
+        expect(container.querySelector(`.vault-card-${vault}`)).toBeInTheDocument();
       });
     });
 
@@ -77,21 +76,20 @@ describe("Home Component", () => {
       process.env.NEXT_PUBLIC_ENVIRONMENT = "other";
       process.env.NEXT_PUBLIC_VAULT_ADDRESSES = "0x123,0x456";
       mockHooks({});
-
-      render(<Home />);
+      const { container } = render(<Home />);
       
       ["0x123", "0x456"].forEach(vault => {
-        expect(screen.getByTestId(`vault-${vault}`)).toBeInTheDocument();
+        expect(container.querySelector(`.vault-card-${vault}`)).toBeInTheDocument();
       });
     });
 
     it("handles empty vault list gracefully", () => {
       process.env.NEXT_PUBLIC_ENVIRONMENT = "ws";
       mockHooks({ vaults: [] });
-
-      render(<Home />);
-      expect(screen.getByText(/popular vaults/i)).toBeInTheDocument();
-      expect(screen.queryByTestId(/^vault-/)).not.toBeInTheDocument();
+      const { container } = render(<Home />);
+      
+      expect(container.querySelector(".popular-vaults")).toBeInTheDocument();
+      expect(container.querySelector(".vault-card")).not.toBeInTheDocument();
     });
   });
 });

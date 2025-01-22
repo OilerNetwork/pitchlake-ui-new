@@ -7,124 +7,95 @@ jest.mock("react-dom", () => ({
   createPortal: (node: React.ReactNode) => node,
 }));
 
-describe("Tooltip Component", () => {
-  it("renders children correctly", () => {
-    render(
-      <Tooltip text="Tooltip text">
-        <button>Hover me</button>
-      </Tooltip>
-    );
+describe("Tooltip Components", () => {
+  describe("Basic Tooltip", () => {
+    it("renders tooltip with hover behavior", () => {
+      const { container } = render(
+        <Tooltip text="Tooltip text">
+          <button className="relative group">Hover me</button>
+        </Tooltip>
+      );
 
-    expect(screen.getByText("Hover me")).toBeInTheDocument();
+      const tooltipGroup = container.querySelector(".relative.group");
+      expect(tooltipGroup).toBeInTheDocument();
+
+      // Initially hidden
+      const tooltipContent = tooltipGroup?.querySelector(".absolute.bottom-full");
+      expect(tooltipContent).toHaveClass("hidden");
+
+      // Show on hover
+      fireEvent.mouseEnter(tooltipGroup!);
+      expect(tooltipContent).not.toHaveClass("hidden");
+
+      // Hide on leave
+      fireEvent.mouseLeave(tooltipGroup!);
+      expect(tooltipContent).toHaveClass("hidden");
+    });
   });
 
-  it("shows tooltip text on hover", () => {
-    render(
-      <Tooltip text="Tooltip text">
-        <button>Hover me</button>
-      </Tooltip>
-    );
-
-    const container = screen.getByText("Hover me").parentElement;
-    fireEvent.mouseEnter(container!);
-    
-    expect(screen.getByText("Tooltip text")).toBeInTheDocument();
-  });
-
-  it("hides tooltip text by default", () => {
-    render(
-      <Tooltip text="Tooltip text">
-        <button>Hover me</button>
-      </Tooltip>
-    );
-
-    expect(screen.queryByText("Tooltip text")).toHaveClass("hidden");
-  });
-});
-
-describe("BalanceTooltip Component", () => {
-  const mockBalance = {
-    locked: "1000000000000000000", // 1 ETH
-    unlocked: "500000000000000000", // 0.5 ETH
-    stashed: "200000000000000000", // 0.2 ETH
-  };
-
-  it("renders children correctly", () => {
-    render(
-      <BalanceTooltip balance={mockBalance}>
-        <button>Hover for balance</button>
-      </BalanceTooltip>
-    );
-
-    expect(screen.getByText("Hover for balance")).toBeInTheDocument();
-  });
-
-  it("shows balance distribution on hover", () => {
-    render(
-      <BalanceTooltip balance={mockBalance}>
-        <button>Hover for balance</button>
-      </BalanceTooltip>
-    );
-
-    const container = screen.getByText("Hover for balance").parentElement;
-    fireEvent.mouseEnter(container!);
-
-    expect(screen.getByText("Balance Distribution")).toBeInTheDocument();
-    expect(screen.getByText("1.000 ETH")).toBeInTheDocument();
-    expect(screen.getByText("0.500 ETH")).toBeInTheDocument();
-    expect(screen.getByText("0.200 ETH")).toBeInTheDocument();
-  });
-
-  it("handles zero balances correctly", () => {
-    const zeroBalance = {
-      locked: "0",
-      unlocked: "0",
-      stashed: "0",
+  describe("Balance Tooltip", () => {
+    const mockBalance = {
+      locked: "1000000000000000000", // 1 ETH
+      unlocked: "500000000000000000", // 0.5 ETH
+      stashed: "200000000000000000", // 0.2 ETH
     };
 
-    render(
-      <BalanceTooltip balance={zeroBalance}>
-        <button>Hover for balance</button>
-      </BalanceTooltip>
-    );
+    it("renders balance tooltip with hover behavior and correct values", () => {
+      const { container } = render(
+        <BalanceTooltip balance={mockBalance}>
+          <button className="flex flex-row items-center">Hover for balance</button>
+        </BalanceTooltip>
+      );
 
-    const container = screen.getByText("Hover for balance").parentElement;
-    fireEvent.mouseEnter(container!);
+      const tooltipTrigger = container.querySelector(".flex.flex-row.items-center");
+      expect(tooltipTrigger).toBeInTheDocument();
 
-    const zeroValues = screen.getAllByText("0.000 ETH");
-    expect(zeroValues).toHaveLength(3);
-  });
+      // Initially no tooltip
+      expect(screen.queryByText("Balance Distribution")).not.toBeInTheDocument();
 
-  it("updates tooltip position on hover", () => {
-    const { container } = render(
-      <BalanceTooltip balance={mockBalance}>
-        <button>Hover for balance</button>
-      </BalanceTooltip>
-    );
+      // Show tooltip on hover
+      fireEvent.mouseEnter(tooltipTrigger!);
+      
+      // Check tooltip structure
+      const tooltip = screen.getByText("Balance Distribution").closest("div");
+      expect(tooltip).toHaveClass("relative", "text-white", "text-[14px]", "font-regular", "rounded-md");
 
-    const tooltipTrigger = screen.getByText("Hover for balance").parentElement;
-    fireEvent.mouseEnter(tooltipTrigger!);
+      // Check balance values
+      const balances = [
+        { label: "Locked", value: "1.000 ETH" },
+        { label: "Unlocked", value: "0.500 ETH" },
+        { label: "Stashed", value: "0.200 ETH" },
+      ];
 
-    // Check if tooltip is positioned relative to the trigger
-    const tooltip = container.querySelector('[style*="position: absolute"]');
-    expect(tooltip).toBeInTheDocument();
-  });
+      balances.forEach(({ label, value }) => {
+        const row = screen.getByText(label).closest(".flex.justify-between");
+        expect(row).toBeInTheDocument();
+        expect(row).toHaveTextContent(value);
+      });
 
-  it("hides tooltip when mouse leaves", () => {
-    render(
-      <BalanceTooltip balance={mockBalance}>
-        <button>Hover for balance</button>
-      </BalanceTooltip>
-    );
+      // Hide on leave
+      fireEvent.mouseLeave(tooltipTrigger!);
+      expect(screen.queryByText("Balance Distribution")).not.toBeInTheDocument();
+    });
 
-    const container = screen.getByText("Hover for balance").parentElement;
-    
-    // Show tooltip
-    fireEvent.mouseEnter(container!);
-    expect(screen.getByText("Balance Distribution")).toBeInTheDocument();
-    
-    // Hide tooltip
-    fireEvent.mouseLeave(container!);
-    expect(screen.queryByText("Balance Distribution")).not.toBeInTheDocument();
+    it("handles zero balances correctly", () => {
+      const zeroBalance = {
+        locked: "0",
+        unlocked: "0",
+        stashed: "0",
+      };
+
+      const { container } = render(
+        <BalanceTooltip balance={zeroBalance}>
+          <button className="flex flex-row items-center">Hover for balance</button>
+        </BalanceTooltip>
+      );
+
+      const tooltipTrigger = container.querySelector(".flex.flex-row.items-center");
+      fireEvent.mouseEnter(tooltipTrigger!);
+
+      const balanceRows = screen.getAllByText("0.000 ETH");
+      expect(balanceRows).toHaveLength(3);
+    });
   });
 }); 

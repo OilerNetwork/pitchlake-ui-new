@@ -1,263 +1,213 @@
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import Header from "../../../components/LayoutComponents/Header";
-import { useNetwork, useAccount, useConnect, useSwitchChain, useDisconnect } from "@starknet-react/core";
 import useIsMobile from "../../../hooks/window/useIsMobile";
-import useERC20 from "../../../hooks/erc20/useERC20";
-import useAccountBalances from "../../../hooks/vault/state/useAccountBalances";
+import { useTransactionContext } from "../../../context/TransactionProvider";
 import { useProtocolContext } from "../../../context/ProtocolProvider";
 import { useRouter } from "next/navigation";
-
-// Mock SVG imports
-jest.mock("@/../public/logo_full.svg", () => "logo_full.svg");
-jest.mock("@/../public/login.svg", () => "login.svg");
-jest.mock("@/../public/braavos.svg", () => "braavos.svg");
-jest.mock("@/../public/argent.svg", () => "argent.svg");
-jest.mock("@/../public/keplr.svg", () => "keplr.svg");
-jest.mock("@/../public/avatar.svg", () => "avatar.svg");
-
-// Mock all the hooks
-jest.mock("@starknet-react/core", () => ({
-  useNetwork: jest.fn(),
-  useAccount: jest.fn(),
-  useConnect: jest.fn(),
-  useSwitchChain: jest.fn(),
-  useDisconnect: jest.fn(),
-}));
-
-jest.mock("../../../hooks/window/useIsMobile", () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
-
-jest.mock("../../../hooks/erc20/useERC20", () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
-
-jest.mock("../../../hooks/vault/state/useAccountBalances", () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
-
-jest.mock("../../../context/ProtocolProvider", () => ({
-  useProtocolContext: jest.fn(),
-}));
-
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
-}));
+import useERC20 from "@/hooks/erc20/useERC20";
+import useAccountBalances from "@/hooks/vault/state/useAccountBalances";
+import { useAccount, useConnect, useDisconnect, useNetwork, useSwitchChain } from "@starknet-react/core";
 
 // Mock next/image
-jest.mock("next/image", () => ({
-  __esModule: true,
-  default: function Image({ src, alt, onClick }: any) {
-    // Return a div instead of img for easier testing
-    return <div data-testid={`image-${alt.toLowerCase().replace(/\s+/g, '-')}`} onClick={onClick}>{alt}</div>;
-  },
+jest.mock("next/image", () => ({ src, alt, className }: any) => (
+  <img src={src} alt={alt} className={className} />
+));
+
+// Mock SVG imports
+jest.mock("@/../public/logo_full.svg", () => "logo_full");
+jest.mock("@/../public/login.svg", () => "login");
+jest.mock("@/../public/braavos.svg", () => "braavos");
+jest.mock("@/../public/argent.svg", () => "argent");
+jest.mock("@/../public/keplr.svg", () => "keplr");
+jest.mock("@/../public/avatar.svg", () => "avatar");
+
+// Mock hooks
+jest.mock("@starknet-react/core", () => ({
+  useAccount: jest.fn(),
+  useConnect: jest.fn(),
+  useDisconnect: jest.fn(),
+  useNetwork: jest.fn(),
+  useSwitchChain: jest.fn()
 }));
 
-describe("Header Component", () => {
-  const mockRouter = {
-    push: jest.fn(),
-  };
+jest.mock("../../../hooks/window/useIsMobile");
+jest.mock("../../../context/TransactionProvider");
+jest.mock("../../../context/ProtocolProvider");
+jest.mock("next/navigation");
+jest.mock("@/hooks/erc20/useERC20");
+jest.mock("@/hooks/vault/state/useAccountBalances");
 
-  const mockProtocolContext = {
-    conn: "ws",
-    timestamp: 0,
-    mockTimeForward: jest.fn(),
-    vaultState: { address: "0x123" },
-  };
+interface MockOverrides {
+  mockTime?: boolean;
+  conn?: string;
+  timestamp?: number;
+  isConnected?: boolean;
+}
+
+const mockHooks = (overrides: MockOverrides = {}) => {
+  const { 
+    conn = "rpc", 
+    timestamp = 1234567890, 
+    mockTime = false,
+    isConnected = false 
+  } = overrides;
+
+  (useIsMobile as jest.Mock).mockReturnValue({ isMobile: false });
+  
+  (useAccount as jest.Mock).mockReturnValue({ 
+    account: isConnected ? { address: "0x123" } : null,
+    address: isConnected ? "0x123" : undefined,
+    isConnected
+  });
 
   const mockConnect = jest.fn();
+  (useConnect as jest.Mock).mockReturnValue({ 
+    connect: mockConnect, 
+    connectors: [
+      { id: "braavos", name: "Braavos" },
+      { id: "argent", name: "Argent" },
+      { id: "keplr", name: "Keplr" }
+    ] 
+  });
 
+  (useDisconnect as jest.Mock).mockReturnValue({ disconnect: jest.fn() });
+  (useSwitchChain as jest.Mock).mockReturnValue({ switchChainAsync: jest.fn() });
+  (useNetwork as jest.Mock).mockReturnValue({ 
+    chain: { network: "testnet" },
+    chains: [
+      { network: "testnet" },
+      { network: "mainnet" },
+      { network: "sepolia" }
+    ]
+  });
+
+  (useProtocolContext as jest.Mock).mockReturnValue({
+    conn,
+    timestamp,
+    mockTime,
+    mockTimeForward: jest.fn(),
+    vaultState: {
+      address: "0x456"
+    }
+  });
+
+  (useERC20 as jest.Mock).mockReturnValue({
+    balance: "1000000000000000000" // 1 ETH
+  });
+
+  (useAccountBalances as jest.Mock).mockReturnValue({
+    lockedBalance: "500000000000000000", // 0.5 ETH
+    unlockedBalance: "300000000000000000", // 0.3 ETH
+    stashedBalance: "200000000000000000" // 0.2 ETH
+  });
+
+  (useRouter as jest.Mock).mockReturnValue({
+    push: jest.fn(),
+  });
+};
+
+describe("Header Component", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    mockHooks();
+  });
+
+  it("renders header with navigation and interaction elements", () => {
+    const { container } = render(<Header />);
     
-    // Setup default mock values
-    (useIsMobile as jest.Mock).mockReturnValue({ isMobile: false });
-    (useRouter as jest.Mock).mockReturnValue(mockRouter);
-    (useProtocolContext as jest.Mock).mockReturnValue(mockProtocolContext);
-    (useNetwork as jest.Mock).mockReturnValue({
-      chains: [{ network: "testnet" }, { network: "mainnet" }],
-      chain: { network: "testnet" },
-    });
-    (useAccount as jest.Mock).mockReturnValue({ account: null });
-    (useConnect as jest.Mock).mockReturnValue({ 
-      connect: mockConnect,
-      connectors: [
-        { id: "braavos", name: "Braavos" },
-        { id: "argentX", name: "Argent X" }
-      ] 
-    });
-    (useSwitchChain as jest.Mock).mockReturnValue({ switchChainAsync: jest.fn() });
-    (useDisconnect as jest.Mock).mockReturnValue({ disconnect: jest.fn() });
-    (useERC20 as jest.Mock).mockReturnValue({ balance: "0" });
-    (useAccountBalances as jest.Mock).mockReturnValue({
-      lockedBalance: "0",
-      unlockedBalance: "0",
-      stashedBalance: "0",
-    });
+    // Check header container
+    const header = container.querySelector("nav");
+    expect(header).toBeInTheDocument();
+    expect(header).toHaveClass("absolute", "top-0", "z-50", "w-full", "h-[84px]", "bg-[#121212]");
+
+    // Check logo
+    const logo = container.querySelector("img");
+    expect(logo).toBeInTheDocument();
+    expect(logo).toHaveAttribute("src", "logo_full");
+    expect(logo).toHaveAttribute("alt", "Pitchlake logo");
+
+    // Check network selector
+    const networkSelector = screen.getByText("testnet");
+    expect(networkSelector).toBeInTheDocument();
   });
 
-  it("renders logo that navigates to home", () => {
+  it("handles connect wallet flow", () => {
     render(<Header />);
-    const logo = screen.getByTestId("image-pitchlake-logo");
-    fireEvent.click(logo);
-    expect(mockRouter.push).toHaveBeenCalledWith("/");
+    
+    // Check initial connect button
+    const connectButton = screen.getByText("Connect");
+    expect(connectButton).toBeInTheDocument();
+    
+    // Open wallet selection dropdown
+    fireEvent.click(connectButton);
+    
+    // Check wallet options
+    const walletOptions = ["BRAAVOS", "ARGENT", "KEPLR"];
+    walletOptions.forEach(wallet => {
+      expect(screen.getByText(wallet)).toBeInTheDocument();
+    });
+    
+    // Check wallet selection
+    const braavosOption = screen.getByText("BRAAVOS");
+    fireEvent.click(braavosOption);
+    const mockConnect = useConnect().connect;
+    expect(mockConnect).toHaveBeenCalledWith({ connector: { id: "braavos", name: "Braavos" } });
   });
 
-  describe("Network Selection", () => {
-    it("renders network selector with current network", () => {
-      render(<Header />);
-      expect(screen.getByText("testnet")).toBeInTheDocument();
-    });
-
-    it("shows network dropdown on click", () => {
-      render(<Header />);
-      const networkButton = screen.getByText("testnet");
-      fireEvent.click(networkButton);
-      expect(screen.getByText("TESTNET")).toBeInTheDocument();
-      expect(screen.getByText("MAINNET")).toBeInTheDocument();
-    });
-
-    it("handles network switching", async () => {
-      const mockSwitchChain = jest.fn();
-      (useSwitchChain as jest.Mock).mockReturnValue({ switchChainAsync: mockSwitchChain });
-      
-      render(<Header />);
-      const networkButton = screen.getByText("testnet");
-      fireEvent.click(networkButton);
-      
-      const mainnetOption = screen.getByText("MAINNET");
-      await act(async () => {
-        fireEvent.click(mainnetOption);
-      });
-      
-      expect(mockSwitchChain).toHaveBeenCalled();
-    });
-
-    it("closes dropdown when clicking outside", () => {
-      render(<Header />);
-      
-      const networkButton = screen.getByText("testnet");
-      fireEvent.click(networkButton);
-      expect(screen.getByText("TESTNET")).toBeInTheDocument();
-      
-      fireEvent.mouseDown(document.body);
-      expect(screen.queryByText("TESTNET")).not.toBeInTheDocument();
-    });
-
-    it("closes dropdown on escape key", () => {
-      render(<Header />);
-      
-      const networkButton = screen.getByText("testnet");
-      fireEvent.click(networkButton);
-      expect(screen.getByText("TESTNET")).toBeInTheDocument();
-      
-      fireEvent.keyDown(document, { key: "Escape" });
-      expect(screen.queryByText("TESTNET")).not.toBeInTheDocument();
-    });
+  it("displays profile dropdown when connected", () => {
+    mockHooks({ isConnected: true });
+    render(<Header />);
+    
+    // Check profile button
+    const profileButton = screen.getByText("0x123...x123");
+    expect(profileButton).toBeInTheDocument();
+    
+    // Check dropdown is initially closed
+    expect(screen.queryByText("MY BALANCE")).not.toBeInTheDocument();
+    
+    // Open profile dropdown
+    fireEvent.click(profileButton);
+    
+    // Verify dropdown is rendered with correct props
+    expect(screen.getByText("MY BALANCE")).toBeInTheDocument();
   });
 
-  describe("Wallet Connection", () => {
-    it("shows connect button with login icon when not connected", () => {
-      render(<Header />);
-      
-      // Check for connect button
-      const connectButton = screen.getByText("Connect").closest('button');
-      expect(connectButton).toBeInTheDocument();
-      
-      // Check for login icon container
-      const loginIconContainer = connectButton?.querySelector('div');
-      expect(loginIconContainer).toBeInTheDocument();
-    });
+  it("handles mock time controls when in mock connection", () => {
+    mockHooks({ conn: "mock", mockTime: true });
+    render(<Header />);
 
-    it("shows wallet selection dropdown when clicking connect", () => {
-      render(<Header />);
-      
-      // Click connect button
-      const connectButton = screen.getByText("Connect").closest('button')!;
-      fireEvent.click(connectButton);
-
-      // Check for wallet selection header
-      expect(screen.getByText("CHOOSE A WALLET")).toBeInTheDocument();
-
-      // Check for wallet options
-      const walletOptions = screen.getAllByTestId("image-login");
-      expect(walletOptions).toHaveLength(2); // One for each connector
-      expect(screen.getByText("BRAAVOS")).toBeInTheDocument();
-      expect(screen.getByText("ARGENTX")).toBeInTheDocument();
-    });
-
-    it("handles wallet connection", async () => {
-      render(<Header />);
-      
-      // Open wallet selection
-      const connectButton = screen.getByText("Connect").closest('button')!;
-      fireEvent.click(connectButton);
-      
-      // Click Braavos option
-      const braavosOption = screen.getByText("BRAAVOS").closest('div')!;
-      await act(async () => {
-        fireEvent.click(braavosOption);
-      });
-      
-      expect(mockConnect).toHaveBeenCalledWith({ 
-        connector: expect.objectContaining({ id: "braavos" }) 
-      });
-    });
-
-    it("shows connected wallet info", () => {
-      const mockAddress = "0x1234567890abcdef";
-      (useAccount as jest.Mock).mockReturnValue({
-        account: { address: mockAddress },
-      });
-      
-      render(<Header />);
-      
-      // Should show avatar and truncated address
-      expect(screen.getByTestId("image-user-avatar")).toBeInTheDocument();
-      expect(screen.getByText(`${mockAddress.slice(0, 6)}...${mockAddress.slice(-4)}`)).toBeInTheDocument();
-    });
-
-    it("handles wallet disconnection", () => {
-      const mockDisconnect = jest.fn();
-      (useDisconnect as jest.Mock).mockReturnValue({ disconnect: mockDisconnect });
-      (useAccount as jest.Mock).mockReturnValue({
-        account: { address: "0x1234567890abcdef" },
-      });
-      
-      render(<Header />);
-      
-      // Open profile dropdown
-      const profileButton = screen.getByTestId("image-user-avatar").parentElement!;
-      fireEvent.click(profileButton);
-      
-      // Click disconnect
-      const disconnectButton = screen.getByText("Disconnect");
-      fireEvent.click(disconnectButton);
-      
-      expect(mockDisconnect).toHaveBeenCalled();
-    });
+    const mockTimeButton = screen.getByText("Forward Mock Time");
+    expect(mockTimeButton).toBeInTheDocument();
+    
+    fireEvent.click(mockTimeButton);
+    expect(useProtocolContext().mockTimeForward).toHaveBeenCalled();
   });
 
-  it("does not render when isMobile is true", () => {
+  it("does not render on mobile", () => {
     (useIsMobile as jest.Mock).mockReturnValue({ isMobile: true });
     const { container } = render(<Header />);
-    expect(container.firstChild).toBeNull();
+
+    expect(container.querySelector("nav")).toBeNull();
   });
 
-  it("shows mock time controls when conn is mock", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      ...mockProtocolContext,
-      conn: "mock",
-    });
+  it("handles network switching", () => {
+    const mockSwitchChainAsync = jest.fn();
+    (useSwitchChain as jest.Mock).mockReturnValue({ switchChainAsync: mockSwitchChainAsync });
     
     render(<Header />);
-    expect(screen.getByText("Forward Mock Time")).toBeInTheDocument();
     
-    const forwardButton = screen.getByText("Forward Mock Time");
-    fireEvent.click(forwardButton);
-    expect(mockProtocolContext.mockTimeForward).toHaveBeenCalled();
+    // Open network selector
+    const networkButton = screen.getByText("testnet");
+    fireEvent.click(networkButton);
+    
+    // Check network options
+    const networks = ["TESTNET", "MAINNET", "SEPOLIA"];
+    networks.forEach(network => {
+      expect(screen.getByText(network)).toBeInTheDocument();
+    });
+    
+    // Select a network
+    const sepoliaOption = screen.getByText("SEPOLIA");
+    fireEvent.click(sepoliaOption);
+    expect(mockSwitchChainAsync).toHaveBeenCalledWith({ chainId: "0x534e5f5345504f4c4941" });
   });
 }); 

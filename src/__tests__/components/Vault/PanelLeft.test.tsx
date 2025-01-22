@@ -18,18 +18,18 @@ jest.mock("@starknet-react/core", () => ({
 // Mock child components
 jest.mock("../../../components/Vault/StateTransition", () => ({
   __esModule: true,
-  default: () => <div data-testid="mock-state-transition">State Transition</div>,
+  default: () => <div className="state-transition">State Transition</div>,
 }));
 
 jest.mock("../../../components/BaseComponents/Tooltip", () => ({
   BalanceTooltip: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="mock-balance-tooltip">{children}</div>
+    <div className="balance-tooltip">{children}</div>
   ),
 }));
 
 jest.mock("../../../components/Vault/Utils/StateTransitionConfirmationModal", () => ({
   __esModule: true,
-  default: () => <div data-testid="mock-confirmation-modal">Confirmation Modal</div>,
+  default: () => <div className="confirmation-modal">Confirmation Modal</div>,
 }));
 
 // Mock utils functions
@@ -74,86 +74,47 @@ describe("PanelLeft Component", () => {
     });
   });
 
-  it("renders for provider view", () => {
-    render(<PanelLeft userType="lp" />);
+  it("renders panel sections and handles interactions", () => {
+    const { container } = render(<PanelLeft userType="lp" />);
     
-    expect(screen.getByText("Statistics")).toBeInTheDocument();
-    expect(screen.getByText("Vault")).toBeInTheDocument();
-    expect(screen.getByTestId("mock-state-transition")).toBeInTheDocument();
-  });
+    // Check sections
+    const sections = container.querySelectorAll(".panel-section");
+    expect(sections).toHaveLength(3);
+    
+    // Check section headers
+    const headers = ["Statistics", "Vault", "State Transition"];
+    headers.forEach(header => {
+      expect(screen.getByText(header).closest(".panel-section-header")).toBeInTheDocument();
+    });
 
-  it("renders for buyer view", () => {
-    render(<PanelLeft userType="ob" />);
-    
-    expect(screen.getByText("Statistics")).toBeInTheDocument();
-    expect(screen.getByText("Vault")).toBeInTheDocument();
-    expect(screen.getByTestId("mock-state-transition")).toBeInTheDocument();
-  });
-
-  it("toggles vault details section", () => {
-    render(<PanelLeft userType="lp" />);
-    
-    const vaultButton = screen.getByText("Vault").closest("div");
-    expect(vaultButton).toBeInTheDocument();
-    
-    fireEvent.click(vaultButton!);
-    // Check if the content is visible after clicking
-    expect(screen.getByText("Run Time")).toBeInTheDocument();
-    
-    fireEvent.click(vaultButton!);
-    // Content should still be visible as it's controlled by isPanelOpen state
-    expect(screen.getByText("Run Time")).toBeInTheDocument();
-  });
-
-  it("displays correct vault statistics", () => {
-    render(<PanelLeft userType="lp" />);
-    
-    const vaultButton = screen.getByText("Vault").closest("div");
+    // Test vault section expansion
+    const vaultButton = screen.getByText("Vault").closest(".panel-section-header");
     fireEvent.click(vaultButton!);
     
+    // Check expanded content
     expect(screen.getByText("Run Time")).toBeInTheDocument();
     expect(screen.getByText("Address")).toBeInTheDocument();
-  });
-
-  it("handles external link clicks", () => {
-    render(<PanelLeft userType="lp" />);
     
-    const vaultButton = screen.getByText("Vault").closest("div");
-    fireEvent.click(vaultButton!);
-    
+    // Check external link
     const externalLink = screen.getByRole("link");
     expect(externalLink).toHaveAttribute(
       "href",
       "https://testnet.starkscan.co/contract/0x123"
     );
-  });
-
-  it("toggles panel open/close", () => {
-    render(<PanelLeft userType="lp" />);
     
-    const statisticsButton = screen.getByText("Statistics").closest("div");
-    expect(statisticsButton).toBeInTheDocument();
-    
-    // Initially the panel should be open
-    expect(screen.getByText("Run Time")).toBeInTheDocument();
-    
-    // Click to close
-    fireEvent.click(statisticsButton!);
-    
-    // Click to open again
-    fireEvent.click(statisticsButton!);
-    expect(screen.getByText("Run Time")).toBeInTheDocument();
-  });
-
-  it("displays correct time until next state transition", () => {
-    render(<PanelLeft userType="lp" />);
-    
-    const vaultButton = screen.getByText("Vault").closest("div");
-    fireEvent.click(vaultButton!);
-    
-    // Find the specific time element under "Auction Starts In"
-    const timeContainer = screen.getByText("Auction Starts In").closest("div");
+    // Check time display
+    const timeContainer = screen.getByText("Auction Starts In").closest(".time-container");
     expect(timeContainer).toBeInTheDocument();
-    expect(timeContainer?.querySelector("p:last-child")?.textContent).toBe("8h 20m");
+    expect(timeContainer?.querySelector(".time-value")?.textContent).toBe("8h 20m");
+  });
+
+  it("renders correctly for both user types", () => {
+    // Test LP view
+    const { container: lpContainer } = render(<PanelLeft userType="lp" />);
+    expect(lpContainer.querySelector(".panel-left-lp")).toBeInTheDocument();
+    
+    // Test OB view
+    const { container: obContainer } = render(<PanelLeft userType="ob" />);
+    expect(obContainer.querySelector(".panel-left-ob")).toBeInTheDocument();
   });
 }); 

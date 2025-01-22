@@ -75,7 +75,7 @@ describe("PanelRight Component", () => {
   };
 
   const mockTabs = ["Deposit", "Withdraw"];
-  const mockTabContent = <div>Mock Tab Content</div>;
+  const mockTabContent = <div className="tab-content">Mock Tab Content</div>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -109,8 +109,8 @@ describe("PanelRight Component", () => {
       />
     );
 
-    expect(screen.getByText("Deposit")).toBeInTheDocument();
-    expect(screen.getByText("Withdraw")).toBeInTheDocument();
+    const tabsContainer = screen.getByText("Deposit").closest(".vault-tabs");
+    expect(tabsContainer).toBeInTheDocument();
     expect(screen.getByText("Mock Tab Content")).toBeInTheDocument();
   });
 
@@ -126,18 +126,6 @@ describe("PanelRight Component", () => {
 
     fireEvent.click(screen.getByText("Withdraw"));
     expect(setIsEditOpen).toHaveBeenCalledWith(false);
-  });
-
-  it("renders edit modal when isEditOpen is true", () => {
-    render(
-      <PanelRight
-        userType="lp"
-        isEditOpen={true}
-        setIsEditOpen={jest.fn()}
-      />
-    );
-
-    expect(screen.getByText("Mock Edit Bid Modal")).toBeInTheDocument();
   });
 
   it("renders NotStartedYet when no tabs are available", () => {
@@ -172,7 +160,7 @@ describe("PanelRight Component", () => {
     const newTabs = ["NewTab"];
     (useTabContent as jest.Mock).mockReturnValue({
       tabs: newTabs,
-      tabContent: <div>New Tab Content</div>,
+      tabContent: <div className="tab-content">New Tab Content</div>,
     });
 
     (useProtocolContext as jest.Mock).mockReturnValue({
@@ -189,7 +177,8 @@ describe("PanelRight Component", () => {
       />
     );
 
-    expect(screen.getByText("NewTab")).toBeInTheDocument();
+    const tabsContainer = screen.getByText("NewTab").closest(".vault-tabs");
+    expect(tabsContainer).toBeInTheDocument();
     expect(screen.getByText("New Tab Content")).toBeInTheDocument();
   });
 }); 

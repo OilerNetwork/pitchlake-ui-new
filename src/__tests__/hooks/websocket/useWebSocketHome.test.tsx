@@ -2,91 +2,168 @@ import { renderHook, act } from "@testing-library/react";
 import useWebSocketHome from "@/hooks/websocket/useWebSocketHome";
 
 // Mock WebSocket
-type WebSocketEventMap = {
-  onopen: () => void;
-  onmessage: (event: { data: string }) => void;
-  onerror: (error: Error) => void;
-  onclose: () => void;
-  send: (data: string) => void;
-};
+class MockWebSocket implements WebSocket {
+  onopen: ((this: WebSocket, ev: Event) => any) | null = null;
+  onmessage: ((this: WebSocket, ev: MessageEvent<any>) => any) | null = null;
+  onerror: ((this: WebSocket, ev: Event) => any) | null = null;
+  onclose: ((this: WebSocket, ev: CloseEvent) => any) | null = null;
+  close = jest.fn();
 
-const mockWebSocket: Partial<WebSocketEventMap> & { close: jest.Mock } = {
-  onopen: undefined,
-  onmessage: undefined,
-  onerror: undefined,
-  onclose: undefined,
-  send: jest.fn(),
-  close: jest.fn(),
-};
+  // Required WebSocket properties
+  binaryType: BinaryType = 'blob';
+  bufferedAmount: number = 0;
+  extensions: string = '';
+  protocol: string = '';
+  readyState: number = WebSocket.CONNECTING;
+  url: string = '';
+  CLOSED: typeof WebSocket.CLOSED = WebSocket.CLOSED;
+  CLOSING: typeof WebSocket.CLOSING = WebSocket.CLOSING;
+  CONNECTING: typeof WebSocket.CONNECTING = WebSocket.CONNECTING;
+  OPEN: typeof WebSocket.OPEN = WebSocket.OPEN;
+  send = jest.fn();
+  addEventListener = jest.fn();
+  removeEventListener = jest.fn();
+  dispatchEvent = jest.fn();
 
-const MockWebSocket = jest.fn().mockImplementation(() => {
-  const ws = { ...mockWebSocket };
-  // Simulate connection established
-  setTimeout(() => ws.onopen?.(), 0);
-  return ws;
-});
+  constructor(url: string) {
+    this.url = url;
+  }
+
+  // Helper method to simulate receiving a message
+  simulateMessage(data: any) {
+    if (this.onmessage) {
+      const messageEvent = new MessageEvent('message', {
+        data: JSON.stringify(data),
+        origin: this.url,
+        lastEventId: '',
+        source: null,
+        ports: [],
+      });
+      this.onmessage(messageEvent);
+    }
+  }
+
+  // Helper method to simulate connection open
+  simulateOpen() {
+    if (this.onopen) {
+      const event = new Event('open');
+      this.onopen(event);
+    }
+  }
+
+  // Helper method to simulate error
+  simulateError(error: any) {
+    if (this.onerror) {
+      const event = new Event('error');
+      this.onerror(event);
+    }
+  }
+
+  // Helper method to simulate connection close
+  simulateClose() {
+    if (this.onclose) {
+      const closeEvent = new CloseEvent('close', {
+        wasClean: true,
+        code: 1000,
+        reason: '',
+      });
+      this.onclose(closeEvent);
+    }
+  }
+}
 
 // Mock the WebSocket constructor
-(global as any).WebSocket = MockWebSocket;
+global.WebSocket = MockWebSocket as any;
 
 describe("useWebSocketHome", () => {
+  let mockWs: MockWebSocket;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(console, "log").mockImplementation(() => {});
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    mockWs = new MockWebSocket("");
+    jest.spyOn(global, "WebSocket").mockImplementation(() => mockWs);
   });
 
-  it("initializes with empty vaults array", () => {
+  it("initializes WebSocket connection after component is loaded", () => {
     const { result } = renderHook(() => useWebSocketHome());
-    expect(result.current.vaults).toEqual([]);
-  });
 
-  it("establishes WebSocket connection after loading", async () => {
-    renderHook(() => useWebSocketHome());
-    
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
+    // Initially, no WebSocket connection
+    expect(WebSocket).not.toHaveBeenCalled();
+
+    // After the second useEffect runs
+    act(() => {
+      jest.runAllTimers();
     });
 
-    const ws = (MockWebSocket as jest.Mock).mock.results[0].value;
-    expect(console.log).toHaveBeenCalledWith("WebSocket connection established");
+    // WebSocket should be initialized with correct URL
+    expect(WebSocket).toHaveBeenCalledWith(
+      `${process.env.NEXT_PUBLIC_WS_URL}/subscribeHome`
+    );
   });
 
-  it("updates vaults when receiving message", async () => {
+  it("updates vaults when receiving WebSocket message", () => {
     const { result } = renderHook(() => useWebSocketHome());
-    const mockVaults = ["0x123", "0x456"];
-    
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-      const ws = (MockWebSocket as jest.Mock).mock.results[0].value;
-      ws.onmessage?.({ data: JSON.stringify({ vaultAddresses: mockVaults }) });
+
+    // Simulate component load
+    act(() => {
+      jest.runAllTimers();
     });
 
-    expect(result.current.vaults).toEqual(mockVaults);
+    // Simulate receiving a message
+    act(() => {
+      mockWs.simulateMessage({
+        vaultAddresses: ["0x123", "0x456"],
+      });
+    });
+
+    // Check if vaults state is updated
+    expect(result.current.vaults).toEqual(["0x123", "0x456"]);
   });
 
-  it("handles WebSocket errors", async () => {
-    renderHook(() => useWebSocketHome());
+  it("handles WebSocket connection events", () => {
+    // Spy on console methods
+    const consoleSpy = jest.spyOn(console, "log");
+    const consoleErrorSpy = jest.spyOn(console, "error");
+
+    const { result } = renderHook(() => useWebSocketHome());
+
+    // Simulate component load
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    // Simulate connection open
+    act(() => {
+      mockWs.simulateOpen();
+    });
+    expect(consoleSpy).toHaveBeenCalledWith("WebSocket connection established");
+
+    // Simulate error
     const mockError = new Error("WebSocket error");
-    
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-      const ws = (MockWebSocket as jest.Mock).mock.results[0].value;
-      ws.onerror?.(mockError);
+    act(() => {
+      mockWs.simulateError(mockError);
     });
+    expect(consoleErrorSpy).toHaveBeenCalledWith("WebSocket error:", mockError);
 
-    expect(console.error).toHaveBeenCalledWith("WebSocket error:", mockError);
+    // Simulate connection close
+    act(() => {
+      mockWs.simulateClose();
+    });
+    expect(consoleSpy).toHaveBeenCalledWith("WebSocket connection closed");
   });
 
-  it("closes WebSocket connection on unmount", async () => {
+  it("closes WebSocket connection on unmount", () => {
     const { unmount } = renderHook(() => useWebSocketHome());
-    
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-      unmount();
+
+    // Simulate component load
+    act(() => {
+      jest.runAllTimers();
     });
 
-    const ws = (MockWebSocket as jest.Mock).mock.results[0].value;
-    expect(ws.close).toHaveBeenCalled();
+    // Unmount the component
+    unmount();
+
+    // Check if close was called
+    expect(mockWs.close).toHaveBeenCalled();
   });
 }); 

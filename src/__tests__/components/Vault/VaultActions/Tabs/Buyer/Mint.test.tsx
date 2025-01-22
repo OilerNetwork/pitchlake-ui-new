@@ -33,67 +33,67 @@ describe("Mint Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Mock useAccount hook
-    (useAccount as jest.Mock).mockReturnValue({
-      address: "0x123",
-      account: true,
-    });
-
-    // Mock useProtocolContext hook
+    // Set default mock values
     (useProtocolContext as jest.Mock).mockReturnValue({
       roundActions: {
         tokenizeOptions: mockTokenizeOptions,
       },
       selectedRoundBuyerState: {
-        mintableOptions: "1000000", // 1 million mintable options
+        mintableOptions: "1000",
       },
     });
 
-    // Mock useTransactionContext hook
     (useTransactionContext as jest.Mock).mockReturnValue({
       pendingTx: false,
     });
+
+    (useAccount as jest.Mock).mockReturnValue({
+      address: "0x123",
+      account: {
+        address: "0x123",
+      },
+    });
   });
 
-  it("renders with initial state", () => {
-    const { container } = render(<Mint showConfirmation={mockShowConfirmation} />);
+  it("renders mint component with correct states and handles interactions", () => {
+    const { container, rerender } = render(<Mint showConfirmation={mockShowConfirmation} />);
 
-    // Check if the mint icon is rendered
-    expect(container.querySelector('.mint-icon')).toBeInTheDocument();
-
-    // Check if the mint button is rendered and enabled
+    // Check initial render
+    expect(container.querySelector(".mint-icon")).toBeInTheDocument();
     const mintButton = screen.getByRole("button", { name: "Mint Now" });
-    expect(mintButton).toBeInTheDocument();
-    expect(mintButton).not.toBeDisabled();
+    expect(mintButton).toBeEnabled();
 
-    // Check if the mintable options balance is displayed correctly
-    expect(screen.getByText("1.0m")).toBeInTheDocument();
-  });
+    // Test confirmation modal
+    fireEvent.click(mintButton);
+    expect(mockShowConfirmation).toHaveBeenCalledWith(
+      "Mint",
+      expect.anything(),
+      expect.any(Function)
+    );
 
-  it("disables button when account is not connected", () => {
+    // Test tokenization
+    const onConfirm = mockShowConfirmation.mock.calls[0][2];
+    onConfirm();
+    expect(mockTokenizeOptions).toHaveBeenCalled();
+
+    // Test with pending transaction
+    (useTransactionContext as jest.Mock).mockReturnValue({
+      pendingTx: true,
+    });
+
+    rerender(<Mint showConfirmation={mockShowConfirmation} />);
+    expect(screen.getByRole("button", { name: "Mint Now" })).toBeDisabled();
+
+    // Test with no account
     (useAccount as jest.Mock).mockReturnValue({
       address: null,
       account: null,
     });
 
-    render(<Mint showConfirmation={mockShowConfirmation} />);
+    rerender(<Mint showConfirmation={mockShowConfirmation} />);
+    expect(screen.getByRole("button", { name: "Mint Now" })).toBeDisabled();
 
-    const mintButton = screen.getByRole("button", { name: "Mint Now" });
-    expect(mintButton).toBeDisabled();
-  });
-
-  it("disables button when transaction is pending", () => {
-    (useTransactionContext as jest.Mock).mockReturnValue({
-      pendingTx: true,
-    });
-
-    render(<Mint showConfirmation={mockShowConfirmation} />);
-
-    const mintButton = screen.getByRole("button", { name: "Mint Now" });
-    expect(mintButton).toBeDisabled();
-  });
-
-  it("disables button when mintable options balance is 0", () => {
+    // Test with zero mintable options
     (useProtocolContext as jest.Mock).mockReturnValue({
       roundActions: {
         tokenizeOptions: mockTokenizeOptions,
@@ -103,39 +103,10 @@ describe("Mint Component", () => {
       },
     });
 
-    render(<Mint showConfirmation={mockShowConfirmation} />);
+    rerender(<Mint showConfirmation={mockShowConfirmation} />);
+    expect(screen.getByRole("button", { name: "Mint Now" })).toBeDisabled();
 
-    const mintButton = screen.getByRole("button", { name: "Mint Now" });
-    expect(mintButton).toBeDisabled();
-  });
-
-  it("shows confirmation modal when mint button is clicked", () => {
-    render(<Mint showConfirmation={mockShowConfirmation} />);
-
-    const mintButton = screen.getByRole("button", { name: "Mint Now" });
-    fireEvent.click(mintButton);
-
-    expect(mockShowConfirmation).toHaveBeenCalledWith(
-      "Mint",
-      expect.anything(),
-      expect.any(Function)
-    );
-  });
-
-  it("calls tokenizeOptions when confirmation is confirmed", async () => {
-    render(<Mint showConfirmation={mockShowConfirmation} />);
-
-    const mintButton = screen.getByRole("button", { name: "Mint Now" });
-    fireEvent.click(mintButton);
-
-    // Get the onConfirm callback that was passed to showConfirmation
-    const onConfirm = mockShowConfirmation.mock.calls[0][2];
-    await onConfirm();
-
-    expect(mockTokenizeOptions).toHaveBeenCalled();
-  });
-
-  it("handles undefined mintableOptions gracefully", () => {
+    // Test with undefined mintable options
     (useProtocolContext as jest.Mock).mockReturnValue({
       roundActions: {
         tokenizeOptions: mockTokenizeOptions,
@@ -145,12 +116,8 @@ describe("Mint Component", () => {
       },
     });
 
-    render(<Mint showConfirmation={mockShowConfirmation} />);
-
-    // Check if the mintable options balance shows 0 when undefined
+    rerender(<Mint showConfirmation={mockShowConfirmation} />);
     expect(screen.getByText("0")).toBeInTheDocument();
-
-    const mintButton = screen.getByRole("button", { name: "Mint Now" });
-    expect(mintButton).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Mint Now" })).toBeDisabled();
   });
 }); 

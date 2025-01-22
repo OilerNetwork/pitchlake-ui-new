@@ -155,56 +155,56 @@ describe("PlaceBid Component", () => {
   });
 
   it("disables bid button when amount exceeds available options", () => {
-    render(<PlaceBid showConfirmation={mockShowConfirmation} />);
+    const { container } = render(<PlaceBid showConfirmation={mockShowConfirmation} />);
 
     // Enter amount exceeding available options
-    const amountInput = screen.getByPlaceholderText("e.g. 5000");
-    fireEvent.change(amountInput, { target: { value: "2000000000000000000" } });
+    const amountInput = container.querySelector(".amount-input");
+    fireEvent.change(amountInput!, { target: { value: "2000000000000000000" } });
 
     // Check if bid button is disabled
-    const bidButton = screen.getByText("Place Bid");
+    const bidButton = container.querySelector(".bid-button");
     expect(bidButton).toBeDisabled();
   });
 
   it("disables bid button when price is below reserve price", () => {
-    render(<PlaceBid showConfirmation={mockShowConfirmation} />);
+    const { container } = render(<PlaceBid showConfirmation={mockShowConfirmation} />);
 
     // Enter price below reserve price
-    const priceInput = screen.getByPlaceholderText("e.g. 0.3");
-    fireEvent.change(priceInput, { target: { value: "0.5" } });
+    const priceInput = container.querySelector(".price-input");
+    fireEvent.change(priceInput!, { target: { value: "0.5" } });
 
     // Check if bid button is disabled
-    const bidButton = screen.getByText("Place Bid");
+    const bidButton = container.querySelector(".bid-button");
     expect(bidButton).toBeDisabled();
   });
 
   it("shows confirmation modal when placing bid", () => {
-    render(<PlaceBid showConfirmation={mockShowConfirmation} />);
+    const { container } = render(<PlaceBid showConfirmation={mockShowConfirmation} />);
 
     // Enter valid amount and price
-    const amountInput = screen.getByPlaceholderText("e.g. 5000");
-    const priceInput = screen.getByPlaceholderText("e.g. 0.3");
+    const amountInput = container.querySelector(".amount-input");
+    const priceInput = container.querySelector(".price-input");
 
-    fireEvent.change(amountInput, { target: { value: "100" } });
-    fireEvent.change(priceInput, { target: { value: "2" } });
+    fireEvent.change(amountInput!, { target: { value: "100" } });
+    fireEvent.change(priceInput!, { target: { value: "2" } });
 
     // Click bid button
-    const bidButton = screen.getByText("Place Bid");
-    fireEvent.click(bidButton);
+    const bidButton = container.querySelector(".bid-button");
+    fireEvent.click(bidButton!);
 
     // Check if confirmation modal is shown
     expect(mockShowConfirmation).toHaveBeenCalled();
   });
 
   it("saves bid values to localStorage", () => {
-    render(<PlaceBid showConfirmation={mockShowConfirmation} />);
+    const { container } = render(<PlaceBid showConfirmation={mockShowConfirmation} />);
 
     // Enter values
-    const amountInput = screen.getByPlaceholderText("e.g. 5000");
-    const priceInput = screen.getByPlaceholderText("e.g. 0.3");
+    const amountInput = container.querySelector(".amount-input");
+    const priceInput = container.querySelector(".price-input");
 
-    fireEvent.change(amountInput, { target: { value: "100" } });
-    fireEvent.change(priceInput, { target: { value: "2" } });
+    fireEvent.change(amountInput!, { target: { value: "100" } });
+    fireEvent.change(priceInput!, { target: { value: "2" } });
 
     // Check if values are saved to localStorage
     expect(localStorage.getItem("bidAmount")).toBe("100");
@@ -216,13 +216,97 @@ describe("PlaceBid Component", () => {
     localStorage.setItem("bidAmount", "100");
     localStorage.setItem("bidPriceGwei", "2");
 
-    render(<PlaceBid showConfirmation={mockShowConfirmation} />);
+    const { container } = render(<PlaceBid showConfirmation={mockShowConfirmation} />);
 
     // Check if inputs have values from localStorage
+    const amountInput = container.querySelector(".amount-input");
+    const priceInput = container.querySelector(".price-input");
+
+    expect(amountInput).toHaveValue("100");
+    expect(priceInput).toHaveValue("2");
+  });
+
+  it("validates bid amount against available options", () => {
+    const { container } = render(<PlaceBid showConfirmation={mockShowConfirmation} />);
+
+    // Enter amount exceeding available options
+    const amountInput = container.querySelector(".amount-input");
+    fireEvent.change(amountInput!, { target: { value: "2000000000000000000" } });
+
+    // Verify error state
+    const errorMessage = container.querySelector(".amount-error");
+    expect(errorMessage).toHaveTextContent("Amount exceeds available options");
+  });
+
+  it("validates bid price against reserve price", () => {
+    const { container } = render(<PlaceBid showConfirmation={mockShowConfirmation} />);
+
+    // Enter price below reserve price
+    const priceInput = container.querySelector(".price-input");
+    fireEvent.change(priceInput!, { target: { value: "0.5" } });
+
+    // Verify error state
+    const errorMessage = container.querySelector(".price-error");
+    expect(errorMessage).toHaveTextContent("Price must be above reserve price");
+  });
+
+  it("calculates total cost correctly", () => {
+    const { container } = render(<PlaceBid showConfirmation={mockShowConfirmation} />);
+
+    // Enter valid amount and price
+    const amountInput = container.querySelector(".amount-input");
+    const priceInput = container.querySelector(".price-input");
+
+    fireEvent.change(amountInput!, { target: { value: "100" } });
+    fireEvent.change(priceInput!, { target: { value: "2" } });
+
+    // Verify total cost calculation
+    const totalCost = container.querySelector(".total-cost");
+    expect(totalCost).toHaveTextContent("Total Cost: 200 ETH");
+  });
+
+  it("shows confirmation with correct bid details", () => {
+    const { container } = render(<PlaceBid showConfirmation={mockShowConfirmation} />);
+
+    // Enter valid bid details
+    const amountInput = container.querySelector(".amount-input");
+    const priceInput = container.querySelector(".price-input");
+
+    fireEvent.change(amountInput!, { target: { value: "100" } });
+    fireEvent.change(priceInput!, { target: { value: "2" } });
+
+    // Submit bid
+    const bidButton = container.querySelector(".bid-button");
+    fireEvent.click(bidButton!);
+
+    // Verify confirmation details
+    expect(mockShowConfirmation).toHaveBeenCalledWith({
+      amount: "100",
+      price: "2",
+      totalCost: "200"
+    });
+  });
+
+  it("persists bid values in localStorage", () => {
+    // Set initial values
+    localStorage.setItem("bidAmount", "100");
+    localStorage.setItem("bidPriceGwei", "2");
+
+    render(<PlaceBid showConfirmation={mockShowConfirmation} />);
+
+    // Verify values are loaded
     const amountInput = screen.getByPlaceholderText("e.g. 5000");
     const priceInput = screen.getByPlaceholderText("e.g. 0.3");
 
     expect(amountInput).toHaveValue("100");
     expect(priceInput).toHaveValue("2");
+
+    // Update values
+    fireEvent.change(amountInput, { target: { value: "200" } });
+    fireEvent.change(priceInput, { target: { value: "3" } });
+
+    // Verify localStorage is updated
+    expect(localStorage.getItem("bidAmount")).toBe("200");
+    expect(localStorage.getItem("bidPriceGwei")).toBe("3");
   });
 }); 

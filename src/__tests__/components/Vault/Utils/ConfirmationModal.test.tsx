@@ -12,8 +12,8 @@ describe("ConfirmationModal Component", () => {
     jest.clearAllMocks();
   });
 
-  it("renders with provided content", () => {
-    render(
+  it("renders confirmation modal with correct content and handles interactions", () => {
+    const { container } = render(
       <ConfirmationModal
         modalHeader={mockModalHeader}
         action={mockAction}
@@ -22,41 +22,47 @@ describe("ConfirmationModal Component", () => {
       />
     );
 
-    expect(screen.getByText("Test Action")).toBeInTheDocument();
-    expect(screen.getByText((content, element) => {
+    // Check modal structure
+    const modal = container.firstChild;
+    expect(modal).toHaveClass("fixed", "inset-0", "bg-black", "bg-opacity-50", "backdrop-blur-sm");
+
+    // Check confirmation message
+    const message = screen.getByText((content, element) => {
       return element?.tagName.toLowerCase() === 'p' && 
              content.includes('Are you sure you want to') &&
              content.includes('Test Content');
-    })).toBeInTheDocument();
-    expect(screen.getByText("Confirm")).toBeInTheDocument();
-    expect(screen.getByText("Cancel")).toBeInTheDocument();
-  });
+    });
+    expect(message).toHaveClass("text-gray-400", "text-center", "text-[14px]");
 
-  it("calls onConfirm when confirm button is clicked", () => {
-    render(
-      <ConfirmationModal
-        modalHeader={mockModalHeader}
-        action={mockAction}
-        onConfirm={mockOnConfirm}
-        onClose={mockOnClose}
-      />
+    // Check buttons
+    const confirmButton = screen.getByText("Confirm");
+    const cancelButton = screen.getByText("Cancel");
+
+    expect(confirmButton).toHaveClass(
+      "bg-[#F5EBB8]",
+      "text-[#121212]",
+      "w-full",
+      "rounded-lg",
+      "py-3",
+      "font-medium"
+    );
+    expect(cancelButton).toHaveClass(
+      "border",
+      "border-[#595959]",
+      "text-[#fafafa]",
+      "w-full",
+      "rounded-lg",
+      "py-3",
+      "font-medium"
     );
 
-    fireEvent.click(screen.getByText("Confirm"));
-    expect(mockOnConfirm).toHaveBeenCalled();
-  });
+    // Test button interactions
+    fireEvent.click(confirmButton);
+    expect(mockOnConfirm).toHaveBeenCalledTimes(1);
+    expect(mockOnClose).not.toHaveBeenCalled();
 
-  it("calls onClose when cancel button is clicked", () => {
-    render(
-      <ConfirmationModal
-        modalHeader={mockModalHeader}
-        action={mockAction}
-        onConfirm={mockOnConfirm}
-        onClose={mockOnClose}
-      />
-    );
-
-    fireEvent.click(screen.getByText("Cancel"));
-    expect(mockOnClose).toHaveBeenCalled();
+    fireEvent.click(cancelButton);
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
+    expect(mockOnConfirm).toHaveBeenCalledTimes(1);
   });
 }); 

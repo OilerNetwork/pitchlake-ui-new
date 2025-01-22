@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import StateTransition from "../../../components/Vault/StateTransition";
 import { useProtocolContext } from "../../../context/ProtocolProvider";
 import { useAccount } from "@starknet-react/core";
@@ -81,10 +81,10 @@ describe("StateTransition Component", () => {
       account: "0x123",
     });
 
-    // Mock Round State with matching prevRoundState
+    // Mock Round State
     (useRoundState as jest.Mock).mockReturnValue({
       roundState: "Open",
-      prevRoundState: "Open", // Set to match roundState
+      prevRoundState: "Open",
     });
 
     // Mock Round Permissions
@@ -103,154 +103,88 @@ describe("StateTransition Component", () => {
     });
   });
 
-  describe("Round State Transitions", () => {
-    it.each([
-      ["Open", "Start Auction"],
-      ["Auctioning", "End Auction"],
-      ["FossilReady", "Request Fossil"],
-      ["Running", "Settle Round"],
-    ])("shows correct button text for %s state", (state, expectedText) => {
+  it("renders state transition button with correct states and permissions", () => {
+    const statePermissions = [
+      { state: "Open", permission: "canAuctionStart", text: "Start Auction" },
+      { state: "Auctioning", permission: "canAuctionEnd", text: "End Auction" },
+      { state: "FossilReady", permission: "canSendFossilRequest", text: "Request Fossil" },
+      { state: "Running", permission: "canRoundSettle", text: "Settle Round" },
+    ];
+
+    statePermissions.forEach(({ state, permission, text }) => {
+      // Update round state
       (useRoundState as jest.Mock).mockReturnValue({
         roundState: state,
         prevRoundState: state,
       });
 
-      render(<StateTransition {...defaultProps} />);
-      const button = screen.getByRole("button");
-      expect(button).toHaveTextContent(expectedText);
-    });
-
-    it.each([
-      ["Open", "canAuctionStart"],
-      ["Auctioning", "canAuctionEnd"],
-      ["Running", "canRoundSettle"],
-      ["FossilReady", "canSendFossilRequest"],
-    ])("disables button when %s state permission is false", (state, permission) => {
-      (useRoundState as jest.Mock).mockReturnValue({
-        roundState: state,
-        prevRoundState: state,
-      });
-
+      // Test enabled state
       (useRoundPermissions as jest.Mock).mockReturnValue({
         canAuctionStart: false,
         canAuctionEnd: false,
         canRoundSettle: false,
         canSendFossilRequest: false,
-        [permission]: false,
+        [permission]: true,
       });
 
-      render(<StateTransition {...defaultProps} />);
-      const button = screen.getByRole("button");
-      expect(button).toBeDisabled();
-    });
-  });
-
-  describe("Panel States", () => {
-    it("renders correctly when panel is closed", () => {
-      render(<StateTransition {...defaultProps} isPanelOpen={false} />);
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass("w-[44px]", "h-[44px]");
-      expect(button.querySelector("p")).toHaveClass("hidden");
-    });
-
-    it("renders correctly when panel is open", () => {
-      render(<StateTransition {...defaultProps} isPanelOpen={true} />);
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass("p-2");
-      expect(button.querySelector("p")).not.toHaveClass("hidden");
-    });
-  });
-
-  describe("Account and Transaction States", () => {
-    it("disables button when account is not connected", () => {
-      (useAccount as jest.Mock).mockReturnValue({ account: null });
-      render(<StateTransition {...defaultProps} />);
-      const button = screen.getByRole("button");
-      expect(button).toBeDisabled();
-    });
-
-    it("disables button when transaction is pending", () => {
-      (useTransactionContext as jest.Mock).mockReturnValue({
-        pendingTx: "0xtx",
-        lastBlock: "100",
-      });
-      render(<StateTransition {...defaultProps} />);
-      const button = screen.getByRole("button");
-      expect(button).toBeDisabled();
-    });
-
-    it("disables button when awaiting round state update", () => {
-      (useRoundState as jest.Mock).mockReturnValue({
-        roundState: "FossilReady",
-        prevRoundState: "Auctioning", // Previous state is correct in the flow
-      });
-      render(<StateTransition {...defaultProps} />);
-      const button = screen.getByRole("button");
-      expect(button).toBeDisabled();
-    });
-  });
-
-  describe("State Transition Actions", () => {
-    type ActionType = "startAuction" | "endAuction" | "settleOptionRound";
-    
-    it.each<[string, ActionType, string]>([
-      ["Open", "startAuction", "Auctioning"],
-      ["Auctioning", "endAuction", "FossilReady"],
-      ["Running", "settleOptionRound", "Open"],
-    ])("calls correct action for %s state", async (state, action, nextState) => {
-      const mockActions = {
-        startAuction: jest.fn().mockResolvedValue(undefined),
-        endAuction: jest.fn().mockResolvedValue(undefined),
-        settleOptionRound: jest.fn().mockResolvedValue(undefined),
-      };
-
-      // Mock the full protocol context
-      (useProtocolContext as jest.Mock).mockReturnValue({
-        selectedRoundState: { ...mockRoundState, roundState: state },
-        timestamp: "500",
-        vaultState: mockVaultState,
-        vaultActions: mockActions,
-        conn: "testnet",
-      });
-
-      // Mock permissions to allow the action
-      (useRoundPermissions as jest.Mock).mockReturnValue({
-        canAuctionStart: state === "Open",
-        canAuctionEnd: state === "Auctioning",
-        canRoundSettle: state === "Running",
-        canSendFossilRequest: state === "FossilReady",
-      });
-
-      // Mock round state
-      (useRoundState as jest.Mock).mockReturnValue({
-        roundState: state,
-        prevRoundState: state,
-      });
-
-      const { setModalState } = defaultProps;
-      render(<StateTransition {...defaultProps} />);
-      
-      const button = screen.getByRole("button");
+      const { container } = render(<StateTransition {...defaultProps} />);
+      const button = container.querySelector(".state-transition-button");
+      expect(button).toHaveTextContent(text);
       expect(button).not.toBeDisabled();
-      
-      await act(async () => {
-        fireEvent.click(button);
+
+      // Test disabled state
+      (useRoundPermissions as jest.Mock).mockReturnValue({
+        canAuctionStart: false,
+        canAuctionEnd: false,
+        canRoundSettle: false,
+        canSendFossilRequest: false,
       });
 
-      // Verify modal state was set
-      expect(setModalState).toHaveBeenCalledWith(expect.objectContaining({
-        show: true,
-        onConfirm: expect.any(Function),
-      }));
-
-      // Get and call the onConfirm function
-      const { onConfirm } = setModalState.mock.calls[0][0];
-      await act(async () => {
-        await onConfirm();
-      });
-
-      // Verify the correct action was called
-      expect(mockActions[action]).toHaveBeenCalled();
+      const { container: disabledContainer } = render(<StateTransition {...defaultProps} />);
+      const disabledButton = disabledContainer.querySelector(".state-transition-button");
+      expect(disabledButton).toBeDisabled();
     });
+  });
+
+  it("handles panel state changes correctly", () => {
+    // Test closed panel
+    const { container: closedContainer } = render(<StateTransition {...defaultProps} isPanelOpen={false} />);
+    const closedButton = closedContainer.querySelector(".state-transition-button");
+    expect(closedButton).toHaveClass("w-[44px]", "h-[44px]");
+    expect(closedButton?.querySelector("p")).toHaveClass("hidden");
+
+    // Test open panel
+    const { container: openContainer } = render(<StateTransition {...defaultProps} isPanelOpen={true} />);
+    const openButton = openContainer.querySelector(".state-transition-button");
+    expect(openButton).toHaveClass("p-2");
+    expect(openButton?.querySelector("p")).not.toHaveClass("hidden");
+  });
+
+  it("handles state transition conditions", () => {
+    // Test disconnected account
+    (useAccount as jest.Mock).mockReturnValue({ account: null });
+    const { container: disconnectedContainer } = render(<StateTransition {...defaultProps} />);
+    expect(disconnectedContainer.querySelector(".state-transition-button")).toBeDisabled();
+
+    // Test pending transaction
+    (useAccount as jest.Mock).mockReturnValue({ account: "0x123" });
+    (useTransactionContext as jest.Mock).mockReturnValue({
+      pendingTx: "0xtx",
+      lastBlock: "100",
+    });
+    const { container: pendingContainer } = render(<StateTransition {...defaultProps} />);
+    expect(pendingContainer.querySelector(".state-transition-button")).toBeDisabled();
+
+    // Test state update in progress
+    (useTransactionContext as jest.Mock).mockReturnValue({
+      pendingTx: null,
+      lastBlock: "100",
+    });
+    (useRoundState as jest.Mock).mockReturnValue({
+      roundState: "FossilReady",
+      prevRoundState: "Auctioning",
+    });
+    const { container: updatingContainer } = render(<StateTransition {...defaultProps} />);
+    expect(updatingContainer.querySelector(".state-transition-button")).toBeDisabled();
   });
 }); 

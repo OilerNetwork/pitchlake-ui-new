@@ -13,50 +13,55 @@ describe("Footer Component", () => {
     (useIsMobile as jest.Mock).mockReturnValue({ isMobile: false });
   });
 
-  it("renders copyright text", () => {
-    render(<Footer />);
-    const currentYear = new Date().getFullYear();
-    expect(screen.getByText(`Copyright © ${currentYear} by Oiler`)).toBeInTheDocument();
-  });
-
-  it("renders all navigation links", () => {
-    render(<Footer />);
+  it("renders footer with navigation and social links", () => {
+    const { container } = render(<Footer />);
     
-    const links = [
+    // Check footer container
+    const footer = container.querySelector(".flex.flex-col.md\\:flex-row");
+    expect(footer).toBeInTheDocument();
+
+    // Check copyright section
+    const currentYear = new Date().getFullYear();
+    const copyright = footer?.querySelector(".text-sm.text-[var\\(--buttongrey\\)]");
+    expect(copyright).toHaveTextContent(`Copyright © ${currentYear} by Oiler`);
+
+    // Check navigation links
+    const navLinks = [
       { text: "Terms of Service", href: "/terms" },
       { text: "Legal & Risk Disclosure", href: "/legal" },
       { text: "Privacy Policy", href: "/privacy" },
       { text: "Documentation", href: "/docs" },
     ];
 
-    links.forEach(link => {
-      const element = screen.getByText(link.text);
-      expect(element).toBeInTheDocument();
-      expect(element.closest('a')).toHaveAttribute('href', link.href);
-    });
-  });
+    const navigation = footer?.querySelector(".flex.flex-col.md\\:flex-row.gap-4");
+    expect(navigation).toBeInTheDocument();
 
-  it("renders social media links", () => {
-    const { container } = render(<Footer />);
-    
+    navLinks.forEach(({ text, href }) => {
+      const link = navigation?.querySelector(`a[href="${href}"]`);
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveTextContent(text);
+      expect(link).toHaveClass("text-sm", "text-[var(--buttongrey)]", "hover:text-white");
+    });
+
+    // Check social links
     const socialLinks = [
-      { href: "https://twitter.com/OilerNetwork", testId: "twitter-link" },
-      { href: "https://discord.com/invite/qd5AAJPBsq", testId: "discord-link" },
-      { href: "https://t.me/oiler_official", testId: "telegram-link" },
+      { href: "https://twitter.com/OilerNetwork", className: "twitter" },
+      { href: "https://discord.com/invite/qd5AAJPBsq", className: "discord" },
+      { href: "https://t.me/oiler_official", className: "telegram" },
     ];
 
-    // Find all social media links
-    const socialIcons = container.querySelectorAll('.flex.items-center.gap-4.ml-4 a');
-    expect(socialIcons).toHaveLength(socialLinks.length);
+    const socialContainer = footer?.querySelector(".flex.gap-4");
+    expect(socialContainer).toBeInTheDocument();
 
-    // Check each link's href
-    socialIcons.forEach((icon, index) => {
-      expect(icon).toHaveAttribute('href', socialLinks[index].href);
-      expect(icon).toHaveAttribute('target', '_blank');
+    socialLinks.forEach(({ href, className }) => {
+      const link = socialContainer?.querySelector(`a[href="${href}"]`);
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link?.querySelector(`.${className}-icon`)).toBeInTheDocument();
     });
   });
 
-  it("does not render when isMobile is true", () => {
+  it("does not render on mobile", () => {
     (useIsMobile as jest.Mock).mockReturnValue({ isMobile: true });
     const { container } = render(<Footer />);
     expect(container.firstChild).toBeNull();

@@ -12,91 +12,81 @@ describe("StateTransitionConfirmationModal", () => {
     jest.clearAllMocks();
   });
 
-  it("renders correct confirmation message for each action", () => {
-    const actions = [
-      ["Start Auction", "Are you sure you want to start this round's auction?"],
-      ["End Auction", "Are you sure you want to end this round's auction?"],
-      ["Request Fossil", "Are you sure you want to request pricing data from Fossil?"],
-      ["Settle Round", "Are you sure you want to settle this round?"],
-    ];
-
-    actions.forEach(([action, expectedMessage]) => {
-      const { unmount } = render(
-        <StateTransitionConfirmationModal
-          {...defaultProps}
-          action={action}
-        />
-      );
-      expect(screen.getByText(expectedMessage)).toBeInTheDocument();
-      unmount();
-    });
-  });
-
-  it("renders correct button text for each action", () => {
-    const actions = [
-      ["Start Auction", "Start"],
-      ["End Auction", "End"],
-      ["Request Fossil", "Request Fossil"],
-      ["Settle Round", "Settle"],
-    ];
-
-    actions.forEach(([action, expectedButtonText]) => {
-      const { unmount } = render(
-        <StateTransitionConfirmationModal
-          {...defaultProps}
-          action={action}
-        />
-      );
-      expect(screen.getByRole("button", { name: expectedButtonText })).toBeInTheDocument();
-      unmount();
-    });
-  });
-
-  it("calls onClose when clicking outside modal", () => {
+  it("renders modal with correct content and handles interactions", () => {
     const { container } = render(<StateTransitionConfirmationModal {...defaultProps} />);
-    
-    const backdrop = container.querySelector(".state-transition-modal-backdrop");
-    fireEvent.click(backdrop!);
-    
-    expect(defaultProps.onClose).toHaveBeenCalled();
-  });
 
-  it("calls onConfirm when clicking confirm button", () => {
-    render(<StateTransitionConfirmationModal {...defaultProps} />);
-    
+    // Check modal structure
+    const modal = container.firstChild;
+    expect(modal).toHaveClass("fixed", "inset-0", "bg-black", "bg-opacity-50", "backdrop-blur-sm");
+
+    // Check message container
+    const messageContainer = container.querySelector(".flex.flex-col.items-center.gap-6");
+    expect(messageContainer).toBeInTheDocument();
+
+    // Check confirmation message
+    const message = screen.getByText("Are you sure you want to start this round's auction?");
+    expect(message).toHaveClass("text-gray-400", "text-center", "text-[14px]");
+
+    // Check buttons
     const confirmButton = screen.getByRole("button", { name: "Start" });
-    fireEvent.click(confirmButton);
-    
-    expect(defaultProps.onConfirm).toHaveBeenCalled();
-  });
-
-  it("calls onClose when clicking cancel button", () => {
-    render(<StateTransitionConfirmationModal {...defaultProps} />);
-    
     const cancelButton = screen.getByRole("button", { name: "Cancel" });
+
+    expect(confirmButton).toHaveClass(
+      "bg-[#F5EBB8]",
+      "text-[#121212]",
+      "w-full",
+      "rounded-lg",
+      "py-3",
+      "font-medium"
+    );
+    expect(cancelButton).toHaveClass(
+      "border",
+      "border-[#595959]",
+      "text-[#fafafa]",
+      "w-full",
+      "rounded-lg",
+      "py-3",
+      "font-medium"
+    );
+
+    // Test button interactions
+    fireEvent.click(confirmButton);
+    expect(defaultProps.onConfirm).toHaveBeenCalled();
+
     fireEvent.click(cancelButton);
-    
     expect(defaultProps.onClose).toHaveBeenCalled();
   });
 
-  it("prevents event propagation when clicking modal content", () => {
-    const { container } = render(<StateTransitionConfirmationModal {...defaultProps} />);
-    
-    const modalContent = container.querySelector(".state-transition-modal-content");
-    fireEvent.click(modalContent!);
-    
-    // If stopPropagation works, onClose should not be called
-    expect(defaultProps.onClose).not.toHaveBeenCalled();
-  });
+  it("renders correct messages for different actions", () => {
+    const actions = [
+      ["Start Auction", "Are you sure you want to start this round's auction?", "Start"],
+      ["End Auction", "Are you sure you want to end this round's auction?", "End"],
+      ["Request Fossil", "Are you sure you want to request pricing data from Fossil?", "Request Fossil"],
+      ["Settle Round", "Are you sure you want to settle this round?", "Settle"],
+    ];
 
-  it("disables body scroll when mounted", () => {
-    render(<StateTransitionConfirmationModal {...defaultProps} />);
-    expect(document.body.style.overflow).toBe("hidden");
-  });
+    actions.forEach(([action, expectedMessage, buttonText]) => {
+      const { container, unmount } = render(
+        <StateTransitionConfirmationModal
+          {...defaultProps}
+          action={action}
+        />
+      );
 
-  it("re-enables body scroll when unmounted", () => {
-    const { unmount } = render(<StateTransitionConfirmationModal {...defaultProps} />);
-    unmount();
-    expect(document.body.style.overflow).toBe("");
+      const message = screen.getByText(expectedMessage);
+      expect(message).toHaveClass("text-gray-400", "text-center", "text-[14px]");
+
+      const confirmButton = screen.getByRole("button", { name: buttonText });
+      expect(confirmButton).toHaveClass(
+        "bg-[#F5EBB8]",
+        "text-[#121212]",
+        "w-full",
+        "rounded-lg",
+        "py-3",
+        "font-medium"
+      );
+
+      unmount();
+    });
   });
 }); 

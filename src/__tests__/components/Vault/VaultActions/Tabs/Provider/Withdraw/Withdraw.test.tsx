@@ -24,78 +24,67 @@ jest.mock("@/components/Vault/VaultActions/Tabs/Provider/Withdraw/WithdrawStash"
   default: () => <div data-testid="withdraw-stash">WithdrawStash</div>,
 }));
 
-describe("Withdraw", () => {
+describe("Withdraw Component", () => {
   const mockShowConfirmation = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("renders with initial state (Liquidity tab)", () => {
+  it("renders correct tabs based on round state", () => {
+    // Test Auctioning state
     (useProtocolContext as jest.Mock).mockReturnValue({
       selectedRoundState: { roundState: "Auctioning" },
     });
 
-    render(<Withdraw showConfirmation={mockShowConfirmation} />);
-
-    // Check if tabs are rendered
+    const { rerender } = render(<Withdraw showConfirmation={mockShowConfirmation} />);
     expect(screen.getByText("Liquidity")).toBeInTheDocument();
     expect(screen.getByText("Queue")).toBeInTheDocument();
     expect(screen.getByText("Collect")).toBeInTheDocument();
 
-    // Check if WithdrawLiquidity is rendered by default
-    expect(screen.getByTestId("withdraw-liquidity")).toBeInTheDocument();
-  });
-
-  it("shows only Liquidity and Collect tabs when not in Auctioning or Running state", () => {
+    // Test Settled state
     (useProtocolContext as jest.Mock).mockReturnValue({
       selectedRoundState: { roundState: "Settled" },
     });
-
-    render(<Withdraw showConfirmation={mockShowConfirmation} />);
-
-    // Check if correct tabs are rendered
+    rerender(<Withdraw showConfirmation={mockShowConfirmation} />);
     expect(screen.getByText("Liquidity")).toBeInTheDocument();
     expect(screen.getByText("Collect")).toBeInTheDocument();
     expect(screen.queryByText("Queue")).not.toBeInTheDocument();
   });
 
-  it("switches to Queue tab and renders QueueWithdrawal component", () => {
+  it("shows correct component when switching tabs", () => {
     (useProtocolContext as jest.Mock).mockReturnValue({
       selectedRoundState: { roundState: "Auctioning" },
     });
 
     render(<Withdraw showConfirmation={mockShowConfirmation} />);
 
-    // Click Queue tab
+    // Default tab (Liquidity)
+    expect(screen.getByTestId("withdraw-liquidity")).toBeInTheDocument();
+
+    // Switch to Queue tab
     fireEvent.click(screen.getByText("Queue"));
-
-    // Check if QueueWithdrawal is rendered
     expect(screen.getByTestId("queue-withdrawal")).toBeInTheDocument();
-  });
 
-  it("switches to Collect tab and renders WithdrawStash component", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      selectedRoundState: { roundState: "Auctioning" },
-    });
-
-    render(<Withdraw showConfirmation={mockShowConfirmation} />);
-
-    // Click Collect tab
+    // Switch to Collect tab
     fireEvent.click(screen.getByText("Collect"));
-
-    // Check if WithdrawStash is rendered
     expect(screen.getByTestId("withdraw-stash")).toBeInTheDocument();
   });
 
-  it("does not show Queue tab content when not in Auctioning or Running state", () => {
+  it("maintains correct tab visibility based on round state", () => {
     (useProtocolContext as jest.Mock).mockReturnValue({
       selectedRoundState: { roundState: "Settled" },
     });
 
     render(<Withdraw showConfirmation={mockShowConfirmation} />);
 
-    // Try to find Queue tab content (should not exist)
+    // Queue tab and its content should not be visible
+    expect(screen.queryByText("Queue")).not.toBeInTheDocument();
     expect(screen.queryByTestId("queue-withdrawal")).not.toBeInTheDocument();
+
+    // Other tabs should be visible
+    expect(screen.getByTestId("withdraw-liquidity")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Collect"));
+    expect(screen.getByTestId("withdraw-stash")).toBeInTheDocument();
   });
 }); 

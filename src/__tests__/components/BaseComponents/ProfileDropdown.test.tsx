@@ -1,16 +1,22 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import ProfileDropdown from "../../../components/BaseComponents/ProfileDropdown";
 
+// Mock the icons
+jest.mock("lucide-react", () => ({
+  CopyIcon: () => <div className="copy-icon" />,
+  LogOutIcon: () => <div className="logout-icon" />,
+}));
+
 describe("ProfileDropdown Component", () => {
   const mockProps = {
     account: {
-      address: "0x1234567890abcdef1234567890abcdef12345678",
+      address: "0x123456789abcdef",
     },
     balance: {
-      wallet: "1.5",
-      locked: "0.5",
-      unlocked: "0.3",
-      stashed: "0.2",
+      wallet: "1.000",
+      locked: "0.500",
+      unlocked: "0.300",
+      stashed: "0.200",
     },
     disconnect: jest.fn(),
     copyToClipboard: jest.fn(),
@@ -20,61 +26,45 @@ describe("ProfileDropdown Component", () => {
     jest.clearAllMocks();
   });
 
-  it("renders the truncated wallet address", () => {
-    render(<ProfileDropdown {...mockProps} />);
+  it("renders dropdown with account info and handles interactions", () => {
+    const { container } = render(<ProfileDropdown {...mockProps} />);
     
-    const truncatedAddress = `${mockProps.account.address.slice(0, 6)}...${mockProps.account.address.slice(-4)}`;
-    expect(screen.getByText(truncatedAddress)).toBeInTheDocument();
-  });
-
-  it("displays all balance information correctly", () => {
-    render(<ProfileDropdown {...mockProps} />);
+    // Check dropdown container
+    const dropdown = container.firstChild as HTMLElement;
+    expect(dropdown).toHaveClass("absolute", "right-0", "mt-2", "w-64", "bg-black", "rounded-md");
     
-    expect(screen.getByText("MY BALANCE")).toBeInTheDocument();
-    expect(screen.getByText("1.5 ETH")).toBeInTheDocument();
-    expect(screen.getByText("0.5 ETH")).toBeInTheDocument();
-    expect(screen.getByText("0.3 ETH")).toBeInTheDocument();
-    expect(screen.getByText("0.2 ETH")).toBeInTheDocument();
-  });
-
-  it("calls copyToClipboard when clicking the address", () => {
-    render(<ProfileDropdown {...mockProps} />);
+    // Check account section
+    const accountSection = dropdown.querySelector(".text-sm.text-white.border-b");
+    expect(accountSection).toBeInTheDocument();
+    expect(accountSection).toHaveTextContent("0x1234...cdef");
+    expect(accountSection?.querySelector(".copy-icon")).toBeInTheDocument();
     
-    const addressElement = screen.getByText(`${mockProps.account.address.slice(0, 6)}...${mockProps.account.address.slice(-4)}`);
-    fireEvent.click(addressElement.parentElement!);
-    
+    // Test copy address
+    fireEvent.click(accountSection!);
     expect(mockProps.copyToClipboard).toHaveBeenCalledWith(mockProps.account.address);
-  });
 
-  it("calls disconnect when clicking the disconnect button", () => {
-    render(<ProfileDropdown {...mockProps} />);
+    // Check balance sections
+    const balanceSection = dropdown.querySelector(".text-sm.text-\\[var\\(--buttonwhite\\)\\]");
+    expect(balanceSection).toBeInTheDocument();
     
-    const disconnectButton = screen.getByText("Disconnect").parentElement!;
-    fireEvent.click(disconnectButton);
-    
-    expect(mockProps.disconnect).toHaveBeenCalled();
-  });
+    const balances = [
+      { label: "Wallet", value: "1.000" },
+      { label: "Locked", value: "0.500" },
+      { label: "Unlocked", value: "0.300" },
+      { label: "Stashed", value: "0.200" },
+    ];
 
-  it("renders all balance labels correctly", () => {
-    render(<ProfileDropdown {...mockProps} />);
-    
-    const labels = ["Wallet", "Locked", "Unlocked", "Stashed"];
-    labels.forEach(label => {
-      expect(screen.getByText(label)).toBeInTheDocument();
+    balances.forEach(({ label, value }) => {
+      const row = screen.getByText(label).closest(".flex.justify-between");
+      expect(row).toBeInTheDocument();
+      expect(row).toHaveTextContent(`${value} ETH`);
     });
-  });
 
-  it("renders icons", () => {
-    render(<ProfileDropdown {...mockProps} />);
+    // Test disconnect
+    const disconnectButton = screen.getByText("Disconnect").closest(".text-sm.text-white");
+    expect(disconnectButton?.querySelector(".logout-icon")).toBeInTheDocument();
     
-    // Find icons by their parent elements
-    const copyIconContainer = screen.getByText((content, element) => {
-      return element?.tagName.toLowerCase() === 'span' && 
-             content.includes(mockProps.account.address.slice(0, 6));
-    }).parentElement;
-    expect(copyIconContainer?.querySelector('svg')).toBeInTheDocument();
-
-    const logoutIconContainer = screen.getByText('Disconnect').parentElement;
-    expect(logoutIconContainer?.querySelector('svg')).toBeInTheDocument();
+    fireEvent.click(disconnectButton!);
+    expect(mockProps.disconnect).toHaveBeenCalled();
   });
 }); 

@@ -3,16 +3,14 @@ import useLatestTimestamp from "@/hooks/chain/useLatestTimestamp";
 import { ProviderInterface } from "starknet";
 
 describe("useLatestTimestamp", () => {
-  // Mock provider with properly typed mock function
-  const mockGetBlock = jest.fn() as jest.MockedFunction<ProviderInterface["getBlock"]>;
+  // Mock provider
   const mockProvider = {
-    getBlock: mockGetBlock,
-  } as unknown as ProviderInterface;
+    getBlock: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
-    mockGetBlock.mockResolvedValue({ timestamp: 1000 } as any);
   });
 
   afterEach(() => {
@@ -25,105 +23,114 @@ describe("useLatestTimestamp", () => {
   });
 
   it("fetches initial timestamp on mount", async () => {
-    const { result } = renderHook(() => useLatestTimestamp(mockProvider));
+    const mockTimestamp = 1234567890;
+    mockProvider.getBlock.mockResolvedValueOnce({ timestamp: mockTimestamp });
 
-    // Wait for initial fetch
+    const { result } = renderHook(() => useLatestTimestamp(mockProvider as any));
+
+    // Wait for the initial fetch
     await act(async () => {
       await Promise.resolve();
     });
 
-    expect(mockGetBlock).toHaveBeenCalledWith("latest");
-    expect(result.current.timestamp).toBe(1000);
+    expect(mockProvider.getBlock).toHaveBeenCalledWith("latest");
+    expect(result.current.timestamp).toBe(mockTimestamp);
   });
 
   it("updates timestamp at specified interval", async () => {
-    const { result } = renderHook(() => useLatestTimestamp(mockProvider, 5000));
+    const timestamps = [1000, 2000, 3000];
+    let callCount = 0;
+    mockProvider.getBlock.mockImplementation(async () => ({
+      timestamp: timestamps[callCount++],
+    }));
+
+    const interval = 5000; // 5 seconds
+    const { result } = renderHook(() => useLatestTimestamp(mockProvider as any, interval));
 
     // Wait for initial fetch
     await act(async () => {
       await Promise.resolve();
     });
+    expect(result.current.timestamp).toBe(timestamps[0]);
 
-    // Update mock to return a different timestamp
-    mockGetBlock.mockResolvedValue({ timestamp: 2000 } as any);
-
-    // Fast-forward past interval
+    // Advance timer by interval and check next update
     await act(async () => {
-      jest.advanceTimersByTime(5000);
+      jest.advanceTimersByTime(interval);
       await Promise.resolve();
     });
+    expect(result.current.timestamp).toBe(timestamps[1]);
 
-    expect(mockGetBlock).toHaveBeenCalledTimes(2);
-    expect(result.current.timestamp).toBe(2000);
+    // Advance timer again and check third update
+    await act(async () => {
+      jest.advanceTimersByTime(interval);
+      await Promise.resolve();
+    });
+    expect(result.current.timestamp).toBe(timestamps[2]);
   });
 
-  it("handles provider error", async () => {
-    const consoleLogSpy = jest.spyOn(console, "log");
-    mockGetBlock.mockRejectedValue(new Error("Failed to fetch block"));
+  it("handles provider errors gracefully", async () => {
+    const consoleSpy = jest.spyOn(console, "log").mockImplementation();
+    const mockError = new Error("Failed to fetch block");
+    mockProvider.getBlock.mockRejectedValueOnce(mockError);
 
-    const { result } = renderHook(() => useLatestTimestamp(mockProvider));
+    const { result } = renderHook(() => useLatestTimestamp(mockProvider as any));
 
-    // Wait for initial fetch
+    // Wait for the initial fetch
     await act(async () => {
       await Promise.resolve();
     });
 
-    expect(consoleLogSpy).toHaveBeenCalledWith(new Error("Failed to fetch block"));
-    expect(result.current.timestamp).toBe(0);
+    expect(consoleSpy).toHaveBeenCalledWith(mockError);
+    expect(result.current.timestamp).toBe(0); // Should keep default value
+    consoleSpy.mockRestore();
   });
 
   it("cleans up interval on unmount", async () => {
-    const { unmount } = renderHook(() => useLatestTimestamp(mockProvider, 5000));
+    const { unmount } = renderHook(() => useLatestTimestamp(mockProvider as any));
 
     // Wait for initial fetch
     await act(async () => {
       await Promise.resolve();
     });
 
-    const initialCallCount = mockGetBlock.mock.calls.length;
+    // Clear mock calls from initial fetch
+    mockProvider.getBlock.mockClear();
 
-    // Unmount
+    // Unmount and advance timer
     unmount();
-
-    // Fast-forward past interval
     await act(async () => {
       jest.advanceTimersByTime(5000);
       await Promise.resolve();
     });
 
-    // Should not have made any more calls after unmount
-    expect(mockGetBlock.mock.calls.length).toBe(initialCallCount);
+    // Should not make any more calls after unmount
+    expect(mockProvider.getBlock).not.toHaveBeenCalled();
   });
 
-  it("updates when provider changes", async () => {
-    const newMockGetBlock = jest.fn().mockResolvedValue({ timestamp: 3000 } as any) as jest.MockedFunction<ProviderInterface["getBlock"]>;
-    const newMockProvider = {
-      getBlock: newMockGetBlock,
-    } as unknown as ProviderInterface;
+  it("reinitializes when provider changes", async () => {
+    const mockTimestamp1 = 1000;
+    const mockTimestamp2 = 2000;
+    const mockProvider1 = { getBlock: jest.fn().mockResolvedValue({ timestamp: mockTimestamp1 }) };
+    const mockProvider2 = { getBlock: jest.fn().mockResolvedValue({ timestamp: mockTimestamp2 }) };
 
     const { result, rerender } = renderHook(
-      ({ provider }) => useLatestTimestamp(provider),
+      ({ provider }) => useLatestTimestamp(provider as any),
       {
-        initialProps: { provider: mockProvider },
+        initialProps: { provider: mockProvider1 },
       }
     );
 
-    // Wait for initial fetch
+    // Wait for initial fetch with first provider
     await act(async () => {
       await Promise.resolve();
     });
+    expect(result.current.timestamp).toBe(mockTimestamp1);
 
-    expect(result.current.timestamp).toBe(1000);
-
-    // Change provider
-    rerender({ provider: newMockProvider });
-
-    // Wait for new fetch
+    // Change provider and wait for new fetch
+    rerender({ provider: mockProvider2 });
     await act(async () => {
       await Promise.resolve();
     });
-
-    expect(newMockGetBlock).toHaveBeenCalledWith("latest");
-    expect(result.current.timestamp).toBe(3000);
+    expect(result.current.timestamp).toBe(mockTimestamp2);
   });
 }); 

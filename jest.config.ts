@@ -11,13 +11,16 @@ const config: Config = {
   testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
+    "^@starknet-react/core$": "<rootDir>/node_modules/@starknet-react/core/dist/index.js",
+    "^@starknet-react/chains$": "<rootDir>/node_modules/@starknet-react/chains/dist/index.js"
   },
   transform: {
     "^.+\\.(js|jsx|ts|tsx)$": ["babel-jest", { presets: ["next/babel"] }],
   },
   transformIgnorePatterns: [
-    "/node_modules/(?!(@starknet-react|get-starknet-core|starknet|@scure/starknet)/)",
+    "node_modules/(?!(@starknet-react|get-starknet-core|starknet|@scure/starknet|eventemitter3)/)"
   ],
+  moduleDirectories: ["node_modules", "<rootDir>"]
 };
 
 export default config;

@@ -33,76 +33,79 @@ describe("Exercise Component", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
 
-    // Mock useAccount hook
-    (useAccount as jest.Mock).mockReturnValue({
-      address: "0x123",
-      account: true,
-    });
-
-    // Mock useProtocolContext hook
+  it("renders exercise component with correct states and handles interactions", () => {
+    // Test with valid state
     (useProtocolContext as jest.Mock).mockReturnValue({
       roundActions: {
         exerciseOptions: mockExerciseOptions,
       },
       selectedRoundBuyerState: {
-        mintableOptions: "1000000000000000000", // 1 ETH worth of options
-        hasMinted: false,
+        mintableOptions: "1000",
+        hasMinted: true,
       },
       selectedRoundState: {
         address: "0x456",
-        payoutPerOption: "2000000000000000000", // 2 ETH payout per option
+        payoutPerOption: "1000000000000000000", // 1 ETH
       },
       vaultAddress: "0x789",
     });
 
-    // Mock useTransactionContext hook
+    (useERC20 as jest.Mock).mockReturnValue({
+      balance: "2000000000000000000", // 2 ETH
+    });
+
     (useTransactionContext as jest.Mock).mockReturnValue({
       pendingTx: false,
     });
 
-    // Mock useERC20 hook
-    (useERC20 as jest.Mock).mockReturnValue({
-      balance: "500000000000000000", // 0.5 ETH worth of options
+    (useAccount as jest.Mock).mockReturnValue({
+      address: "0x123",
+      account: {
+        address: "0x123",
+      },
     });
-  });
 
-  it("renders with initial state", () => {
-    const { container } = render(<Exercise showConfirmation={mockShowConfirmation} />);
+    const { container, rerender } = render(<Exercise showConfirmation={mockShowConfirmation} />);
 
-    // Check if the exercise icon is rendered
-    expect(container.querySelector(".exercise-options-icon")).toBeInTheDocument();
-
-    // Check if the exercise button is rendered and enabled
+    // Check initial render
     const exerciseButton = screen.getByText("Exercise Now");
-    expect(exerciseButton).toBeInTheDocument();
-    expect(exerciseButton).not.toBeDisabled();
-  });
+    expect(exerciseButton).toBeEnabled();
 
-  it("disables button when account is not connected", () => {
+    // Test confirmation modal
+    fireEvent.click(exerciseButton);
+    expect(mockShowConfirmation).toHaveBeenCalledWith(
+      "Exercise Options",
+      expect.anything(),
+      expect.any(Function)
+    );
+
+    // Get and call the onConfirm callback
+    const onConfirm = mockShowConfirmation.mock.calls[0][2];
+    onConfirm();
+    expect(mockExerciseOptions).toHaveBeenCalledWith({
+      account: "0x123",
+    });
+
+    // Test with pending transaction
+    (useTransactionContext as jest.Mock).mockReturnValue({
+      pendingTx: true,
+    });
+
+    rerender(<Exercise showConfirmation={mockShowConfirmation} />);
+    expect(screen.getByText("Exercise Now")).toBeDisabled();
+
+    // Test with no account
     (useAccount as jest.Mock).mockReturnValue({
       address: null,
       account: null,
     });
 
-    render(<Exercise showConfirmation={mockShowConfirmation} />);
+    rerender(<Exercise showConfirmation={mockShowConfirmation} />);
+    expect(screen.getByText("Exercise Now")).toBeDisabled();
 
-    const exerciseButton = screen.getByText("Exercise Now");
-    expect(exerciseButton).toBeDisabled();
-  });
-
-  it("disables button when transaction is pending", () => {
-    (useTransactionContext as jest.Mock).mockReturnValue({
-      pendingTx: true,
-    });
-
-    render(<Exercise showConfirmation={mockShowConfirmation} />);
-
-    const exerciseButton = screen.getByText("Exercise Now");
-    expect(exerciseButton).toBeDisabled();
-  });
-
-  it("disables button when payout balance is 0", () => {
+    // Test with zero payout balance
     (useProtocolContext as jest.Mock).mockReturnValue({
       roundActions: {
         exerciseOptions: mockExerciseOptions,
@@ -122,35 +125,7 @@ describe("Exercise Component", () => {
       balance: "0",
     });
 
-    render(<Exercise showConfirmation={mockShowConfirmation} />);
-
-    const exerciseButton = screen.getByText("Exercise Now");
-    expect(exerciseButton).toBeDisabled();
-  });
-
-  it("shows confirmation modal when exercise button is clicked", () => {
-    render(<Exercise showConfirmation={mockShowConfirmation} />);
-
-    const exerciseButton = screen.getByText("Exercise Now");
-    fireEvent.click(exerciseButton);
-
-    expect(mockShowConfirmation).toHaveBeenCalledWith(
-      "Exercise",
-      expect.anything(),
-      expect.any(Function)
-    );
-  });
-
-  it("calls exerciseOptions when confirmation is confirmed", async () => {
-    render(<Exercise showConfirmation={mockShowConfirmation} />);
-
-    const exerciseButton = screen.getByText("Exercise Now");
-    fireEvent.click(exerciseButton);
-
-    // Get the onConfirm callback that was passed to showConfirmation
-    const onConfirm = mockShowConfirmation.mock.calls[0][2];
-    await onConfirm();
-
-    expect(mockExerciseOptions).toHaveBeenCalled();
+    rerender(<Exercise showConfirmation={mockShowConfirmation} />);
+    expect(screen.getByText("Exercise Now")).toBeDisabled();
   });
 }); 

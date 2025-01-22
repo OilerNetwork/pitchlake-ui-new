@@ -11,7 +11,7 @@ describe("SuccessModal Component", () => {
     jest.clearAllMocks();
   });
 
-  it("renders with provided content", () => {
+  it("formats success message correctly", () => {
     render(
       <SuccessModal
         activeTab={mockActiveTab}
@@ -20,16 +20,35 @@ describe("SuccessModal Component", () => {
       />
     );
 
-    expect(screen.getByText("Test Action")).toBeInTheDocument();
-    expect(screen.getByText((content, element) => {
+    const message = screen.getByText((content, element) => {
       return element?.tagName.toLowerCase() === 'p' && 
              content.includes('You have successfully') &&
              content.includes('Test Content');
-    })).toBeInTheDocument();
-    expect(screen.getByText("Got it")).toBeInTheDocument();
+    });
+
+    expect(message).toHaveClass("text-gray-400", "text-center", "text-[14px]");
   });
 
-  it("calls onClose when got it button is clicked", () => {
+  it("renders success-specific elements", () => {
+    const { container } = render(
+      <SuccessModal
+        activeTab={mockActiveTab}
+        action={mockAction}
+        onClose={mockOnClose}
+      />
+    );
+
+    // Check for success icon
+    const successIcon = container.querySelector(".success-icon");
+    expect(successIcon).toBeInTheDocument();
+    expect(successIcon).toHaveClass("bg-[#F5EBB8]", "rounded-lg", "w-12", "h-12");
+
+    // Check for "Got it" button styling
+    const gotItButton = screen.getByText("Got it");
+    expect(gotItButton).toHaveClass("bg-[#F5EBB8]", "text-[#121212]", "rounded-lg");
+  });
+
+  it("handles close interaction correctly", () => {
     render(
       <SuccessModal
         activeTab={mockActiveTab}
@@ -39,6 +58,6 @@ describe("SuccessModal Component", () => {
     );
 
     fireEvent.click(screen.getByText("Got it"));
-    expect(mockOnClose).toHaveBeenCalled();
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 }); 

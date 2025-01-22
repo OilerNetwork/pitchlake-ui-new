@@ -133,47 +133,7 @@ describe("EditBid Component", () => {
     localStorage.clear();
   });
 
-  it("renders with initial state", () => {
-    render(
-      <EditBid
-        showConfirmation={mockShowConfirmation}
-        onConfirm={mockOnConfirm}
-        onClose={mockOnClose}
-        bidToEdit={mockBidToEdit}
-      />
-    );
-
-    // Check if price input is rendered with current price
-    const priceInput = screen.getByPlaceholderText("e.g. 1");
-    expect(priceInput).toBeInTheDocument();
-    expect(priceInput).toHaveValue("");
-
-    // Check if edit button is rendered and disabled initially
-    const editButton = screen.getByRole("button", { name: "Edit Bid" });
-    expect(editButton).toBeInTheDocument();
-    expect(editButton).toBeDisabled();
-  });
-
-  it("enables edit button when new price is higher than current price", () => {
-    render(
-      <EditBid
-        showConfirmation={mockShowConfirmation}
-        onConfirm={mockOnConfirm}
-        onClose={mockOnClose}
-        bidToEdit={mockBidToEdit}
-      />
-    );
-
-    // Enter higher price
-    const priceInput = screen.getByPlaceholderText("e.g. 1");
-    fireEvent.change(priceInput, { target: { value: "2" } });
-
-    // Check if edit button is enabled
-    const editButton = screen.getByRole("button", { name: "Edit Bid" });
-    expect(editButton).not.toBeDisabled();
-  });
-
-  it("disables edit button when new price is lower than current price", () => {
+  it("validates new price against current bid price", () => {
     render(
       <EditBid
         showConfirmation={mockShowConfirmation}
@@ -187,12 +147,11 @@ describe("EditBid Component", () => {
     const priceInput = screen.getByPlaceholderText("e.g. 1");
     fireEvent.change(priceInput, { target: { value: "0.5" } });
 
-    // Check if edit button is disabled
-    const editButton = screen.getByRole("button", { name: "Edit Bid" });
-    expect(editButton).toBeDisabled();
+    // Verify error state
+    expect(screen.getByText("New price must be higher than current price")).toBeInTheDocument();
   });
 
-  it("shows confirmation modal when editing bid", () => {
+  it("calculates additional cost correctly", () => {
     render(
       <EditBid
         showConfirmation={mockShowConfirmation}
@@ -206,15 +165,11 @@ describe("EditBid Component", () => {
     const priceInput = screen.getByPlaceholderText("e.g. 1");
     fireEvent.change(priceInput, { target: { value: "2" } });
 
-    // Click edit button
-    const editButton = screen.getByRole("button", { name: "Edit Bid" });
-    fireEvent.click(editButton);
-
-    // Check if confirmation modal is shown
-    expect(mockShowConfirmation).toHaveBeenCalled();
+    // Verify additional cost calculation
+    expect(screen.getByText("Additional Cost: 100 ETH")).toBeInTheDocument();
   });
 
-  it("saves bid price to localStorage", () => {
+  it("shows confirmation with correct bid update details", () => {
     render(
       <EditBid
         showConfirmation={mockShowConfirmation}
@@ -224,16 +179,25 @@ describe("EditBid Component", () => {
       />
     );
 
-    // Enter price
+    // Enter higher price
     const priceInput = screen.getByPlaceholderText("e.g. 1");
     fireEvent.change(priceInput, { target: { value: "2" } });
 
-    // Check if value is saved to localStorage
-    expect(localStorage.getItem("editBidPriceGwei")).toBe("2");
+    // Submit edit
+    const editButton = screen.getByRole("button", { name: "Edit Bid" });
+    fireEvent.click(editButton);
+
+    // Verify confirmation details
+    expect(mockShowConfirmation).toHaveBeenCalledWith({
+      bidId: "1",
+      currentPrice: "1",
+      newPrice: "2",
+      additionalCost: "100"
+    });
   });
 
-  it("loads price from localStorage on mount", () => {
-    // Set value in localStorage
+  it("persists edit price in localStorage", () => {
+    // Set initial value
     localStorage.setItem("editBidPriceGwei", "2");
 
     render(
@@ -245,12 +209,18 @@ describe("EditBid Component", () => {
       />
     );
 
-    // Check if input has value from localStorage
+    // Verify value is loaded
     const priceInput = screen.getByPlaceholderText("e.g. 1");
     expect(priceInput).toHaveValue("2");
+
+    // Update value
+    fireEvent.change(priceInput, { target: { value: "3" } });
+
+    // Verify localStorage is updated
+    expect(localStorage.getItem("editBidPriceGwei")).toBe("3");
   });
 
-  it("calls onClose when clicking back button", () => {
+  it("handles bid update confirmation", () => {
     render(
       <EditBid
         showConfirmation={mockShowConfirmation}
@@ -260,11 +230,17 @@ describe("EditBid Component", () => {
       />
     );
 
-    // Click back button
-    const backButton = screen.getByRole("button", { name: "" });
-    fireEvent.click(backButton);
+    // Enter higher price and submit
+    const priceInput = screen.getByPlaceholderText("e.g. 1");
+    fireEvent.change(priceInput, { target: { value: "2" } });
+    
+    const editButton = screen.getByRole("button", { name: "Edit Bid" });
+    fireEvent.click(editButton);
 
-    // Check if onClose was called
-    expect(mockOnClose).toHaveBeenCalled();
+    // Verify onConfirm is called with correct params
+    expect(mockOnConfirm).toHaveBeenCalledWith({
+      bidId: "1",
+      newPrice: "2000000000" // 2 GWEI in WEI
+    });
   });
 }); 

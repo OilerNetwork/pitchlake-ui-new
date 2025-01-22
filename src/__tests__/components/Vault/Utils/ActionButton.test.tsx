@@ -9,8 +9,9 @@ describe("ActionButton", () => {
     jest.clearAllMocks();
   });
 
-  it("renders with enabled state", () => {
-    render(
+  it("renders button with correct states and handles interactions", () => {
+    // Test enabled state
+    const { rerender } = render(
       <ActionButton
         onClick={mockOnClick}
         disabled={false}
@@ -21,43 +22,21 @@ describe("ActionButton", () => {
     const button = screen.getByRole("button", { name: "Click Me" });
     expect(button).toBeInTheDocument();
     expect(button).not.toBeDisabled();
-    expect(button).toHaveClass("bg-[#F5EBB8]");
-    expect(button).toHaveClass("text-[#121212]");
-  });
-
-  it("renders with disabled state", () => {
-    render(
-      <ActionButton
-        onClick={mockOnClick}
-        disabled={true}
-        text="Click Me"
-      />
+    expect(button).toHaveClass(
+      "bg-[#F5EBB8]",
+      "text-[#121212]",
+      "w-full",
+      "rounded-lg",
+      "py-3",
+      "font-medium"
     );
 
-    const button = screen.getByRole("button", { name: "Click Me" });
-    expect(button).toBeInTheDocument();
-    expect(button).toBeDisabled();
-    expect(button).toHaveClass("bg-[#373632]");
-    expect(button).toHaveClass("text-[#8C8C8C]");
-    expect(button).toHaveClass("cursor-not-allowed");
-  });
-
-  it("calls onClick when clicked in enabled state", () => {
-    render(
-      <ActionButton
-        onClick={mockOnClick}
-        disabled={false}
-        text="Click Me"
-      />
-    );
-
-    const button = screen.getByRole("button", { name: "Click Me" });
+    // Test click handler
     fireEvent.click(button);
     expect(mockOnClick).toHaveBeenCalledTimes(1);
-  });
 
-  it("does not call onClick when clicked in disabled state", () => {
-    render(
+    // Test disabled state
+    rerender(
       <ActionButton
         onClick={mockOnClick}
         disabled={true}
@@ -65,8 +44,15 @@ describe("ActionButton", () => {
       />
     );
 
-    const button = screen.getByRole("button", { name: "Click Me" });
-    fireEvent.click(button);
-    expect(mockOnClick).not.toHaveBeenCalled();
+    expect(button).toBeDisabled();
+    expect(button).toHaveClass(
+      "bg-[#373632]",
+      "text-[#8C8C8C]",
+      "cursor-not-allowed",
+      "w-full",
+      "rounded-lg",
+      "py-3",
+      "font-medium"
+    );
   });
 }); 
