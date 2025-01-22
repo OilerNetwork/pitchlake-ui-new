@@ -13,6 +13,7 @@ import ProtocolProvider from "@/context/ProtocolProvider";
 import { AppProps } from "next/app";
 import QueryProvider from "@/components/Providers/queryProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { HelpProvider } from "@/context/HelpProvider";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -43,11 +44,13 @@ export default function RootLayout({
           <StarknetProvider>
             <TransactionProvider>
               <ProtocolProvider>
-                <Header />
-                {children}
-                <div className="flex flex-col-reverse">
-                  <Footer />
-                </div>
+                <HelpProvider>
+                  <Header />
+                  {children}
+                  <div className="flex flex-col-reverse">
+                    <Footer />
+                  </div>
+                </HelpProvider>
               </ProtocolProvider>
             </TransactionProvider>
           </StarknetProvider>
