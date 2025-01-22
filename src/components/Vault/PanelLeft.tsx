@@ -138,7 +138,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
   return (
     <>
       <div
-        className={`flex flex-col mr-4 max-w-[350px] transition-all duration-300 max-h-[834px] overflow-hidden ${
+        className={`flex flex-col mr-4 max-w-[350px] transition-all duration-300 max-h-[800px] overflow-hidden ${
           isPanelOpen ? "w-full" : "w-[110px]"
         } ${!isPanelOpen ? "" : ""}`}
       >
