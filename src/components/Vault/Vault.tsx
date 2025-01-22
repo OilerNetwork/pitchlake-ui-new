@@ -9,6 +9,9 @@ import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import useIsMobile from "@/hooks/window/useIsMobile";
 import MobileScreen from "../BaseComponents/MobileScreen";
+import { useHelpContext } from "@/context/HelpProvider";
+import { HelpBoxPanel } from "../HelpBoxComponents/HelpBoxPanel";
+import Hoverable from "../BaseComponents/Hoverable";
 
 export const Vault = () => {
   const [isProviderView, setIsProviderView] = useState(true);
@@ -20,11 +23,14 @@ export const Vault = () => {
     return <MobileScreen />;
   }
 
+  const { isHelpBoxOpen } = useHelpContext();
+
   return (
     <div className="px-6 py-4 pt-[120px] bg-faded-black-alt flex-grow flex-box overflow-auto">
       <div className="flex flex-row-reverse text-primary">
         <div className="flex flex-row rounded-md border-[1px] border-greyscale-800 h-[55px]">
-          <div
+          <Hoverable
+            dataId="userToggleLP"
             onClick={() => {
               setIsProviderView(true);
               setIsEditOpen(false);
@@ -44,8 +50,9 @@ export const Vault = () => {
             >
               Provider
             </p>
-          </div>
-          <div
+          </Hoverable>
+          <Hoverable
+            dataId="userToggleOB"
             onClick={() => {
               setIsProviderView(false);
               //setIsEditOpen(false);
@@ -65,7 +72,7 @@ export const Vault = () => {
             >
               Buyer
             </p>
-          </div>
+          </Hoverable>
         </div>
 
         <div className="flex flex-row items-center ml-[16px] mr-[auto] text-[16px] font-medium text-[#FAFAFA]">
@@ -89,12 +96,24 @@ export const Vault = () => {
         }
         <RoundPerformanceChart />
 
-        <div className="w-full ml-6 max-w-[350px]">
-          <PanelRight
-            userType={isProviderView ? "lp" : "ob"}
-            isEditOpen={isEditOpen}
-            setIsEditOpen={setIsEditOpen}
-          />
+        <div className="w-full ml-6 max-w-[350px] flex flex-col max-h-[834px]">
+          <div
+            className={`
+              bg-[#121212] border border-[#262626] rounded-lg flex flex-col
+              ${isHelpBoxOpen ? "h-[60%]" : "h-[100%]"} transition-all duration-300
+            `}
+          >
+            <PanelRight
+              userType={isProviderView ? "lp" : "ob"}
+              isEditOpen={isEditOpen}
+              setIsEditOpen={setIsEditOpen}
+            />
+          </div>
+          {isHelpBoxOpen && (
+            <div className="mt-6">
+              <HelpBoxPanel />
+            </div>
+          )}
         </div>
       </div>
     </div>
