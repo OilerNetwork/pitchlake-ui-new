@@ -9,6 +9,7 @@ import { DepositArgs } from "@/lib/types";
 import { CollectEthIcon } from "@/components/Icons";
 import { num } from "starknet";
 import { useTransactionContext } from "@/context/TransactionProvider";
+import Hoverable from "@/components/BaseComponents/Hoverable";
 
 interface WithdrawStashProps {
   //withdrawStash: () => Promise<void>;
@@ -102,13 +103,16 @@ const WithdrawStash: React.FC<WithdrawStashProps> = ({
         </div>
       </div>
       <div className="mt-auto">
-        <div className="flex justify-between text-sm border-t border-[#262626] p-6">
+        <Hoverable
+          dataId="collectStashButton"
+          className="flex justify-between text-sm border-t border-[#262626] p-6"
+        >
           <ActionButton
             onClick={handleSubmit}
             disabled={isButtonDisabled()}
             text="Collect"
           />
-        </div>
+        </Hoverable>
       </div>
     </div>
   );

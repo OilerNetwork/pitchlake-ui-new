@@ -13,8 +13,9 @@ import { formatNumberText } from "@/lib/utils";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import useLatestTimetamp from "@/hooks/chain/useLatestTimestamp";
 import { useProvider } from "@starknet-react/core";
-import {  useContract } from "@starknet-react/core";
+import { useContract } from "@starknet-react/core";
 import { erc20ABI, optionRoundABI } from "@/lib/abi";
+import Hoverable from "@/components/BaseComponents/Hoverable";
 
 interface PlaceBidProps {
   showConfirmation: (
@@ -44,7 +45,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
 
   const { allowance, balance } = useERC20(
     vaultState?.ethAddress as `0x${string}`,
-    selectedRoundState?.address
+    selectedRoundState?.address,
   );
   const [needsApproving, setNeedsApproving] = useState<string>("0");
 
@@ -258,54 +259,65 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-grow space-y-6 p-6">
-        <InputField
-          label="Enter Amount"
-          type="integer"
-          //value={state.bidAmount}
-          value={state.bidAmount}
-          onChange={handleAmountChange}
-          placeholder="e.g. 5000"
-          icon={
-            <Layers3
-              size="20px"
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 stroke-[1px]"
-            />
-          }
-          error={state.isAmountOk}
-        />
-        <InputField
-          label="Enter Price (GWEI)"
-          type="number"
-          value={state.bidPrice}
-          onChange={handlePriceChange}
-          placeholder="e.g. 0.3"
-          icon={
-            <FontAwesomeIcon
-              icon={faEthereum}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pr-2"
-            />
-          }
-          error={state.isPriceOk}
-        />
+        <Hoverable dataId="inputBidAmount">
+          <InputField
+            label="Enter Amount"
+            type="integer"
+            //value={state.bidAmount}
+            value={state.bidAmount}
+            onChange={handleAmountChange}
+            placeholder="e.g. 5000"
+            icon={
+              <Layers3
+                size="20px"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 stroke-[1px]"
+              />
+            }
+            error={state.isAmountOk}
+          />
+        </Hoverable>
+        <Hoverable dataId="inputBidPrice">
+          <InputField
+            label="Enter Price (GWEI)"
+            type="number"
+            value={state.bidPrice}
+            onChange={handlePriceChange}
+            placeholder="e.g. 0.3"
+            icon={
+              <FontAwesomeIcon
+                icon={faEthereum}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pr-2"
+              />
+            }
+            error={state.isPriceOk}
+          />
+        </Hoverable>
       </div>
-      <div className="flex justify-between text-sm px-6 pb-1">
-        <span className="text-gray-400">Total</span>
-        <span>{bidTotalEth.toFixed(2)} ETH</span>
-      </div>
-      <div className="flex justify-between text-sm px-6 pb-6">
-        <span className="text-gray-400">Balance</span>
-        <span>
-          {parseFloat(formatEther(num.toBigInt(balance))).toFixed(3)} ETH
-        </span>
-      </div>
+      <Hoverable dataId="newBidSummary" className="flex flex-col h-[full]">
+        <div className="flex justify-between text-sm px-6 pb-1">
+          <span className="text-gray-400">Total</span>
+          <span>{bidTotalEth.toFixed(2)} ETH</span>
+        </div>
+      </Hoverable>
+      <Hoverable dataId="placingBidBalance" className="flex flex-col h-[full]">
+        <div className="flex justify-between text-sm px-6 pb-6">
+          <span className="text-gray-400">Balance</span>
+          <span>
+            {parseFloat(formatEther(num.toBigInt(balance))).toFixed(3)} ETH
+          </span>
+        </div>
+      </Hoverable>
       <div className="mt-auto">
-        <div className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]">
+        <Hoverable
+          dataId="placeBidButton"
+          className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
+        >
           <ActionButton
             onClick={handleSubmitForMulticall}
             disabled={state.isButtonDisabled}
             text="Place Bid"
           />
-        </div>
+        </Hoverable>
       </div>
     </div>
   );

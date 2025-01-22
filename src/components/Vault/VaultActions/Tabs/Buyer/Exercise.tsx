@@ -11,6 +11,7 @@ import { formatNumberText } from "@/lib/utils";
 import { num } from "starknet";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import useERC20 from "@/hooks/erc20/useERC20";
+import Hoverable from "@/components/BaseComponents/Hoverable";
 
 interface ExerciseProps {
   showConfirmation: (
@@ -97,13 +98,16 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
       </div>
 
       <div className="mt-auto">
-        <div className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]">
+        <Hoverable
+          dataId="exerciseButton"
+          className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
+        >
           <ActionButton
             onClick={handleSubmit}
             disabled={isButtonDisabled()}
             text="Exercise Now"
           />
-        </div>
+        </Hoverable>
       </div>
     </div>
   );

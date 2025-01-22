@@ -16,8 +16,10 @@ import { useExplorer } from "@starknet-react/core";
 import { BalanceTooltip } from "@/components/BaseComponents/Tooltip";
 import StateTransition from "@/components/Vault/StateTransition";
 import { useProvider } from "@starknet-react/core";
+import Hoverable from "@/components/BaseComponents/Hoverable";
 
-const FOSSIL_DELAY = process.env.NEXT_PUBLIC_FOSSIL_USE_MOCK_PRICING_DATA === "true" ? 0 : 15 * 60;
+const FOSSIL_DELAY =
+  process.env.NEXT_PUBLIC_FOSSIL_USE_MOCK_PRICING_DATA === "true" ? 0 : 15 * 60;
 
 // comment for git
 const PanelLeft = ({ userType }: { userType: string }) => {
@@ -155,8 +157,9 @@ const PanelLeft = ({ userType }: { userType: string }) => {
             }}
             className="flex items-center h-[56px] w-full border-b-1 p-4 border-white cursor-pointer"
           >
-            <div
-              className={`flex flex-row w-full items-center rounded-md px-2 hover:cursor-pointer ${
+            <Hoverable
+              dataId="leftPanelStatisticsBar"
+              className={`flex flex-row w-full items-center rounded-md hover:cursor-pointer ${
                 isPanelOpen ? "justify-between" : "justify-center"
               }`}
             >
@@ -173,184 +176,203 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                   stroke="var(--buttonwhite)"
                 />
               </div>
-            </div>
+            </Hoverable>
           </div>
           <div
             className={`flex flex-col w-full px-3 border-t-[1px] border-greyscale-800`}
           >
-            <div
-              onClick={() => {
-                if (isPanelOpen) {
-                  setVaultIsOpen((state) => !state);
-                } else {
-                  setIsPanelOpen(true);
-                  setVaultIsOpen(true);
-                  setOptionRoundIsOpen(false);
-                }
-              }}
-              className={`flex flex-row w-full mt-3 rounded-md p-3 ${
-                isPanelOpen
-                  ? "justify-between bg-faded-black"
-                  : "justify-center"
-              } cursor-pointer`}
-            >
-              <div>
-                <SafeIcon
-                  fill="none"
-                  stroke="var(--buttongrey)"
-                  classname="w-6 h-6 text-primary-800 hover-zoom"
-                />
+            <Hoverable dataId="leftPanelVaultBar">
+              <div
+                onClick={() => {
+                  if (isPanelOpen) {
+                    setVaultIsOpen((state) => !state);
+                  } else {
+                    setIsPanelOpen(true);
+                    setVaultIsOpen(true);
+                    setOptionRoundIsOpen(false);
+                  }
+                }}
+                className={`flex flex-row w-full mt-3 rounded-md p-3 ${
+                  isPanelOpen
+                    ? "justify-between bg-faded-black"
+                    : "justify-center"
+                } cursor-pointer`}
+              >
+                <div>
+                  <SafeIcon
+                    fill="none"
+                    stroke="var(--buttongrey)"
+                    classname="w-6 h-6 text-primary-800 hover-zoom"
+                  />
+                </div>
+                <div
+                  className={`${isPanelOpen ? "flex" : "hidden"} flex-row w-full`}
+                >
+                  <div className="ml-2 text-white w-fit text-nowrap font-[] font-regular">
+                    Vault
+                  </div>
+                  <div className="flex flex-row-reverse w-full">
+                    {vaultIsOpen ? (
+                      <ChevronDown stroke="var(--buttonwhite)" />
+                    ) : (
+                      <ChevronUp stroke="var(--buttonwhite)" />
+                    )}
+                  </div>
+                </div>
               </div>
               <div
-                className={`${isPanelOpen ? "flex" : "hidden"} flex-row w-full`}
+                className={`flex flex-col mt-2 overflow-scroll no-scrollbar gap-1 ${
+                  isPanelOpen ? "" : "hidden"
+                } ${
+                  !vaultIsOpen
+                    ? "h-[0]"
+                    : !optionRoundIsOpen
+                      ? "h-[215px]"
+                      : "h-[215px]"
+                } transition-all duration-900ms `}
               >
-                <div className="ml-2 text-white w-fit text-nowrap font-[] font-regular">
-                  Vault
-                </div>
-                <div className="flex flex-row-reverse w-full">
-                  {vaultIsOpen ? (
-                    <ChevronDown stroke="var(--buttonwhite)" />
-                  ) : (
-                    <ChevronUp stroke="var(--buttonwhite)" />
-                  )}
-                </div>
-              </div>
-            </div>
-            <div
-              className={`flex flex-col mt-2 overflow-scroll no-scrollbar gap-1 ${
-                isPanelOpen ? "" : "hidden"
-              } ${
-                !vaultIsOpen
-                  ? "h-[0]"
-                  : !optionRoundIsOpen
-                    ? "h-[215px]"
-                    : "h-[215px]"
-              } transition-all duration-900ms `}
-            >
-              <div className="flex flex-row justify-between p-2 w-full">
-                <p className="text-[#BFBFBF]">Run Time</p>
-                <p>
-                  {selectedRoundState?.auctionEndDate &&
-                  selectedRoundState?.optionSettleDate &&
-                  selectedRoundState.auctionEndDate !== "0" &&
-                  selectedRoundState.optionSettleDate !== "0"
-                    ? timeUntilTarget(
-                        selectedRoundState.auctionEndDate.toString(),
-                        selectedRoundState.optionSettleDate.toString(),
-                      )
-                    : "Loading..."}
-                </p>
-              </div>
-              <div className="flex flex-row justify-between p-2 w-full">
-                <p className="text-[#BFBFBF]">Address</p>
-                <a
-                  href={explorer.contract(
-                    vaultState?.address ? vaultState.address : "",
-                  )}
-                  target="_blank"
-                  className="flex flex-row justify-center items-center text-[#F5EBB8] cursor-pointer gap-[4px]"
+                <Hoverable
+                  dataId="leftPanelVaultRunTime"
+                  className="flex flex-row justify-between p-2 w-full"
                 >
-                  <p className="">
-                    {
-                      vaultState?.address && vaultState?.address !== "0x"
-                        ? shortenString(vaultState?.address)
-                        : "Loading..."
-                      //Add vault address short string from state here
-                    }
+                  <p className="text-[#BFBFBF]">Run Time</p>
+                  <p>
+                    {selectedRoundState?.auctionEndDate &&
+                    selectedRoundState?.optionSettleDate &&
+                    selectedRoundState.auctionEndDate !== "0" &&
+                    selectedRoundState.optionSettleDate !== "0"
+                      ? timeUntilTarget(
+                          selectedRoundState.auctionEndDate.toString(),
+                          selectedRoundState.optionSettleDate.toString(),
+                        )
+                      : "Loading..."}
                   </p>
-                  <SquareArrowOutUpRight size={16} />
-                </a>
-              </div>
-              {
-                //   <div className="flex flex-row justify-between p-2 w-full">
-                //     <p className="text-[#BFBFBF] font-regular">Fees</p>
-                //     <p>0%</p>
-                //   </div>
-              }
-              {
-                // <div className="flex flex-row justify-between p-2 w-full">
-                //   <p className="text-[#BFBFBF]">TVL</p>
-                //   <p>
-                //     {vaultState
-                //       ? parseFloat(
-                //           formatEther(
-                //             (
-                //               num.toBigInt(vaultState.lockedBalance.toString()) +
-                //               num.toBigInt(
-                //                 vaultState.unlockedBalance.toString(),
-                //               ) +
-                //               num.toBigInt(vaultState.stashedBalance.toString())
-                //             ).toString(),
-                //           ),
-                //         ).toFixed(0)
-                //       : 0}
-                //     /1,000 ETH
-                //   </p>
-                // </div>
-              }
-              {
-                //  <div className="flex flex-row justify-between p-2 w-full">
-                //    <p className="text-[#BFBFBF] font-regular">APY</p>
-                //    <p>12.34%</p>
-                //  </div>
-              }
-              <div className="flex flex-row justify-between p-2 w-full z-50">
-                <p className="text-[#BFBFBF] font-regular">Balance</p>
-                <div className="flex flex-row items-center gap-1 overflow-visable">
-                  <BalanceTooltip
-                    balance={{
-                      locked: vaultState
-                        ? vaultState.lockedBalance.toString()
-                        : "0",
-                      unlocked: vaultState
-                        ? vaultState.unlockedBalance.toString()
-                        : "0",
-                      stashed: vaultState
-                        ? vaultState.stashedBalance.toString()
-                        : "0",
-                    }}
-                  >
-                    {
-                      <>
-                        <p>
-                          {vaultState
-                            ? Number(
-                                formatEther(
-                                  BigInt(vaultState.lockedBalance) +
-                                    BigInt(vaultState.unlockedBalance) +
-                                    BigInt(vaultState.stashedBalance),
-                                ),
-                              ).toFixed(2)
-                            : 0}{" "}
-                          ETH
-                        </p>
-                        <Info
-                          size={16}
-                          color="#CFC490"
-                          className="cursor-pointer"
-                        />
-                      </>
-                    }
-                  </BalanceTooltip>
-                </div>
-              </div>
+                </Hoverable>
 
-              <div className="flex flex-row justify-between p-2 w-full">
-                <p className="text-[#BFBFBF] font-regular">Risk Level</p>
-                <p>
-                  {vaultState?.alpha && vaultState.alpha !== "0"
-                    ? `${Number(vaultState?.alpha) / 100}%`
-                    : "Loading..."}
-                </p>
+                <Hoverable
+                  dataId="leftPanelVaultAddress"
+                  className="flex flex-row justify-between p-2 w-full"
+                >
+                  <p className="text-[#BFBFBF]">Address</p>
+                  <a
+                    href={explorer.contract(
+                      vaultState?.address ? vaultState.address : "",
+                    )}
+                    target="_blank"
+                    className="flex flex-row justify-center items-center text-[#F5EBB8] cursor-pointer gap-[4px]"
+                  >
+                    <p className="">
+                      {
+                        vaultState?.address && vaultState?.address !== "0x"
+                          ? shortenString(vaultState?.address)
+                          : "Loading..."
+                        //Add vault address short string from state here
+                      }
+                    </p>
+                    <SquareArrowOutUpRight size={16} />
+                  </a>
+                </Hoverable>
+                {
+                  //   <div className="flex flex-row justify-between p-2 w-full">
+                  //     <p className="text-[#BFBFBF] font-regular">Fees</p>
+                  //     <p>0%</p>
+                  //   </div>
+                }
+                {
+                  // <div className="flex flex-row justify-between p-2 w-full">
+                  //   <p className="text-[#BFBFBF]">TVL</p>
+                  //   <p>
+                  //     {vaultState
+                  //       ? parseFloat(
+                  //           formatEther(
+                  //             (
+                  //               num.toBigInt(vaultState.lockedBalance.toString()) +
+                  //               num.toBigInt(
+                  //                 vaultState.unlockedBalance.toString(),
+                  //               ) +
+                  //               num.toBigInt(vaultState.stashedBalance.toString())
+                  //             ).toString(),
+                  //           ),
+                  //         ).toFixed(0)
+                  //       : 0}
+                  //     /1,000 ETH
+                  //   </p>
+                  // </div>
+                }
+                {
+                  //  <div className="flex flex-row justify-between p-2 w-full">
+                  //    <p className="text-[#BFBFBF] font-regular">APY</p>
+                  //    <p>12.34%</p>
+                  //  </div>
+                }
+                <Hoverable
+                  dataId="leftPanelVaultBalance"
+                  className="flex flex-row justify-between p-2 w-full z-50"
+                >
+                  <p className="text-[#BFBFBF] font-regular">Balance</p>
+                  <div className="flex flex-row items-center gap-1 overflow-visable">
+                    <BalanceTooltip
+                      balance={{
+                        locked: vaultState
+                          ? vaultState.lockedBalance.toString()
+                          : "0",
+                        unlocked: vaultState
+                          ? vaultState.unlockedBalance.toString()
+                          : "0",
+                        stashed: vaultState
+                          ? vaultState.stashedBalance.toString()
+                          : "0",
+                      }}
+                    >
+                      {
+                        <>
+                          <p>
+                            {vaultState
+                              ? Number(
+                                  formatEther(
+                                    BigInt(vaultState.lockedBalance) +
+                                      BigInt(vaultState.unlockedBalance) +
+                                      BigInt(vaultState.stashedBalance),
+                                  ),
+                                ).toFixed(2)
+                              : 0}{" "}
+                            ETH
+                          </p>
+                          <Info
+                            size={16}
+                            color="#CFC490"
+                            className="cursor-pointer"
+                          />
+                        </>
+                      }
+                    </BalanceTooltip>
+                  </div>
+                </Hoverable>
+
+                <Hoverable
+                  dataId="leftPanelVaultAlpha"
+                  className="flex flex-row justify-between p-2 w-full"
+                >
+                  <p className="text-[#BFBFBF] font-regular">Risk Level</p>
+                  <p>
+                    {vaultState?.alpha && vaultState.alpha !== "0"
+                      ? `${Number(vaultState?.alpha) / 100}%`
+                      : "Loading..."}
+                  </p>
+                </Hoverable>
+                <Hoverable
+                  dataId="leftPanelVaultStrike"
+                  className="flex flex-row justify-between p-2 w-full"
+                >
+                  <p className="text-[#BFBFBF] font-regular">Strike Level</p>
+                  <p>{Number(vaultState?.strikeLevel) / 100}%</p>
+                </Hoverable>
               </div>
-              <div className="flex flex-row justify-between p-2 w-full">
-                <p className="text-[#BFBFBF] font-regular">Strike Level</p>
-                <p>{Number(vaultState?.strikeLevel) / 100}%</p>
-              </div>
-            </div>
+            </Hoverable>
           </div>
           <div className="flex flex-col w-full px-3 border-t-[1px] border-greyscale-800">
-            <div
+            <Hoverable
+              dataId="leftPanelRoundBar"
               onClick={() => {
                 if (isPanelOpen) {
                   setOptionRoundIsOpen((state) => !state);
@@ -388,7 +410,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                   )}
                 </div>
               </div>
-            </div>
+            </Hoverable>
             <div
               className={`flex flex-col mt-2 overflow-scroll no-scrollbar ${
                 isPanelOpen ? "" : "hidden"
@@ -402,7 +424,10 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                       : "h-[315px]"
               } transition-all duration-900 max-h-full`}
             >
-              <div className="max-h-full flex flex-row justify-between items-center p-2 w-full">
+              <Hoverable
+                dataId="leftPanelRoundId"
+                className="max-h-full flex flex-row justify-between items-center p-2 w-full"
+              >
                 <p className="text-[#BFBFBF]">Selected Round</p>
                 {selectedRoundState?.address &&
                 selectedRoundState?.roundId &&
@@ -430,9 +455,12 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                     <p>Loading... </p>
                   </a>
                 )}
-              </div>
+              </Hoverable>
 
-              <div className="max-h-full flex flex-row justify-between items-center p-2 w-full">
+              <Hoverable
+                dataId="leftPanelRoundState"
+                className="max-h-full flex flex-row justify-between items-center p-2 w-full"
+              >
                 <p className="text-[#BFBFBF]">State</p>
                 <p
                   className={`border-[1px] ${styles.border} ${styles.bg} ${styles.text} font-medium rounded-full px-2 py-[1px]`}
@@ -441,7 +469,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                     ? selectedRoundState.roundState
                     : "Loading"}
                 </p>
-              </div>
+              </Hoverable>
               {
                 ///  (roundState === "Open" || roundState == "Auctioning") && (
                 ///  <div className="max-h-full flex flex-row justify-between items-center p-2 w-full">
@@ -459,7 +487,10 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                 ///)
               }
               {roundState === "Settled" && (
-                <div className="max-h-full flex flex-row justify-between items-center   p-2 w-full">
+                <Hoverable
+                  dataId="leftPanelRoundPerf"
+                  className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
+                >
                   <p className="text-[#BFBFBF]">Round Perf.</p>
                   <p>
                     {selectedRoundState
@@ -469,10 +500,13 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                       : 0}
                     %
                   </p>
-                </div>
+                </Hoverable>
               )}
 
-              <div className="max-h-full flex flex-row justify-between items-center   p-2 w-full">
+              <Hoverable
+                dataId="leftPanelRoundCapLevel"
+                className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
+              >
                 <p className="text-[#BFBFBF]">Cap Level</p>
                 <p>
                   {
@@ -486,8 +520,11 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                       : "Loading..." //Add round duration from state here
                   }
                 </p>
-              </div>
-              <div className="max-h-full flex flex-row justify-between items-center p-2 w-full">
+              </Hoverable>
+              <Hoverable
+                dataId="leftPanelRoundStrikePrice"
+                className="max-h-full flex flex-row justify-between items-center p-2 w-full"
+              >
                 <p className="text-[#BFBFBF]">Strike Price</p>
                 <p>
                   {selectedRoundState?.strikePrice &&
@@ -500,11 +537,14 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                       ).toFixed(2)} GWEI`
                     : "Loading..."}
                 </p>
-              </div>
+              </Hoverable>
 
               {roundState == "Auctioning" && (
                 <>
-                  <div className="max-h-full flex flex-row justify-between items-center   p-2 w-full">
+                  <Hoverable
+                    dataId="leftPanelRoundReservePrice"
+                    className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
+                  >
                     <p className="text-[#BFBFBF] font-regular text-[14px]">
                       Reserve Price
                     </p>
@@ -521,8 +561,11 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                       }{" "}
                       GWEI
                     </p>
-                  </div>
-                  <div className="max-h-full flex flex-row justify-between items-center   p-2 w-full">
+                  </Hoverable>
+                  <Hoverable
+                    dataId="leftPanelRoundTotalOptions"
+                    className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
+                  >
                     <p className="text-[#BFBFBF]">Total Options</p>
                     <p>
                       {formatNumberText(
@@ -533,13 +576,16 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                           : 0,
                       )}
                     </p>
-                  </div>
+                  </Hoverable>
                 </>
               )}
 
               {roundState == "Running" && (
                 <>
-                  <div className="max-h-full flex flex-row justify-between items-center   p-2 w-full">
+                  <Hoverable
+                    dataId="leftPanelRoundClearingPrice"
+                    className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
+                  >
                     <p className="text-[#BFBFBF]">Clearing Price</p>
                     <p>
                       {selectedRoundState?.clearingPrice &&
@@ -551,8 +597,11 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                         ).toFixed(2)}{" "}
                       GWEI
                     </p>
-                  </div>
-                  <div className="max-h-full flex flex-row justify-between items-center   p-2 w-full">
+                  </Hoverable>
+                  <Hoverable
+                    dataId="leftPanelRoundOptionsSold"
+                    className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
+                  >
                     <p className="text-[#BFBFBF]">Options Sold</p>
                     <p>
                       {formatNumberText(
@@ -561,13 +610,16 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                           : 0,
                       )}
                     </p>
-                  </div>
+                  </Hoverable>
                 </>
               )}
 
               {roundState == "Settled" && (
                 <>
-                  <div className="max-h-full flex flex-row justify-between items-center   p-2 w-full">
+                  <Hoverable
+                    dataId="leftPanelRoundClearingPrice"
+                    className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
+                  >
                     <p className="text-[#BFBFBF]">Clearing Price</p>
                     <p>
                       {selectedRoundState?.clearingPrice &&
@@ -579,8 +631,11 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                         ).toFixed(2)}{" "}
                       GWEI
                     </p>
-                  </div>
-                  <div className="max-h-full flex flex-row justify-between items-center   p-2 w-full">
+                  </Hoverable>
+                  <Hoverable
+                    dataId="leftPanelRoundSettlementPrice"
+                    className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
+                  >
                     <p className="text-[#BFBFBF]">Settlement Price</p>
                     <p>
                       {selectedRoundState?.settlementPrice &&
@@ -592,8 +647,11 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                         ).toFixed(2)}{" "}
                       GWEI
                     </p>
-                  </div>
-                  <div className="max-h-full flex flex-row justify-between items-center   p-2 w-full">
+                  </Hoverable>
+                  <Hoverable
+                    dataId="leftPanelRoundPayout"
+                    className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
+                  >
                     <p className="text-[#BFBFBF]">Payout</p>
                     <p>
                       {selectedRoundState?.payoutPerOption &&
@@ -605,13 +663,16 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                         ).toFixed(2)}{" "}
                       GWEI
                     </p>
-                  </div>
+                  </Hoverable>
                 </>
               )}
-              <div className="max-h-full flex flex-row justify-between items-center   p-2 w-full">
+              <Hoverable
+                dataId="leftPanelRoundTime"
+                className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
+              >
                 <p className="text-[#BFBFBF]">{getStateActionHeader()}</p>
                 <p>{getTimeUntilNextStateTransition()}</p>
-              </div>
+              </Hoverable>
             </div>
           </div>
           <StateTransition
