@@ -15,6 +15,7 @@ env:
   CONTAINER_NAME: pitchlake-ui-new
   TASK_NAME: pitchlake-ui-new-app
   PORT: ${{vars.PORT}}
+  NODE_ENV: production
   NEXT_PUBLIC_VAULT_ADDRESSES: ${{vars.VAULT_ADDRESSES}}
   NEXT_PUBLIC_API_URL: ${{vars.API_URL}}
   NEXT_PUBLIC_ENVIRONMENT: ${{vars.ENVIRONMENT}}
@@ -34,7 +35,7 @@ permissions:
 jobs:
   build_push_deploy:
     runs-on: ubuntu-latest
-    # environment: staging
+    environment: staging
 
     steps:
       - name: Checkout repository
