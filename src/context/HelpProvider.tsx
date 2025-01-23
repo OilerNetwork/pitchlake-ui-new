@@ -20,7 +20,7 @@ const HelpContext = createContext<HelpContextProps | undefined>(undefined);
 export const HelpProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [isHelpBoxOpen, setIsHelpBoxOpen] = useState(true);
+  const [isHelpBoxOpen, setIsHelpBoxOpen] = useState(false);
   const [content, setContent] = useState<string | null>(null);
   const [header, setHeader] = useState<string | null>(null);
   const [isHoveringHelpBox, setIsHoveringHelpBox] = useState(false);

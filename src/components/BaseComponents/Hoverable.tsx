@@ -1,7 +1,6 @@
 "use client";
 import React, { useRef, useCallback } from "react";
 import { useHelpContext } from "@/context/HelpProvider";
-import { descriptions } from "@/context/descriptions";
 import helpData from "@/components/HelpBoxComponents/Help.json";
 
 interface HoverableProps {
@@ -13,13 +12,6 @@ interface HoverableProps {
   onClick?: () => void;
   ref?: React.Ref<HTMLDivElement>;
 }
-
-interface HelpDataEntry {
-  header: string;
-  text: string;
-}
-
-type HelpData = Record<string, HelpDataEntry>;
 
 const Hoverable: React.FC<HoverableProps> = ({
   dataId,
