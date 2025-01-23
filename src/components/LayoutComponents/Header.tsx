@@ -45,6 +45,7 @@ import { Chain } from "@starknet-react/chains";
 import { useHelpContext } from "@/context/HelpProvider";
 import QuestionCircleIcon from "../Icons/QuestionCircleIcon";
 import Hoverable from "../BaseComponents/Hoverable";
+import { useUiContext } from "@/context/UiProvider";
 
 export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -56,6 +57,7 @@ export default function Header() {
   const isDropdownChainOpenRef = useRef(isDropdownChainOpen);
   const { isMobile } = useIsMobile();
   const { isHelpBoxOpen, toggleHelpBoxOpen } = useHelpContext();
+  const { isBlurOpen, setBlurOpen } = useUiContext();
   const router = useRouter();
   const pathName = usePathname();
   const { connect, connectors } = useConnect();
@@ -104,6 +106,7 @@ export default function Header() {
         !dropdownRef?.current?.contains(event.target as HTMLDivElement)
       ) {
         setIsDropdownOpen(false);
+        setBlurOpen(false);
       }
     };
     const handleClickOutsideChain = (event: MouseEvent) => {
@@ -112,15 +115,18 @@ export default function Header() {
         !dropdownChainRef?.current?.contains(event.target as HTMLDivElement)
       ) {
         setIsDropdownChainOpen(false);
+        setBlurOpen(false);
       }
     };
 
     const handleEscKey = (event: KeyboardEvent) => {
       if (isDropdownOpenRef.current && event.key === "Escape") {
         setIsDropdownOpen(false);
+        setBlurOpen(false);
       }
       if (isDropdownChainOpenRef.current && event.key === "Escape") {
         setIsDropdownChainOpen(false);
+        setBlurOpen(false);
       }
     };
 
@@ -212,7 +218,10 @@ export default function Header() {
             {
               <button
                 className="flex flex-row min-w-16 border-[1px] border-primary-400 text-primary-400 text-sm px-4 py-3 rounded-md  items-center justify-center"
-                onClick={() => setIsDropdownChainOpen(true)}
+                onClick={() => {
+                  setIsDropdownChainOpen(true);
+                  setBlurOpen(!isBlurOpen);
+                }}
               >
                 <p>{chain.network}</p>
                 <ArrowDownIcon
@@ -256,7 +265,10 @@ export default function Header() {
             {account ? (
               <Hoverable dataId="accountDropdown">
                 <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  onClick={() => {
+                    setIsDropdownOpen(!isDropdownOpen);
+                    //setBlurOpen(!isBlurOpen);
+                  }}
                   className="flex items-center space-x-2 py-2 px-3 rounded-md border border-greyscale-800 w-[164px] h-[44px]"
                 >
                   <Image
@@ -277,7 +289,11 @@ export default function Header() {
                     <ProfileDropdown
                       account={account}
                       balance={balanceData}
-                      disconnect={disconnect}
+                      disconnect={() => {
+                        disconnect();
+                        //setBlurOpen(!isBlurOpen);
+                        //setIsDropdownOpen((state) => !state);
+                      }}
                       copyToClipboard={copyToClipboard}
                     />
                     {/* <ToastContainer
@@ -294,7 +310,10 @@ export default function Header() {
               <Hoverable dataId="loginButton">
                 <button
                   className="flex flex-row min-w-16 bg-primary-400 text-black text-sm px-8 py-4 rounded-md w-[123px] h-[44px] items-center justify-center"
-                  onClick={() => setIsDropdownOpen((state) => !state)}
+                  onClick={() => {
+                    setBlurOpen(!isBlurOpen);
+                    setIsDropdownOpen((state) => !state);
+                  }}
                 >
                   <p>Connect</p>
                   <div>
@@ -315,7 +334,11 @@ export default function Header() {
                       {connectors.map((connector) => (
                         <div
                           key={connector.id}
-                          onClick={() => connect({ connector })}
+                          onClick={() => {
+                            connect({ connector });
+                            setIsDropdownOpen(false);
+                            setBlurOpen(false);
+                          }}
                           className="cursor-pointer sticky p-2 px-3 bg-[#161616] w-full text-[#FAFAFA] text-[14px] font-medium hover:bg-[#262626]"
                         >
                           {

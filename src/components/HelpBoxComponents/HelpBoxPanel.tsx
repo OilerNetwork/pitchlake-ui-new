@@ -51,7 +51,7 @@ export const HelpBoxPanel = () => {
             <QuestionCircleIcon stroke="#8C8C8C" fill="none" />
           </div>
           <p className="text-[12px] text-[#8C8C8C] font-medium max-w-[276px]">
-            Text will change in 3 seconds. Move back to this window to keep the
+            Text will change in 1 second. Move back to this window to keep the
             current text visible.
           </p>
         </div>
