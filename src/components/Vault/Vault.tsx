@@ -78,7 +78,10 @@ export const Vault = () => {
         <div className="flex flex-row items-center ml-[16px] mr-[auto] text-[16px] font-medium text-[#FAFAFA]">
           Vault Details
         </div>
-        <div className="hover-zoom-small flex items-center justify-center">
+        <Hoverable
+          dataId="logo"
+          className="hover-zoom-small flex items-center justify-center"
+        >
           <div
             onClick={() => {
               router.push("/");
@@ -87,7 +90,7 @@ export const Vault = () => {
           >
             <ChevronLeft className="w-[16px] h-[16px] stroke-[#F5EBB8]" />
           </div>
-        </div>
+        </Hoverable>
       </div>
       <div className="mt-6 flex flex-row">
         {<PanelLeft userType={isProviderView ? "lp" : "ob"} />}
