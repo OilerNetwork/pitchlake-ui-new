@@ -1,6 +1,5 @@
 "use client";
-import { Default } from "@/components/HelpBoxComponents/HelpBoxPanel";
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 interface HelpContextProps {
   isHelpBoxOpen: boolean;
@@ -8,6 +7,9 @@ interface HelpContextProps {
 
   content: string | null;
   setContent: (val: string | null) => void;
+
+  header: string | null;
+  setHeader: (val: string | null) => void;
 
   isHoveringHelpBox: boolean;
   setIsHoveringHelpBox: (val: boolean) => void;
@@ -20,6 +22,7 @@ export const HelpProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [isHelpBoxOpen, setIsHelpBoxOpen] = useState(true);
   const [content, setContent] = useState<string | null>(null);
+  const [header, setHeader] = useState<string | null>(null);
   const [isHoveringHelpBox, setIsHoveringHelpBox] = useState(false);
 
   const toggleHelpBoxOpen = () => {
@@ -33,6 +36,8 @@ export const HelpProvider: React.FC<{ children: React.ReactNode }> = ({
         toggleHelpBoxOpen,
         content,
         setContent,
+        header,
+        setHeader,
         isHoveringHelpBox,
         setIsHoveringHelpBox,
       }}

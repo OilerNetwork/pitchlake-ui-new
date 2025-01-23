@@ -45,7 +45,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
   setIsExpandedView,
 }) => {
   const { setSelectedRound, selectedRoundState } = useProtocolContext();
-  const { setContent, isHoveringHelpBox } = useHelpContext();
+  const { setContent, setHeader, isHoveringHelpBox } = useHelpContext();
 
   const hoverTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -149,6 +149,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
           setContent(
             `Hovering at chart coords: ${state.chartX}, ${state.chartY}`,
           );
+          setHeader(null);
         }
       }, HOVER_DELAY);
     },

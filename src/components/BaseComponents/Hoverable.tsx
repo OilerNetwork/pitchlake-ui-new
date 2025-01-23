@@ -2,6 +2,7 @@
 import React, { useRef, useCallback } from "react";
 import { useHelpContext } from "@/context/HelpProvider";
 import { descriptions } from "@/context/descriptions";
+import helpData from "@/components/HelpBoxComponents/Help.json";
 
 interface HoverableProps {
   dataId: string; // e.g. "item1"
@@ -13,6 +14,13 @@ interface HoverableProps {
   ref?: React.Ref<HTMLDivElement>;
 }
 
+interface HelpDataEntry {
+  header: string;
+  text: string;
+}
+
+type HelpData = Record<string, HelpDataEntry>;
+
 const Hoverable: React.FC<HoverableProps> = ({
   dataId,
   delay = 700,
@@ -22,7 +30,7 @@ const Hoverable: React.FC<HoverableProps> = ({
   onClick,
   ref,
 }) => {
-  const { setContent, isHoveringHelpBox } = useHelpContext();
+  const { setContent, setHeader, isHoveringHelpBox } = useHelpContext();
   const hoverTimer = useRef<NodeJS.Timeout | null>(null);
   const lockTimer = useRef<NodeJS.Timeout | null>(null);
   const isLocked = useRef(false);
@@ -43,9 +51,15 @@ const Hoverable: React.FC<HoverableProps> = ({
       // If the user is still not inside the InfoBox, update content
       if (!isHoveringHelpBox) {
         setContent(
-          <>
-            {`${descriptions[dataId] || "No description available for " + dataId}`}
-          </>,
+          helpData[dataId as keyof typeof helpData]?.text ||
+            "No description available for " + dataId,
+        );
+
+        /// @NOTE: Comment out if needed
+
+        setHeader(
+          helpData[dataId as keyof typeof helpData]?.header ||
+            "No header available for " + dataId,
         );
       }
 
@@ -55,7 +69,7 @@ const Hoverable: React.FC<HoverableProps> = ({
         isLocked.current = true;
       }, lockDuration);
     }, delay);
-  }, [dataId, delay, lockDuration, isHoveringHelpBox, setContent]);
+  }, [dataId, delay, lockDuration, isHoveringHelpBox, setContent, setHeader]);
 
   // On mouse leave, clear the timer if we haven't set content yet
   const handleMouseLeave = useCallback(() => {
