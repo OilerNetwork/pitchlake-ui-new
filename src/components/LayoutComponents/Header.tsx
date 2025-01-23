@@ -19,7 +19,6 @@ import {
   useDeployAccount,
   useDisconnect,
   useProvider,
-  useSwitchChain,
 } from "@starknet-react/core";
 import ProfileDropdown from "../BaseComponents/ProfileDropdown";
 import { copyToClipboard } from "@/lib/utils";
@@ -54,7 +53,7 @@ export default function Header() {
   const { isMobile } = useIsMobile();
   const router = useRouter();
   const { connect, connectors } = useConnect();
-  const { switchChainAsync } = useSwitchChain({});
+ // const { switchChainAsync } = useSwitchChain({});
   const { disconnect } = useDisconnect();
   const { chains, chain } = useNetwork();
   console.log("CHAINS", chains);
@@ -146,10 +145,10 @@ export default function Header() {
       console.log("FAILED");
       return Error("Chain not found");
     }
-    await switchChainAsync({
-      chainId: chain,
-    });
-    console.log("CHAIN SWITCHED");
+      // await switchChainAsync({
+      //   chainId: chain,
+      // });
+      console.log("CHAIN SWITCHED");
     return;
   };
   const copyToClipboard = (text: string) => {

@@ -1,7 +1,7 @@
 import { optionRoundABI } from "@/lib/abi";
 import { OptionBuyerStateType, OptionRoundStateType } from "@/lib/types";
 import useContractReads from "@/lib/useContractReads";
-import { useAccount, useContract, useReadContract } from "@starknet-react/core";
+import { useAccount, useContract, useContractRead } from "@starknet-react/core";
 import { useMemo } from "react";
 import { CairoCustomEnum, num } from "starknet";
 import { getPerformanceLP, getPerformanceOB } from "@/lib/utils";
