@@ -17,13 +17,12 @@ export const Vault = () => {
   const [isProviderView, setIsProviderView] = useState(true);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const { isMobile } = useIsMobile();
+  const { isHelpBoxOpen } = useHelpContext();
   const router = useRouter();
 
   if (isMobile) {
     return <MobileScreen />;
   }
-
-  const { isHelpBoxOpen } = useHelpContext();
 
   return (
     <div className="px-6 py-4 pt-[120px] bg-faded-black-alt flex-grow flex-box overflow-auto">

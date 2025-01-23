@@ -44,7 +44,7 @@ interface DepositState {
 const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   const { vaultState, lpState } = useProtocolContext();
   const [state, setState] = useState<DepositState>({
-    amount: localStorage.getItem(LOCAL_STORAGE_KEY) || "",
+    amount: "",
     isDepositAsBeneficiary: false,
     beneficiaryAddress: "",
     activeWithdrawTab: "For Me",
@@ -52,6 +52,13 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
     isAmountOk: "",
     isBeneficiaryOk: "",
   });
+
+  useEffect(() => {
+    const amount = localStorage?.getItem(LOCAL_STORAGE_KEY);
+    if (amount) {
+      setState((prevState) => ({ ...prevState, amount }));
+    }
+  }, []);
   const { account } = useAccount();
   const { pendingTx, setPendingTx } = useTransactionContext();
   const { allowance, balance } = useERC20(
@@ -164,7 +171,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   const handleMulticall = async () => {
     const data = await sendAsync();
     setPendingTx(data?.transaction_hash);
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
+    localStorage?.removeItem(LOCAL_STORAGE_KEY);
   };
 
   useEffect(() => {
@@ -250,7 +257,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
                   e.target.value.indexOf(".") + 19,
                 ),
               });
-              localStorage.setItem(LOCAL_STORAGE_KEY, e.target.value);
+              localStorage?.setItem(LOCAL_STORAGE_KEY, e.target.value);
             }}
             placeholder="e.g. 5.0"
             error={state.isAmountOk}

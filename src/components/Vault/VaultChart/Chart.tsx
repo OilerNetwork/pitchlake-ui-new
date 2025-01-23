@@ -334,9 +334,8 @@ const RoundPerformanceChart = () => {
       <div className="flex justify-center items-center my-4">
         <div className="flex gap-4">
           {["TWAP", "BASEFEE", "STRIKE", "CAP_LEVEL"].map((line) => (
-            <Hoverable dataId={`chartLineButton_${line}`}>
+            <Hoverable key={line} dataId={`chartLineButton_${line}`}>
               <button
-                key={line}
                 className={`hover-zoom-small flex flex-row items-center font-regular text-[12px]
                    ${
                      line === "CAP_LEVEL"
