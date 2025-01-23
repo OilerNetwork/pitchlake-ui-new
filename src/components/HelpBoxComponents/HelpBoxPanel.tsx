@@ -9,6 +9,8 @@ export const HelpBoxPanel = () => {
     toggleHelpBoxOpen,
     content,
     setContent,
+    header,
+    setHeader,
     setIsHoveringHelpBox,
   } = useHelpContext();
 
@@ -19,6 +21,7 @@ export const HelpBoxPanel = () => {
     // If we just opened the help box
     if (isHelpBoxOpen) {
       setContent(null);
+      setHeader(null);
     }
   }, [isHelpBoxOpen, setContent]);
 
@@ -30,7 +33,9 @@ export const HelpBoxPanel = () => {
         onMouseLeave={handleMouseLeave}
       >
         <div className="flex justify-between items-center px-6 py-4">
-          <h2 className="font-medium text-sm text-[#fafafa]">Help</h2>
+          <h2 className="font-medium text-sm text-[#fafafa]">
+            {header ? header : "Help"}
+          </h2>
           <div className="" onClick={toggleHelpBoxOpen}>
             <XIcon className="w-4 h-4 cursor-pointer" stroke="#bfbfbf" />
           </div>
