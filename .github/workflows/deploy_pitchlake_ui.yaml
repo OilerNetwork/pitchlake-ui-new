@@ -34,7 +34,7 @@ permissions:
 jobs:
   build_push_deploy:
     runs-on: ubuntu-latest
-    environment: staging
+    # environment: staging
 
     steps:
       - name: Checkout repository
