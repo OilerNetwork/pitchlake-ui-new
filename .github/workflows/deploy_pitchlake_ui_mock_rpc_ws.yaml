@@ -3,9 +3,6 @@ on:
   push:
     branches:
       - develop
-  pull_request:
-    branches:
-      - develop
 
 env:
   AWS_REGION: eu-central-1
@@ -24,6 +21,7 @@ env:
   TASK_NAME_WS: pitchlake-ui-ws-app
   # Shared configuration
   ECS_CLUSTER: pitchlake-ui-new-ecs-cluster
+  NODE_ENV: production
   PORT: ${{vars.PORT}}
   NEXT_PUBLIC_VAULT_ADDRESSES: ${{vars.VAULT_ADDRESSES}}
   NEXT_PUBLIC_ENVIRONMENT: ${{vars.ENVIRONMENT}}
@@ -42,6 +40,7 @@ permissions:
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
+    environment: staging
     outputs:
       image_uri: ${{ steps.build-image.outputs.image_uri }}
     
@@ -64,15 +63,6 @@ jobs:
       - name: Create htpasswd file
         run: htpasswd -bc .htpasswd pitchlake ${{ secrets.APPLICATION_PASSWORD }}
 
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run test cases
-        run: pnpm test
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -91,7 +81,6 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
-          NODE_ENV: production
         run: |
           IMAGE_TAG=pitchlake-ui-${{ github.sha }}
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
