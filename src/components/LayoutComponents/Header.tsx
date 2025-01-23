@@ -23,7 +23,7 @@ import {
 } from "@starknet-react/core";
 import ProfileDropdown from "../BaseComponents/ProfileDropdown";
 import { copyToClipboard } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useProtocolContext } from "@/context/ProtocolProvider";
 import { constants } from "starknet";
 import {
@@ -57,6 +57,7 @@ export default function Header() {
   const { isMobile } = useIsMobile();
   const { isHelpBoxOpen, toggleHelpBoxOpen } = useHelpContext();
   const router = useRouter();
+  const pathName = usePathname();
   const { connect, connectors } = useConnect();
   const { switchChainAsync } = useSwitchChain({});
   const { disconnect } = useDisconnect();
@@ -241,15 +242,16 @@ export default function Header() {
               </div>
             )}
           </Hoverable>
-          <div className="relative">
-            <button
-              onClick={toggleHelpBoxOpen}
-              className={`w-[44px] h-[44px] border rounded-md text-primary-400 flex flex-row items-center justify-center ${isHelpBoxOpen ? "border-[#454545] bg-[#1A1A16]" : "border-[#262626]"}`}
-            >
-              {<QuestionCircleIcon classname="" stroke="#F5EBB8" />}
-            </button>
-          </div>
-
+          {!isMobile && pathName?.includes("vault") && (
+            <div className="relative">
+              <button
+                onClick={toggleHelpBoxOpen}
+                className={`w-[44px] h-[44px] border rounded-md text-primary-400 flex flex-row items-center justify-center ${isHelpBoxOpen ? "border-[#454545] bg-[#1A1A16]" : "border-[#262626]"}`}
+              >
+                {<QuestionCircleIcon classname="" stroke="#F5EBB8" />}
+              </button>
+            </div>
+          )}
           <div className="relative" ref={dropdownRef}>
             {account ? (
               <Hoverable dataId="accountDropdown">
