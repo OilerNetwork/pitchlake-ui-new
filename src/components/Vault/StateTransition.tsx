@@ -178,7 +178,7 @@ const StateTransition = ({
       <Hoverable dataId={`leftPanelStateTransitionButton_${roundState}`}>
         <div className={`${isPanelOpen ? "px-6" : ""}`}>
           <button
-            disabled={isDisabled || check}
+            disabled={isDisabled || check || roundState === "Pending"}
             className={`flex ${!isPanelOpen && !isDisabled ? "hover-zoom-small" : ""} ${
               roundState === "Settled" ? "hidden" : ""
             } ${isPanelOpen ? "p-2" : "w-[44px] h-[44px]"} border border-greyscale-700 text-primary disabled:text-greyscale rounded-md mt-4 justify-center items-center min-w-[44px] min-h-[44px] w-full`}
