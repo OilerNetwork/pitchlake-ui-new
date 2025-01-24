@@ -10,10 +10,11 @@ import ButtonTabs from "../ButtonTabs";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEthereum } from "@fortawesome/free-brands-svg-icons";
 import { num, Call } from "starknet";
-import {useSendTransaction, useContract } from "@starknet-react/core";
+import { useSendTransaction, useContract } from "@starknet-react/core";
 import { erc20ABI, vaultABI } from "@/lib/abi";
 import useERC20 from "@/hooks/erc20/useERC20";
 import { shortenString } from "@/lib/utils";
+import Hoverable from "@/components/BaseComponents/Hoverable";
 
 interface DepositProps {
   showConfirmation: (
@@ -43,7 +44,7 @@ interface DepositState {
 const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   const { vaultState, lpState } = useProtocolContext();
   const [state, setState] = useState<DepositState>({
-    amount: localStorage.getItem(LOCAL_STORAGE_KEY) || "",
+    amount: "",
     isDepositAsBeneficiary: false,
     beneficiaryAddress: "",
     activeWithdrawTab: "For Me",
@@ -51,11 +52,18 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
     isAmountOk: "",
     isBeneficiaryOk: "",
   });
+
+  useEffect(() => {
+    const amount = localStorage?.getItem(LOCAL_STORAGE_KEY);
+    if (amount) {
+      setState((prevState) => ({ ...prevState, amount }));
+    }
+  }, []);
   const { account } = useAccount();
   const { pendingTx, setPendingTx } = useTransactionContext();
   const { allowance, balance } = useERC20(
     vaultState?.ethAddress as `0x${string}`,
-    vaultState?.address
+    vaultState?.address,
   );
 
   const updateState = (updates: Partial<DepositState>) => {
@@ -97,6 +105,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
       !account ||
       (state.isDepositAsBeneficiary &&
         !isValidHex64(state.beneficiaryAddress)) ||
+      !isValidHex64(account.address) ||
       Number(state.amount) <= 0
     ) {
       return calls;
@@ -162,7 +171,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   const handleMulticall = async () => {
     const data = await sendAsync();
     setPendingTx(data?.transaction_hash);
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
+    localStorage?.removeItem(LOCAL_STORAGE_KEY);
   };
 
   useEffect(() => {
@@ -220,44 +229,54 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
           }
         />
         {state.isDepositAsBeneficiary && (
-          <InputField
-            type="text"
-            value={state.beneficiaryAddress}
-            label="Enter Address"
-            onChange={(e) =>
-              updateState({ beneficiaryAddress: e.target.value })
-            }
-            placeholder="Depositor's Address"
-            icon={
-              <User className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
-            }
-            error={state.isBeneficiaryOk}
-          />
-        )}
-        <InputField
-          type="number"
-          value={state.amount}
-          label="Enter Amount"
-          onChange={(e) => {
-            updateState({
-              amount: e.target.value.slice(0, e.target.value.indexOf(".") + 19),
-            });
-            localStorage.setItem(LOCAL_STORAGE_KEY, e.target.value);
-          }}
-          placeholder="e.g. 5.0"
-          error={state.isAmountOk}
-          icon={
-            <FontAwesomeIcon
-              icon={faEthereum}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pr-2"
+          <Hoverable dataId="inputDepositAddress">
+            <InputField
+              type="text"
+              value={state.beneficiaryAddress}
+              label="Enter Address"
+              onChange={(e) =>
+                updateState({ beneficiaryAddress: e.target.value })
+              }
+              placeholder="Depositor's Address"
+              icon={
+                <User className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
+              }
+              error={state.isBeneficiaryOk}
             />
-          }
-        />
+          </Hoverable>
+        )}
+        <Hoverable dataId="inputDepositAmount">
+          <InputField
+            type="number"
+            value={state.amount}
+            label="Enter Amount"
+            onChange={(e) => {
+              updateState({
+                amount: e.target.value.slice(
+                  0,
+                  e.target.value.indexOf(".") + 19,
+                ),
+              });
+              localStorage?.setItem(LOCAL_STORAGE_KEY, e.target.value);
+            }}
+            placeholder="e.g. 5.0"
+            error={state.isAmountOk}
+            icon={
+              <FontAwesomeIcon
+                icon={faEthereum}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pr-2"
+              />
+            }
+          />
+        </Hoverable>
       </div>
 
       <div className="mt-auto">
         {state.activeWithdrawTab === "For Me" && (
-          <div className="px-6 flex justify-between text-sm mb-6 pt-6">
+          <Hoverable
+            dataId="lpActionUnlockedBalance"
+            className="px-6 flex justify-between text-sm mb-6 pt-6"
+          >
             <span className="text-gray-400">Unlocked Balance</span>
             <span className="text-white">
               {parseFloat(
@@ -267,15 +286,18 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
               ).toFixed(3)}{" "}
               ETH
             </span>
-          </div>
+          </Hoverable>
         )}
-        <div className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]">
+        <Hoverable
+          dataId="depositButton"
+          className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
+        >
           <ActionButton
             onClick={handleSubmitForMulticall}
             disabled={state.isButtonDisabled}
             text={pendingTx ? "Pending" : "Deposit"}
           />
-        </div>
+        </Hoverable>
       </div>
     </div>
   );

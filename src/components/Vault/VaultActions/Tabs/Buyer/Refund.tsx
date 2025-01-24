@@ -10,6 +10,7 @@ import { formatNumberText } from "@/lib/utils";
 import { num } from "starknet";
 import { formatEther } from "ethers";
 import { useTransactionContext } from "@/context/TransactionProvider";
+import Hoverable from "@/components/BaseComponents/Hoverable";
 
 interface RefundProps {
   showConfirmation: (
@@ -77,13 +78,16 @@ const Refund: React.FC<RefundProps> = ({ showConfirmation }) => {
       </div>
 
       <div className="mt-auto">
-        <div className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]">
+        <Hoverable
+          dataId="refundButton"
+          className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
+        >
           <ActionButton
             onClick={handleSubmit}
             disabled={isButtonDisabled()}
             text="Refund Now"
           />
-        </div>
+        </Hoverable>
       </div>
     </div>
   );

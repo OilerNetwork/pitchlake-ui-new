@@ -1,5 +1,6 @@
 import React from "react";
 import { CopyIcon, LogOutIcon } from "lucide-react";
+import Hoverable from "./Hoverable";
 
 interface ProfileDropdownProps {
   account: {
@@ -23,7 +24,8 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
 }) => {
   return (
     <div className="absolute right-0 mt-2 w-64 bg-black rounded-md shadow-lg py-1 border border-greyscale-800 h-[270px]">
-      <div
+      <Hoverable
+        dataId="accountDropdownAddress"
         className="px-4 py-3 text-sm text-white border-b border-greyscale-800 flex justify-between items-center hover:cursor-pointer hover:bg-[#262626]"
         onClick={() => copyToClipboard(account.address)}
       >
@@ -31,28 +33,42 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
           {account.address.slice(0, 6)}...{account.address.slice(-4)}
         </span>
         <CopyIcon className="h-4 w-4 text-[var(--buttongrey)] cursor-pointer" />
-      </div>
+      </Hoverable>
       <div className="px-4 py-2 text-sm text-[var(--buttonwhite)] border-b border-greyscale-800">
-        <h3 className="text-[var(--buttongrey)] mb-3 mt-2 text-[12px]">
-          MY BALANCE
-        </h3>
+        <Hoverable dataId="accountDropdownBalanceHeader">
+          <h3 className="text-[var(--buttongrey)] mb-3 mt-2 text-[12px]">
+            MY BALANCE
+          </h3>
+        </Hoverable>
         <div className="space-y-3">
-          <div className="flex justify-between font-regular">
+          <Hoverable
+            dataId="accountDropdownBalance"
+            className="flex justify-between font-regular"
+          >
             <span>Wallet</span>
             <span>{balance.wallet} ETH</span>
-          </div>
-          <div className="flex justify-between font-regular">
+          </Hoverable>
+          <Hoverable
+            dataId="accountDropdownLocked"
+            className="flex justify-between font-regular"
+          >
             <span>Locked</span>
             <span>{balance.locked} ETH</span>
-          </div>
-          <div className="flex justify-between font-regular">
+          </Hoverable>
+          <Hoverable
+            dataId="accountDropdownUnlocked"
+            className="flex justify-between font-regular"
+          >
             <span>Unlocked</span>
             <span>{balance.unlocked} ETH</span>
-          </div>
-          <div className="flex justify-between font-regular">
+          </Hoverable>
+          <Hoverable
+            dataId="accountDropdownStashed"
+            className="flex justify-between font-regular"
+          >
             <span>Stashed</span>
             <span>{balance.stashed} ETH</span>
-          </div>
+          </Hoverable>
         </div>
       </div>
       <div

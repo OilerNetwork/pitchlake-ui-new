@@ -1,0 +1,330 @@
+{
+  "logo": {
+    "header": "Home",
+    "text": "Return to the homepage."
+  },
+  "networkSelector": {
+    "header": "Network Selector",
+    "text": "Select which network to connect to."
+  },
+  "helpModeButton": {
+    "header": "Help Toggle",
+    "text": "Toggle help mode."
+  },
+  "loginButton": {
+    "header": "Login Button",
+    "text": "Connect your account."
+  },
+  "logoutButton": {
+    "header": "Logout Button",
+    "text": "Disconnect your account."
+  },
+  "accountDropdown": {
+    "header": "Account Dropdown",
+    "text": "Toggle account dropdown."
+  },
+  "accountDropdownAddress": {
+    "header": "My Address",
+    "text": "Copy your address to clipboard."
+  },
+  "accountDropdownBalanceHeader": {
+    "header": "My Balance",
+    "text": "Your liquidity."
+  },
+  "accountDropdownBalance": {
+    "header": "My ETH Balance",
+    "text": "Your ETH balance."
+  },
+  "accountDropdownLocked": {
+    "header": "My Locked Balance",
+    "text": "Your total locked balance."
+  },
+  "accountDropdownUnlocked": {
+    "header": "My Unlocked Balance",
+    "text": "Your total unlocked balance."
+  },
+  "accountDropdownStashed": {
+    "header": "My Stashed Balance",
+    "text": "Your total stashed balance."
+  },
+  "userToggleLP": {
+    "header": "Switch to Liquidity Provider",
+    "text": "Switch to liquidity provider view."
+  },
+  "userToggleOB": {
+    "header": "Switch to Option Buyer",
+    "text": "Switch to option buyer view."
+  },
+  "leftPanelStatisticsBar": {
+    "header": "Vault and Round Info",
+    "text": "View vault and round info."
+  },
+  "leftPanelVaultRunTime": {
+    "header": "Option Run Time",
+    "text": "Duration of each round."
+  },
+  "leftPanelVaultAddress": {
+    "header": "Vault Address",
+    "text": "Address of the vault."
+  },
+  "leftPanelVaultBar": {
+    "header": "Vault Info",
+    "text": "View vault stats."
+  },
+  "leftPanelVaultBalance": {
+    "header": "Vault Balances",
+    "text": "The liquidity distribution of the vault."
+  },
+  "vaultLockedBalance": {
+    "header": "Vault Locked Balance",
+    "text": "The total amount of ETH locked into this vault's current round."
+  },
+  "vaultUnlockedBalance": {
+    "header": "Vault Unlocked Balance",
+    "text": "The total amount of ETH unlocked in this vault. If not withdrawn, it will become locked in the next round."
+  },
+  "vaultStashedBalance": {
+    "header": "Vault Stashed Balance",
+    "text": "The total amount of ETH stashed in this vault from queued withdrawals. Funds will remain stashed in the vault until liquidity providers collect it."
+  },
+  "leftPanelVaultAlpha": {
+    "header": "Vault Risk Level",
+    "text": "The risk level of the vault."
+  },
+  "leftPanelVaultStrike": {
+    "header": "Vault Strike Level",
+    "text": "The strike level of the vault. Determines the next round's strike price."
+  },
+  "leftPanelRoundBar": {
+    "header": "Round Info",
+    "text": "View selected round info."
+  },
+  "leftPanelRoundId": {
+    "header": "Round ID",
+    "text": "The round's ID."
+  },
+  "leftPanelRoundState": {
+    "header": "Round State",
+    "text": "The current state of the round"
+  },
+  "leftPanelRoundPerf": {
+    "header": "Round performance",
+    "text": "The [LP | OB] performance for this round."
+  },
+  "leftPanelRoundCapLevel": {
+    "header": "Cap Level",
+    "text": "The max percentage above the strike this round will payout."
+  },
+  "leftPanelRoundStrikePrice": {
+    "header": "Strike Price",
+    "text": "The basefee TWAP that determines if the options can be exercised upon settlement."
+  },
+  "leftPanelRoundReservePrice": {
+    "header": "Reserve Price",
+    "text": "The minimum bid price per option."
+  },
+  "leftPanelRoundTotalOptions": {
+    "header": "Total Options",
+    "text": "The total number of options available in the auction."
+  },
+  "leftPanelRoundClearingPrice": {
+    "header": "Clearing Price",
+    "text": "The realized price per option from the auction"
+  },
+  "leftPanelRoundOptionsSold": {
+    "header": "Options Sold",
+    "text": "The number of options sold in this round."
+  },
+  "leftPanelRoundSettlementPrice": {
+    "header": "Settlement Price",
+    "text": "The basefee TWAP when the round settled."
+  },
+  "leftPanelRoundPayout": {
+    "header": "Round Payout",
+    "text": "The total payout for this round."
+  },
+  "leftPanelRoundTime": {
+    "header": "Run Time",
+    "text": "How much time remains before the round's state can transition."
+  },
+  "leftPanelStateTransitionButton_Open": {
+    "header": "Start Auction",
+    "text": "Button to start the round's auction once the auction start date is reached."
+  },
+  "leftPanelStateTransitionButton_Auctioning": {
+    "header": "End Auction",
+    "text": "Button to end the round's auction once the auction end date is reached."
+  },
+  "leftPanelStateTransitionButton_Running": {
+    "header": "Settle Round",
+    "text": "Button to settle the option round once the settlement date is reached."
+  },
+  "chartRoundSelector": {
+    "header": "Round Dropdown",
+    "text": "Select which round to view."
+  },
+  "chartPreviousRound": {
+    "header": "Previous Round",
+    "text": "View the previous round."
+  },
+  "chartNextRound": {
+    "header": "Next Round",
+    "text": "View the next round."
+  },
+  "chartHistory": {
+    "header": "Chart History",
+    "text": "View this vault's history."
+  },
+  "chartLineButton_TWAP": {
+    "header": "Chart: TWAP",
+    "text": "View the TWAP price."
+  },
+  "chartLineButton_BASEFEE": {
+    "header": "Chart: Basefee",
+    "text": "View the base fee."
+  },
+  "chartLineButton_STRIKE": {
+    "header": "Chart: Strike",
+    "text": "View the strike price."
+  },
+  "chartLineButton_CAP_LEVEL": {
+    "header": "Chart: Cap Level",
+    "text": "View the cap level."
+  },
+  "actionTab_Deposit": {
+    "header": "Deposit Tab",
+    "text": "Add liquidity to your unlocked balance."
+  },
+  "actionTab_For Me": {
+    "header": "For Me Tab",
+    "text": "Deposit for the connected account."
+  },
+  "actionTab_For Someone Else": {
+    "header": "For Someone Else Tab",
+    "text": "Deposit for an account not connected."
+  },
+  "actionTab_Withdraw": {
+    "header": "Withdraw Tab",
+    "text": "Remove liquidity from your unlocked balance."
+  },
+  "actionTab_Liquidity": {
+    "header": "Withdraw Tab",
+    "text": "Remove liquidity from your unlocked balance."
+  },
+  "actionTab_Queue": {
+    "header": "Queue Withdrawal Tab",
+    "text": "Queue a percentage of your locked balance to be stashed aside upon round settlement."
+  },
+  "actionTab_Collect": {
+    "header": "Collect Stash Tab",
+    "text": "Collect your stashed balance."
+  },
+  "actionTab_Place Bid": {
+    "header": "Place Bid Tab",
+    "text": "Bid for options."
+  },
+  "actionTab_History": {
+    "header": "Bid History Tab",
+    "text": "View your bid history."
+  },
+  "actionTab_Refund": {
+    "header": "Refund Tab",
+    "text": "Refund your bids that were not collected as premium."
+  },
+  "actionTab_Mint": {
+    "header": "Mint Tab",
+    "text": "Convert your options into ERC-20 tokens."
+  },
+  "actionTab_Exercise": {
+    "header": "Exercise Tab",
+    "text": "Exercise all of your options for this round."
+  },
+  "lpActionLockedBalance": {
+    "header": "My Locked Balance",
+    "text": "Your current locked balance."
+  },
+  "lpActionUnlockedBalance": {
+    "header": "My Unlocked Balance",
+    "text": "Your current unlocked balance."
+  },
+  "inputDepositAmount": {
+    "header": "Deposit Details",
+    "text": "Enter the amount of ETH you want to deposit."
+  },
+  "inputDepositAddress": {
+    "header": "Depsoit Details",
+    "text": "Enter the address you are depositting for."
+  },
+  "depositButton": {
+    "header": "Make Deposit",
+    "text": "Deposits are added to a user's unlocked balance. Once the next auction starts all unlocked liquidity will become locked."
+  },
+  "inputWithdrawalAmount": {
+    "header": "Withdrawal Details",
+    "text": "Enter the amount of ETH you want to withdraw."
+  },
+  "withdrawButton": {
+    "header": "Withdrawal Details",
+    "text": "Withdrawals come from a user's unlocked balance."
+  },
+  "queueSlider": {
+    "header": "Queue Withdrawal Details",
+    "text": "Select the percentage of your locked balance to queue."
+  },
+  "queueButton": {
+    "header": "Queue Button",
+    "text": "Queue a percentage of your locked balance to become stashed upon settlement. The rest will become unlocked."
+  },
+  "collectStashButton": {
+    "header": "Collect Stash",
+    "text": "Collect your entire stashed balance."
+  },
+  "inputBidAmount": {
+    "header": "Bid Details",
+    "text": "Enter the number of options you are bidding for. Each option is for a single unit of gas."
+  },
+  "inputBidPrice": {
+    "header": "Bid Details",
+    "text": "Enter the price you are bidding for each option (in GWEI)."
+  },
+  "newBidSummary": {
+    "header": "Bid Summary",
+    "text": "The total cost of this bid."
+  },
+  "placingBidBalance": {
+    "header": "My ETH Balance",
+    "text": "Your current ETH balance."
+  },
+  "placeBidButton": {
+    "header": "Place Bid",
+    "text": "Request transaction to bid ETH in the auction."
+  },
+  "inputUpdateBidAmount": {
+    "header": "Bid Details",
+    "text": "How many options this bid is for. If you wish to bid for additional options you must place a new bid."
+  },
+  "inputUpdateBidPrice": {
+    "header": "Bid Details",
+    "text": "Enter the new price being bid for each option (in GWEI)."
+  },
+  "updateBidSummary": {
+    "header": "Update Bid Summary",
+    "text": "The total cost to increase this bid."
+  },
+  "updateBidButton": {
+    "header": "Update Bid",
+    "text": "Update the price per option of your bid."
+  },
+  "mintButton": {
+    "header": "Mint Options",
+    "text": "Mint options as ERC-20 tokens."
+  },
+  "refundButton": {
+    "header": "Refund Bids",
+    "text": "Refund your unused bids."
+  },
+  "exerciseButton": {
+    "header": "Exercise Options",
+    "text": "Exercise all of your options (non-minted options and ERC-20 options)."
+  }
+}

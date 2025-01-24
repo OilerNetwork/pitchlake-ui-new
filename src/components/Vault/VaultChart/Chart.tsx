@@ -16,6 +16,7 @@ import data from "@/chart_data.json";
 import GasPriceChart from "@/components/Vault/VaultChart/ChartInner";
 import { useGasData } from "@/hooks/chart/useGasData";
 import { useHistoricalRoundParams } from "@/hooks/chart/useHistoricalRoundParams";
+import Hoverable from "@/components/BaseComponents/Hoverable";
 
 const RoundPerformanceChart = () => {
   const [isExpandedView, setIsExpandedView] = useState(false);
@@ -208,7 +209,8 @@ const RoundPerformanceChart = () => {
     <div className="w-full h-[800px] bg-black-alt rounded-[12px] border border-greyscale-800 relative">
       {/* Round Navigation */}
       <div className="flex flex-row items-center p-5 justify-between border-b-[1px] border-greyscale-800 pb-4 h-[56px]">
-        <div
+        <Hoverable
+          dataId="chartRoundSelector"
           ref={headerRef}
           onClick={() => setRoundNavIsOpen(!roundNavIsOpen)}
           className="cursor-pointer font-medium text-[14px] text-primary flex flex-row items-center"
@@ -228,9 +230,9 @@ const RoundPerformanceChart = () => {
               <ArrowUpIcon stroke="var(--primary)" classname="ml-2 w-4 h-4" />
             )}
           </div>
-        </div>
+        </Hoverable>
         <div className="flex flex-row items-center gap-4">
-          <div onClick={decrementRound}>
+          <Hoverable dataId="chartPreviousRound" onClick={decrementRound}>
             <ArrowLeftIcon
               stroke={
                 !selectedRound || selectedRound === 1
@@ -247,8 +249,8 @@ const RoundPerformanceChart = () => {
                   : ""
               } `}
             />
-          </div>
-          <div onClick={incrementRound}>
+          </Hoverable>
+          <Hoverable dataId="chartNextRound" onClick={incrementRound}>
             <ArrowRightIcon
               stroke={
                 selectedRound &&
@@ -270,8 +272,8 @@ const RoundPerformanceChart = () => {
                   : ""
               }`}
             />
-          </div>
-          <div>
+          </Hoverable>
+          <Hoverable dataId="chartHistory">
             <History
               onClick={() => setIsExpandedView(!isExpandedView)}
               className={classNames(
@@ -283,10 +285,7 @@ const RoundPerformanceChart = () => {
                 "hover:stroke-[var(--primary)]  hover-zoom",
               )}
             />
-            {
-              //hover:scale-105 transition-transform duration-200 ease-in-out
-            }
-          </div>
+          </Hoverable>
         </div>
       </div>
 
@@ -335,9 +334,9 @@ const RoundPerformanceChart = () => {
       <div className="flex justify-center items-center my-4">
         <div className="flex gap-4">
           {["TWAP", "BASEFEE", "STRIKE", "CAP_LEVEL"].map((line) => (
-            <button
-              key={line}
-              className={`hover-zoom-small flex flex-row items-center font-regular text-[12px]
+            <Hoverable key={line} dataId={`chartLineButton_${line}`}>
+              <button
+                className={`hover-zoom-small flex flex-row items-center font-regular text-[12px]
                    ${
                      line === "CAP_LEVEL"
                        ? "text-success"
@@ -347,15 +346,16 @@ const RoundPerformanceChart = () => {
                            ? "text-warning-300"
                            : "text-error-300"
                    }`}
-              onClick={() => toggleLine(line)}
-            >
-              {line === "CAP_LEVEL" ? "CAP LEVEL" : line}
-              {activeLines[line] ? (
-                <EyeIcon className="w-4 h-4 ml-2 mr-3" />
-              ) : (
-                <EyeOffIcon className="w-4 h-4 ml-2 mr-3" />
-              )}
-            </button>
+                onClick={() => toggleLine(line)}
+              >
+                {line === "CAP_LEVEL" ? "CAP LEVEL" : line}
+                {activeLines[line] ? (
+                  <EyeIcon className="w-4 h-4 ml-2 mr-3" />
+                ) : (
+                  <EyeOffIcon className="w-4 h-4 ml-2 mr-3" />
+                )}
+              </button>
+            </Hoverable>
           ))}
         </div>
       </div>
