@@ -23,7 +23,7 @@ import {
 } from "@starknet-react/core";
 import ProfileDropdown from "../BaseComponents/ProfileDropdown";
 import { copyToClipboard } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useProtocolContext } from "@/context/ProtocolProvider";
 import { constants } from "starknet";
 import {
@@ -42,6 +42,10 @@ import useAccountBalances from "@/hooks/vault/state/useAccountBalances";
 import { ArrowDownIcon, LoginIcon } from "../Icons";
 import useIsMobile from "@/hooks/window/useIsMobile";
 import { Chain } from "@starknet-react/chains";
+import { useHelpContext } from "@/context/HelpProvider";
+import QuestionCircleIcon from "../Icons/QuestionCircleIcon";
+import Hoverable from "../BaseComponents/Hoverable";
+import { useUiContext } from "@/context/UiProvider";
 
 export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -52,35 +56,38 @@ export default function Header() {
   const isDropdownOpenRef = useRef(isDropdownOpen);
   const isDropdownChainOpenRef = useRef(isDropdownChainOpen);
   const { isMobile } = useIsMobile();
+  const { isHelpBoxOpen, toggleHelpBoxOpen } = useHelpContext();
+  const { isBlurOpen, setBlurOpen } = useUiContext();
   const router = useRouter();
+  const pathName = usePathname();
   const { connect, connectors } = useConnect();
   const { switchChainAsync } = useSwitchChain({});
   const { disconnect } = useDisconnect();
   const { chains, chain } = useNetwork();
-  console.log("CHAINS", chains);
+  //console.log("CHAINS", chains);
   const { account } = useAccount();
   const { balance } = useERC20(
     "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-    vaultState?.address
+    vaultState?.address,
   );
 
   const { lockedBalance, unlockedBalance, stashedBalance } = useAccountBalances(
-    vaultState ? vaultState.address : ""
+    vaultState ? vaultState.address : "",
   );
 
   // @NOTE: sum balances accross all vaults ?
   const balanceData = {
     wallet: parseFloat(formatEther(num.toBigInt(balance).toString())).toFixed(
-      3
+      3,
     ),
     locked: parseFloat(
-      formatEther(num.toBigInt(lockedBalance).toString())
+      formatEther(num.toBigInt(lockedBalance).toString()),
     ).toFixed(3),
     unlocked: parseFloat(
-      formatEther(num.toBigInt(unlockedBalance).toString())
+      formatEther(num.toBigInt(unlockedBalance).toString()),
     ).toFixed(3),
     stashed: parseFloat(
-      formatEther(num.toBigInt(stashedBalance).toString())
+      formatEther(num.toBigInt(stashedBalance).toString()),
     ).toFixed(3),
   };
 
@@ -99,6 +106,7 @@ export default function Header() {
         !dropdownRef?.current?.contains(event.target as HTMLDivElement)
       ) {
         setIsDropdownOpen(false);
+        setBlurOpen(false);
       }
     };
     const handleClickOutsideChain = (event: MouseEvent) => {
@@ -107,15 +115,18 @@ export default function Header() {
         !dropdownChainRef?.current?.contains(event.target as HTMLDivElement)
       ) {
         setIsDropdownChainOpen(false);
+        setBlurOpen(false);
       }
     };
 
     const handleEscKey = (event: KeyboardEvent) => {
       if (isDropdownOpenRef.current && event.key === "Escape") {
         setIsDropdownOpen(false);
+        setBlurOpen(false);
       }
       if (isDropdownChainOpenRef.current && event.key === "Escape") {
         setIsDropdownChainOpen(false);
+        setBlurOpen(false);
       }
     };
 
@@ -171,7 +182,7 @@ export default function Header() {
   return (
     !isMobile && (
       <nav className="absolute top-0 z-50 w-full h-[84px] bg-[#121212] px-8 py-6 flex justify-between items-center border-b border-[#262626]">
-        <div className="flex-shrink-0">
+        <Hoverable dataId="logo" className="flex-shrink-0">
           <Image
             onClick={() => {
               router.push("/");
@@ -183,7 +194,7 @@ export default function Header() {
             className="cursor-pointer h-8 sm:h-10 md:h-12 lg:h-14"
             style={{ objectFit: "contain" }}
           />
-        </div>
+        </Hoverable>
 
         <div className="flex items-center space-x-4 text-[14px] font-medium">
           {conn === "mock" && (
@@ -199,11 +210,18 @@ export default function Header() {
             //  <BellIcon className="h-6 w-6 text-primary" />
             //</div>
           }
-          <div className="relative" ref={dropdownChainRef}>
+          <Hoverable
+            dataId="networkSelector"
+            className="relative"
+            ref={dropdownChainRef}
+          >
             {
               <button
                 className="flex flex-row min-w-16 border-[1px] border-primary-400 text-primary-400 text-sm px-4 py-3 rounded-md  items-center justify-center"
-                onClick={() => setIsDropdownChainOpen(true)}
+                onClick={() => {
+                  setIsDropdownChainOpen(true);
+                  setBlurOpen(!isBlurOpen);
+                }}
               >
                 <p>{chain.network}</p>
                 <ArrowDownIcon
@@ -215,10 +233,10 @@ export default function Header() {
 
             {isDropdownChainOpen && (
               <div className="absolute right-0 bg-[#161616] text-center text-primary-400 w-full text-sm flex flex-col">
-                {chains.map((chain: Chain,index:number) => {
+                {chains.map((chain: Chain, index: number) => {
                   return (
                     <div
-                    key={index}
+                      key={index}
                       onClick={() => {
                         handleSwitchChain(chain.network);
                       }}
@@ -232,12 +250,25 @@ export default function Header() {
                 })}
               </div>
             )}
-          </div>
+          </Hoverable>
+          {!isMobile && pathName?.includes("vault") && (
+            <div className="relative">
+              <button
+                onClick={toggleHelpBoxOpen}
+                className={`w-[44px] h-[44px] border rounded-md text-primary-400 flex flex-row items-center justify-center ${isHelpBoxOpen ? "border-[#454545] bg-[#1A1A16]" : "border-[#262626]"}`}
+              >
+                {<QuestionCircleIcon classname="" stroke="#F5EBB8" />}
+              </button>
+            </div>
+          )}
           <div className="relative" ref={dropdownRef}>
             {account ? (
-              <>
+              <Hoverable dataId="accountDropdown">
                 <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  onClick={() => {
+                    setIsDropdownOpen(!isDropdownOpen);
+                    //setBlurOpen(!isBlurOpen);
+                  }}
                   className="flex items-center space-x-2 py-2 px-3 rounded-md border border-greyscale-800 w-[164px] h-[44px]"
                 >
                   <Image
@@ -258,7 +289,11 @@ export default function Header() {
                     <ProfileDropdown
                       account={account}
                       balance={balanceData}
-                      disconnect={disconnect}
+                      disconnect={() => {
+                        disconnect();
+                        //setBlurOpen(!isBlurOpen);
+                        //setIsDropdownOpen((state) => !state);
+                      }}
                       copyToClipboard={copyToClipboard}
                     />
                     {/* <ToastContainer
@@ -270,12 +305,15 @@ export default function Header() {
                     /> */}
                   </>
                 )}
-              </>
+              </Hoverable>
             ) : (
-              <>
+              <Hoverable dataId="loginButton">
                 <button
                   className="flex flex-row min-w-16 bg-primary-400 text-black text-sm px-8 py-4 rounded-md w-[123px] h-[44px] items-center justify-center"
-                  onClick={() => setIsDropdownOpen((state) => !state)}
+                  onClick={() => {
+                    setBlurOpen(!isBlurOpen);
+                    setIsDropdownOpen((state) => !state);
+                  }}
                 >
                   <p>Connect</p>
                   <div>
@@ -296,7 +334,11 @@ export default function Header() {
                       {connectors.map((connector) => (
                         <div
                           key={connector.id}
-                          onClick={() => connect({ connector })}
+                          onClick={() => {
+                            connect({ connector });
+                            setIsDropdownOpen(false);
+                            setBlurOpen(false);
+                          }}
                           className="cursor-pointer sticky p-2 px-3 bg-[#161616] w-full text-[#FAFAFA] text-[14px] font-medium hover:bg-[#262626]"
                         >
                           {
@@ -306,8 +348,8 @@ export default function Header() {
                                   connector.id === "braavos"
                                     ? braavosIcon
                                     : connector.id === "keplr"
-                                    ? keplr
-                                    : argent
+                                      ? keplr
+                                      : argent
                                 }
                                 alt="Login"
                                 width={20}
@@ -324,7 +366,7 @@ export default function Header() {
                     </div>
                   </div>
                 )}
-              </>
+              </Hoverable>
             )}
           </div>
         </div>

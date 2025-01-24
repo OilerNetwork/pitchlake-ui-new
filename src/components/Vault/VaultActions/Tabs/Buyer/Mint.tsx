@@ -8,6 +8,7 @@ import { useAccount } from "@starknet-react/core";
 import { RepeatEthIcon } from "@/components/Icons";
 import { formatNumberText } from "@/lib/utils";
 import { useTransactionContext } from "@/context/TransactionProvider";
+import Hoverable from "@/components/BaseComponents/Hoverable";
 
 interface MintProps {
   showConfirmation: (
@@ -72,20 +73,25 @@ const Mint: React.FC<MintProps> = ({ showConfirmation }) => {
           <br />
           <span className="font-semibold text-[#fafafa]">
             {formatNumberText(
-              Number(selectedRoundBuyerState?.mintableOptions?.toString()??"0"),
+              Number(
+                selectedRoundBuyerState?.mintableOptions?.toString() ?? "0",
+              ),
             )}
           </span>
         </p>
       </div>
 
       <div className="mt-auto">
-        <div className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]">
+        <Hoverable
+          dataId="mintButton"
+          className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
+        >
           <ActionButton
             onClick={handleSubmit}
             disabled={isButtonDisabled()}
             text="Mint Now"
           />
-        </div>
+        </Hoverable>
       </div>
     </div>
   );

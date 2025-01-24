@@ -23,6 +23,8 @@ export { default as RepeatEthIcon } from "./RepeatEthIcon";
 export { default as HammerIcon } from "./HammerIcon";
 export { default as ExerciseOptionsIcon } from "./ExerciseOptionsIcon";
 export { default as CollectEthIcon } from "./CollectEthIcon";
+export { default as HoverIcon } from "./HoverIcon";
+export { default as QuestionCircleIcon } from "./QuestionCircleIcon";
 
 // To create a new tailwind compatible icon component, create a new file in pitchlake-ui/public/icons/ using other icons as a template.
 // Export the icon here to make it available to other components.

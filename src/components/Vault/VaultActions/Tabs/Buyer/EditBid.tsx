@@ -13,11 +13,9 @@ import { useAccount } from "@starknet-react/core";
 import useLatestTimetamp from "@/hooks/chain/useLatestTimestamp";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useProvider } from "@starknet-react/core";
-import {
-  useSendTransaction,
-  useContract,
-} from "@starknet-react/core";
+import { useSendTransaction, useContract } from "@starknet-react/core";
 import { erc20ABI, optionRoundABI } from "@/lib/abi";
+import Hoverable from "@/components/BaseComponents/Hoverable";
 
 interface EditModalProps {
   onConfirm: () => void;
@@ -150,7 +148,7 @@ const EditModal: React.FC<EditModalProps> = ({
     ethContract,
     bidId,
   ]);
-  const { sendAsync} = useSendTransaction({ calls });
+  const { sendAsync } = useSendTransaction({ calls });
 
   // Send confirmation
   const handleSubmitForMulticall = () => {
@@ -241,7 +239,7 @@ const EditModal: React.FC<EditModalProps> = ({
 
       <div className="flex flex-col h-full">
         <div className="flex-grow space-y-6 pt-2 px-4">
-          <div>
+          <Hoverable dataId="inputUpdateBidAmount">
             <InputField
               type="number"
               value={""}
@@ -258,8 +256,8 @@ const EditModal: React.FC<EditModalProps> = ({
                 />
               }
             />
-          </div>
-          <div>
+          </Hoverable>
+          <Hoverable dataId="inputUpdateBidPrice">
             <InputField
               type="number"
               value={state.newPriceGwei}
@@ -275,28 +273,37 @@ const EditModal: React.FC<EditModalProps> = ({
               }
               error={state.error}
             />
-          </div>
+          </Hoverable>
         </div>
       </div>
 
-      <div className="flex justify-between text-sm px-6 pb-1">
+      <Hoverable
+        dataId="updateBidSummary"
+        className="flex justify-between text-sm px-6 pb-1"
+      >
         <span className="text-gray-400">Total</span>
         <span>{parseFloat(totalNewCostEth).toFixed(6)} ETH</span>
-      </div>
-      <div className="flex justify-between text-sm px-6 pb-6">
+      </Hoverable>
+      <Hoverable
+        dataId="placingBidBalance"
+        className="flex justify-between text-sm px-6 pb-6"
+      >
         <span className="text-gray-400">Balance</span>
         <span>
           {parseFloat(formatEther(num.toBigInt(balance))).toFixed(3)} ETH
         </span>
-      </div>
+      </Hoverable>
       <div className="mt-auto">
-        <div className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]">
+        <Hoverable
+          dataId="updateBidButton"
+          className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
+        >
           <ActionButton
             onClick={handleSubmitForMulticall}
             disabled={state.isButtonDisabled}
             text="Edit Bid"
           />
-        </div>
+        </Hoverable>
       </div>
     </div>
   );

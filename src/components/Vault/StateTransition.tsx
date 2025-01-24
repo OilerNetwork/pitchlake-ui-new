@@ -7,6 +7,7 @@ import { useTransactionContext } from "@/context/TransactionProvider";
 import { useRoundState } from "@/hooks/stateTransition/useRoundState";
 import { getIconByRoundState } from "@/hooks/stateTransition/getIconByRoundState";
 import { useRoundPermissions } from "@/hooks/stateTransition/useRoundPermissions";
+import Hoverable from "../BaseComponents/Hoverable";
 
 const StateTransition = ({
   isPanelOpen,
@@ -24,7 +25,7 @@ const StateTransition = ({
     timestamp: timestampRaw,
     conn,
   } = useProtocolContext();
-  const { pendingTx,lastBlock } = useTransactionContext();
+  const { pendingTx, lastBlock } = useTransactionContext();
   const { account } = useAccount();
   const timestamp = timestampRaw ? timestampRaw : "0";
   const {
@@ -55,7 +56,7 @@ const StateTransition = ({
   } = useRoundPermissions(
     timestamp.toString(),
     selectedRoundState,
-    fossilDelay
+    fossilDelay,
   );
 
   const actions: Record<string, string> = useMemo(
@@ -109,8 +110,7 @@ const StateTransition = ({
 
     setIsAwaitingRoundStateUpdate(true);
 
-    if(roundState!=="FossilReady")
-    setCheck(true)
+    if (roundState !== "FossilReady") setCheck(true);
     setModalState((prev: any) => ({
       ...prev,
       show: false,
@@ -140,16 +140,16 @@ const StateTransition = ({
     canRoundSettle,
   ]);
 
+  const [check, setCheck] = useState(false);
+  const icon = getIconByRoundState(
+    roundState,
+    isDisabled || check,
+    isPanelOpen,
+  );
 
- 
-
-
-  const [check,setCheck]= useState(false)
-  const icon = getIconByRoundState(roundState, isDisabled||check, isPanelOpen);
-
-  useEffect(()=>{
-    setCheck(false)
-  },[selectedRoundState?.roundState])
+  useEffect(() => {
+    setCheck(false);
+  }, [selectedRoundState?.roundState]);
   useEffect(() => {
     if (expectedNextState && roundState === expectedNextState) {
       setIsAwaitingRoundStateUpdate(false);
@@ -176,26 +176,29 @@ const StateTransition = ({
           : "border border-transparent border-t-[#262626]"
       } flex flex-col w-full mx-auto mt-auto mb-4 ${isPanelOpen ? "" : "items-center justify-center"}`}
     >
-      <div className={`${isPanelOpen ? "px-6" : ""}`}>
-        <button
-          disabled={isDisabled || check}
-          className={`flex ${!isPanelOpen && !isDisabled ? "hover-zoom-small" : ""} ${
-            roundState === "Settled" ? "hidden" : ""
-          } ${isPanelOpen ? "p-2" : "w-[44px] h-[44px]"} border border-greyscale-700 text-primary disabled:text-greyscale rounded-md mt-4 justify-center items-center min-w-[44px] min-h-[44px] w-full`}
-          onClick={() => {
-            setModalState({
-              show: true,
-              action: actions[roundState],
-              onConfirm: handleAction,
-            });
-          }}
-        >
-          <p className={`${isPanelOpen ? "" : "hidden"}`}>
-            {prevRoundState !== roundState ? "Pending" : actions[roundState]}
-          </p>
-          {icon}
-        </button>
-      </div>
+
+      <Hoverable dataId={`leftPanelStateTransitionButton_${roundState}`}>
+        <div className={`${isPanelOpen ? "px-6" : ""}`}>
+          <button
+            disabled={isDisabled || check }
+            className={`flex ${!isPanelOpen && !isDisabled ? "hover-zoom-small" : ""} ${
+              roundState === "Settled" ? "hidden" : ""
+            } ${isPanelOpen ? "p-2" : "w-[44px] h-[44px]"} border border-greyscale-700 text-primary disabled:text-greyscale rounded-md mt-4 justify-center items-center min-w-[44px] min-h-[44px] w-full`}
+            onClick={() => {
+              setModalState({
+                show: true,
+                action: actions[roundState],
+                onConfirm: handleAction,
+              });
+            }}
+          >
+            <p className={`${isPanelOpen ? "" : "hidden"}`}>
+              {prevRoundState !== roundState ? "Pending" : actions[roundState]}
+            </p>
+            {icon}
+          </button>
+        </div>
+      </Hoverable>
     </div>
   );
 };
