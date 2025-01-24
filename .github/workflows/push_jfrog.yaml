@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - feat/test
 
 env:
   DOCKER_REGISTRY: nethermind.jfrog.io
@@ -30,7 +29,7 @@ permissions:
 jobs:
   deploy-agent:
     runs-on: ubuntu-latest
-    # environment: staging
+    environment: staging
 
     steps:
       - name: Checkout repository
