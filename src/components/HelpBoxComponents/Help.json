@@ -147,6 +147,34 @@
     "header": "Run Time",
     "text": "How much time remains before the round's state can transition."
   },
+  "leftPanelRoundTime_Open_past": {
+    "header": "Auction Not Started Yet",
+    "text": "The transaction to start the auction has not been made yet."
+  },
+  "leftPanelRoundTime_Open_future": {
+    "header": "Auction Cannot Start Yet",
+    "text": "The transaction to start the auction cannot be made yet."
+  },
+  "leftPanelRoundTime_Auctioning_past": {
+    "header": "Auction Not Ended Yet",
+    "text": "The transaction to end the auction has not been made yet."
+  },
+  "leftPanelRoundTime_Auctioning_future": {
+    "header": "Auction Cannot End Yet",
+    "text": "The transaction to end the auction cannot be made yet."
+  },
+  "leftPanelRoundTime_Running_past": {
+    "header": "Round Not Settled Yet",
+    "text": "The transaction to settle the round has not been made yet."
+  },
+  "leftPanelRoundTime_Running_future": {
+    "header": "Round Cannot Settle Yet",
+    "text": "The transaction to settle the round cannot be made yet."
+  },
+  "leftPanelRoundTime_Settled_past": {
+    "header": "Round Settled",
+    "text": "This round has been settled."
+  },
   "leftPanelStateTransitionButton_Open": {
     "header": "Start Auction",
     "text": "Button to start the round's auction once the auction start date is reached."
@@ -298,6 +326,10 @@
   "placeBidButton": {
     "header": "Place Bid",
     "text": "Request transaction to bid ETH in the auction."
+  },
+  "openUpdateBidPanel": {
+    "header": "Update Bid",
+    "text": "Increase your bid price per option."
   },
   "inputUpdateBidAmount": {
     "header": "Bid Details",
