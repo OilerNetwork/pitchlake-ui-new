@@ -52,52 +52,74 @@ const PanelLeft = ({ userType }: { userType: string }) => {
     await modalState.onConfirm();
   };
 
-  const getStateActionHeader = () => {
-    const round = selectedRoundState
-      ? selectedRoundState
-      : { optionSettleDate: "0" };
+  const RemainingTimeElement = () => {
+    if (
+      !selectedRoundState ||
+      !selectedRoundState.roundState ||
+      !selectedRoundState.auctionStartDate ||
+      !selectedRoundState.auctionEndDate ||
+      !selectedRoundState.optionSettleDate
+    )
+      return null;
 
-    const roundState = selectedRoundState?.roundState
-      ? selectedRoundState.roundState
-      : "Open";
+    const { roundState, auctionStartDate, auctionEndDate, optionSettleDate } =
+      selectedRoundState;
+    const currentTimestamp = Number(timestamp);
 
-    if (roundState === "Open") return "Auction Starts In";
-    if (roundState === "Auctioning") return "Auction Ends In";
-    if (roundState === "Running") {
-      let settlementDate = Number(round.optionSettleDate);
-      if (timestamp < settlementDate) return "Round Ends In";
-      else if (timestamp < settlementDate + FOSSIL_DELAY)
-        return "Fossil Ready In";
-      else return "Round Ended";
+    let header = "";
+    let timeText = "Loading...";
+    let targetTimestamp: number | null = null;
+    let key = "past";
+
+    const table: any = {
+      Open: {
+        future: "Auction Starts In",
+        past: "Auction Could Start",
+      },
+      Auctioning: {
+        future: "Auction Ends In",
+        past: "Auction Could End",
+      },
+      Running: { future: "Round Settles In", past: "Round Could Settle" },
+      Settled: { past: "Round Settled" },
+    };
+
+    switch (roundState) {
+      case "Open":
+        targetTimestamp = Number(auctionStartDate);
+        break;
+      case "Auctioning":
+        targetTimestamp = Number(auctionEndDate);
+        break;
+      case "Running":
+        targetTimestamp = Number(optionSettleDate);
+        break;
+      case "Settled":
+        targetTimestamp = Number(optionSettleDate);
+        break;
     }
-    if (roundState === "Settled") return "Round Ended";
-  };
 
-  const getTimeUntilNextStateTransition = () => {
-    const round = selectedRoundState
-      ? selectedRoundState
-      : { auctionStartDate: "0", auctionEndDate: "0", optionSettleDate: "0" };
-    const roundState = selectedRoundState?.roundState
-      ? selectedRoundState.roundState
-      : "Open";
+    if (!targetTimestamp) return null;
 
-    let targetDate: string | number | bigint = "0";
-
-    if (roundState === "Open") targetDate = round.auctionStartDate;
-    if (roundState === "Auctioning") targetDate = round.auctionEndDate;
-    if (roundState === "Running") {
-      let settlementDate = Number(round.optionSettleDate);
-      if (timestamp < settlementDate) targetDate = settlementDate;
-      else if (timestamp < settlementDate + FOSSIL_DELAY)
-        targetDate = settlementDate + FOSSIL_DELAY;
-      else targetDate = settlementDate;
+    if (currentTimestamp < targetTimestamp) {
+      key = "future";
     }
-    if (roundState === "Settled") targetDate = round.optionSettleDate;
 
-    targetDate = targetDate ? targetDate : "0";
-    return Number(timestamp) !== 0 && Number(targetDate) !== 0
-      ? timeUntilTarget(Number(timestamp).toString(), targetDate.toString())
-      : "Loading...";
+    header = table[roundState][key];
+    timeText = timeUntilTarget(
+      currentTimestamp.toString(),
+      targetTimestamp.toString(),
+    );
+
+    return (
+      <Hoverable
+        dataId={`leftPanelRoundTime_${roundState}_${key}`}
+        className="max-h-full flex flex-row justify-between items-center p-2 w-full"
+      >
+        <p className="text-[#BFBFBF]">{header}</p>
+        <p>{timeText}</p>
+      </Hoverable>
+    );
   };
 
   const stateStyles: any = {
@@ -470,22 +492,6 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                     : "Loading"}
                 </p>
               </Hoverable>
-              {
-                ///  (roundState === "Open" || roundState == "Auctioning") && (
-                ///  <div className="max-h-full flex flex-row justify-between items-center p-2 w-full">
-                ///    <p className="text-[#BFBFBF]">Last Round Perf.</p>
-                ///    <div
-                ///      onClick={() => {
-                ///        console.log("todo: decrement selected round id");
-                ///      }}
-                ///      className="flex flex-row justify-center items-center text-[#F5EBB8] cursor-pointer gap-[4px]"
-                ///    >
-                ///      <p className="">+12.34%</p>
-                ///      <ArrowRightIcon className="size-[16px]" />
-                ///    </div>
-                ///  </div>
-                ///)
-              }
               {roundState === "Settled" && (
                 <Hoverable
                   dataId="leftPanelRoundPerf"
@@ -509,16 +515,14 @@ const PanelLeft = ({ userType }: { userType: string }) => {
               >
                 <p className="text-[#BFBFBF]">Cap Level</p>
                 <p>
-                  {
-                    selectedRoundState?.capLevel &&
-                    selectedRoundState.capLevel !== "0"
-                      ? `${(
-                          (100 *
-                            parseInt(selectedRoundState.capLevel.toString())) /
-                          10_000
-                        ).toFixed(2)}%`
-                      : "Loading..." //Add round duration from state here
-                  }
+                  {selectedRoundState?.capLevel &&
+                  selectedRoundState.capLevel !== "0"
+                    ? `${(
+                        (100 *
+                          parseInt(selectedRoundState.capLevel.toString())) /
+                        10_000
+                      ).toFixed(2)}%`
+                    : "Loading..."}
                 </p>
               </Hoverable>
               <Hoverable
@@ -666,13 +670,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                   </Hoverable>
                 </>
               )}
-              <Hoverable
-                dataId="leftPanelRoundTime"
-                className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
-              >
-                <p className="text-[#BFBFBF]">{getStateActionHeader()}</p>
-                <p>{getTimeUntilNextStateTransition()}</p>
-              </Hoverable>
+              <RemainingTimeElement />
             </div>
           </div>
           <StateTransition
