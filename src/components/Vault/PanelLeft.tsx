@@ -165,7 +165,8 @@ const PanelLeft = ({ userType }: { userType: string }) => {
         } ${!isPanelOpen ? "" : ""}`}
       >
         <div className="flex items-center align-center text-[14px] bg-black-alt border-[1px] border-greyscale-800 items-start rounded-lg w-full flex flex-col flex-grow h-full max-h-full">
-          <div
+          <Hoverable
+            dataId="leftPanelStatisticsBar"
             onClick={() => {
               if (isPanelOpen) {
                 setIsPanelOpen(false);
@@ -179,8 +180,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
             }}
             className="flex items-center h-[56px] w-full border-b-1 p-4 border-white cursor-pointer"
           >
-            <Hoverable
-              dataId="leftPanelStatisticsBar"
+            <div
               className={`flex flex-row w-full items-center rounded-md hover:cursor-pointer ${
                 isPanelOpen ? "justify-between" : "justify-center"
               }`}
@@ -198,8 +198,8 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                   stroke="var(--buttonwhite)"
                 />
               </div>
-            </Hoverable>
-          </div>
+            </div>
+          </Hoverable>
           <div
             className={`flex flex-col w-full px-3 border-t-[1px] border-greyscale-800`}
           >
