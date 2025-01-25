@@ -22,7 +22,7 @@ const useVaultState = ({
   const contractData = useMemo(() => {
     return {
       abi: vaultABI,
-      address: conn === "rpc" ? address as `0x${string}` : undefined,
+      address: conn === "rpc" ? (address as `0x${string}`) : undefined,
     };
   }, [address, conn]);
 
@@ -126,7 +126,7 @@ const useVaultState = ({
   const { data: currentRoundAddress } = useReadContract({
     ...contractData,
     functionName: "get_round_address",
-    args: currentRoundId ? [currentRoundId.toString()] : [],
+    args: currentRoundId ? [BigInt(currentRoundId.toString())] : [BigInt(1)],
     watch: true,
   });
 
@@ -135,8 +135,8 @@ const useVaultState = ({
     functionName: "get_round_address",
     args:
       selectedRound && selectedRound !== 0
-        ? [selectedRound.toString()]
-        : undefined,
+        ? [BigInt(selectedRound.toString())]
+        : [BigInt(1)],
     watch: true,
   });
 
