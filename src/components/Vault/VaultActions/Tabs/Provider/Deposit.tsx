@@ -38,6 +38,7 @@ interface DepositState {
 
 const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   const { vaultState, lpState } = useProtocolContext();
+  console.log("check_", lpState?.unlockedBalance);
   const [state, setState] = useState<DepositState>({
     amount: "",
     isDepositAsBeneficiary: false,
