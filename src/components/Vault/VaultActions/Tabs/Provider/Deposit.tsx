@@ -13,7 +13,7 @@ import { num, Call } from "starknet";
 import { useSendTransaction, useContract } from "@starknet-react/core";
 import { erc20ABI, vaultABI } from "@/lib/abi";
 import useERC20 from "@/hooks/erc20/useERC20";
-import { shortenString } from "@/lib/utils";
+import { shortenString, isValidHex64 } from "@/lib/utils";
 
 interface DepositProps {
   showConfirmation: (
@@ -21,11 +21,6 @@ interface DepositProps {
     action: ReactNode,
     onConfirm: () => Promise<void>,
   ) => void;
-}
-
-function isValidHex64(input: string): boolean {
-  const regex = /^0x[a-fA-F0-9]{64}$/;
-  return regex.test(input);
 }
 
 const LOCAL_STORAGE_KEY = "depositAmountWei";

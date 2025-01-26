@@ -258,6 +258,20 @@ export const timeUntilTargetFormal = (timestamp: string, target: string) => {
   return str;
 };
 
+export const isValidHex64 = (input: string): boolean => {
+  if (!input.startsWith('0x')) return false;
+  
+  // Remove '0x' prefix and any leading zeros
+  const hexPart = input.slice(2).toLowerCase();
+  
+  // Check if the remaining characters are valid hex
+  const validHexRegex = /^[a-f0-9]+$/;
+  if (!validHexRegex.test(hexPart)) return false;
+  
+  // Check if the length is less than or equal to 64 (after removing '0x')
+  return hexPart.length <= 64;
+};
+
 ///   function generateMockData(
 ///     startDate: string,
 ///     itemCount: number,
