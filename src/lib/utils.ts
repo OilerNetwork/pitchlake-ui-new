@@ -277,6 +277,21 @@ export const timeUntilTargetFormal = (timestamp: string, target: string) => {
   return str;
 };
 
+export const stringToHexString = (input?: string): string => {
+  if (!input) return "";
+  
+  // If the input is a number, handle it as before
+  if (!isNaN(Number(input))) {
+    const num = BigInt(input.toString());
+    return `0x${num.toString(16)}`;
+  }
+  
+  // For text strings, convert to hex
+  const hex = Array.from(input)
+    .map(c => c.charCodeAt(0).toString(16).padStart(2, '0'))
+    .join('');
+  return `0x${hex}`;
+};
 ///   function generateMockData(
 ///     startDate: string,
 ///     itemCount: number,
