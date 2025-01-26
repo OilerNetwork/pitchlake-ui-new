@@ -22,7 +22,7 @@ const useVaultState = ({
   const contractData = useMemo(() => {
     return {
       abi: vaultABI,
-      address: conn === "rpc" ? address as `0x${string}` : undefined,
+      address: conn === "rpc" ? (address as `0x${string}`) : undefined,
     };
   }, [address, conn]);
 

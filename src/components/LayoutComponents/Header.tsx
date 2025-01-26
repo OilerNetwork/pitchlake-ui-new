@@ -1,44 +1,26 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
-
-import { BellIcon, ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon } from "lucide-react";
 import logo_full from "@/../public/logo_full.svg";
-import login from "@/../public/login.svg";
 import braavosIcon from "@/../public/braavos.svg";
 import argent from "@/../public/argent.svg";
 import keplr from "@/../public/keplr.svg";
 import avatar from "@/../public/avatar.svg";
-import { toast, ToastContainer, Bounce } from "react-toastify";
-import { starknetChainId, useNetwork } from "@starknet-react/core";
+import { toast } from "react-toastify";
+import { useNetwork } from "@starknet-react/core";
 import {
-  braavos,
   useAccount,
-  useBalance,
   useConnect,
-  useDeployAccount,
   useDisconnect,
-  useProvider,
   useSwitchChain,
 } from "@starknet-react/core";
 import ProfileDropdown from "../BaseComponents/ProfileDropdown";
-import { copyToClipboard } from "@/lib/utils";
 import { useRouter, usePathname } from "next/navigation";
 import { useProtocolContext } from "@/context/ProtocolProvider";
 import { constants } from "starknet";
-import {
-  Account,
-  BigNumberish,
-  RawArgs,
-  DeployAccountContractPayload,
-  CallData,
-  hash,
-  num,
-  // ArgentX,
-} from "starknet";
-import { parseEther, formatEther } from "ethers";
+import { formatEther } from "ethers";
 import useERC20 from "@/hooks/erc20/useERC20";
-import useAccountBalances from "@/hooks/vault/state/useAccountBalances";
 import { ArrowDownIcon, LoginIcon } from "../Icons";
 import useIsMobile from "@/hooks/window/useIsMobile";
 import { Chain } from "@starknet-react/chains";
@@ -50,7 +32,8 @@ import { useUiContext } from "@/context/UiProvider";
 export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownChainRef = useRef<HTMLDivElement>(null);
-  const { conn, timestamp, mockTimeForward, vaultState } = useProtocolContext();
+  const { conn, timestamp, mockTimeForward, vaultState, lpState } =
+    useProtocolContext();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownChainOpen, setIsDropdownChainOpen] = useState(false);
   const isDropdownOpenRef = useRef(isDropdownOpen);
@@ -71,25 +54,44 @@ export default function Header() {
     vaultState?.address,
   );
 
-  const { lockedBalance, unlockedBalance, stashedBalance } = useAccountBalances(
-    vaultState ? vaultState.address : "",
-  );
+  const balanceData = useMemo(() => {
+    let wallet = "0";
+    let locked = "0";
+    let unlocked = "0";
+    let stashed = "0";
 
-  // @NOTE: sum balances accross all vaults ?
-  const balanceData = {
-    wallet: parseFloat(formatEther(num.toBigInt(balance).toString())).toFixed(
-      3,
-    ),
-    locked: parseFloat(
-      formatEther(num.toBigInt(lockedBalance).toString()),
-    ).toFixed(3),
-    unlocked: parseFloat(
-      formatEther(num.toBigInt(unlockedBalance).toString()),
-    ).toFixed(3),
-    stashed: parseFloat(
-      formatEther(num.toBigInt(stashedBalance).toString()),
-    ).toFixed(3),
-  };
+    const _default: any = {
+      wallet,
+      locked,
+      unlocked,
+      stashed,
+    };
+
+    if (!lpState) return _default;
+    const { lockedBalance, unlockedBalance, stashedBalance } = lpState;
+
+    if (balance)
+      wallet = parseFloat(formatEther(BigInt(balance).toString())).toFixed(3);
+    if (lockedBalance)
+      locked = parseFloat(
+        formatEther(BigInt(lpState.lockedBalance).toString()),
+      ).toFixed(3);
+    if (unlockedBalance)
+      unlocked = parseFloat(
+        formatEther(BigInt(lpState.unlockedBalance).toString()),
+      ).toFixed(3);
+    if (stashedBalance)
+      stashed = parseFloat(
+        formatEther(BigInt(lpState.stashedBalance).toString()),
+      ).toFixed(3);
+
+    return { wallet, locked, unlocked, stashed };
+  }, [
+    balance,
+    lpState?.lockedBalance,
+    lpState?.unlockedBalance,
+    lpState?.stashedBalance,
+  ]);
 
   useEffect(() => {
     isDropdownOpenRef.current = isDropdownOpen;

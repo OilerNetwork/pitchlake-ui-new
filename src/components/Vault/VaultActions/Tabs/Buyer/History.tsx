@@ -6,6 +6,7 @@ import { formatNumberText } from "@/lib/utils";
 import { formatUnits } from "ethers";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useProtocolContext } from "@/context/ProtocolProvider";
+import Hoverable from "@/components/BaseComponents/Hoverable";
 
 interface HistoryItem {
   bid_id: string;
@@ -55,7 +56,10 @@ const HistoryItem: React.FC<{
         </p>
       </div>
       {roundState === "Auctioning" && (
-        <div className="bg-[#262626] p-2 rounded-lg cursor-pointer">
+        <Hoverable
+          dataId="openUpdateBidPanel"
+          className="bg-[#262626] p-2 rounded-lg cursor-pointer"
+        >
           <SquarePen
             onClick={() => {
               setBidToEdit({ item });
@@ -64,7 +68,7 @@ const HistoryItem: React.FC<{
             size={20}
             className="text-[#E2E2E2]"
           />
-        </div>
+        </Hoverable>
       )}
     </div>
   );
