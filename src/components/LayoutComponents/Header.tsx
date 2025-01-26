@@ -2,7 +2,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 
-import { BellIcon, ChevronDownIcon } from "lucide-react";
+import { BellIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import {
+  ArrowUpIcon,
+  ArrowDownIcon,
+  CheckIcon,
+  GlobeIcon,
+  LoginIcon,
+} from "@/components/Icons";
 import logo_full from "@/../public/logo_full.svg";
 import login from "@/../public/login.svg";
 import braavosIcon from "@/../public/braavos.svg";
@@ -39,7 +46,6 @@ import {
 import { parseEther, formatEther } from "ethers";
 import useERC20 from "@/hooks/erc20/useERC20";
 import useAccountBalances from "@/hooks/vault/state/useAccountBalances";
-import { ArrowDownIcon, LoginIcon } from "../Icons";
 import useIsMobile from "@/hooks/window/useIsMobile";
 import { Chain } from "@starknet-react/chains";
 
@@ -57,30 +63,30 @@ export default function Header() {
   const { switchChainAsync } = useSwitchChain({});
   const { disconnect } = useDisconnect();
   const { chains, chain } = useNetwork();
-  console.log("CHAINS", chains);
+  //console.log("CHAINS", chains);
   const { account } = useAccount();
   const { balance } = useERC20(
     "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-    vaultState?.address
+    vaultState?.address,
   );
 
   const { lockedBalance, unlockedBalance, stashedBalance } = useAccountBalances(
-    vaultState ? vaultState.address : ""
+    vaultState ? vaultState.address : "",
   );
 
   // @NOTE: sum balances accross all vaults ?
   const balanceData = {
     wallet: parseFloat(formatEther(num.toBigInt(balance).toString())).toFixed(
-      3
+      3,
     ),
     locked: parseFloat(
-      formatEther(num.toBigInt(lockedBalance).toString())
+      formatEther(num.toBigInt(lockedBalance).toString()),
     ).toFixed(3),
     unlocked: parseFloat(
-      formatEther(num.toBigInt(unlockedBalance).toString())
+      formatEther(num.toBigInt(unlockedBalance).toString()),
     ).toFixed(3),
     stashed: parseFloat(
-      formatEther(num.toBigInt(stashedBalance).toString())
+      formatEther(num.toBigInt(stashedBalance).toString()),
     ).toFixed(3),
   };
 
@@ -125,7 +131,7 @@ export default function Header() {
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      document.addEventListener("mousedown", handleClickOutsideChain);
+      document.removeEventListener("mousedown", handleClickOutsideChain);
       document.removeEventListener("keydown", handleEscKey);
     };
   }, []);
@@ -202,31 +208,51 @@ export default function Header() {
           <div className="relative" ref={dropdownChainRef}>
             {
               <button
-                className="flex flex-row min-w-16 border-[1px] border-primary-400 text-primary-400 text-sm px-4 py-3 rounded-md  items-center justify-center"
-                onClick={() => setIsDropdownChainOpen(true)}
+                className="w-[150px] h-[44px] flex flex-row min-w-16 border-[1px] border-[#454545] text-white text-sm px-2 text-white py-3 rounded-md items-center"
+                onClick={() => setIsDropdownChainOpen(!isDropdownChainOpen)}
               >
-                <p>{chain.network}</p>
-                <ArrowDownIcon
-                  stroke="var(--primary)"
-                  classname="flex items-center ml-2 w-4 h-4"
-                />
+                <GlobeIcon fill="none" />
+                <p className="pl-[0.5rem]">{`${chain.network.charAt(0).toUpperCase() + chain.network.slice(1)}`}</p>
+
+                {isDropdownChainOpen ? (
+                  <ArrowUpIcon
+                    stroke="#bfbfbf"
+                    strokeWidth="1"
+                    classname="flex flex-row justify-center items-center w-5 h-5 ml-auto"
+                  />
+                ) : (
+                  <ArrowDownIcon
+                    stroke="#bfbfbf"
+                    strokeWidth="1"
+                    classname="flex flex-row justify-center items-center w-5 h-5 ml-auto"
+                  />
+                )}
               </button>
             }
 
             {isDropdownChainOpen && (
-              <div className="absolute right-0 bg-[#161616] text-center text-primary-400 w-full text-sm flex flex-col">
-                {chains.map((chain: Chain,index:number) => {
+              <div className="absolute left-0 mt-[0.5rem] rounded-md border-[#262626] border-[1px] bg-[#161616] w-[167px] h-[196px] text-left text-primary-400 text-sm flex flex-col justify-center">
+                {chains.map((c: Chain, index: number) => {
                   return (
                     <div
-                    key={index}
+                      key={index}
                       onClick={() => {
                         handleSwitchChain(chain.network);
                       }}
-                      className={`cursor-pointer sticky p-2 px-3 w-full text-[12px] font-medium hover:bg-[#262626] ${
-                        chain.network === "mainnet" ? "text-greyscale-400" : ""
-                      }`}
+                      className={`p-2 flex flex-row  ${chain.network === c.network ? "bg-[#262626]" : ""} ${c.network === "mainnet" ? "" : "hover:bg-[#262626]"}`}
                     >
-                      {chain.network.toLocaleUpperCase()}
+                      <div
+                        className={`px-2 py-1 cursor-pointer sticky w-full text-[14px] text-[#FFFFFF] font-normal text-nowrap ${
+                          c.network === "mainnet" ? "text-greyscale-500" : ""
+                        }`}
+                      >
+                        {`${c.network.charAt(0).toUpperCase() + c.network.slice(1)}${c.network === "mainnet" ? " (Disabled)" : ""}`}
+                      </div>
+                      {chain.network === c.network && (
+                        <div className="px-2 flex flex-row items-center justify-center">
+                          <CheckIcon stroke="#ffffff" fill="none" />
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -250,6 +276,7 @@ export default function Header() {
                   <span className="text-white font-medium">
                     {shortenString(account.address)}
                   </span>
+
                   <ChevronDownIcon className="h-4 w-4 text-white" />
                 </button>
 
@@ -306,8 +333,8 @@ export default function Header() {
                                   connector.id === "braavos"
                                     ? braavosIcon
                                     : connector.id === "keplr"
-                                    ? keplr
-                                    : argent
+                                      ? keplr
+                                      : argent
                                 }
                                 alt="Login"
                                 width={20}

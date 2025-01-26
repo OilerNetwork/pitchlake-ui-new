@@ -10,10 +10,10 @@ import ButtonTabs from "../ButtonTabs";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEthereum } from "@fortawesome/free-brands-svg-icons";
 import { num, Call } from "starknet";
-import {useSendTransaction, useContract } from "@starknet-react/core";
+import { useSendTransaction, useContract } from "@starknet-react/core";
 import { erc20ABI, vaultABI } from "@/lib/abi";
 import useERC20 from "@/hooks/erc20/useERC20";
-import { shortenString } from "@/lib/utils";
+import { shortenString, isValidHex64 } from "@/lib/utils";
 
 interface DepositProps {
   showConfirmation: (
@@ -21,11 +21,6 @@ interface DepositProps {
     action: ReactNode,
     onConfirm: () => Promise<void>,
   ) => void;
-}
-
-function isValidHex64(input: string): boolean {
-  const regex = /^0x[a-fA-F0-9]{64}$/;
-  return regex.test(input);
 }
 
 const LOCAL_STORAGE_KEY = "depositAmountWei";
@@ -55,7 +50,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   const { pendingTx, setPendingTx } = useTransactionContext();
   const { allowance, balance } = useERC20(
     vaultState?.ethAddress as `0x${string}`,
-    vaultState?.address
+    vaultState?.address,
   );
 
   const updateState = (updates: Partial<DepositState>) => {
@@ -97,6 +92,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
       !account ||
       (state.isDepositAsBeneficiary &&
         !isValidHex64(state.beneficiaryAddress)) ||
+      !isValidHex64(account?.address) ||
       Number(state.amount) <= 0
     ) {
       return calls;
