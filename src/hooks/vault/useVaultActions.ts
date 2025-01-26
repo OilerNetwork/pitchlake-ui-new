@@ -3,6 +3,7 @@ import {
   useContract,
   useNetwork,
   useProvider,
+  useSendTransaction,
 } from "@starknet-react/core";
 import { vaultABI } from "@/lib/abi";
 import {
@@ -13,8 +14,6 @@ import {
   QueueArgs,
   CollectArgs,
 } from "@/lib/types";
-import { getDevAccount } from "@/lib/constants";
-import { Account, RpcProvider } from "starknet";
 import { useCallback, useMemo } from "react";
 import { useTransactionContext } from "@/context/TransactionProvider";
 
@@ -74,9 +73,19 @@ const useVaultActions = (address?: `0x${string}`) => {
 
   const depositLiquidity = useCallback(
     async (depositArgs: DepositArgs) => {
-      await callContract("deposit")(depositArgs);
+      if (!typedContract || !account) return;
+      const { sendAsync } = useSendTransaction({
+        calls: [
+          typedContract.populateTransaction.deposit(
+            depositArgs.amount,
+            depositArgs.beneficiary || account.address,
+          )
+        ]
+      });
+      const data = await sendAsync();
+      setPendingTx(data?.transaction_hash);
     },
-    [callContract],
+    [typedContract, account, setPendingTx],
   );
 
   const withdrawLiquidity = useCallback(

@@ -66,6 +66,8 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
     vaultState?.address,
   );
 
+  console.log("check_",lpState?.unlockedBalance)
+
   const updateState = (updates: Partial<DepositState>) => {
     setState((prevState) => ({ ...prevState, ...updates }));
   };

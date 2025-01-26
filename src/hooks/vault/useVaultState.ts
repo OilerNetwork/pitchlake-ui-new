@@ -1,4 +1,4 @@
-import { useAccount, useReadContract } from "@starknet-react/core";
+import { useAccount, useInvalidateOnBlock, useReadContract } from "@starknet-react/core";
 import { vaultABI } from "@/lib/abi";
 import { LiquidityProviderStateType, VaultStateType } from "@/lib/types";
 import { stringToHex } from "@/lib/utils";
@@ -84,6 +84,7 @@ const useVaultState = ({
     watch: true,
   });
 
+  useInvalidateOnBlock({queryKey:["","*"]})
   //Wallet states
   const lpState = useContractReads({
     contractData,

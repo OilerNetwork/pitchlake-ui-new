@@ -6,12 +6,9 @@ import {
   createContext,
   useContext,
   useEffect,
-  useRef,
   useState,
 } from "react";
-import { useBlock, useBlockNumber, useTransactionReceipt } from "@starknet-react/core";
-import { getDevAccount } from "@/lib/constants";
-import { Account, RpcProvider } from "starknet";
+import { useTransactionReceipt } from "@starknet-react/core";
 
 /*This is the bridge for any transactions to go through, it's disabled by isTxDisabled if there is data loading or if
   there's a pending transaction. The data loading is enforced to ensure no transaction is done without latest data.

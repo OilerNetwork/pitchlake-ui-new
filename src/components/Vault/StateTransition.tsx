@@ -25,7 +25,7 @@ const StateTransition = ({
     timestamp: timestampRaw,
     conn,
   } = useProtocolContext();
-  const { pendingTx, lastBlock } = useTransactionContext();
+  const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
   const timestamp = timestampRaw ? timestampRaw : "0";
   const {

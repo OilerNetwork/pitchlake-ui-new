@@ -1,6 +1,6 @@
 import { useReadContract } from "@starknet-react/core";
 import { useMemo } from "react";
-import { Abi, Result } from "starknet";
+import { Abi, BlockTag, Result } from "starknet";
 
 const useContractReads = ({
   contractData,
@@ -22,6 +22,7 @@ const useContractReads = ({
       functionName: state.functionName,
       args: state.args ?? [], // Default to an empty array if no args are provided
       watch,
+      blockIdentifier: BlockTag.LATEST,
       //refetchInterval: 10000,
     });
 

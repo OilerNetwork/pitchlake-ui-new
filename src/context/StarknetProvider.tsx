@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import { RpcProvider } from "starknet";
 import { sepolia, mainnet, devnet, Chain } from "@starknet-react/chains";
 import {
   StarknetConfig,
@@ -41,7 +40,6 @@ export const StarknetProvider = ({
 }) => {
   const { connectors } = useInjectedConnectors({
     // Show these connectors if the user has no connector installed.
-    recommended: [argent(), braavos()],
     // Hide recommended connectors if the user has any connector installed.
     includeRecommended: "onlyIfNoConnectors",
     // Randomize the order of the connectors.
@@ -80,6 +78,7 @@ export const StarknetProvider = ({
   return (
     <StarknetConfig
       chains={[sepolia, newDevnet, juno, mainnet]}
+
       provider={provider}
       connectors={connectors}
       explorer={voyager}
