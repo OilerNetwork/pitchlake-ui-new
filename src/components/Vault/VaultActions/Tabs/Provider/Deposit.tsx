@@ -10,7 +10,7 @@ import ButtonTabs from "../ButtonTabs";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEthereum } from "@fortawesome/free-brands-svg-icons";
 import { num, Call } from "starknet";
-import { useSendTransaction, useContract } from "@starknet-react/core";
+import {useContractWrite, useContract } from "@starknet-react/core";
 import { erc20ABI, vaultABI } from "@/lib/abi";
 import useERC20 from "@/hooks/erc20/useERC20";
 import { shortenString, isValidHex64 } from "@/lib/utils";
@@ -132,7 +132,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
     ethContract,
     vaultContract,
   ]);
-  const { sendAsync } = useSendTransaction({ calls });
+  const { writeAsync } = useContractWrite({ calls });
 
   // Send confirmation
   const handleSubmitForMulticall = () => {
@@ -164,7 +164,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
 
   // Open wallet
   const handleMulticall = async () => {
-    const data = await sendAsync();
+    const data = await writeAsync();
     setPendingTx(data?.transaction_hash);
     localStorage?.removeItem(LOCAL_STORAGE_KEY);
   };

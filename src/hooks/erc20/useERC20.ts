@@ -1,7 +1,7 @@
 import {
   useAccount,
   useContract,
-  useReadContract,
+  useContractRead,
   useProvider,
 } from "@starknet-react/core";
 import { useEffect, useCallback, useMemo, useState } from "react";
@@ -47,7 +47,7 @@ const useERC20 = (
   }, [contract, account]);
   //Read States
 
-  const { data: balanceRaw } = useReadContract({
+  const { data: balanceRaw } = useContractRead({
     abi: erc20ABI,
     address: tokenAddress ? tokenAddress : undefined,
     functionName: "balance_of",
@@ -55,7 +55,7 @@ const useERC20 = (
     watch: true,
   });
 
-  const { data: allowanceRaw } = useReadContract({
+  const { data: allowanceRaw } = useContractRead({
     abi: erc20ABI,
     address: tokenAddress ? tokenAddress : undefined,
     functionName: "allowance",
