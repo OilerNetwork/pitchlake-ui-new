@@ -18,10 +18,11 @@ import StateTransition from "@/components/Vault/StateTransition";
 import { useProvider } from "@starknet-react/core";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 
+// @NOTE: Replace this with difference between latest fossil block timestamp & now
+// - create a useLatestFossilBlockTimestamp hook
 const FOSSIL_DELAY =
   process.env.NEXT_PUBLIC_FOSSIL_USE_MOCK_PRICING_DATA === "true" ? 0 : 15 * 60;
 
-// comment for git
 const PanelLeft = ({ userType }: { userType: string }) => {
   const { vaultState, selectedRoundState, timestamp } = useProtocolContext();
   const [vaultIsOpen, setVaultIsOpen] = useState<boolean>(false);
@@ -37,7 +38,6 @@ const PanelLeft = ({ userType }: { userType: string }) => {
     onConfirm: async () => {},
   });
 
-  const { provider } = useProvider();
   const explorer = useExplorer();
 
   const hideModal = () => {
@@ -64,7 +64,9 @@ const PanelLeft = ({ userType }: { userType: string }) => {
 
     const { roundState, auctionStartDate, auctionEndDate, optionSettleDate } =
       selectedRoundState;
-    const currentTimestamp = Number(timestamp);
+    const now = new Date();
+    const currentTimestamp = now.getTime() / 1000;
+    //const currentTimestamp = Number(timestamp);
 
     let header = "";
     let timeText = "Loading...";
@@ -92,7 +94,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
         targetTimestamp = Number(auctionEndDate);
         break;
       case "Running":
-        targetTimestamp = Number(optionSettleDate);
+        targetTimestamp = Number(optionSettleDate) + FOSSIL_DELAY;
         break;
       case "Settled":
         targetTimestamp = Number(optionSettleDate);

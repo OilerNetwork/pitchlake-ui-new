@@ -222,8 +222,7 @@ export const timeUntilTarget = (
     if (days > 0) timeString += `${days}d `;
     if (hours > 0) timeString += `${hours}h `;
     if (minutes > 0) timeString += `${minutes}m `;
-    if (days === 0 && hours === 0 && minutes === 0 && seconds > 0)
-      timeString += `${seconds}s `;
+    if (days === 0 && hours === 0 && seconds > 0) timeString += `${seconds}s `;
     return timeString.trim() || "Now";
   } else if (diffInSeconds === 0) {
     return "Now";
@@ -279,30 +278,30 @@ export const timeUntilTargetFormal = (timestamp: string, target: string) => {
 
 export const stringToHexString = (input?: string): string => {
   if (!input) return "";
-  
+
   // If the input is a number, handle it as before
   if (!isNaN(Number(input))) {
     const num = BigInt(input.toString());
     return `0x${num.toString(16)}`;
   }
-  
+
   // For text strings, convert to hex
   const hex = Array.from(input)
-    .map(c => c.charCodeAt(0).toString(16).padStart(2, '0'))
-    .join('');
+    .map((c) => c.charCodeAt(0).toString(16).padStart(2, "0"))
+    .join("");
   return `0x${hex}`;
 };
 
 export const isValidHex64 = (input: string): boolean => {
-  if (!input.startsWith('0x')) return false;
-  
+  if (!input.startsWith("0x")) return false;
+
   // Remove '0x' prefix and any leading zeros
   const hexPart = input.slice(2).toLowerCase();
-  
+
   // Check if the remaining characters are valid hex
   const validHexRegex = /^[a-f0-9]+$/;
   if (!validHexRegex.test(hexPart)) return false;
-  
+
   // Check if the length is less than or equal to 64 (after removing '0x')
   return hexPart.length <= 64;
 };
