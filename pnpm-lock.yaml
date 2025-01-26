@@ -48,11 +48,7 @@ importers:
         specifier: ^5.21.6
         version: 5.21.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       axios:
-<<<<<<< HEAD
         specifier: ^1.7.8
-=======
-        specifier: ^1.7.7
->>>>>>> 583416b6033da6da396c2f90178b55a1a86182d7
         version: 1.7.8
       classnames:
         specifier: ^2.5.1
@@ -94,11 +90,7 @@ importers:
         specifier: ^10.0.6
         version: 10.0.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       recharts:
-<<<<<<< HEAD
         specifier: ^2.13.2
-=======
-        specifier: ^2.13.1
->>>>>>> 583416b6033da6da396c2f90178b55a1a86182d7
         version: 2.13.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       starknet:
         specifier: ^6.11.0
