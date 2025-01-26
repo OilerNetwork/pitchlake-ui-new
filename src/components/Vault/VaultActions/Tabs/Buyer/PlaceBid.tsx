@@ -108,8 +108,8 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
 
     if (
       approveCall &&
-      num.toBigInt(allowance) < num.toBigInt(needsApproving) &&
-      totalWei < num.toBigInt(balance)
+      BigInt(allowance) < BigInt(needsApproving)
+      // && totalWei < BigInt(balance)
     )
       calls.push(approveCall);
     if (bidCall) calls.push(bidCall);
