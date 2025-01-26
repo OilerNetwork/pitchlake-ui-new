@@ -126,7 +126,7 @@ const useVaultState = ({
   const { data: currentRoundAddress } = useReadContract({
     ...contractData,
     functionName: "get_round_address",
-    args: currentRoundId ? [currentRoundId.toString()] : [],
+    args: currentRoundId ? [BigInt(currentRoundId.toString())] : undefined,
     watch: true,
   });
 
@@ -135,7 +135,7 @@ const useVaultState = ({
     functionName: "get_round_address",
     args:
       selectedRound && selectedRound !== 0
-        ? [selectedRound.toString()]
+        ? [BigInt(selectedRound.toString())]
         : undefined,
     watch: true,
   });
