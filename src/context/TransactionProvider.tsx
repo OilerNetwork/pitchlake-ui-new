@@ -38,6 +38,9 @@ const TransactionProvider = ({ children }: { children: ReactNode }) => {
   const [pendingTx, setPendingTx] = useState<string | undefined>();
   const { status,data } = useTransactionReceipt({ hash: pendingTx });
 
+  const { data: blockNumber } = useBlockNumber({
+    refetchInterval: 2000,
+  });
   const resetState = () => {
     
     setPendingTx(undefined);
