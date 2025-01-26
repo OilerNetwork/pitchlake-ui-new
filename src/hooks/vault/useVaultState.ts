@@ -1,4 +1,4 @@
-import { useAccount, useReadContract } from "@starknet-react/core";
+import { useAccount, useContractRead } from "@starknet-react/core";
 import { vaultABI } from "@/lib/abi";
 import { LiquidityProviderStateType, VaultStateType } from "@/lib/types";
 import { stringToHex } from "@/lib/utils";
@@ -112,7 +112,7 @@ const useVaultState = ({
     watch: true,
   }) as unknown as LiquidityProviderStateType;
 
-  const { data: round1Address } = useReadContract({
+  const { data: round1Address } = useContractRead({
     ...contractData,
     functionName: "get_round_address",
     args: [1],
@@ -123,19 +123,19 @@ const useVaultState = ({
     stringToHex(round1Address ? round1Address.toString() : ""),
   );
 
-  const { data: currentRoundAddress } = useReadContract({
+  const { data: currentRoundAddress } = useContractRead({
     ...contractData,
     functionName: "get_round_address",
-    args: currentRoundId ? [BigInt(currentRoundId.toString())] : undefined,
+    args: currentRoundId ? [currentRoundId.toString()] : undefined,
     watch: true,
   });
 
-  const { data: selectedRoundAddress } = useReadContract({
+  const { data: selectedRoundAddress } = useContractRead({
     ...actionsContractData,
     functionName: "get_round_address",
     args:
       selectedRound && selectedRound !== 0
-        ? [BigInt(selectedRound.toString())]
+        ? [selectedRound.toString()]
         : undefined,
     watch: true,
   });

@@ -13,7 +13,10 @@ import { useAccount } from "@starknet-react/core";
 import useLatestTimetamp from "@/hooks/chain/useLatestTimestamp";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useProvider } from "@starknet-react/core";
-import { useSendTransaction, useContract } from "@starknet-react/core";
+import {
+  useContractWrite,
+  useContract,
+} from "@starknet-react/core";
 import { erc20ABI, optionRoundABI } from "@/lib/abi";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 
@@ -148,7 +151,7 @@ const EditModal: React.FC<EditModalProps> = ({
     ethContract,
     bidId,
   ]);
-  const { sendAsync } = useSendTransaction({ calls });
+  const { writeAsync} = useContractWrite({ calls });
 
   // Send confirmation
   const handleSubmitForMulticall = () => {
@@ -171,7 +174,7 @@ const EditModal: React.FC<EditModalProps> = ({
 
   // Open wallet
   const handleMulticall = async () => {
-    const data = await sendAsync();
+    const data = await writeAsync();
     setPendingTx(data?.transaction_hash);
     setState((prevState) => ({ ...prevState, newPriceGwei: "" }));
     localStorage.removeItem(LOCAL_STORAGE_KEY);

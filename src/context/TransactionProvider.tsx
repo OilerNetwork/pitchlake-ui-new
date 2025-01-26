@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useBlock, useBlockNumber, useTransactionReceipt } from "@starknet-react/core";
+import { useBlock, useBlockNumber, useWaitForTransaction } from "@starknet-react/core";
 import { getDevAccount } from "@/lib/constants";
 import { Account, RpcProvider } from "starknet";
 
@@ -36,7 +36,7 @@ const TransactionProvider = ({ children }: { children: ReactNode }) => {
   const [isTxDisabled, setIsTxDisabled] = useState<boolean>(false);
 
   const [pendingTx, setPendingTx] = useState<string | undefined>();
-  const { status,data } = useTransactionReceipt({ hash: pendingTx });
+  const { status,data } = useWaitForTransaction({ hash: pendingTx });
 
   const { data: blockNumber } = useBlockNumber({
     refetchInterval: 2000,
