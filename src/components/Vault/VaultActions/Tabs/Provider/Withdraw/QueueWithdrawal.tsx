@@ -5,6 +5,7 @@ import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useAccount } from "@starknet-react/core";
 import { formatEther } from "ethers";
+import Hoverable from "@/components/BaseComponents/Hoverable";
 
 interface WithdrawQueueProps {
   showConfirmation: (
@@ -92,11 +93,8 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-grow px-6">
-        <label
-          className="block text-sm font-medium text-gray-400 mb-2"
-          htmlFor="percentage-slider"
-        >
+      <Hoverable dataId="queueSlider" className="flex-grow px-6">
+        <label className="block text-sm font-medium text-gray-400 mb-2" htmlFor="percentage-slider">
           Choose Percentage
         </label>
         <div className="flex items-center space-x-4">
@@ -129,24 +127,30 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
             </span>
           </div>
         </div>
-      </div>
+      </Hoverable>
       <div className="flex flex-col h-[full] mt-[auto]">
-        <div className="px-6 flex justify-between text-sm mb-6 mt-auto">
-          <span className="text-gray-400">Current Locked Balance</span>
+        <Hoverable
+          dataId="lpActionLockedBalance"
+          className="px-6 flex justify-between text-sm mb-6 mt-auto"
+        >
+          <span className="text-gray-400">Locked Balance</span>
           <span className="text-white">
             {parseFloat(
               formatEther(lpState?.lockedBalance?.toString() || "0"),
             ).toFixed(3)}{" "}
             ETH
           </span>
-        </div>
-        <div className="mt-[auto] flex justify-between text-sm border-t border-[#262626] p-6">
+        </Hoverable>
+        <Hoverable
+          dataId="queueButton"
+          className="mt-[auto] flex justify-between text-sm border-t border-[#262626] p-6"
+        >
           <ActionButton
             onClick={handleSubmit}
             disabled={isButtonDisabled()}
-            text="Withdraw"
+            text="Queue"
           />
-        </div>
+        </Hoverable>
       </div>
     </div>
   );

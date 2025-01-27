@@ -1,6 +1,7 @@
 # Use Node.js v20 as the base image
 FROM node:20-alpine AS builder
 
+# Build arguments
 ARG NEXT_PUBLIC_VAULT_ADDRESSES
 ARG NEXT_PUBLIC_ENVIRONMENT
 ARG NEXT_PUBLIC_RPC_URL_MAINNET
@@ -10,6 +11,7 @@ ARG FOSSIL_API_KEY
 ARG FOSSIL_DB_URL
 ARG NEXT_PUBLIC_FOSSIL_API_URL
 
+# Environment variables
 ENV NEXT_PUBLIC_VAULT_ADDRESSES=${NEXT_PUBLIC_VAULT_ADDRESSES}
 ENV NEXT_PUBLIC_ENVIRONMENT=${NEXT_PUBLIC_ENVIRONMENT}
 ENV NEXT_PUBLIC_RPC_URL_MAINNET=${NEXT_PUBLIC_RPC_URL_MAINNET}
@@ -40,18 +42,28 @@ RUN pnpm run build
 # Production image
 FROM node:20-alpine AS runner
 
+# Install required packages
+RUN apk add --no-cache nginx apache2-utils && \
+    npm install -g pnpm
+
+# Set the working directory
 WORKDIR /app
 
-# Install pnpm
-ENV FOSSIL_DB_URL=${FOSSIL_DB_URL}
-RUN npm install -g pnpm
-
-# Copy necessary files from builder
+# Copy necessary files from the builder
 COPY --from=builder /app/package.json .
 COPY --from=builder /app/pnpm-lock.yaml* .
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules ./node_modules
 
-# Define the command to run the app
-CMD pnpm start -p ${PORT}
+# Copy the Nginx configuration file
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copy the .htpasswd file for basic auth
+COPY .htpasswd /etc/nginx/.htpasswd
+
+# Expose the ports
+EXPOSE 80
+
+# Start the application and Nginx
+CMD pnpm start --port 3000 & nginx -g 'daemon off;'

@@ -167,14 +167,14 @@ export const stringToHex = (decimalString?: string): string => {
   return `0x${num.toString(16)}`;
 };
 
-export const removeLeadingZeroes=(hash: string) =>{
+export const removeLeadingZeroes = (hash: string) => {
   if (!hash.startsWith("0x")) {
     throw new Error("Invalid hash: must start with 0x");
   }
   const prefix = "0x";
-  const trimmed = hash.slice(2).replace(/^0+/, ''); // Remove leading zeroes
+  const trimmed = hash.slice(2).replace(/^0+/, ""); // Remove leading zeroes
   return prefix + (trimmed || "0"); // Return "0x0" if everything is zero
-}
+};
 // Utility function to format the number
 export const formatNumberText = (number: number) => {
   if (number < 100_000) {
@@ -193,13 +193,16 @@ export const timeFromNow = (timestamp: string) => {
   return timeUntilTarget(now.toString(), timestamp);
 };
 
-export const timeUntilTarget = (timestamp: string, target: string) => {
-  const timestampDate = new Date(Number(timestamp) * 1000);
-  const targetDate = new Date(Number(target) * 1000);
+export const timeUntilTarget = (
+  currentTimestamp: string,
+  targetTimestamp: string,
+): string => {
+  const currentDate = new Date(Number(currentTimestamp) * 1000);
+  const targetDate = new Date(Number(targetTimestamp) * 1000);
 
   // Calculate the difference in milliseconds
-  const diffInMs = targetDate.getTime() - timestampDate.getTime();
-  const sign = diffInMs < 0 ? "-" : "";
+  const diffInMs = targetDate.getTime() - currentDate.getTime();
+  const diffInSeconds = Math.floor(diffInMs / 1000);
   const diffInMsAbs = Math.abs(diffInMs);
 
   // Convert milliseconds to meaningful units
@@ -213,14 +216,29 @@ export const timeUntilTarget = (timestamp: string, target: string) => {
   const minutes = Math.floor((diffInMsAbs % msInHour) / msInMinute);
   const seconds = Math.floor((diffInMsAbs % msInMinute) / msInSecond);
 
-  let str = `${sign}`;
-  str += days > 0 ? `${days}d ` : "";
-  str += hours > 0 ? `${hours}h ` : "";
-  str += minutes > 0 ? `${minutes}m ` : "";
-  if ((days === 0 && sign === "") || (sign === "-" && days === 0 && hours <= 2))
-    str += `${seconds}s `;
-
-  return str;
+  if (diffInSeconds > 0) {
+    // Future time
+    let timeString = "";
+    if (days > 0) timeString += `${days}d `;
+    if (hours > 0) timeString += `${hours}h `;
+    if (minutes > 0) timeString += `${minutes}m `;
+    if (days === 0 && hours === 0 && seconds > 0) timeString += `${seconds}s `;
+    return timeString.trim() || "Now";
+  } else if (diffInSeconds === 0) {
+    return "Now";
+  } else {
+    // Past time
+    if (diffInSeconds > -60) {
+      return "Just now";
+    }
+    let timeString = "";
+    if (days > 0) timeString += `${days}d `;
+    if (hours > 0) timeString += `${hours}h `;
+    if (minutes > 0) timeString += `${minutes}m `;
+    if (days === 0 && hours === 0 && minutes === 0 && seconds > 0)
+      timeString += `${seconds}s `;
+    return `${timeString.trim()} ago`;
+  }
 };
 
 export const timeUntilTargetFormal = (timestamp: string, target: string) => {
@@ -258,20 +276,35 @@ export const timeUntilTargetFormal = (timestamp: string, target: string) => {
   return str;
 };
 
+export const stringToHexString = (input?: string): string => {
+  if (!input) return "";
+
+  // If the input is a number, handle it as before
+  if (!isNaN(Number(input))) {
+    const num = BigInt(input.toString());
+    return `0x${num.toString(16)}`;
+  }
+
+  // For text strings, convert to hex
+  const hex = Array.from(input)
+    .map((c) => c.charCodeAt(0).toString(16).padStart(2, "0"))
+    .join("");
+  return `0x${hex}`;
+};
+
 export const isValidHex64 = (input: string): boolean => {
-  if (!input.startsWith('0x')) return false;
-  
+  if (!input.startsWith("0x")) return false;
+
   // Remove '0x' prefix and any leading zeros
   const hexPart = input.slice(2).toLowerCase();
-  
+
   // Check if the remaining characters are valid hex
   const validHexRegex = /^[a-f0-9]+$/;
   if (!validHexRegex.test(hexPart)) return false;
-  
+
   // Check if the length is less than or equal to 64 (after removing '0x')
   return hexPart.length <= 64;
 };
-
 ///   function generateMockData(
 ///     startDate: string,
 ///     itemCount: number,

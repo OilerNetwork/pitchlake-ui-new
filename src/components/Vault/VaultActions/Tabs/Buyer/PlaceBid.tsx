@@ -6,15 +6,16 @@ import { useProtocolContext } from "@/context/ProtocolProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEthereum } from "@fortawesome/free-brands-svg-icons";
 import { formatUnits, parseUnits, parseEther, formatEther } from "ethers";
-import { useAccount, useSendTransaction } from "@starknet-react/core";
+import { useAccount, useContractWrite } from "@starknet-react/core";
 import useERC20 from "@/hooks/erc20/useERC20";
 import { num, Call } from "starknet";
 import { formatNumberText } from "@/lib/utils";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import useLatestTimetamp from "@/hooks/chain/useLatestTimestamp";
 import { useProvider } from "@starknet-react/core";
-import {  useContract } from "@starknet-react/core";
+import { useContract } from "@starknet-react/core";
 import { erc20ABI, optionRoundABI } from "@/lib/abi";
+import Hoverable from "@/components/BaseComponents/Hoverable";
 
 interface PlaceBidProps {
   showConfirmation: (
@@ -44,7 +45,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
 
   const { allowance, balance } = useERC20(
     vaultState?.ethAddress as `0x${string}`,
-    selectedRoundState?.address
+    selectedRoundState?.address,
   );
   const [needsApproving, setNeedsApproving] = useState<string>("0");
 
@@ -107,8 +108,8 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
 
     if (
       approveCall &&
-      num.toBigInt(allowance) < num.toBigInt(needsApproving) &&
-      totalWei < num.toBigInt(balance)
+      BigInt(allowance) < BigInt(needsApproving)
+      // && totalWei < BigInt(balance)
     )
       calls.push(approveCall);
     if (bidCall) calls.push(bidCall);
@@ -123,7 +124,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
     allowance,
     needsApproving,
   ]);
-  const { sendAsync } = useSendTransaction({ calls });
+  const { writeAsync } = useContractWrite({ calls });
 
   // Send confirmation
   const handleSubmitForMulticall = () => {
@@ -153,7 +154,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
 
   // Open wallet
   const handleMulticall = async () => {
-    const data = await sendAsync();
+    const data = await writeAsync();
     setPendingTx(data?.transaction_hash);
     localStorage.removeItem(LOCAL_STORAGE_KEY1);
     localStorage.removeItem(LOCAL_STORAGE_KEY2);
@@ -256,23 +257,67 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
   ]);
 
   return (
-    <div className="place-bid-container">
-      <InputField
-        label="Amount"
-        value={state.bidAmount}
-        onChange={handleAmountChange}
-        placeholder="e.g. 5000"
-        error={state.isAmountOk}
-      />
-      <InputField
-        label="Price (GWEI)"
-        value={state.bidPrice}
-        onChange={handlePriceChange}
-        placeholder="e.g. 0.3"
-        error={state.isPriceOk}
-      />
-      <div className="place-bid-total">
-        Total Cost: {bidTotalEth} ETH
+    <div className="flex flex-col h-full">
+      <div className="flex-grow space-y-6 p-6">
+        <Hoverable dataId="inputBidAmount" className="place-bid-container">
+          <InputField
+            label="Enter Amount"
+            type="integer"
+            //value={state.bidAmount}
+            value={state.bidAmount}
+            onChange={handleAmountChange}
+            placeholder="e.g. 5000"
+            icon={
+              <Layers3
+                size="20px"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 stroke-[1px]"
+              />
+            }
+            error={state.isAmountOk}
+          />
+        </Hoverable>
+        <Hoverable dataId="inputBidPrice">
+          <InputField
+            label="Enter Price (GWEI)"
+            type="number"
+            value={state.bidPrice}
+            onChange={handlePriceChange}
+            placeholder="e.g. 0.3"
+            icon={
+              <FontAwesomeIcon
+                icon={faEthereum}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pr-2"
+              />
+            }
+            error={state.isPriceOk}
+          />
+        </Hoverable>
+      </div>
+      <Hoverable dataId="newBidSummary" className="flex flex-col h-[full]">
+        <div className="flex justify-between text-sm px-6 pb-1">
+          <span className="text-gray-400 place-bid-total">Total</span>
+          <span>{bidTotalEth.toFixed(2)} ETH</span>
+        </div>
+      </Hoverable>
+      <Hoverable dataId="placingBidBalance" className="flex flex-col h-[full]">
+        <div className="flex justify-between text-sm px-6 pb-6">
+          <span className="text-gray-400">Balance</span>
+          <span>
+            {parseFloat(formatEther(num.toBigInt(balance))).toFixed(3)} ETH
+          </span>
+        </div>
+      </Hoverable>
+      <div className="mt-auto">
+        <Hoverable
+          dataId="placeBidButton"
+          className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
+        >
+          <ActionButton
+            onClick={handleSubmitForMulticall}
+            disabled={state.isButtonDisabled}
+            text="Place Bid"
+          />
+        </Hoverable>
       </div>
       <ActionButton
         onClick={handleSubmitForMulticall}

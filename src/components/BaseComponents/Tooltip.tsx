@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { formatEther } from "ethers";
+import Hoverable from "./Hoverable";
 
 interface BalanceTooltipProps {
   balance: {
@@ -63,31 +64,42 @@ const BalanceTooltip: React.FC<BalanceTooltipProps> = ({
               </svg>
             </div>
             {/* Tooltip Content */}
-            <h2 className="text-sm p-3 px-4 border-b border-[#262626]">
-              Balance Distribution
-            </h2>
+            <Hoverable dataId="leftPanelVaultBalance">
+              <h2 className="text-sm p-3 px-4 border-b border-[#262626]">
+                Balance Distribution
+              </h2>
+            </Hoverable>
             <div className="space-y-2">
-              <div className="p-2 px-4 pb-0 flex justify-between">
+              <Hoverable
+                dataId="vaultLockedBalance"
+                className="p-2 px-4 pb-0 flex justify-between"
+              >
                 <span>Locked</span>
                 <span>
                   {parseFloat(formatEther(balance.locked)).toFixed(3) || "0"}{" "}
                   ETH
                 </span>
-              </div>
-              <div className="p-2 px-4 pb-0 flex justify-between">
+              </Hoverable>
+              <Hoverable
+                dataId="vaultUnlockedBalance"
+                className="p-2 px-4 pb-0 flex justify-between"
+              >
                 <span>Unlocked</span>
                 <span>
                   {parseFloat(formatEther(balance.unlocked)).toFixed(3) || "0"}{" "}
                   ETH
                 </span>
-              </div>
-              <div className="p-2 px-4 pb-0 flex justify-between">
+              </Hoverable>
+              <Hoverable
+                dataId="vaultStashedBalance"
+                className="p-2 px-4 pb-0 flex justify-between"
+              >
                 <span>Stashed</span>
                 <span>
                   {parseFloat(formatEther(balance.stashed)).toFixed(3) || "0"}{" "}
                   ETH
                 </span>
-              </div>
+              </Hoverable>
             </div>
           </div>,
           document.body,

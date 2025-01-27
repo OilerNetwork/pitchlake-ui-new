@@ -14,6 +14,7 @@ import { faEthereum } from "@fortawesome/free-brands-svg-icons";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useAccount } from "@starknet-react/core";
 import { num } from "starknet";
+import Hoverable from "@/components/BaseComponents/Hoverable";
 
 interface WithdrawLiquidityProps {
   showConfirmation: (
@@ -119,33 +120,37 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
 
   return (
     <>
-      <div className="flex flex-col space-y-5 px-6 mb-[auto]">
-        <div>
-          <InputField
-            type="number"
-            value={state.amount || ""}
-            label="Enter Amount"
-            onChange={(e) => {
-              const value = e.target.value;
-              const formattedValue = value.includes(".")
-                ? value.slice(0, value.indexOf(".") + 19)
-                : value;
+      <Hoverable
+        dataId="inputWithdrawalAmount"
+        className="flex flex-col space-y-5 px-6 mb-[auto]"
+      >
+        <InputField
+          type="number"
+          value={state.amount || ""}
+          label="Enter Amount"
+          onChange={(e) => {
+            const value = e.target.value;
+            const formattedValue = value.includes(".")
+              ? value.slice(0, value.indexOf(".") + 19)
+              : value;
 
-              updateState({ amount: formattedValue });
-            }}
-            placeholder="e.g. 5.0"
-            icon={
-              <FontAwesomeIcon
-                icon={faEthereum}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pr-2"
-              />
-            }
-            error={state.isAmountOk}
-          />
-        </div>
-      </div>
+            updateState({ amount: formattedValue });
+          }}
+          placeholder="e.g. 5.0"
+          icon={
+            <FontAwesomeIcon
+              icon={faEthereum}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pr-2"
+            />
+          }
+          error={state.isAmountOk}
+        />
+      </Hoverable>
       <div className="flex flex-col h-[full] mt-[auto]">
-        <div className="px-6 flex justify-between text-sm mb-6 mt-auto">
+        <Hoverable
+          dataId="lpActionUnlockedBalance"
+          className="px-6 flex justify-between text-sm mb-6 mt-auto"
+        >
           <span className="text-gray-400">Unlocked Balance</span>
           <span className="text-white">
             {parseFloat(
@@ -153,14 +158,17 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
             ).toFixed(3)}{" "}
             ETH
           </span>
-        </div>
-        <div className="mt-[auto] flex justify-between text-sm border-t border-[#262626] p-6">
+        </Hoverable>
+        <Hoverable
+          dataId="withdrawButton"
+          className="mt-[auto] flex justify-between text-sm border-t border-[#262626] p-6"
+        >
           <ActionButton
             onClick={handleSubmit}
             disabled={isWithdrawDisabled()}
             text="Withdraw"
           />
-        </div>
+        </Hoverable>
       </div>
     </>
   );

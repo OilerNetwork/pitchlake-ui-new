@@ -109,7 +109,11 @@ const useVaultActions = (address?: `0x${string}`) => {
   }, [callContract]);
 
   const settleOptionRound = useCallback(async () => {
-    await callContract("settle_round")();
+    try {
+      await callContract("settle_round")();
+    } catch (error) {
+      console.log(error);
+    }
   }, [callContract]);
   //State Transition
 

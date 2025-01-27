@@ -9,11 +9,15 @@ import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import useIsMobile from "@/hooks/window/useIsMobile";
 import MobileScreen from "../BaseComponents/MobileScreen";
+import { useHelpContext } from "@/context/HelpProvider";
+import { HelpBoxPanel } from "../HelpBoxComponents/HelpBoxPanel";
+import Hoverable from "../BaseComponents/Hoverable";
 
 export const Vault = () => {
   const [isProviderView, setIsProviderView] = useState(true);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const { isMobile } = useIsMobile();
+  const { isHelpBoxOpen } = useHelpContext();
   const router = useRouter();
 
   if (isMobile) {
@@ -21,10 +25,11 @@ export const Vault = () => {
   }
 
   return (
-    <div className="px-6 py-4 bg-faded-black-alt flex-grow flex-box overflow-auto">
-      <div className="flex flex-row-reverse py-1 text-primary">
-        <div className="flex flex-row rounded-md border-[1px] h-[55px] border-greyscale-800 ">
-          <div
+    <div className="px-6 py-4 pt-[120px] bg-faded-black-alt flex-grow flex-box overflow-auto">
+      <div className="flex flex-row-reverse text-primary">
+        <div className="flex flex-row rounded-md border-[1px] border-greyscale-800 h-[55px]">
+          <Hoverable
+            dataId="userToggleLP"
             onClick={() => {
               setIsProviderView(true);
               setIsEditOpen(false);
@@ -44,13 +49,14 @@ export const Vault = () => {
             >
               Provider
             </p>
-          </div>
-          <div
+          </Hoverable>
+          <Hoverable
+            dataId="userToggleOB"
             onClick={() => {
               setIsProviderView(false);
               //setIsEditOpen(false);
             }}
-            className={`flex flex-row items-center m-[1px] hover:cursor-pointer p-4 rounded-md text-[14px] h-[44px] justify-center w-[115px] ${
+            className={`flex flex-row items-center justify-center m-[1px] hover:cursor-pointer px-4 py-1 rounded-md text-[14px] w-[115px] ${
               !isProviderView ? "bg-primary-900" : ""
             }`}
           >
@@ -65,13 +71,16 @@ export const Vault = () => {
             >
               Buyer
             </p>
-          </div>
+          </Hoverable>
         </div>
 
         <div className="flex flex-row items-center ml-[16px] mr-[auto] text-[16px] font-medium text-[#FAFAFA]">
           Vault Details
         </div>
-        <div className="hover-zoom-small flex items-center justify-center">
+        <Hoverable
+          dataId="logo"
+          className="hover-zoom-small flex items-center justify-center"
+        >
           <div
             onClick={() => {
               router.push("/");
@@ -80,7 +89,7 @@ export const Vault = () => {
           >
             <ChevronLeft className="w-[16px] h-[16px] stroke-[#F5EBB8]" />
           </div>
-        </div>
+        </Hoverable>
       </div>
       <div className="mt-6 flex flex-row">
         {<PanelLeft userType={isProviderView ? "lp" : "ob"} />}
@@ -89,12 +98,24 @@ export const Vault = () => {
         }
         <RoundPerformanceChart />
 
-        <div className="w-full ml-6 max-w-[350px]">
-          <PanelRight
-            userType={isProviderView ? "lp" : "ob"}
-            isEditOpen={isEditOpen}
-            setIsEditOpen={setIsEditOpen}
-          />
+        <div className="w-full ml-6 max-w-[350px] flex flex-col max-h-[834px]">
+          <div
+            className={`
+              bg-[#121212] border border-[#262626] rounded-lg flex flex-col
+              ${isHelpBoxOpen ? "h-[60%]" : "h-[100%]"} transition-all duration-300
+            `}
+          >
+            <PanelRight
+              userType={isProviderView ? "lp" : "ob"}
+              isEditOpen={isEditOpen}
+              setIsEditOpen={setIsEditOpen}
+            />
+          </div>
+          {isHelpBoxOpen && (
+            <div className="mt-6">
+              <HelpBoxPanel />
+            </div>
+          )}
         </div>
       </div>
     </div>

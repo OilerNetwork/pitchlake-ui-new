@@ -9,6 +9,7 @@ import {
   voyager,
   jsonRpcProvider,
 } from "@starknet-react/core";
+import { stringToHexString } from "@/lib/utils";
 
 const newDevnet = { ...devnet, id: BigInt("0x534e5f4a554e4f5f53455155454e434552") };
 export const juno = {
@@ -75,9 +76,10 @@ export const StarknetProvider = ({
   }
   const provider = jsonRpcProvider({ rpc });
 
+  const newDevnet = {...devnet, id: BigInt(stringToHexString("SN_KATANA"))}
   return (
     <StarknetConfig
-      chains={[sepolia, devnet, juno, mainnet]}
+      chains={[sepolia, newDevnet, juno, mainnet]}
       provider={provider}
       connectors={connectors}
       explorer={voyager}

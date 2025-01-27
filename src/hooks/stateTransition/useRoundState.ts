@@ -36,6 +36,7 @@ const getRoundState = ({
     if (
       fossilError ||
       fossilStatus === null ||
+      fossilStatus.error ||
       fossilStatus.status === "Failed"
     )
       return "FossilReady";

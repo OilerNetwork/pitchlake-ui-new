@@ -13,6 +13,9 @@ import ProtocolProvider from "@/context/ProtocolProvider";
 import { AppProps } from "next/app";
 import QueryProvider from "@/components/Providers/queryProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { HelpProvider } from "@/context/HelpProvider";
+import { UiProvider } from "@/context/UiProvider";
+import { Blur } from "@/components/BaseComponents/Blur";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -38,20 +41,28 @@ export default function RootLayout({
 }>) {
   return (
     <html className={`${montserrat.variable}`} lang="en">
-      <body className="flex flex-col min-h-[100vh] text-white bg-black">
-        <QueryProvider>
+      <body className="flex flex-col min-h-[100vh] text-white">
+
           <StarknetProvider>
             <TransactionProvider>
               <ProtocolProvider>
-                <Header />
-                <div className="mt-[84px] flex flex-grow bg-bg-color">{children}</div>
-                <div className="flex flex-col-reverse">
-                  <Footer />
-                </div>
+                <UiProvider>
+                  <HelpProvider>
+                    <Header />
+                    <Blur>
+                      <main className="flex-grow bg-faded-black-alt">
+                        {children}
+                      </main>
+                      <div className="flex flex-col-reverse">
+                        <Footer />
+                      </div>
+                    </Blur>
+                  </HelpProvider>
+                </UiProvider>
               </ProtocolProvider>
             </TransactionProvider>
           </StarknetProvider>
-        </QueryProvider>
+
       </body>
     </html>
   );

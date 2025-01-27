@@ -13,11 +13,9 @@ import { useAccount } from "@starknet-react/core";
 import useLatestTimetamp from "@/hooks/chain/useLatestTimestamp";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useProvider } from "@starknet-react/core";
-import {
-  useSendTransaction,
-  useContract,
-} from "@starknet-react/core";
+import { useContractWrite, useContract } from "@starknet-react/core";
 import { erc20ABI, optionRoundABI } from "@/lib/abi";
+import Hoverable from "@/components/BaseComponents/Hoverable";
 
 interface EditModalProps {
   onConfirm: () => void;
@@ -133,8 +131,8 @@ const EditModal: React.FC<EditModalProps> = ({
 
     if (
       approveCall &&
-      num.toBigInt(allowance) < num.toBigInt(needsApproving) &&
-      totalCostWei < num.toBigInt(balance)
+      num.toBigInt(allowance) < num.toBigInt(needsApproving)
+      //  && totalCostWei < num.toBigInt(balance)
     )
       calls.push(approveCall);
     if (editBidCall) calls.push(editBidCall);
@@ -150,7 +148,7 @@ const EditModal: React.FC<EditModalProps> = ({
     ethContract,
     bidId,
   ]);
-  const { sendAsync} = useSendTransaction({ calls });
+  const { writeAsync } = useContractWrite({ calls });
 
   // Send confirmation
   const handleSubmitForMulticall = () => {
@@ -173,7 +171,7 @@ const EditModal: React.FC<EditModalProps> = ({
 
   // Open wallet
   const handleMulticall = async () => {
-    const data = await sendAsync();
+    const data = await writeAsync();
     setPendingTx(data?.transaction_hash);
     setState((prevState) => ({ ...prevState, newPriceGwei: "" }));
     localStorage.removeItem(LOCAL_STORAGE_KEY);
@@ -241,7 +239,7 @@ const EditModal: React.FC<EditModalProps> = ({
 
       <div className="flex flex-col h-full">
         <div className="flex-grow space-y-6 pt-2 px-4">
-          <div className="edit-bid-current-amount">
+          <Hoverable dataId="inputUpdateBidAmount" className="edit-bid-current-amount">
             <InputField
               type="number"
               value={""}
@@ -258,8 +256,8 @@ const EditModal: React.FC<EditModalProps> = ({
                 />
               }
             />
-          </div>
-          <div className="edit-bid-new-price">
+          </Hoverable>
+          <Hoverable dataId="inputUpdateBidPrice" className="edit-bid-new-price">
             <InputField
               type="number"
               value={state.newPriceGwei}
@@ -275,28 +273,37 @@ const EditModal: React.FC<EditModalProps> = ({
               }
               error={state.error}
             />
-          </div>
+          </Hoverable>
         </div>
       </div>
 
-      <div className="flex justify-between text-sm px-6 pb-1 edit-bid-total">
+      <Hoverable
+        dataId="updateBidSummary"
+        className="flex justify-between text-sm px-6 pb-1 edit-bid-total"
+      >
         <span className="text-gray-400">Total</span>
         <span>{parseFloat(totalNewCostEth).toFixed(6)} ETH</span>
-      </div>
-      <div className="flex justify-between text-sm px-6 pb-6 edit-bid-balance">
+      </Hoverable>
+      <Hoverable
+        dataId="placingBidBalance"
+        className="flex justify-between text-sm px-6 pb-6 edit-bid-balance"
+      >
         <span className="text-gray-400">Balance</span>
         <span>
           {parseFloat(formatEther(num.toBigInt(balance))).toFixed(3)} ETH
         </span>
-      </div>
+      </Hoverable>
       <div className="mt-auto">
-        <div className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]">
+        <Hoverable
+          dataId="updateBidButton"
+          className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
+        >
           <ActionButton
             onClick={handleSubmitForMulticall}
             disabled={state.isButtonDisabled}
             text="Edit Bid"
           />
-        </div>
+        </Hoverable>
       </div>
     </div>
   );

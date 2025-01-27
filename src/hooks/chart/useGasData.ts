@@ -70,7 +70,7 @@ export const useGasData = ({
     queryKey,
     queryFn: () =>
       fetchGasData(lowerTimestamp, upperTimestamp, twapRange, roundStart),
-
+    refetchInterval: 30 * 1000,
     enabled:
       typeof lowerTimestamp === "number" &&
       typeof upperTimestamp === "number" &&
