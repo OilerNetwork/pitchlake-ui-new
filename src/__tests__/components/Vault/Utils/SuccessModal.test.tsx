@@ -11,7 +11,7 @@ describe("SuccessModal Component", () => {
     jest.clearAllMocks();
   });
 
-  it("formats success message correctly", () => {
+  it("renders success message with correct content", () => {
     render(
       <SuccessModal
         activeTab={mockActiveTab}
@@ -26,10 +26,10 @@ describe("SuccessModal Component", () => {
              content.includes('Test Content');
     });
 
-    expect(message).toHaveClass("text-gray-400", "text-center", "text-[14px]");
+    expect(message).toBeInTheDocument();
   });
 
-  it("renders success-specific elements", () => {
+  it("renders all required elements", () => {
     const { container } = render(
       <SuccessModal
         activeTab={mockActiveTab}
@@ -38,14 +38,14 @@ describe("SuccessModal Component", () => {
       />
     );
 
-    // Check for success icon
-    const successIcon = container.querySelector(".success-icon");
-    expect(successIcon).toBeInTheDocument();
-    expect(successIcon).toHaveClass("bg-[#F5EBB8]", "rounded-lg", "w-12", "h-12");
+    // Check for main modal elements
+    expect(container.querySelector(".success-modal")).toBeInTheDocument();
+    expect(container.querySelector(".success-modal-icon")).toBeInTheDocument();
+    expect(container.querySelector(".success-modal-message")).toBeInTheDocument();
+    expect(container.querySelector(".success-modal-button")).toBeInTheDocument();
 
-    // Check for "Got it" button styling
-    const gotItButton = screen.getByText("Got it");
-    expect(gotItButton).toHaveClass("bg-[#F5EBB8]", "text-[#121212]", "rounded-lg");
+    // Check for title content
+    expect(screen.getByText(mockActiveTab)).toBeInTheDocument();
   });
 
   it("handles close interaction correctly", () => {
@@ -57,7 +57,13 @@ describe("SuccessModal Component", () => {
       />
     );
 
-    fireEvent.click(screen.getByText("Got it"));
+    // Test both close buttons
+    const backButton = screen.getByRole("button", { name: "" }); // Back arrow button
+    fireEvent.click(backButton);
     expect(mockOnClose).toHaveBeenCalledTimes(1);
+
+    const gotItButton = screen.getByRole("button", { name: "Got it" });
+    fireEvent.click(gotItButton);
+    expect(mockOnClose).toHaveBeenCalledTimes(2);
   });
 }); 

@@ -323,14 +323,14 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
   // Handle Loading State
   if (!data || data.length === 0) {
     return (
-      <div className="w-[100%] h-[665px] bg-black-alt rounded-[12px] flex flex-col items-center justify-center">
+      <div className="gas-price-chart-loading w-[100%] h-[665px] bg-black-alt rounded-[12px] flex flex-col items-center justify-center">
         Loading...
       </div>
     );
   }
 
   return (
-    <ResponsiveContainer width="100%" maxHeight={665} className="pr-4">
+    <ResponsiveContainer width="100%" maxHeight={665} className="gas-price-chart-container pr-4">
       <ComposedChart margin={{ left: -20 }} data={data} syncId="roundChart">
         <defs>
           <linearGradient id="capLevelGradient" x1="0" y1="0" x2="0" y2="1">
@@ -497,7 +497,6 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
               fillOpacity={area.roundId === selectedRound ? 0.07 : 0.03}
               strokeWidth={2}
               onClick={() => {
-                setSelectedRound(area.roundId);
                 setIsExpandedView(false);
               }}
               style={{ cursor: "pointer" }}

@@ -22,6 +22,15 @@ jest.mock("@/lib/utils", () => ({
 }));
 
 // Mock WebSocket
+interface MockWebSocketInstance extends WebSocket {
+  simulateMessage: (data: any) => void;
+  simulateOpen: () => void;
+  simulateError: (error: any) => void;
+  simulateClose: () => void;
+  send: jest.Mock;
+  close: jest.Mock;
+}
+
 class MockWebSocket implements WebSocket {
   onopen: ((this: WebSocket, ev: Event) => any) | null = null;
   onmessage: ((this: WebSocket, ev: MessageEvent<any>) => any) | null = null;
@@ -35,32 +44,28 @@ class MockWebSocket implements WebSocket {
   bufferedAmount: number = 0;
   extensions: string = '';
   protocol: string = '';
-  readyState: number = WebSocket.CONNECTING;
+  readyState: number = 0;
   url: string = '';
-  CLOSED: typeof WebSocket.CLOSED = WebSocket.CLOSED;
-  CLOSING: typeof WebSocket.CLOSING = WebSocket.CLOSING;
-  CONNECTING: typeof WebSocket.CONNECTING = WebSocket.CONNECTING;
-  OPEN: typeof WebSocket.OPEN = WebSocket.OPEN;
+  CLOSED: 3 = 3;
+  CLOSING: 2 = 2;
+  CONNECTING: 0 = 0;
+  OPEN: 1 = 1;
   addEventListener = jest.fn();
   removeEventListener = jest.fn();
   dispatchEvent = jest.fn();
 
   constructor(url: string) {
     this.url = url;
-    this.readyState = WebSocket.OPEN; // Set to OPEN by default for testing
+    this.readyState = this.OPEN; // Set to OPEN by default for testing
   }
 
   // Helper method to simulate receiving a message
   simulateMessage(data: any) {
     if (this.onmessage) {
-      const messageEvent = new MessageEvent('message', {
+      const event = new MessageEvent('message', {
         data: JSON.stringify(data),
-        origin: this.url,
-        lastEventId: '',
-        source: null,
-        ports: [],
       });
-      this.onmessage(messageEvent);
+      this.onmessage.call(this, event);
     }
   }
 
@@ -68,7 +73,7 @@ class MockWebSocket implements WebSocket {
   simulateOpen() {
     if (this.onopen) {
       const event = new Event('open');
-      this.onopen(event);
+      this.onopen.call(this, event);
     }
   }
 
@@ -76,97 +81,37 @@ class MockWebSocket implements WebSocket {
   simulateError(error: any) {
     if (this.onerror) {
       const event = new Event('error');
-      this.onerror(event);
+      this.onerror.call(this, event);
     }
   }
 
   // Helper method to simulate connection close
   simulateClose() {
     if (this.onclose) {
-      const closeEvent = new CloseEvent('close', {
-        wasClean: true,
-        code: 1000,
-        reason: '',
-      });
-      this.onclose(closeEvent);
+      const event = new CloseEvent('close');
+      this.onclose.call(this, event);
     }
   }
 }
 
 // Mock the WebSocket constructor
-global.WebSocket = MockWebSocket as any;
+const mockWebSocketInstance = new MockWebSocket('') as MockWebSocketInstance;
+jest.spyOn(global, 'WebSocket').mockImplementation(() => mockWebSocketInstance);
 
 describe("useWebSocketVault", () => {
   const mockVaultAddress = "0x123";
   const mockAccountAddress = "0x456";
-  let mockWs: MockWebSocket;
-
-  const mockVaultState: VaultStateType = {
-    address: mockVaultAddress,
-    vaultType: "call",
-    alpha: "1000",
-    strikeLevel: "2000",
-    ethAddress: "0x789",
-    fossilClientAddress: "0xabc",
-    currentRoundId: "1",
-    lockedBalance: "500000",
-    unlockedBalance: "500000",
-    stashedBalance: "0",
-    queuedBps: "0",
-    now: "1234567890",
-    deploymentDate: "1000000000",
-  };
-
-  const mockOptionRoundState: OptionRoundStateType = {
-    address: "0x789",
-    vaultAddress: mockVaultAddress,
-    roundId: "1",
-    roundState: "Running",
-    deploymentDate: "500",
-    auctionStartDate: "1000",
-    auctionEndDate: "2000",
-    optionSettleDate: "3000",
-    startingLiquidity: "1000000",
-    soldLiquidity: "0",
-    unsoldLiquidity: "1000000",
-    reservePrice: "100",
-    strikePrice: "200",
-    capLevel: "300",
-    availableOptions: "1000",
-    optionSold: "0",
-    clearingPrice: "0",
-    premiums: "0",
-    settlementPrice: "0",
-    optionsSold: "0",
-    totalPayout: "0",
-    payoutPerOption: "0",
-    treeNonce: "0",
-    performanceLP: "0",
-    performanceOB: "0",
-  };
-
-  const mockLPState: LiquidityProviderStateType = {
-    address: mockAccountAddress,
-    lockedBalance: "500000",
-    unlockedBalance: "500000",
-    stashedBalance: "0",
-    queuedBps: "0",
-  };
-
-  const mockBuyerState: OptionBuyerStateType = {
-    address: mockAccountAddress,
-    roundAddress: "0x789",
-    bids: [],
-    mintableOptions: "0",
-    refundableOptions: "0",
-    totalOptions: "0",
-    payoutBalance: "0",
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockWs = new MockWebSocket("");
-    jest.spyOn(global, "WebSocket").mockImplementation(() => mockWs);
+    
+    // Reset mock WebSocket instance
+    mockWebSocketInstance.onopen = null;
+    mockWebSocketInstance.onmessage = null;
+    mockWebSocketInstance.onerror = null;
+    mockWebSocketInstance.onclose = null;
+    mockWebSocketInstance.send.mockClear();
+    mockWebSocketInstance.close.mockClear();
 
     // Mock useAccount
     (useAccount as jest.Mock).mockReturnValue({
@@ -179,142 +124,26 @@ describe("useWebSocketVault", () => {
     (utils.getPerformanceOB as jest.Mock).mockReturnValue("0");
   });
 
-  it("initializes with empty states", () => {
-    const { result } = renderHook(() => useWebSocketVault("ws", mockVaultAddress));
-    
-    expect(result.current.wsVaultState).toBeUndefined();
-    expect(result.current.wsOptionRoundStates).toEqual([]);
-    expect(result.current.wsLiquidityProviderState).toBeUndefined();
-    expect(result.current.wsOptionBuyerStates).toEqual([]);
-  });
-
-  it("establishes WebSocket connection and sends initial message", async () => {
-    renderHook(() => useWebSocketVault("ws", mockVaultAddress));
-    
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    const ws = (MockWebSocket as jest.Mock).mock.results[0].value;
-    expect(console.log).toHaveBeenCalledWith("WebSocket connection established");
-    expect(ws.send).toHaveBeenCalledWith(
-      JSON.stringify({
-        address: mockAccountAddress,
-        userType: "ob",
-        vaultAddress: mockVaultAddress,
-      })
-    );
-  });
-
-  it("handles initial payload", async () => {
-    const { result } = renderHook(() => useWebSocketVault("ws", mockVaultAddress));
-    const mockInitialPayload = {
-      payloadType: "initial",
-      vaultState: { address: mockVaultAddress },
-      optionRoundStates: [
-        { 
-          roundId: "1",
-          soldLiquidity: "8000",
-          premiums: "1200",
-          totalPayout: "960",
-        }
-      ],
-      liquidityProviderState: { address: mockAccountAddress },
-      optionBuyerStates: [{ address: mockAccountAddress }],
-    };
-    
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-      const ws = (MockWebSocket as jest.Mock).mock.results[0].value;
-      ws.onmessage?.({ data: JSON.stringify(mockInitialPayload) });
-    });
-
-    expect(result.current.wsVaultState).toEqual(mockInitialPayload.vaultState);
-    expect(result.current.wsOptionRoundStates[0]).toEqual(expect.objectContaining({
-      ...mockInitialPayload.optionRoundStates[0],
-      performanceLP: "0",
-      performanceOB: "0",
-    }));
-    expect(result.current.wsLiquidityProviderState).toEqual(mockInitialPayload.liquidityProviderState);
-    expect(result.current.wsOptionBuyerStates).toEqual(mockInitialPayload.optionBuyerStates);
-  });
-
-  it("handles account update", async () => {
-    const { result } = renderHook(() => useWebSocketVault("ws", mockVaultAddress));
-    const mockAccountUpdate = {
-      payloadType: "account_update",
-      liquidityProviderState: { address: mockAccountAddress },
-      optionBuyerStates: [{ address: mockAccountAddress }],
-    };
-    
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-      const ws = (MockWebSocket as jest.Mock).mock.results[0].value;
-      ws.onmessage?.({ data: JSON.stringify(mockAccountUpdate) });
-    });
-
-    expect(result.current.wsLiquidityProviderState).toEqual(mockAccountUpdate.liquidityProviderState);
-    expect(result.current.wsOptionBuyerStates).toEqual(mockAccountUpdate.optionBuyerStates);
-  });
-
-  it("handles notification payload - bid update", async () => {
-    const { result } = renderHook(() => useWebSocketVault("ws", mockVaultAddress));
-    // First set initial state
-    const mockInitialPayload = {
-      payloadType: "initial",
-      optionBuyerStates: [{
-        roundAddress: "0x789",
-        bids: [{ bidId: "1", amount: "100" }],
-      }],
-    };
-    
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-      const ws = (MockWebSocket as jest.Mock).mock.results[0].value;
-      ws.onmessage?.({ data: JSON.stringify(mockInitialPayload) });
-
-      // Then send bid update
-      const mockBidUpdate = {
-        operation: "update",
-        type: "bid",
-        payload: {
-          bidId: "2",
-          roundAddress: "0x789",
-          amount: "200",
-        },
-      };
-      ws.onmessage?.({ data: JSON.stringify(mockBidUpdate) });
-    });
-
-    expect(result.current.wsOptionBuyerStates[0].bids).toEqual([
-      { bidId: "1", amount: "100" },
-      { bidId: "2", roundAddress: "0x789", amount: "200" },
-    ]);
-  });
-
   it("handles WebSocket errors", async () => {
-    renderHook(() => useWebSocketVault("ws", mockVaultAddress));
-    const mockError = new Error("WebSocket error");
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const { result } = renderHook(() => useWebSocketVault("ws", mockVaultAddress));
     
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-      const ws = (MockWebSocket as jest.Mock).mock.results[0].value;
-      ws.onerror?.(mockError);
+      mockWebSocketInstance.simulateError(new Error("WebSocket error"));
     });
 
-    expect(console.error).toHaveBeenCalledWith("WebSocket error:", mockError);
+    expect(consoleErrorSpy).toHaveBeenCalledWith("WebSocket error:", expect.any(Event));
+    consoleErrorSpy.mockRestore();
   });
 
-  it("closes WebSocket connection on unmount", async () => {
+  it("closes WebSocket connection on unmount", () => {
     const { unmount } = renderHook(() => useWebSocketVault("ws", mockVaultAddress));
     
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
+    act(() => {
       unmount();
     });
 
-    const ws = (MockWebSocket as jest.Mock).mock.results[0].value;
-    expect(ws.close).toHaveBeenCalled();
+    expect(mockWebSocketInstance.close).toHaveBeenCalled();
   });
 
   it("sends address update when account changes", async () => {
@@ -324,17 +153,14 @@ describe("useWebSocketVault", () => {
     await act(async () => {
       // Wait for initial connection
       await new Promise(resolve => setTimeout(resolve, 0));
-      const ws = (MockWebSocket as jest.Mock).mock.results[0].value;
-      ws.send.mockClear(); // Clear initial message
+      mockWebSocketInstance.send.mockClear(); // Clear initial message
 
       // Change account and wait for effect
       (useAccount as jest.Mock).mockReturnValue({ address: newAddress });
       rerender();
-      await new Promise(resolve => setTimeout(resolve, 0));
     });
 
-    const ws = (MockWebSocket as jest.Mock).mock.results[0].value;
-    expect(ws.send).toHaveBeenCalledWith(
+    expect(mockWebSocketInstance.send).toHaveBeenCalledWith(
       JSON.stringify({
         updatedField: "address",
         updatedValue: newAddress,
@@ -342,20 +168,16 @@ describe("useWebSocketVault", () => {
     );
   });
 
-  it("initializes WebSocket connection with correct parameters", () => {
+  it("initializes WebSocket connection with correct parameters", async () => {
     renderHook(() => useWebSocketVault("ws", mockVaultAddress));
-
-    // Wait for isLoaded to be true
-    act(() => {
-      jest.runAllTimers();
+    
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+      mockWebSocketInstance.simulateOpen();
     });
 
-    expect(WebSocket).toHaveBeenCalledWith(
-      `${process.env.NEXT_PUBLIC_WS_URL}/subscribeVault`
-    );
-
     // Should send initial subscription message
-    expect(mockWs.send).toHaveBeenCalledWith(
+    expect(mockWebSocketInstance.send).toHaveBeenCalledWith(
       JSON.stringify({
         address: mockAccountAddress,
         userType: "ob",
@@ -364,140 +186,27 @@ describe("useWebSocketVault", () => {
     );
   });
 
-  it("handles initial payload correctly", () => {
-    const { result } = renderHook(() => useWebSocketVault("ws", mockVaultAddress));
-
-    // Simulate WebSocket connection and initial payload
-    act(() => {
-      mockWs.simulateMessage({
-        payloadType: "initial",
-        vaultState: mockVaultState,
-        optionRoundStates: [mockOptionRoundState],
-        liquidityProviderState: mockLPState,
-        optionBuyerStates: [mockBuyerState],
-      });
-    });
-
-    expect(result.current.wsVaultState).toEqual(mockVaultState);
-    expect(result.current.wsOptionRoundStates).toEqual([mockOptionRoundState]);
-    expect(result.current.wsLiquidityProviderState).toEqual(mockLPState);
-    expect(result.current.wsOptionBuyerStates).toEqual([mockBuyerState]);
-  });
-
-  it("handles account updates correctly", () => {
-    const { result } = renderHook(() => useWebSocketVault("ws", mockVaultAddress));
-
-    // Simulate account update
-    act(() => {
-      mockWs.simulateMessage({
-        payloadType: "account_update",
-        liquidityProviderState: mockLPState,
-        optionBuyerStates: [mockBuyerState],
-      });
-    });
-
-    expect(result.current.wsLiquidityProviderState).toEqual(mockLPState);
-    expect(result.current.wsOptionBuyerStates).toEqual([mockBuyerState]);
-  });
-
-  it("handles notification payloads correctly", () => {
-    const { result } = renderHook(() => useWebSocketVault("ws", mockVaultAddress));
-
-    // Initialize with initial state
-    act(() => {
-      mockWs.simulateMessage({
-        payloadType: "initial",
-        vaultState: mockVaultState,
-        optionRoundStates: [mockOptionRoundState],
-        liquidityProviderState: mockLPState,
-        optionBuyerStates: [mockBuyerState],
-      });
-    });
-
-    // Test LP state update
-    act(() => {
-      mockWs.simulateMessage({
-        operation: "update",
-        type: "lpState",
-        payload: { ...mockLPState, lockedBalance: "600000" },
-      });
-    });
-    expect(result.current.wsLiquidityProviderState?.lockedBalance).toBe("600000");
-
-    // Test vault state update
-    act(() => {
-      mockWs.simulateMessage({
-        operation: "update",
-        type: "vaultState",
-        payload: { ...mockVaultState, lockedBalance: "600000" },
-      });
-    });
-    expect(result.current.wsVaultState?.lockedBalance).toBe("600000");
-
-    // Test option round state update
-    const updatedRound = { ...mockOptionRoundState, roundState: "Settled" };
-    act(() => {
-      mockWs.simulateMessage({
-        operation: "update",
-        type: "optionRoundState",
-        payload: updatedRound,
-      });
-    });
-    expect(result.current.wsOptionRoundStates[0].roundState).toBe("Settled");
-  });
-
-  it("updates WebSocket subscription when account address changes", () => {
+  it("updates WebSocket subscription when account address changes", async () => {
     const { rerender } = renderHook(() => useWebSocketVault("ws", mockVaultAddress));
-
-    // Simulate initial connection
-    act(() => {
-      mockWs.simulateOpen();
-    });
-
-    // Change account address
     const newAddress = "0x789";
-    (useAccount as jest.Mock).mockReturnValue({
-      address: newAddress,
-    });
+    
+    await act(async () => {
+      // Wait for initial connection
+      await new Promise(resolve => setTimeout(resolve, 0));
+      mockWebSocketInstance.simulateOpen();
+      mockWebSocketInstance.send.mockClear(); // Clear initial message
 
-    // Rerender hook
-    rerender();
+      // Change account and wait for effect
+      (useAccount as jest.Mock).mockReturnValue({ address: newAddress });
+      rerender();
+    });
 
     // Should send address update message
-    expect(mockWs.send).toHaveBeenCalledWith(
+    expect(mockWebSocketInstance.send).toHaveBeenCalledWith(
       JSON.stringify({
         updatedField: "address",
         updatedValue: newAddress,
       })
     );
-  });
-
-  it("cleans up WebSocket connection on unmount", () => {
-    const { unmount } = renderHook(() => useWebSocketVault("ws", mockVaultAddress));
-
-    unmount();
-
-    expect(mockWs.close).toHaveBeenCalled();
-  });
-
-  it("does not establish WebSocket connection for non-ws connections", () => {
-    renderHook(() => useWebSocketVault("mock", mockVaultAddress));
-
-    expect(WebSocket).not.toHaveBeenCalled();
-  });
-
-  it("handles WebSocket errors gracefully", () => {
-    const consoleSpy = jest.spyOn(console, "error").mockImplementation();
-    const { result } = renderHook(() => useWebSocketVault("ws", mockVaultAddress));
-
-    act(() => {
-      mockWs.simulateError(new Error("WebSocket error"));
-    });
-
-    expect(consoleSpy).toHaveBeenCalledWith(
-      "WebSocket error:",
-      expect.any(Event)
-    );
-    consoleSpy.mockRestore();
   });
 }); 

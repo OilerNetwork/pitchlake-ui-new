@@ -17,10 +17,10 @@ describe("StateTransitionConfirmationModal", () => {
 
     // Check modal structure
     const modal = container.firstChild;
-    expect(modal).toHaveClass("fixed", "inset-0", "bg-black", "bg-opacity-50", "backdrop-blur-sm");
+    expect(modal).toHaveClass("state-transition-modal-backdrop", "overflow-hidden", "fixed", "inset-0", "flex", "items-center", "justify-center", "z-50", "backdrop-blur-sm", "bg-black/50");
 
     // Check message container
-    const messageContainer = container.querySelector(".flex.flex-col.items-center.gap-6");
+    const messageContainer = container.querySelector(".flex.flex-col.items-center.p-6");
     expect(messageContainer).toBeInTheDocument();
 
     // Check confirmation message
@@ -32,21 +32,23 @@ describe("StateTransitionConfirmationModal", () => {
     const cancelButton = screen.getByRole("button", { name: "Cancel" });
 
     expect(confirmButton).toHaveClass(
+      "w-[125px]",
+      "px-4",
+      "py-2",
       "bg-[#F5EBB8]",
-      "text-[#121212]",
-      "w-full",
       "rounded-lg",
-      "py-3",
-      "font-medium"
+      "text-[#121212]"
     );
     expect(cancelButton).toHaveClass(
+      "w-[125px]",
+      "px-4",
+      "py-2",
+      "bg-[#121212]",
       "border",
+      "border-[2px]",
       "border-[#595959]",
-      "text-[#fafafa]",
-      "w-full",
       "rounded-lg",
-      "py-3",
-      "font-medium"
+      "text-[#fafafa]"
     );
 
     // Test button interactions
@@ -78,12 +80,12 @@ describe("StateTransitionConfirmationModal", () => {
 
       const confirmButton = screen.getByRole("button", { name: buttonText });
       expect(confirmButton).toHaveClass(
+        "w-[125px]",
+        "px-4",
+        "py-2",
         "bg-[#F5EBB8]",
-        "text-[#121212]",
-        "w-full",
         "rounded-lg",
-        "py-3",
-        "font-medium"
+        "text-[#121212]"
       );
 
       unmount();

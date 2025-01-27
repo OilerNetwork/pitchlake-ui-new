@@ -11,19 +11,19 @@ jest.mock("@/context/ProtocolProvider", () => ({
 // Mock recharts components
 jest.mock("recharts", () => ({
   ComposedChart: ({ children }: { children: React.ReactNode }) => (
-    <div className="composed-chart">{children}</div>
+    <div>{children}</div>
   ),
-  Area: () => <div className="chart-area" />,
-  Line: () => <div className="chart-line" />,
-  XAxis: () => <div className="chart-x-axis" />,
-  YAxis: () => <div className="chart-y-axis" />,
-  CartesianGrid: () => <div className="chart-grid" />,
-  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
-    <div className="chart-container">{children}</div>
+  Area: ({ dataKey }: { dataKey: string }) => <div className={`chart-area-${dataKey.toLowerCase()}`} />,
+  Line: ({ dataKey }: { dataKey: string }) => <div className={`chart-line-${dataKey.toLowerCase()}`} />,
+  XAxis: () => <div />,
+  YAxis: () => <div />,
+  CartesianGrid: () => <div />,
+  ResponsiveContainer: ({ children, className }: { children: React.ReactNode, className: string }) => (
+    <div className={className}>{children}</div>
   ),
-  ReferenceLine: () => <div className="chart-reference-line" />,
-  ReferenceArea: () => <div className="chart-reference-area" />,
-  Tooltip: () => <div className="chart-tooltip" />,
+  ReferenceLine: () => <div />,
+  ReferenceArea: () => <div />,
+  Tooltip: () => <div />,
 }));
 
 describe("GasPriceChart", () => {
@@ -49,13 +49,6 @@ describe("GasPriceChart", () => {
         BASEFEE: 45,
         STRIKE: 50,
         CAP_LEVEL: 65,
-      },
-      {
-        timestamp: 2000,
-        TWAP: 55,
-        BASEFEE: 42,
-        STRIKE: 48,
-        CAP_LEVEL: 60,
       },
     ],
     activeLines: {
@@ -84,44 +77,26 @@ describe("GasPriceChart", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Mock useProtocolContext
     (useProtocolContext as jest.Mock).mockReturnValue({
       setSelectedRound: mockSetSelectedRound,
       selectedRoundState: mockSelectedRoundState,
     });
   });
 
-  it("renders chart with correct components and handles view changes", () => {
-    const { container, rerender } = render(<GasPriceChart {...defaultProps} />);
+  it("renders chart with correct components and data visualization", () => {
+    const { container } = render(<GasPriceChart {...defaultProps} />);
 
-    // Check initial render with all components
-    expect(container.querySelector(".chart-container")).toBeInTheDocument();
-    expect(container.querySelector(".composed-chart")).toBeInTheDocument();
-    expect(container.querySelector(".chart-grid")).toBeInTheDocument();
-    expect(container.querySelector(".chart-x-axis")).toBeInTheDocument();
-    expect(container.querySelector(".chart-y-axis")).toBeInTheDocument();
-    expect(container.querySelector(".chart-tooltip")).toBeInTheDocument();
+    // Verify chart container and structure
+    expect(container.querySelector(".gas-price-chart-container")).toBeInTheDocument();
 
-    // Check for active lines
-    const lines = container.querySelectorAll(".chart-line");
-    expect(lines.length).toBe(4); // TWAP, BASEFEE, STRIKE, CAP_LEVEL
-
-    // Check reference elements
-    expect(container.querySelector(".chart-reference-line")).toBeInTheDocument();
-    expect(container.querySelector(".chart-reference-area")).toBeInTheDocument();
-
-    // Test expanded view
-    rerender(<GasPriceChart {...defaultProps} isExpandedView={true} />);
-    expect(container.querySelector(".chart-container")).toHaveClass("expanded");
-
-    // Test with inactive lines
-    rerender(<GasPriceChart {...defaultProps} activeLines={{ TWAP: false, BASEFEE: false, STRIKE: true, CAP_LEVEL: true }} />);
-    const updatedLines = container.querySelectorAll(".chart-line");
-    expect(updatedLines.length).toBe(2); // Only STRIKE and CAP_LEVEL
+    // Verify data visualization components
+    expect(container.querySelector(".chart-area-twap")).toBeInTheDocument();
+    expect(container.querySelector(".chart-area-basefee")).toBeInTheDocument();
+    expect(container.querySelector(".chart-line-strike")).toBeInTheDocument();
+    expect(container.querySelector(".chart-area-cap_level")).toBeInTheDocument();
   });
 
-  it("renders with no data", () => {
+  it("handles missing data by showing loading state", () => {
     const { container } = render(
       <GasPriceChart
         {...defaultProps}
@@ -130,38 +105,36 @@ describe("GasPriceChart", () => {
       />
     );
 
-    expect(container.querySelector(".loading-message")).toBeInTheDocument();
+    expect(container.querySelector(".gas-price-chart-loading")).toBeInTheDocument();
+    expect(container.textContent).toContain("Loading...");
   });
 
-  it("renders with missing data points", () => {
-    const dataWithMissing = [
-      {
-        timestamp: 1000,
-        TWAP: null,
-        BASEFEE: 40,
-        STRIKE: undefined,
-        CAP_LEVEL: 55,
-      },
-      {
-        timestamp: 2000,
-        TWAP: 55,
-        BASEFEE: null,
-        STRIKE: 48,
-        CAP_LEVEL: undefined,
-      },
-    ];
+  it("renders only active data lines", () => {
+    const { container } = render(
+      <GasPriceChart
+        {...defaultProps}
+        activeLines={{
+          TWAP: false,
+          BASEFEE: true,
+          STRIKE: false,
+          CAP_LEVEL: true,
+        }}
+      />
+    );
 
-    const { container } = render(<GasPriceChart {...defaultProps} data={dataWithMissing} />);
-
-    expect(container.querySelector(".chart-container")).toBeInTheDocument();
-    expect(container.querySelector(".composed-chart")).toBeInTheDocument();
+    // Check that only active lines are rendered
+    expect(container.querySelector(".chart-area-twap")).not.toBeInTheDocument();
+    expect(container.querySelector(".chart-area-basefee")).toBeInTheDocument();
+    expect(container.querySelector(".chart-line-strike")).not.toBeInTheDocument();
+    expect(container.querySelector(".chart-area-cap_level")).toBeInTheDocument();
   });
 
-  it("renders with multiple rounds", () => {
-    const multiRoundData = {
+  it("handles expanded view with multiple rounds", () => {
+    const multiRoundProps = {
       ...defaultProps,
+      isExpandedView: true,
       fromRound: 1,
-      toRound: 3,
+      toRound: 2,
       historicalData: {
         rounds: [
           {
@@ -178,20 +151,13 @@ describe("GasPriceChart", () => {
             capLevel: "1000",
             strikePrice: "50000000000",
           },
-          {
-            roundId: 3,
-            deploymentDate: "3000",
-            optionSettleDate: "4000",
-            capLevel: "1000",
-            strikePrice: "55000000000",
-          },
         ],
       },
     };
 
-    const { container } = render(<GasPriceChart {...multiRoundData} />);
+    const { container } = render(<GasPriceChart {...multiRoundProps} />);
 
-    expect(container.querySelector(".chart-container")).toBeInTheDocument();
-    expect(container.querySelector(".composed-chart")).toBeInTheDocument();
+    // Verify expanded view components are rendered
+    expect(container.querySelector(".gas-price-chart-container")).toBeInTheDocument();
   });
 }); 

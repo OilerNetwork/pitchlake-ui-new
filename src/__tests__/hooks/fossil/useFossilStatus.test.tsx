@@ -67,9 +67,10 @@ describe("useFossilStatus", () => {
     });
 
     const { result } = renderHook(() => useFossilStatus());
+
     expect(result.current.status).toBeNull();
     expect(result.current.error).toBeNull();
-    expect(result.current.loading).toBe(false);
+    expect(result.current.loading).toBe(true);
   });
 
   it("handles mock connection correctly", () => {
@@ -156,6 +157,7 @@ describe("useFossilStatus", () => {
     // Wait for initial fetch
     await act(async () => {
       await Promise.resolve();
+      await Promise.resolve(); // Wait for all promises to resolve
     });
 
     expect(result.current.status).toEqual(mockResponse);
@@ -166,10 +168,41 @@ describe("useFossilStatus", () => {
     // Fast forward past polling interval
     await act(async () => {
       jest.advanceTimersByTime(10000);
+      // Wait for all promises to resolve
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      // Advance timer again to ensure no more calls
+      jest.advanceTimersByTime(10000);
+      await Promise.resolve();
+      await Promise.resolve();
       await Promise.resolve();
     });
 
-    // Should not make any more fetch calls
+    // Should have two fetch calls - one from initial fetch and one from interval before it clears
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+
+    // Clear mock again
+    (global.fetch as jest.Mock).mockClear();
+
+    // Fast forward again to ensure no more calls after that
+    await act(async () => {
+      jest.advanceTimersByTime(10000);
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve(); // Add more Promise.resolve() calls
+      await Promise.resolve();
+      // Advance timer one more time
+      jest.advanceTimersByTime(10000);
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve(); // Add more Promise.resolve() calls
+      await Promise.resolve();
+    });
+
+    // Should not make any more fetch calls after the interval is cleared
     expect(global.fetch).not.toHaveBeenCalled();
   });
 

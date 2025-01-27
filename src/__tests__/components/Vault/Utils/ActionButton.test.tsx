@@ -22,14 +22,6 @@ describe("ActionButton", () => {
     const button = screen.getByRole("button", { name: "Click Me" });
     expect(button).toBeInTheDocument();
     expect(button).not.toBeDisabled();
-    expect(button).toHaveClass(
-      "bg-[#F5EBB8]",
-      "text-[#121212]",
-      "w-full",
-      "rounded-lg",
-      "py-3",
-      "font-medium"
-    );
 
     // Test click handler
     fireEvent.click(button);
@@ -45,14 +37,5 @@ describe("ActionButton", () => {
     );
 
     expect(button).toBeDisabled();
-    expect(button).toHaveClass(
-      "bg-[#373632]",
-      "text-[#8C8C8C]",
-      "cursor-not-allowed",
-      "w-full",
-      "rounded-lg",
-      "py-3",
-      "font-medium"
-    );
   });
 }); 

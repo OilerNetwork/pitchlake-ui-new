@@ -1,3 +1,4 @@
+import { renderHook } from "@testing-library/react";
 import { useRoundState } from "@/hooks/stateTransition/useRoundState";
 import { OptionRoundStateType } from "@/lib/types";
 import { StatusData } from "@/hooks/fossil/useFossilStatus";
@@ -8,131 +9,136 @@ describe("useRoundState", () => {
   } as OptionRoundStateType);
 
   it("returns Settled when selectedRoundState is undefined", () => {
-    const { roundState } = useRoundState({
+    const { result } = renderHook(() => useRoundState({
       selectedRoundState: undefined,
       fossilStatus: null,
       fossilError: null,
       pendingTx: undefined,
       expectedNextState: null,
-    });
-    expect(roundState).toBe("Settled");
+    }));
+    expect(result.current.roundState).toBe("Settled");
   });
 
   it("returns Pending when transaction is pending", () => {
-    const { roundState } = useRoundState({
+    const { result } = renderHook(() => useRoundState({
       selectedRoundState: mockRoundState("Open"),
       fossilStatus: null,
       fossilError: null,
       pendingTx: "0x123",
       expectedNextState: null,
-    });
-    expect(roundState).toBe("Pending");
+    }));
+    expect(result.current.roundState).toBe("Pending");
   });
 
   it("returns Pending when fossil status is Pending", () => {
-    const { roundState } = useRoundState({
+    const { result } = renderHook(() => useRoundState({
       selectedRoundState: mockRoundState("Open"),
       fossilStatus: { status: "Pending" },
       fossilError: null,
       pendingTx: undefined,
       expectedNextState: null,
-    });
-    expect(roundState).toBe("Pending");
+    }));
+    expect(result.current.roundState).toBe("Pending");
   });
 
   it("returns current state for Open/Auctioning/Settled when matching expected state", () => {
     ["Open", "Auctioning", "Settled"].forEach(currentState => {
-      const { roundState } = useRoundState({
+      const { result } = renderHook(() => useRoundState({
         selectedRoundState: mockRoundState(currentState),
         fossilStatus: null,
         fossilError: null,
         pendingTx: undefined,
         expectedNextState: currentState,
-      });
-      expect(roundState).toBe(currentState);
+      }));
+      expect(result.current.roundState).toBe(currentState);
     });
   });
 
   it("returns Pending when current state doesn't match expected next state", () => {
-    const { roundState } = useRoundState({
+    const { result } = renderHook(() => useRoundState({
       selectedRoundState: mockRoundState("Open"),
       fossilStatus: null,
       fossilError: null,
       pendingTx: undefined,
       expectedNextState: "Auctioning",
-    });
-    expect(roundState).toBe("Pending");
+    }));
+    expect(result.current.roundState).toBe("Pending");
   });
 
   describe("Running state transitions", () => {
     it("returns Running when fossil status is Completed and not expecting Open", () => {
-      const { roundState } = useRoundState({
+      const { result } = renderHook(() => useRoundState({
         selectedRoundState: mockRoundState("Running"),
         fossilStatus: { status: "Completed" },
         fossilError: null,
         pendingTx: undefined,
         expectedNextState: "Running",
-      });
-      expect(roundState).toBe("Running");
+      }));
+      expect(result.current.roundState).toBe("Running");
     });
 
     it("returns Pending when fossil status is Completed and expecting Open", () => {
-      const { roundState } = useRoundState({
+      const { result } = renderHook(() => useRoundState({
         selectedRoundState: mockRoundState("Running"),
         fossilStatus: { status: "Completed" },
         fossilError: null,
         pendingTx: undefined,
         expectedNextState: "Open",
-      });
-      expect(roundState).toBe("Pending");
+      }));
+      expect(result.current.roundState).toBe("Pending");
     });
 
     it("returns FossilReady when fossil status is Failed", () => {
-      const { roundState } = useRoundState({
+      const { result } = renderHook(() => useRoundState({
         selectedRoundState: mockRoundState("Running"),
         fossilStatus: { status: "Failed" },
         fossilError: null,
         pendingTx: undefined,
         expectedNextState: null,
-      });
-      expect(roundState).toBe("FossilReady");
+      }));
+      expect(result.current.roundState).toBe("FossilReady");
     });
 
     it("returns FossilReady when there is a fossil error", () => {
-      const { roundState } = useRoundState({
+      const { result } = renderHook(() => useRoundState({
         selectedRoundState: mockRoundState("Running"),
         fossilStatus: null,
         fossilError: "Some error",
         pendingTx: undefined,
         expectedNextState: null,
-      });
-      expect(roundState).toBe("FossilReady");
+      }));
+      expect(result.current.roundState).toBe("FossilReady");
     });
 
     it("returns FossilReady when fossil status is null", () => {
-      const { roundState } = useRoundState({
+      const { result } = renderHook(() => useRoundState({
         selectedRoundState: mockRoundState("Running"),
         fossilStatus: null,
         fossilError: null,
         pendingTx: undefined,
         expectedNextState: null,
-      });
-      expect(roundState).toBe("FossilReady");
+      }));
+      expect(result.current.roundState).toBe("FossilReady");
     });
 
     it("tracks previous round state", () => {
-      const { roundState: initialState, prevRoundState: initialPrev } = useRoundState({
-        selectedRoundState: mockRoundState("Open"),
-        fossilStatus: null,
-        fossilError: null,
-        pendingTx: undefined,
-        expectedNextState: null,
-      });
+      const { result, rerender } = renderHook(
+        (props) => useRoundState(props),
+        {
+          initialProps: {
+            selectedRoundState: mockRoundState("Open"),
+            fossilStatus: null,
+            fossilError: null,
+            pendingTx: undefined,
+            expectedNextState: null,
+          }
+        }
+      );
 
-      expect(initialState).toBe("Open");
-      expect(initialPrev).toBe("Open");
+      expect(result.current.roundState).toBe("Open");
+      expect(result.current.prevRoundState).toBe("Open");
 
-      const { roundState: nextState, prevRoundState: nextPrev } = useRoundState({
+      rerender({
         selectedRoundState: mockRoundState("Auctioning"),
         fossilStatus: null,
         fossilError: null,
@@ -140,8 +146,8 @@ describe("useRoundState", () => {
         expectedNextState: null,
       });
 
-      expect(nextState).toBe("Auctioning");
-      expect(nextPrev).toBe("Open");
+      expect(result.current.roundState).toBe("Auctioning");
+      expect(result.current.prevRoundState).toBe("Open");
     });
   });
 }); 

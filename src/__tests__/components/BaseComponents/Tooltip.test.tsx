@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import { Tooltip, BalanceTooltip } from "../../../components/BaseComponents/Tooltip";
+import { Tooltip, BalanceTooltip } from "@/components/BaseComponents/Tooltip";
 
 // Mock createPortal since we're using it in BalanceTooltip
 jest.mock("react-dom", () => ({
@@ -7,95 +7,72 @@ jest.mock("react-dom", () => ({
   createPortal: (node: React.ReactNode) => node,
 }));
 
-describe("Tooltip Components", () => {
-  describe("Basic Tooltip", () => {
-    it("renders tooltip with hover behavior", () => {
-      const { container } = render(
-        <Tooltip text="Tooltip text">
-          <button className="relative group">Hover me</button>
-        </Tooltip>
-      );
+describe("Tooltip", () => {
+  it("renders tooltip content", () => {
+    render(
+      <Tooltip text="Test tooltip">
+        <button>Hover me</button>
+      </Tooltip>
+    );
 
-      const tooltipGroup = container.querySelector(".relative.group");
-      expect(tooltipGroup).toBeInTheDocument();
+    const tooltipContainer = screen.getByText("Hover me").closest(".tooltip-container");
+    expect(tooltipContainer).toBeInTheDocument();
 
-      // Initially hidden
-      const tooltipContent = tooltipGroup?.querySelector(".absolute.bottom-full");
-      expect(tooltipContent).toHaveClass("hidden");
-
-      // Show on hover
-      fireEvent.mouseEnter(tooltipGroup!);
-      expect(tooltipContent).not.toHaveClass("hidden");
-
-      // Hide on leave
-      fireEvent.mouseLeave(tooltipGroup!);
-      expect(tooltipContent).toHaveClass("hidden");
-    });
+    const tooltipContent = tooltipContainer?.querySelector(".tooltip-content");
+    expect(tooltipContent).toBeInTheDocument();
+    expect(tooltipContent).toHaveTextContent("Test tooltip");
+    expect(tooltipContent).toHaveClass("hidden", "group-hover:block");
   });
+});
 
-  describe("Balance Tooltip", () => {
-    const mockBalance = {
-      locked: "1000000000000000000", // 1 ETH
-      unlocked: "500000000000000000", // 0.5 ETH
-      stashed: "200000000000000000", // 0.2 ETH
+describe("BalanceTooltip", () => {
+  it("renders balance tooltip with correct values", () => {
+    const balance = {
+      locked: "100000000000000000000",
+      unlocked: "50000000000000000000",
+      stashed: "25000000000000000000"
     };
 
-    it("renders balance tooltip with hover behavior and correct values", () => {
-      const { container } = render(
-        <BalanceTooltip balance={mockBalance}>
-          <button className="flex flex-row items-center">Hover for balance</button>
-        </BalanceTooltip>
-      );
+    const { container } = render(
+      <BalanceTooltip balance={balance}>
+        <div>Balance</div>
+      </BalanceTooltip>
+    );
 
-      const tooltipTrigger = container.querySelector(".flex.flex-row.items-center");
-      expect(tooltipTrigger).toBeInTheDocument();
+    const tooltipTrigger = screen.getByText("Balance").closest(".flex.flex-row.items-center");
+    expect(tooltipTrigger).toBeInTheDocument();
 
-      // Initially no tooltip
-      expect(screen.queryByText("Balance Distribution")).not.toBeInTheDocument();
+    // Trigger hover
+    fireEvent.mouseEnter(tooltipTrigger!);
 
-      // Show tooltip on hover
-      fireEvent.mouseEnter(tooltipTrigger!);
-      
-      // Check tooltip structure
-      const tooltip = screen.getByText("Balance Distribution").closest("div");
-      expect(tooltip).toHaveClass("relative", "text-white", "text-[14px]", "font-regular", "rounded-md");
+    // Now we can check the tooltip content
+    expect(screen.getByText("Balance Distribution")).toBeInTheDocument();
+    expect(screen.getByText("100.000 ETH")).toBeInTheDocument();
+    expect(screen.getByText("50.000 ETH")).toBeInTheDocument();
+    expect(screen.getByText("25.000 ETH")).toBeInTheDocument();
+  });
 
-      // Check balance values
-      const balances = [
-        { label: "Locked", value: "1.000 ETH" },
-        { label: "Unlocked", value: "0.500 ETH" },
-        { label: "Stashed", value: "0.200 ETH" },
-      ];
+  it("handles zero balances correctly", () => {
+    const balance = {
+      locked: "0",
+      unlocked: "0",
+      stashed: "0"
+    };
 
-      balances.forEach(({ label, value }) => {
-        const row = screen.getByText(label).closest(".flex.justify-between");
-        expect(row).toBeInTheDocument();
-        expect(row).toHaveTextContent(value);
-      });
+    const { container } = render(
+      <BalanceTooltip balance={balance}>
+        <div>Balance</div>
+      </BalanceTooltip>
+    );
 
-      // Hide on leave
-      fireEvent.mouseLeave(tooltipTrigger!);
-      expect(screen.queryByText("Balance Distribution")).not.toBeInTheDocument();
-    });
+    const tooltipTrigger = screen.getByText("Balance").closest(".flex.flex-row.items-center");
+    expect(tooltipTrigger).toBeInTheDocument();
 
-    it("handles zero balances correctly", () => {
-      const zeroBalance = {
-        locked: "0",
-        unlocked: "0",
-        stashed: "0",
-      };
+    // Trigger hover
+    fireEvent.mouseEnter(tooltipTrigger!);
 
-      const { container } = render(
-        <BalanceTooltip balance={zeroBalance}>
-          <button className="flex flex-row items-center">Hover for balance</button>
-        </BalanceTooltip>
-      );
-
-      const tooltipTrigger = container.querySelector(".flex.flex-row.items-center");
-      fireEvent.mouseEnter(tooltipTrigger!);
-
-      const balanceRows = screen.getAllByText("0.000 ETH");
-      expect(balanceRows).toHaveLength(3);
-    });
+    // Now we can check the tooltip content
+    expect(screen.getByText("Balance Distribution")).toBeInTheDocument();
+    expect(screen.getAllByText("0.000 ETH")).toHaveLength(3);
   });
 }); 

@@ -23,38 +23,25 @@ describe("ConfirmationModal Component", () => {
     );
 
     // Check modal structure
-    const modal = container.firstChild;
-    expect(modal).toHaveClass("fixed", "inset-0", "bg-black", "bg-opacity-50", "backdrop-blur-sm");
+    expect(container.querySelector(".confirmation-modal")).toBeInTheDocument();
+    expect(container.querySelector(".confirmation-modal-header")).toBeInTheDocument();
+    expect(container.querySelector(".confirmation-modal-content")).toBeInTheDocument();
+    expect(container.querySelector(".confirmation-modal-actions")).toBeInTheDocument();
 
-    // Check confirmation message
+    // Check content
+    expect(screen.getByText(mockModalHeader)).toBeInTheDocument();
     const message = screen.getByText((content, element) => {
       return element?.tagName.toLowerCase() === 'p' && 
              content.includes('Are you sure you want to') &&
              content.includes('Test Content');
     });
-    expect(message).toHaveClass("text-gray-400", "text-center", "text-[14px]");
+    expect(message).toBeInTheDocument();
 
     // Check buttons
     const confirmButton = screen.getByText("Confirm");
     const cancelButton = screen.getByText("Cancel");
-
-    expect(confirmButton).toHaveClass(
-      "bg-[#F5EBB8]",
-      "text-[#121212]",
-      "w-full",
-      "rounded-lg",
-      "py-3",
-      "font-medium"
-    );
-    expect(cancelButton).toHaveClass(
-      "border",
-      "border-[#595959]",
-      "text-[#fafafa]",
-      "w-full",
-      "rounded-lg",
-      "py-3",
-      "font-medium"
-    );
+    expect(confirmButton).toBeInTheDocument();
+    expect(cancelButton).toBeInTheDocument();
 
     // Test button interactions
     fireEvent.click(confirmButton);

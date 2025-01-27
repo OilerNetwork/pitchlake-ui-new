@@ -1,190 +1,253 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import StateTransition from "../../../components/Vault/StateTransition";
 import { useProtocolContext } from "../../../context/ProtocolProvider";
-import { useAccount } from "@starknet-react/core";
 import { useTransactionContext } from "../../../context/TransactionProvider";
+import { useAccount } from "@starknet-react/core";
+import useFossilStatus from "../../../hooks/fossil/useFossilStatus";
 import { useRoundState } from "../../../hooks/stateTransition/useRoundState";
 import { useRoundPermissions } from "../../../hooks/stateTransition/useRoundPermissions";
-import useFossilStatus from "../../../hooks/fossil/useFossilStatus";
 
 // Mock all hooks
-jest.mock("../../../context/ProtocolProvider", () => ({
-  useProtocolContext: jest.fn(),
-}));
+jest.mock("../../../context/ProtocolProvider");
+jest.mock("../../../context/TransactionProvider");
+jest.mock("@starknet-react/core");
+jest.mock("../../../hooks/fossil/useFossilStatus");
+jest.mock("../../../hooks/stateTransition/useRoundState");
+jest.mock("../../../hooks/stateTransition/useRoundPermissions");
 
-jest.mock("@starknet-react/core", () => ({
-  useAccount: jest.fn(),
-}));
+// Mock fetch for fossil requests
+global.fetch = jest.fn();
 
-jest.mock("../../../context/TransactionProvider", () => ({
-  useTransactionContext: jest.fn(),
-}));
-
-jest.mock("../../../hooks/stateTransition/useRoundState", () => ({
-  useRoundState: jest.fn(),
-}));
-
-jest.mock("../../../hooks/stateTransition/useRoundPermissions", () => ({
-  useRoundPermissions: jest.fn(),
-}));
-
-jest.mock("../../../hooks/fossil/useFossilStatus", () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
-
-describe("StateTransition Component", () => {
-  const mockVaultState = {
-    currentRoundId: "1",
-    address: "0x123",
-    fossilClientAddress: "0x456",
-  };
-
-  const mockRoundState = {
-    roundId: "1",
-    roundState: "Open",
-    auctionStartDate: "1000",
-    auctionEndDate: "2000",
-    optionSettleDate: "3000",
-  };
-
-  const defaultProps = {
-    isPanelOpen: true,
-    setModalState: jest.fn(),
-    fossilDelay: 0
-  };
+describe("StateTransition", () => {
+  const mockSetModalState = jest.fn();
+  const mockStartAuction = jest.fn();
+  const mockEndAuction = jest.fn();
+  const mockSettleOptionRound = jest.fn();
+  const mockSetFossilStatus = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
-    // Mock Protocol Context
+
+    // Mock useProtocolContext
     (useProtocolContext as jest.Mock).mockReturnValue({
-      selectedRoundState: mockRoundState,
-      timestamp: "500",
-      vaultState: mockVaultState,
-      vaultActions: {
-        startAuction: jest.fn(),
-        endAuction: jest.fn(),
-        settleOptionRound: jest.fn(),
+      vaultState: {
+        currentRoundId: "1",
+        fossilClientAddress: "0x123",
+        address: "0x456"
       },
-      conn: "testnet",
+      vaultActions: {
+        startAuction: mockStartAuction,
+        endAuction: mockEndAuction,
+        settleOptionRound: mockSettleOptionRound
+      },
+      selectedRoundState: {
+        roundId: "1"
+      },
+      timestamp: "1000",
+      conn: "testnet"
     });
 
-    // Mock Transaction Context
+    // Mock useTransactionContext
     (useTransactionContext as jest.Mock).mockReturnValue({
-      pendingTx: null,
-      lastBlock: "100",
+      pendingTx: false
     });
 
-    // Mock Account
+    // Mock useAccount
     (useAccount as jest.Mock).mockReturnValue({
-      account: "0x123",
+      account: { address: "0x789" }
     });
 
-    // Mock Round State
+    // Mock useFossilStatus
+    (useFossilStatus as jest.Mock).mockReturnValue({
+      status: null,
+      error: null,
+      setStatusData: mockSetFossilStatus
+    });
+
+    // Mock useRoundState
     (useRoundState as jest.Mock).mockReturnValue({
       roundState: "Open",
-      prevRoundState: "Open",
+      prevRoundState: "Open"
     });
 
-    // Mock Round Permissions
+    // Mock useRoundPermissions
     (useRoundPermissions as jest.Mock).mockReturnValue({
       canAuctionStart: true,
-      canAuctionEnd: false,
-      canRoundSettle: false,
-      canSendFossilRequest: false,
+      canAuctionEnd: true,
+      canRoundSettle: true,
+      canSendFossilRequest: true
     });
 
-    // Mock Fossil Status
-    (useFossilStatus as jest.Mock).mockReturnValue({
-      status: "ready",
-      error: null,
-      setStatusData: jest.fn(),
-    });
-  });
-
-  it("renders state transition button with correct states and permissions", () => {
-    const statePermissions = [
-      { state: "Open", permission: "canAuctionStart", text: "Start Auction" },
-      { state: "Auctioning", permission: "canAuctionEnd", text: "End Auction" },
-      { state: "FossilReady", permission: "canSendFossilRequest", text: "Request Fossil" },
-      { state: "Running", permission: "canRoundSettle", text: "Settle Round" },
-    ];
-
-    statePermissions.forEach(({ state, permission, text }) => {
-      // Update round state
-      (useRoundState as jest.Mock).mockReturnValue({
-        roundState: state,
-        prevRoundState: state,
-      });
-
-      // Test enabled state
-      (useRoundPermissions as jest.Mock).mockReturnValue({
-        canAuctionStart: false,
-        canAuctionEnd: false,
-        canRoundSettle: false,
-        canSendFossilRequest: false,
-        [permission]: true,
-      });
-
-      const { container } = render(<StateTransition {...defaultProps} />);
-      const button = container.querySelector(".state-transition-button");
-      expect(button).toHaveTextContent(text);
-      expect(button).not.toBeDisabled();
-
-      // Test disabled state
-      (useRoundPermissions as jest.Mock).mockReturnValue({
-        canAuctionStart: false,
-        canAuctionEnd: false,
-        canRoundSettle: false,
-        canSendFossilRequest: false,
-      });
-
-      const { container: disabledContainer } = render(<StateTransition {...defaultProps} />);
-      const disabledButton = disabledContainer.querySelector(".state-transition-button");
-      expect(disabledButton).toBeDisabled();
+    // Mock fetch
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ status: "success" })
     });
   });
 
-  it("handles panel state changes correctly", () => {
-    // Test closed panel
-    const { container: closedContainer } = render(<StateTransition {...defaultProps} isPanelOpen={false} />);
-    const closedButton = closedContainer.querySelector(".state-transition-button");
-    expect(closedButton).toHaveClass("w-[44px]", "h-[44px]");
-    expect(closedButton?.querySelector("p")).toHaveClass("hidden");
+  it("renders state transition button with correct text", () => {
+    render(
+      <StateTransition
+        isPanelOpen={true}
+        setModalState={mockSetModalState}
+        fossilDelay={300}
+      />
+    );
 
-    // Test open panel
-    const { container: openContainer } = render(<StateTransition {...defaultProps} isPanelOpen={true} />);
-    const openButton = openContainer.querySelector(".state-transition-button");
-    expect(openButton).toHaveClass("p-2");
-    expect(openButton?.querySelector("p")).not.toHaveClass("hidden");
+    expect(screen.getByText("Start Auction")).toBeInTheDocument();
+    expect(screen.getByRole("button")).not.toBeDisabled();
   });
 
-  it("handles state transition conditions", () => {
-    // Test disconnected account
-    (useAccount as jest.Mock).mockReturnValue({ account: null });
-    const { container: disconnectedContainer } = render(<StateTransition {...defaultProps} />);
-    expect(disconnectedContainer.querySelector(".state-transition-button")).toBeDisabled();
+  it("handles state transitions correctly", async () => {
+    render(
+      <StateTransition
+        isPanelOpen={true}
+        setModalState={mockSetModalState}
+        fossilDelay={300}
+      />
+    );
 
-    // Test pending transaction
-    (useAccount as jest.Mock).mockReturnValue({ account: "0x123" });
-    (useTransactionContext as jest.Mock).mockReturnValue({
-      pendingTx: "0xtx",
-      lastBlock: "100",
+    // Test Open -> Auctioning transition
+    (useRoundState as jest.Mock).mockReturnValue({
+      roundState: "Open",
+      prevRoundState: "Open"
     });
-    const { container: pendingContainer } = render(<StateTransition {...defaultProps} />);
-    expect(pendingContainer.querySelector(".state-transition-button")).toBeDisabled();
 
-    // Test state update in progress
-    (useTransactionContext as jest.Mock).mockReturnValue({
-      pendingTx: null,
-      lastBlock: "100",
+    const button = screen.getByRole("button");
+    fireEvent.click(button);
+
+    expect(mockSetModalState).toHaveBeenCalledWith({
+      show: true,
+      action: "Start Auction",
+      onConfirm: expect.any(Function)
     });
+
+    // Get and call the onConfirm function
+    const { onConfirm } = mockSetModalState.mock.calls[0][0];
+    await act(() => onConfirm());
+
+    expect(mockStartAuction).toHaveBeenCalled();
+  });
+
+  it("handles fossil request correctly", async () => {
     (useRoundState as jest.Mock).mockReturnValue({
       roundState: "FossilReady",
-      prevRoundState: "Auctioning",
+      prevRoundState: "FossilReady"
     });
-    const { container: updatingContainer } = render(<StateTransition {...defaultProps} />);
-    expect(updatingContainer.querySelector(".state-transition-button")).toBeDisabled();
+
+    render(
+      <StateTransition
+        isPanelOpen={true}
+        setModalState={mockSetModalState}
+        fossilDelay={300}
+      />
+    );
+
+    const button = screen.getByRole("button");
+    fireEvent.click(button);
+
+    expect(mockSetModalState).toHaveBeenCalledWith({
+      show: true,
+      action: "Request Fossil",
+      onConfirm: expect.any(Function)
+    });
+
+    // Get and call the onConfirm function
+    const { onConfirm } = mockSetModalState.mock.calls[0][0];
+    await act(() => onConfirm());
+
+    expect(global.fetch).toHaveBeenCalledWith("/api/sendFossilRequest", expect.any(Object));
+    expect(mockSetFossilStatus).toHaveBeenCalledWith({
+      status: "Pending",
+      error: undefined
+    });
+  });
+
+  it("disables button when appropriate", () => {
+    // Test with no account
+    (useAccount as jest.Mock).mockReturnValue({ account: null });
+    
+    const { rerender } = render(
+      <StateTransition
+        isPanelOpen={true}
+        setModalState={mockSetModalState}
+        fossilDelay={300}
+      />
+    );
+
+    expect(screen.getByRole("button")).toBeDisabled();
+
+    // Test with pending transaction
+    (useAccount as jest.Mock).mockReturnValue({ account: { address: "0x789" } });
+    (useTransactionContext as jest.Mock).mockReturnValue({ pendingTx: true });
+
+    rerender(
+      <StateTransition
+        isPanelOpen={true}
+        setModalState={mockSetModalState}
+        fossilDelay={300}
+      />
+    );
+
+    expect(screen.getByRole("button")).toBeDisabled();
+  });
+
+  it("handles permission-based disabling correctly", () => {
+    (useRoundPermissions as jest.Mock).mockReturnValue({
+      canAuctionStart: false,
+      canAuctionEnd: false,
+      canRoundSettle: false,
+      canSendFossilRequest: false
+    });
+
+    render(
+      <StateTransition
+        isPanelOpen={true}
+        setModalState={mockSetModalState}
+        fossilDelay={300}
+      />
+    );
+
+    expect(screen.getByRole("button")).toBeDisabled();
+  });
+
+  it("renders nothing for settled rounds", () => {
+    (useRoundState as jest.Mock).mockReturnValue({
+      roundState: "Settled",
+      prevRoundState: "Settled"
+    });
+
+    const { container } = render(
+      <StateTransition
+        isPanelOpen={true}
+        setModalState={mockSetModalState}
+        fossilDelay={300}
+      />
+    );
+
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("renders nothing when round IDs don't match", () => {
+    (useProtocolContext as jest.Mock).mockReturnValue({
+      vaultState: {
+        currentRoundId: "2",
+        fossilClientAddress: "0x123",
+        address: "0x456"
+      },
+      selectedRoundState: {
+        roundId: "1"
+      }
+    });
+
+    const { container } = render(
+      <StateTransition
+        isPanelOpen={true}
+        setModalState={mockSetModalState}
+        fossilDelay={300}
+      />
+    );
+
+    expect(container.firstChild).toBeNull();
   });
 }); 

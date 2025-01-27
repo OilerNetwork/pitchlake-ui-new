@@ -21,20 +21,30 @@ describe("InputField Components", () => {
       );
 
       const inputContainer = container.firstChild;
-      expect(inputContainer).toHaveClass("flex", "flex-col", "gap-2");
+      expect(inputContainer).toHaveClass("input-field-container");
 
       const label = screen.getByText("Test Label");
-      expect(label).toHaveClass("text-sm", "text-[var(--buttongrey)]");
+      expect(label).toHaveClass("flex", "flex-row", "justify-between", "text-sm", "font-medium", "text-[#fafafa]", "text-[14px]", "mb-1");
 
       const input = screen.getByRole("textbox");
       expect(input).toHaveValue("Test Value");
       expect(input).toHaveClass(
-        "bg-[#121212]",
+        "input-field",
+        "outline-none",
+        "w-full",
+        "bg-[#0A0A0A]",
         "border",
-        "border-[#262626]",
-        "rounded-lg",
-        "p-3",
-        "text-white"
+        "rounded-md",
+        "p-2",
+        "pr-8",
+        "appearance-none",
+        "flex",
+        "flex-row",
+        "justify-between",
+        "border-gray-700",
+        "focus:blue-400",
+        "text-white",
+        "px-6"
       );
 
       // Test input change
@@ -61,8 +71,8 @@ describe("InputField Components", () => {
       expect(inputWithOptions).toBeDisabled();
       expect(inputWithOptions).toHaveAttribute("type", "number");
       expect(inputWithOptions).toHaveAttribute("placeholder", "Test Placeholder");
-      expect(screen.getByText("Secondary Label")).toHaveClass("text-sm", "text-[var(--buttongrey)]");
-      expect(screen.getByText("Error Message")).toHaveClass("text-red-500", "text-sm");
+      expect(screen.getByText("Secondary Label")).toHaveClass("font-regular", "text-[var(--buttongrey)]");
+      expect(screen.getByText("Error Message")).toHaveClass("mt-1", "text-sm", "text-red-500");
       expect(container.querySelector(".input-icon")).toBeInTheDocument();
 
       // Test error state
@@ -82,20 +92,28 @@ describe("InputField Components", () => {
       );
 
       const inputContainer = container.firstChild;
-      expect(inputContainer).toHaveClass("flex", "flex-col", "gap-2");
+      expect(inputContainer).toHaveClass("mb-4");
 
       const label = screen.getByText("Test Label");
-      expect(label).toHaveClass("text-sm", "text-[var(--buttongrey)]");
+      expect(label).toHaveClass("flex", "flex-row", "justify-between", "text-sm", "font-medium", "text-[#fafafa]", "text-[14px]", "mb-1");
 
       const input = screen.getByRole("textbox");
       expect(input).toHaveValue("Test Value");
       expect(input).toHaveClass(
-        "bg-[#121212]",
+        "input-field",
+        "w-full",
+        "bg-[#0A0A0A]",
         "border",
-        "border-[#262626]",
-        "rounded-lg",
-        "p-3",
-        "text-white"
+        "rounded-md",
+        "p-2",
+        "pr-8",
+        "appearance-none",
+        "flex",
+        "flex-row",
+        "justify-between",
+        "border-gray-700",
+        "text-white",
+        "px-6"
       );
 
       // Test input change
@@ -120,8 +138,8 @@ describe("InputField Components", () => {
       const inputWithOptions = screen.getByRole("spinbutton");
       expect(inputWithOptions).toHaveAttribute("type", "number");
       expect(inputWithOptions).toHaveAttribute("placeholder", "Test Placeholder");
-      expect(screen.getByText("Secondary Label")).toHaveClass("text-sm", "text-[var(--buttongrey)]");
-      expect(screen.getByText("Error Message")).toHaveClass("text-red-500", "text-sm");
+      expect(screen.getByText("Secondary Label")).toHaveClass("font-regular", "text-[var(--buttongrey)]");
+      expect(screen.getByText("Error Message")).toHaveClass("mt-1", "text-sm", "text-red-500");
       expect(container.querySelector(".input-icon")).toBeInTheDocument();
 
       // Test error state

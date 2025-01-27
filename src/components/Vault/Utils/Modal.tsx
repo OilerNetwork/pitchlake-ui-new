@@ -7,16 +7,26 @@ interface ModalProps {
   onClose: () => void;
 }
 
-const Modal: React.FC<ModalProps> = ({ title, children, onClose }) => (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-    <div className="bg-[#121212] p-6 rounded-lg max-w-sm w-full">
-      <div className="flex items-center mb-4">
-        <ArrowLeftIcon className="h-5 w-5 mr-2" onClick={onClose} />
-        <h2 className="text-lg font-semibold">{title}</h2>
+const Modal: React.FC<ModalProps> = ({ title, children, onClose }) => {
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center modal-overlay" onClick={handleOverlayClick}>
+      <div className="bg-[#121212] p-6 rounded-lg max-w-sm w-full modal-container">
+        <div className="flex items-center mb-4 modal-header">
+          <ArrowLeftIcon className="h-5 w-5 mr-2 modal-close" onClick={onClose} />
+          <h2 className="text-lg font-semibold modal-title">{title}</h2>
+        </div>
+        <div className="modal-content">
+          {children}
+        </div>
       </div>
-      {children}
     </div>
-  </div>
-);
+  );
+};
 
 export default Modal;

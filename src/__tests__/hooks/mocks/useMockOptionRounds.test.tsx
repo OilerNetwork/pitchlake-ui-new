@@ -4,6 +4,7 @@ import { useAccount } from "@starknet-react/core";
 
 // Mock dependencies
 jest.mock("@starknet-react/core", () => ({
+  __esModule: true,
   useAccount: jest.fn(),
 }));
 
