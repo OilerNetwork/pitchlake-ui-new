@@ -13,10 +13,7 @@ import { useAccount } from "@starknet-react/core";
 import useLatestTimetamp from "@/hooks/chain/useLatestTimestamp";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useProvider } from "@starknet-react/core";
-import {
-  useContractWrite,
-  useContract,
-} from "@starknet-react/core";
+import { useContractWrite, useContract } from "@starknet-react/core";
 import { erc20ABI, optionRoundABI } from "@/lib/abi";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 
@@ -134,8 +131,8 @@ const EditModal: React.FC<EditModalProps> = ({
 
     if (
       approveCall &&
-      num.toBigInt(allowance) < num.toBigInt(needsApproving) &&
-      totalCostWei < num.toBigInt(balance)
+      num.toBigInt(allowance) < num.toBigInt(needsApproving)
+      //  && totalCostWei < num.toBigInt(balance)
     )
       calls.push(approveCall);
     if (editBidCall) calls.push(editBidCall);
@@ -151,7 +148,7 @@ const EditModal: React.FC<EditModalProps> = ({
     ethContract,
     bidId,
   ]);
-  const { writeAsync} = useContractWrite({ calls });
+  const { writeAsync } = useContractWrite({ calls });
 
   // Send confirmation
   const handleSubmitForMulticall = () => {
