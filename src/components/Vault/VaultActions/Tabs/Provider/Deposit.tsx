@@ -10,7 +10,7 @@ import ButtonTabs from "../ButtonTabs";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEthereum } from "@fortawesome/free-brands-svg-icons";
 import { num, Call } from "starknet";
-import {useContractWrite, useContract } from "@starknet-react/core";
+import { useContractWrite, useContract } from "@starknet-react/core";
 import { erc20ABI, vaultABI } from "@/lib/abi";
 import useERC20 from "@/hooks/erc20/useERC20";
 import { shortenString, isValidHex64 } from "@/lib/utils";
@@ -38,7 +38,7 @@ interface DepositState {
 
 const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   const { vaultState, lpState } = useProtocolContext();
-  console.log("check_", lpState?.unlockedBalance);
+  //  console.log("check_", lpState?.unlockedBalance);
   const [state, setState] = useState<DepositState>({
     amount: "",
     isDepositAsBeneficiary: false,
