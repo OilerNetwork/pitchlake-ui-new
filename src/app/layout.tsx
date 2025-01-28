@@ -16,6 +16,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelpProvider } from "@/context/HelpProvider";
 import { UiProvider } from "@/context/UiProvider";
 import { Blur } from "@/components/BaseComponents/Blur";
+import { ChartProvider } from "@/context/ChartProvider";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -42,10 +43,10 @@ export default function RootLayout({
   return (
     <html className={`${montserrat.variable}`} lang="en">
       <body className="flex flex-col min-h-[100vh] text-white">
-
-          <StarknetProvider>
-            <TransactionProvider>
-              <ProtocolProvider>
+        <StarknetProvider>
+          <TransactionProvider>
+            <ProtocolProvider>
+              <ChartProvider>
                 <UiProvider>
                   <HelpProvider>
                     <Header />
@@ -59,10 +60,10 @@ export default function RootLayout({
                     </Blur>
                   </HelpProvider>
                 </UiProvider>
-              </ProtocolProvider>
-            </TransactionProvider>
-          </StarknetProvider>
-
+              </ChartProvider>
+            </ProtocolProvider>
+          </TransactionProvider>
+        </StarknetProvider>
       </body>
     </html>
   );
