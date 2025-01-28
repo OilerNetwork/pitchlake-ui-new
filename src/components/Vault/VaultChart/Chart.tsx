@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import classNames from "classnames";
-import axios from "axios";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import {
   ArrowDownIcon,
@@ -12,104 +11,31 @@ import {
 import { History } from "lucide-react";
 import { useProtocolContext } from "@/context/ProtocolProvider";
 import { formatUnits } from "ethers";
-import data from "@/chart_data.json";
 import GasPriceChart from "@/components/Vault/VaultChart/ChartInner";
-import { useGasData } from "@/hooks/chart/useGasData";
 import { useHistoricalRoundParams } from "@/hooks/chart/useHistoricalRoundParams";
 import Hoverable from "@/components/BaseComponents/Hoverable";
+import { useChartContext } from "@/context/ChartProvider";
 
 const RoundPerformanceChart = () => {
-  const [isExpandedView, setIsExpandedView] = useState(false);
+  // Protocol context
+  const { selectedRound, setSelectedRound, vaultState } = useProtocolContext();
+  // Chart context
+  const { isExpandedView, setIsExpandedView } = useChartContext();
 
-  const { selectedRound, selectedRoundState, setSelectedRound, vaultState } =
-    useProtocolContext();
-
-  const vaultAddress = useMemo(() => {
-    return vaultState?.address;
-  }, [vaultState?.address]);
-
-  const toRound = useMemo(() => {
-    return selectedRound
-      ? Number(selectedRound)
-      : vaultState?.currentRoundId
-        ? Number(vaultState.currentRoundId)
-        : 1;
-  }, [selectedRound]);
-
-  const fromRound = useMemo(() => {
-    if (!isExpandedView) {
-      return toRound;
-    } else {
-      return toRound > 3 ? toRound - 3 : 1;
-    }
-  }, [toRound, isExpandedView]);
-
-  const { vaultData: historicalData } = useHistoricalRoundParams({
-    vaultAddress,
-    fromRound,
-    toRound,
-  });
-
-  const maxDataPoints = 100;
-
-  //  const [maxDataPoints, setMaxDataPoints] = useState<number>(100);
-  const twapRange = useMemo(() => {
-    if (
-      !selectedRoundState?.auctionEndDate ||
-      !selectedRoundState?.optionSettleDate
-    )
-      return 1;
-
-    return (
-      Number(selectedRoundState.optionSettleDate) -
-      Number(selectedRoundState.auctionEndDate)
-    );
-  }, [
-    selectedRoundState?.auctionEndDate,
-    selectedRoundState?.optionSettleDate,
-  ]);
-
-  //const [twapRange, setTwapRange] = useState<number>(720); // Example TWAP range in seconds
-
-  const bounds = useMemo(() => {
-    if (!selectedRoundState) return;
-
-    const deploymentTimestamp = Number(selectedRoundState.deploymentDate);
-    const optionSettleTimestamp = Number(selectedRoundState.optionSettleDate);
-
-    if (!isExpandedView) return [deploymentTimestamp, optionSettleTimestamp];
-    else {
-      return [
-        deploymentTimestamp - 3 * (optionSettleTimestamp - deploymentTimestamp),
-        optionSettleTimestamp,
-      ];
-    }
-  }, [
-    selectedRoundState?.deploymentDate,
-    selectedRoundState?.optionSettleDate,
-    isExpandedView,
-  ]);
-
-  // Use the useGasData hook
-  const { gasData, isLoading, isError, error } = useGasData({
-    lowerTimestamp: bounds ? bounds[0] : 0,
-    upperTimestamp: bounds ? bounds[1] : 0,
-    maxDataPoints,
-    twapRange,
-    roundStart: Number(selectedRoundState?.deploymentDate),
-  });
-
+  // Chart toggles
   const [activeLines, setActiveLines] = useState<{ [key: string]: boolean }>({
     TWAP: true,
     BASEFEE: true,
     STRIKE: true,
     CAP_LEVEL: true,
   });
-  const [zoomDomain, setZoomDomain] = useState<any>(null);
-  const [roundNavIsOpen, setRoundNavIsOpen] = useState(false);
 
-  const headerRef = useRef<HTMLDivElement | null>(null);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const toggleLine = (line: string) => {
+    setActiveLines((prev) => ({ ...prev, [line]: !prev[line] }));
+  };
+
+  // Round selector dropdown and updators
+  const [roundNavIsOpen, setRoundNavIsOpen] = useState(false);
 
   const decrementRound = () => {
     if (selectedRound > 1) {
@@ -126,54 +52,9 @@ const RoundPerformanceChart = () => {
     }
   };
 
-  const handleZoom = (domain: any) => {
-    setZoomDomain(domain);
-  };
-
-  const handleResetZoom = () => {
-    setZoomDomain(null);
-  };
-
-  const parsedData = useMemo(() => {
-    if (!selectedRound || !gasData || !historicalData || !bounds) return [];
-
-    return gasData?.map((item: any) => {
-      const newItem: any = { ...item };
-
-      const round = historicalData.rounds.find((r: any) => {
-        const lowerBound = Number(r.deploymentDate);
-        const upperBound = Number(r.optionSettleDate);
-        return item.timestamp >= lowerBound && item.timestamp <= upperBound;
-      });
-
-      if (round) {
-        const strike = Number(formatUnits(round.strikePrice, "gwei"));
-        const cap =
-          Number(formatUnits(round.strikePrice, "gwei")) *
-          (1 + Number(round.capLevel) / 10000);
-
-        newItem.STRIKE = strike;
-        newItem.CAP_LEVEL = cap;
-      } else {
-        newItem.STRIKE = undefined;
-        newItem.CAP_LEVEL = undefined;
-      }
-
-      return newItem;
-    });
-  }, [
-    gasData,
-    selectedRound,
-    historicalData,
-    selectedRoundState?.deploymentDate,
-    selectedRoundState?.optionSettleDate,
-    selectedRoundState?.capLevel,
-    selectedRoundState?.strikePrice,
-  ]);
-
-  const toggleLine = (line: string) => {
-    setActiveLines((prev) => ({ ...prev, [line]: !prev[line] }));
-  };
+  // Refs
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Set initial selectedRound
   useEffect(() => {
@@ -186,8 +67,8 @@ const RoundPerformanceChart = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) &&
         headerRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
         !headerRef.current.contains(event.target as Node)
       ) {
         setRoundNavIsOpen(false);
@@ -361,19 +242,7 @@ const RoundPerformanceChart = () => {
       </div>
 
       {/* Chart */}
-      <GasPriceChart
-        data={parsedData}
-        historicalData={historicalData}
-        activeLines={activeLines}
-        fromRound={fromRound}
-        toRound={toRound}
-        isExpandedView={isExpandedView}
-        selectedRound={selectedRound}
-        setIsExpandedView={setIsExpandedView}
-        //zoomDomain={zoomDomain}
-        //handleZoom={handleZoom}
-        //handleResetZoom={handleResetZoom}
-      />
+      <GasPriceChart activeLines={activeLines} />
     </div>
   );
 };

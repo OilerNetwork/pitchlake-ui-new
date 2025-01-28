@@ -52,7 +52,7 @@ export type ProtocolContextType = {
   timestamp: number;
   selectedRoundAddress: string | undefined;
   currentRoundAddress: string | undefined;
-  block:GetBlockResponse | undefined;
+  block: GetBlockResponse | undefined;
 };
 
 export const ProtocolContext = createContext<ProtocolContextType>(

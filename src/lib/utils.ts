@@ -2,6 +2,7 @@ import { poseidonHashSingle } from "@scure/starknet";
 import { bytesToNumberBE } from "@noble/curves/abstract/utils";
 import { OptionRoundStateType, FossilParams } from "@/lib/types";
 import { num } from "starknet";
+import { FormattedBlockData } from "@/app/api/getFossilGasData/route";
 
 export const createJobRequestParams = (
   targetTimestamp: number,
@@ -305,6 +306,143 @@ export const isValidHex64 = (input: string): boolean => {
   // Check if the length is less than or equal to 64 (after removing '0x')
   return hexPart.length <= 64;
 };
+
+export const getTWAPs = (
+  blockData: FormattedBlockData[],
+  firstTimestamp: number,
+  twapRange: number,
+): FormattedBlockData[] => {
+  if (!blockData?.length || twapRange <= 0)
+    return blockData.map((b) => ({ ...b }));
+
+  const dataWithTWAP: FormattedBlockData[] = blockData.map(
+    (currentBlock, currentIndex) => {
+      const currentTime = currentBlock.timestamp;
+
+      // Skip if it's before our requested start
+      if (currentTime < firstTimestamp) {
+        return { ...currentBlock };
+      }
+
+      // 2A. Compute the start of the window
+      const windowStart = currentTime - twapRange;
+
+      // 2B. We build "segments" so we can do the integral over time intervals.
+      //     Each segment has { startTimestamp, baseFee } indicating the baseFee
+      //     is valid from startTimestamp up to the next segment’s startTimestamp.
+      let segments: { start: number; fee: number }[] = [];
+      let lastKnownFee: number | undefined = undefined;
+
+      /**
+       * STEP: Find the last known fee at or *before* windowStart (for interpolation).
+       * We'll traverse backward from currentIndex to see if there's a data point
+       * that is <= windowStart.
+       */
+      for (let i = currentIndex; i >= 0; i--) {
+        const b = blockData[i];
+        if (b.basefee !== undefined && b.timestamp <= currentTime) {
+          if (b.timestamp <= windowStart) {
+            lastKnownFee = b.basefee;
+            break;
+          } else {
+            lastKnownFee = b.basefee;
+            // Keep going in case there's an even earlier block that’s still <= windowStart
+          }
+        }
+      }
+
+      if (lastKnownFee === undefined) {
+        for (let i = 0; i <= currentIndex; i++) {
+          if (blockData[i].basefee !== undefined) {
+            lastKnownFee = blockData[i].basefee;
+            break;
+          }
+        }
+      }
+
+      // If still undefined, that means we have no known fees at all => twap is undefined
+      if (lastKnownFee === undefined) {
+        return { ...currentBlock };
+      }
+
+      // 2C. Build up the segments from windowStart to currentTime, using
+      //     the known block times in [windowStart, currentTime].
+      let prevTs = windowStart;
+      let prevFee = lastKnownFee;
+
+      for (let i = 0; i <= currentIndex; i++) {
+        const b = blockData[i];
+        if (
+          b.basefee !== undefined &&
+          b.timestamp >= windowStart &&
+          b.timestamp <= currentTime
+        ) {
+          // We have a block inside the window -> close out the segment from prevTs to b.timestamp
+          if (b.timestamp > prevTs) {
+            segments.push({ start: prevTs, fee: prevFee });
+          }
+          // Now start a new segment from b.timestamp, with b's fee
+          prevTs = b.timestamp;
+          prevFee = b.basefee;
+        }
+      }
+
+      // 2D. Finally, push the last segment from prevTs to currentTime
+      if (currentTime > prevTs) {
+        segments.push({ start: prevTs, fee: prevFee });
+      }
+
+      // 2E. Calculate the time-weighted average
+      let weightedSum = 0;
+      let totalSeconds = 0;
+
+      for (let i = 0; i < segments.length; i++) {
+        const startSegment = segments[i].start;
+        const endSegment =
+          i < segments.length - 1 ? segments[i + 1].start : currentTime;
+
+        const delta = endSegment - startSegment;
+        if (delta > 0) {
+          weightedSum += segments[i].fee * delta;
+          totalSeconds += delta;
+        }
+      }
+
+      if (totalSeconds === 0) {
+        return { ...currentBlock, twap: Number(prevFee) };
+      } else {
+        return { ...currentBlock, twap: weightedSum / Number(totalSeconds) };
+      }
+    },
+  );
+
+  const filtered = dataWithTWAP
+    .filter((b) => {
+      return b.timestamp >= firstTimestamp;
+    })
+    .map((oldBlock: FormattedBlockData) => {
+      if (oldBlock.isUnconfirmed) {
+        return {
+          ...oldBlock,
+          unconfirmedTwap: oldBlock.twap,
+          unconfirmedBasefee: oldBlock.basefee,
+        };
+      } else {
+        if (oldBlock.basefee != undefined) {
+          return {
+            ...oldBlock,
+            confirmedTwap: oldBlock.twap,
+            confirmedBasefee: oldBlock.basefee,
+          };
+        } else {
+          return oldBlock;
+        }
+      }
+    });
+
+  return filtered;
+};
+
 ///   function generateMockData(
 ///     startDate: string,
 ///     itemCount: number,

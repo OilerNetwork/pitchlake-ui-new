@@ -46,7 +46,7 @@ export const RoundStateLabels: { [key in RoundState]: string } = {
 export type VaultStateType = {
   address: string;
   vaultType: string;
-  latestBlock?:string;
+  latestBlock?: string;
   alpha: number | bigint | string;
   strikeLevel: number | bigint | string;
   ethAddress: string;
@@ -70,11 +70,11 @@ export type LiquidityProviderStateType = {
 
 export type OptionBuyerStateType = {
   address: string;
-  bidHashes?:string
-  bids?:Bid[]|any;
+  bidHashes?: string;
+  bids?: Bid[] | any;
   roundAddress: string;
-  hasMinted?:boolean;
-  hasRefunded?:boolean;
+  hasMinted?: boolean;
+  hasRefunded?: boolean;
   mintableOptions: bigint | number | string;
   refundableOptions: bigint | number | string;
   totalOptions: bigint | number | string;
