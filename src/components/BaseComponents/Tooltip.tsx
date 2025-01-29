@@ -206,9 +206,9 @@ const BalanceTooltip: React.FC<BalanceTooltipProps> = ({
 
 const Tooltip: React.FC<MessageProps> = ({ text, children }) => {
   return (
-    <div className="relative group">
+    <div className="tooltip-container relative group">
       {children}
-      <div className="absolute bottom-full mb-2 hidden group-hover:block text-white p-2 rounded-md border border-[#262626] border-1 bg-[#121212] shadow-sm">
+      <div className="tooltip-content absolute bottom-full mb-2 hidden group-hover:block text-white p-2 rounded-md border border-[#262626] border-1 bg-[#121212] shadow-sm">
         {text}
       </div>
     </div>

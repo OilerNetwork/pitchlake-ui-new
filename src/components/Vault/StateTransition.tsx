@@ -26,6 +26,7 @@ const StateTransition = ({
     conn,
   } = useProtocolContext();
   const { pendingTx, lastBlock } = useTransactionContext();
+
   const { account } = useAccount();
   const timestamp = timestampRaw ? timestampRaw : "0";
   const {
@@ -48,6 +49,7 @@ const StateTransition = ({
     expectedNextState,
   });
 
+  console.log("states",selectedRoundState,roundState,prevRoundState,)
   const {
     canAuctionStart,
     canAuctionEnd,

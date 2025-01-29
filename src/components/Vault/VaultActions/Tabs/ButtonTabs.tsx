@@ -3,7 +3,7 @@ import { TabsProps } from "@/lib/types";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 
 const ButtonTabs: React.FC<TabsProps> = ({ tabs, activeTab, setActiveTab }) => (
-  <div className="flex space-x-3 mb-4">
+  <div className="vault-button-tabs flex space-x-3 mb-4">
     {tabs.map((tab) => (
       <Hoverable key={tab} dataId={`actionTab_${tab}`}>
         <button

@@ -23,6 +23,7 @@ export { default as RepeatEthIcon } from "./RepeatEthIcon";
 export { default as HammerIcon } from "./HammerIcon";
 export { default as ExerciseOptionsIcon } from "./ExerciseOptionsIcon";
 export { default as CollectEthIcon } from "./CollectEthIcon";
+export { default as GlobeIcon } from "./GlobeIcon";
 export { default as HoverIcon } from "./HoverIcon";
 export { default as QuestionCircleIcon } from "./QuestionCircleIcon";
 

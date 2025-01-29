@@ -13,7 +13,7 @@ const ExerciseOptionsIcon = ({
       height="95"
       viewBox="0 0 95 95"
       fill={fill}
-      className={classname}
+      className={`exercise-options-icon ${classname || ''}`}
       stroke={stroke}
       xmlns="http://www.w3.org/2000/svg"
     >

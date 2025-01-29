@@ -151,8 +151,8 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
           dataId="lpActionUnlockedBalance"
           className="px-6 flex justify-between text-sm mb-6 mt-auto"
         >
-          <span className="text-gray-400">Unlocked Balance</span>
-          <span className="text-white">
+          <span className="text-gray-400 balance-label">Unlocked Balance</span>
+          <span className="text-white balance-amount">
             {parseFloat(
               formatEther(lpState?.unlockedBalance?.toString() || "0"),
             ).toFixed(3)}{" "}

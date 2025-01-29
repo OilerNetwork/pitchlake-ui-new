@@ -1,0 +1,31 @@
+---
+description: 
+globs: 
+---
+Goal Driver Function:
+Make all tests pass unless there are UI bugs that require component changes
+If component changes are needed, halt and inform you
+This applies to the full test suite, not just individual components
+Instructional Set:
+Remove redundancy in component tests:
+Remove child component tests from parent components
+Remove hook-related tests that should be tested separately
+Keep integration tests and parent-specific logic tests
+Update test targeting:
+Add class identifiers in the original components for test targeting
+Replace data-testid with class identifiers
+NO CSS changes should be made
+Conditionals:
+For each component:
+Remove tests that belong in child component or parent component of current test files
+Remove tests that are testing the styling of a component
+Keep integration tests that verify parent-child interactions
+Keep tests specific to current component logic
+For test fixes:
+Proceed with updates that don't require component logic changes
+Proceed with updates that don't require CSS modifications
+If either is needed, inform you first
+For linter errors:
+Fix if clear how to fix
+Don't make uneducated guesses
+Don't loop more than 3 times on fixing the same file's linter errors

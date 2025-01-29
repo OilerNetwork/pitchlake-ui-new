@@ -94,12 +94,13 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
   return (
     <div className="flex flex-col h-full">
       <Hoverable dataId="queueSlider" className="flex-grow px-6">
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-gray-400 mb-2" htmlFor="percentage-slider">
           Choose Percentage
         </label>
         <div className="flex items-center space-x-4">
           <div className="border-[1px] border-[#595959] w-full h-[44px] bg-[#0A0A0A] rounded-md flex items-center px-4">
             <input
+              id="percentage-slider"
               type="range"
               min="0"
               max="100"

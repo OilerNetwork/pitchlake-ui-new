@@ -63,7 +63,7 @@ export const createJobId = (
     params.reserve_price[1],
   ].join("");
 
-  const bytes: Buffer = Buffer.from(input, "utf-8");
+  const bytes = new TextEncoder().encode(input);
   const asNum = bytesToNumberBE(bytes);
 
   const hashResult = poseidonHashSingle(asNum);

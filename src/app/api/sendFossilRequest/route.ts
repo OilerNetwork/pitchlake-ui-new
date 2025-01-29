@@ -40,7 +40,6 @@ export async function POST(request: Request) {
       fossilRequest,
     );
 
-    console.log("RAW", resp);
 
     if (!resp.ok) {
       console.error("Fossil request failed:", resp.statusText);

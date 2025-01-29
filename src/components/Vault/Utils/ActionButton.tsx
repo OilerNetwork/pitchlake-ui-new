@@ -14,7 +14,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   <button
     onClick={onClick}
     disabled={disabled}
-    className={`w-full font-semibold text-[14px] py-3 rounded-md ${
+    className={`action-button w-full font-semibold text-[14px] py-3 rounded-md ${
       disabled
         ? "bg-[#373632] text-[#8C8C8C] cursor-not-allowed"
         : "bg-[#F5EBB8] text-[#121212]"

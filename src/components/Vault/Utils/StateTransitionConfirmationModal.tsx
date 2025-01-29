@@ -39,11 +39,11 @@ const StateTransitionConfirmationModal = ({
   }, []);
   return (
     <div
-      className="overflow-hidden fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/50"
+      className="state-transition-modal-backdrop overflow-hidden fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/50"
       onClick={onClose} // Close the modal when the background is clicked
     >
       <div
-        className="shadow-lg max-w-md w-full bg-[#121212] border border-[#262626] rounded-lg flex flex-col w-[314px]"
+        className="state-transition-modal-content shadow-lg max-w-md w-full bg-[#121212] border border-[#262626] rounded-lg flex flex-col w-[314px]"
         onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
       >
         <div className="flex flex-col items-center p-6">
