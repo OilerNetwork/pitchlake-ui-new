@@ -4,6 +4,7 @@ import Refund from "@/components/Vault/VaultActions/Tabs/Buyer/Refund";
 import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useAccount } from "@starknet-react/core";
 import { useTransactionContext } from "@/context/TransactionProvider";
+import { useHelpContext } from "@/context/HelpProvider";
 
 // Mock the hooks
 jest.mock("@/context/ProtocolProvider", () => ({
@@ -19,6 +20,10 @@ jest.mock("@starknet-react/core", () => ({
 jest.mock("@/context/TransactionProvider", () => ({
   __esModule: true,
   useTransactionContext: jest.fn(),
+}));
+
+jest.mock("@/context/HelpProvider", () => ({
+  useHelpContext: jest.fn(),
 }));
 
 // Mock the Icons component
@@ -53,6 +58,12 @@ describe("Refund Component", () => {
     // Mock useTransactionContext hook
     (useTransactionContext as jest.Mock).mockReturnValue({
       pendingTx: false,
+    });
+
+    // Mock useHelpContext hook
+    (useHelpContext as jest.Mock).mockReturnValue({
+      setHelpContent: jest.fn(),
+      clearHelpContent: jest.fn(),
     });
 
     // Mock environment variable

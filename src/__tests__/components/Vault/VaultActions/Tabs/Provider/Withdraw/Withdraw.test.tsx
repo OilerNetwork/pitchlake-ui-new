@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import Withdraw from "@/components/Vault/VaultActions/Tabs/Provider/Withdraw/Withdraw";
 import { useProtocolContext } from "@/context/ProtocolProvider";
+import { HelpProvider } from "@/context/HelpProvider";
 
 // Mock the hooks
 jest.mock("@/context/ProtocolProvider", () => ({
@@ -24,6 +25,14 @@ jest.mock("@/components/Vault/VaultActions/Tabs/Provider/Withdraw/WithdrawStash"
   default: () => <div data-testid="withdraw-stash">WithdrawStash</div>,
 }));
 
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <HelpProvider>
+      {children}
+    </HelpProvider>
+  );
+};
+
 describe("Withdraw Component", () => {
   const mockShowConfirmation = jest.fn();
 
@@ -37,7 +46,11 @@ describe("Withdraw Component", () => {
       selectedRoundState: { roundState: "Auctioning" },
     });
 
-    const { rerender } = render(<Withdraw showConfirmation={mockShowConfirmation} />);
+    const { rerender } = render(
+      <TestWrapper>
+        <Withdraw showConfirmation={mockShowConfirmation} />
+      </TestWrapper>
+    );
     expect(screen.getByText("Liquidity")).toBeInTheDocument();
     expect(screen.getByText("Queue")).toBeInTheDocument();
     expect(screen.getByText("Collect")).toBeInTheDocument();
@@ -46,7 +59,11 @@ describe("Withdraw Component", () => {
     (useProtocolContext as jest.Mock).mockReturnValue({
       selectedRoundState: { roundState: "Settled" },
     });
-    rerender(<Withdraw showConfirmation={mockShowConfirmation} />);
+    rerender(
+      <TestWrapper>
+        <Withdraw showConfirmation={mockShowConfirmation} />
+      </TestWrapper>
+    );
     expect(screen.getByText("Liquidity")).toBeInTheDocument();
     expect(screen.getByText("Collect")).toBeInTheDocument();
     expect(screen.queryByText("Queue")).not.toBeInTheDocument();
@@ -57,7 +74,11 @@ describe("Withdraw Component", () => {
       selectedRoundState: { roundState: "Auctioning" },
     });
 
-    render(<Withdraw showConfirmation={mockShowConfirmation} />);
+    render(
+      <TestWrapper>
+        <Withdraw showConfirmation={mockShowConfirmation} />
+      </TestWrapper>
+    );
 
     // Default tab (Liquidity)
     expect(screen.getByTestId("withdraw-liquidity")).toBeInTheDocument();
@@ -76,7 +97,11 @@ describe("Withdraw Component", () => {
       selectedRoundState: { roundState: "Settled" },
     });
 
-    render(<Withdraw showConfirmation={mockShowConfirmation} />);
+    render(
+      <TestWrapper>
+        <Withdraw showConfirmation={mockShowConfirmation} />
+      </TestWrapper>
+    );
 
     // Queue tab and its content should not be visible
     expect(screen.queryByText("Queue")).not.toBeInTheDocument();

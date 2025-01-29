@@ -1,5 +1,14 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import Tabs from "../../../../../components/Vault/VaultActions/Tabs/Tabs";
+import { HelpProvider } from "@/context/HelpProvider";
+
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <HelpProvider>
+      {children}
+    </HelpProvider>
+  );
+};
 
 describe("Tabs", () => {
   const defaultProps = {
@@ -13,7 +22,11 @@ describe("Tabs", () => {
   });
 
   it("renders tabs with correct styling and handles interactions", () => {
-    const { container } = render(<Tabs {...defaultProps} />);
+    const { container } = render(
+      <TestWrapper>
+        <Tabs {...defaultProps} />
+      </TestWrapper>
+    );
     
     // Check container styling
     const tabsContainer = container.querySelector(".vault-tabs");

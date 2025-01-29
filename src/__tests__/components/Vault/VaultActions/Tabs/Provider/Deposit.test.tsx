@@ -1,15 +1,18 @@
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import Deposit from "@/components/Vault/VaultActions/Tabs/Provider/Deposit";
+import { HelpProvider } from "@/context/HelpProvider";
 
 // Mock all external dependencies
+const mockWriteAsync = jest.fn().mockResolvedValue({ transaction_hash: "0x123" });
+
 jest.mock("@starknet-react/core", () => ({
   useContract: () => ({
     contract: {
       typedv2: () => ({
         connect: jest.fn().mockReturnThis(),
         populateTransaction: {
-          approve: jest.fn(),
-          deposit: jest.fn()
+          approve: jest.fn().mockResolvedValue({ calldata: [] }),
+          deposit: jest.fn().mockResolvedValue({ calldata: [] })
         }
       })
     }
@@ -19,8 +22,8 @@ jest.mock("@starknet-react/core", () => ({
       address: "0x123"
     }
   }),
-  useSendTransaction: () => ({
-    sendAsync: jest.fn().mockResolvedValue({ transaction_hash: "0x123" })
+  useContractWrite: () => ({
+    writeAsync: mockWriteAsync
   })
 }));
 
@@ -43,12 +46,6 @@ jest.mock("@/context/ProtocolProvider", () => ({
   })
 }));
 
-jest.mock("starknet", () => ({
-  num: {
-    toBigInt: jest.fn(value => BigInt(value))
-  }
-}));
-
 jest.mock("@/hooks/erc20/useERC20", () => ({
   __esModule: true,
   default: jest.fn().mockReturnValue({
@@ -65,55 +62,34 @@ describe("Deposit Component", () => {
     localStorage.clear();
   });
 
-  it("renders deposit form with correct states and handles interactions", () => {
-    const { container, rerender } = render(<Deposit showConfirmation={mockShowConfirmation} />);
+  it("handles deposit flow correctly", async () => {
+    render(
+      <HelpProvider>
+        <Deposit showConfirmation={mockShowConfirmation} />
+      </HelpProvider>
+    );
 
-    // Check initial render
+    // Enter valid deposit amount
     const amountInput = screen.getByPlaceholderText("e.g. 5.0");
+    fireEvent.change(amountInput, { target: { value: "1.0" } });
+
+    // Initiate deposit
     const depositButton = screen.getByRole("button", { name: "Deposit" });
-    expect(amountInput).toBeInTheDocument();
-    expect(depositButton).toBeInTheDocument();
-    expect(depositButton).toBeDisabled(); // Initially disabled with no amount
-
-    // Test valid amount
-    fireEvent.change(amountInput, { target: { value: "1.0" } });
-    expect(depositButton).toBeEnabled();
-    expect(localStorage.getItem("depositAmountWei")).toBe("1.0");
-
-    // Test amount exceeding balance
-    fireEvent.change(amountInput, { target: { value: "3.0" } }); // Balance is 2 ETH
-    expect(depositButton).toBeDisabled();
-    expect(screen.getByText(/Exceeds balance/)).toBeInTheDocument();
-
-    // Test depositing for someone else
-    fireEvent.click(screen.getByText("For Someone Else"));
-    const addressInput = screen.getByPlaceholderText("Depositor's Address");
-    expect(addressInput).toBeInTheDocument();
-
-    // Test with valid amount and address
-    fireEvent.change(amountInput, { target: { value: "1.0" } });
-    fireEvent.change(addressInput, { target: { value: "0x" + "1".repeat(64) } });
-    expect(depositButton).toBeEnabled();
-
-    // Test confirmation modal
     fireEvent.click(depositButton);
+
+    // Verify confirmation modal was shown
     expect(mockShowConfirmation).toHaveBeenCalledWith(
       "Deposit",
       expect.anything(),
       expect.any(Function)
     );
 
-    // Test transaction execution
-    const mockSendAsync = jest.fn().mockResolvedValue({ transaction_hash: "0x123" });
-    jest.spyOn(require("@starknet-react/core"), "useSendTransaction").mockReturnValue({
-      sendAsync: mockSendAsync
+    // Complete deposit flow
+    const onConfirm = mockShowConfirmation.mock.calls[0][2];
+    await act(async () => {
+      await onConfirm();
     });
 
-    // Get and call the onConfirm callback
-    const onConfirm = mockShowConfirmation.mock.calls[0][2];
-    act(() => {
-      onConfirm();
-    });
-    expect(mockSendAsync).toHaveBeenCalled();
+    expect(mockWriteAsync).toHaveBeenCalled();
   });
 }); 

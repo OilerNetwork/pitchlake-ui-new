@@ -6,7 +6,9 @@ import { useProtocolContext } from "../../../context/ProtocolProvider";
 import { useRouter } from "next/navigation";
 import useERC20 from "@/hooks/erc20/useERC20";
 import useAccountBalances from "@/hooks/vault/state/useAccountBalances";
-import { useAccount, useConnect, useDisconnect, useNetwork, useSwitchChain } from "@starknet-react/core";
+import { useAccount, useConnect, useDisconnect, useNetwork } from "@starknet-react/core";
+import { useHelpContext } from "@/context/HelpProvider";
+import { useUiContext } from "@/context/UiProvider";
 
 // Mock next/image
 jest.mock("next/image", () => ({ src, alt, className }: any) => (
@@ -26,8 +28,7 @@ jest.mock("@starknet-react/core", () => ({
   useAccount: jest.fn(),
   useConnect: jest.fn(),
   useDisconnect: jest.fn(),
-  useNetwork: jest.fn(),
-  useSwitchChain: jest.fn()
+  useNetwork: jest.fn()
 }));
 
 jest.mock("../../../hooks/window/useIsMobile");
@@ -36,6 +37,8 @@ jest.mock("../../../context/ProtocolProvider");
 jest.mock("next/navigation");
 jest.mock("@/hooks/erc20/useERC20");
 jest.mock("@/hooks/vault/state/useAccountBalances");
+jest.mock("@/context/HelpProvider");
+jest.mock("@/context/UiProvider");
 
 interface MockOverrides {
   mockTime?: boolean;
@@ -71,7 +74,6 @@ const mockHooks = (overrides: MockOverrides = {}) => {
   });
 
   (useDisconnect as jest.Mock).mockReturnValue({ disconnect: jest.fn() });
-  (useSwitchChain as jest.Mock).mockReturnValue({ switchChainAsync: jest.fn() });
   (useNetwork as jest.Mock).mockReturnValue({ 
     chain: { network: "testnet" },
     chains: [
@@ -104,6 +106,18 @@ const mockHooks = (overrides: MockOverrides = {}) => {
   (useRouter as jest.Mock).mockReturnValue({
     push: jest.fn(),
   });
+
+  (useHelpContext as jest.Mock).mockReturnValue({
+    isHelpBoxOpen: false,
+    toggleHelpBoxOpen: jest.fn(),
+    setHelpContent: jest.fn(),
+    clearHelpContent: jest.fn()
+  });
+
+  (useUiContext as jest.Mock).mockReturnValue({
+    isBlurOpen: false,
+    setBlurOpen: jest.fn()
+  });
 };
 
 describe("Header Component", () => {
@@ -126,7 +140,7 @@ describe("Header Component", () => {
     expect(logo).toHaveAttribute("alt", "Pitchlake logo");
 
     // Check network selector
-    const networkSelector = screen.getByText("testnet");
+    const networkSelector = screen.getByText("Testnet");
     expect(networkSelector).toBeInTheDocument();
   });
 
@@ -189,25 +203,23 @@ describe("Header Component", () => {
     expect(container.querySelector("nav")).toBeNull();
   });
 
-  it("handles network switching", () => {
-    const mockSwitchChainAsync = jest.fn();
-    (useSwitchChain as jest.Mock).mockReturnValue({ switchChainAsync: mockSwitchChainAsync });
-    
+  it("handles network display", () => {
     render(<Header />);
     
-    // Open network selector
-    const networkButton = screen.getByText("testnet");
-    fireEvent.click(networkButton);
+    // Check network selector button
+    const networkButton = screen.getByRole("button", { name: /testnet/i });
+    expect(networkButton).toBeInTheDocument();
     
     // Check network options
-    const networks = ["TESTNET", "MAINNET", "SEPOLIA"];
-    networks.forEach(network => {
-      expect(screen.getByText(network)).toBeInTheDocument();
-    });
+    fireEvent.click(networkButton);
+    expect(screen.getByText("Mainnet (Disabled)")).toBeInTheDocument();
+    expect(screen.getByText("Sepolia")).toBeInTheDocument();
+  });
+
+  it("displays connect button when not connected", () => {
+    render(<Header />);
     
-    // Select a network
-    const sepoliaOption = screen.getByText("SEPOLIA");
-    fireEvent.click(sepoliaOption);
-    expect(mockSwitchChainAsync).toHaveBeenCalledWith({ chainId: "0x534e5f5345504f4c4941" });
+    const connectButton = screen.getByRole("button", { name: /connect/i });
+    expect(connectButton).toBeInTheDocument();
   });
 }); 

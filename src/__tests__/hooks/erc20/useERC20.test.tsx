@@ -1,6 +1,6 @@
 import { renderHook, act } from "@testing-library/react";
 import useERC20 from "@/hooks/erc20/useERC20";
-import { useAccount, useContract, useReadContract, useProvider } from "@starknet-react/core";
+import { useAccount, useContract, useContractRead, useProvider } from "@starknet-react/core";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { erc20ABI } from "@/lib/abi";
 
@@ -8,7 +8,7 @@ import { erc20ABI } from "@/lib/abi";
 jest.mock("@starknet-react/core", () => ({
   useAccount: jest.fn(),
   useContract: jest.fn(),
-  useReadContract: jest.fn(),
+  useContractRead: jest.fn(),
   useProvider: jest.fn(),
 }));
 
@@ -59,8 +59,8 @@ describe("useERC20", () => {
       pendingTx: false,
     });
 
-    // Mock useReadContract for balance and allowance
-    (useReadContract as jest.Mock).mockImplementation(({ functionName }) => {
+    // Mock useContractRead for balance and allowance
+    (useContractRead as jest.Mock).mockImplementation(({ functionName }) => {
       if (functionName === "balance_of") {
         return { data: "1000" };
       }

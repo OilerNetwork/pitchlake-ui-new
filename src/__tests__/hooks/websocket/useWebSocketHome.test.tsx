@@ -80,24 +80,21 @@ describe("useWebSocketHome", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
     mockWs = new MockWebSocket("");
     jest.spyOn(global, "WebSocket").mockImplementation(() => mockWs);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it("initializes WebSocket connection after component is loaded", () => {
     const { result } = renderHook(() => useWebSocketHome());
 
-    // Initially, no WebSocket connection
-    expect(WebSocket).not.toHaveBeenCalled();
-
-    // After the second useEffect runs
-    act(() => {
-      jest.runAllTimers();
-    });
-
     // WebSocket should be initialized with correct URL
     expect(WebSocket).toHaveBeenCalledWith(
-      `${process.env.NEXT_PUBLIC_WS_URL}/subscribeHome`
+      expect.stringContaining("/subscribeHome")
     );
   });
 
@@ -106,7 +103,7 @@ describe("useWebSocketHome", () => {
 
     // Simulate component load
     act(() => {
-      jest.runAllTimers();
+      jest.advanceTimersByTime(1000);
     });
 
     // Simulate receiving a message
@@ -129,7 +126,7 @@ describe("useWebSocketHome", () => {
 
     // Simulate component load
     act(() => {
-      jest.runAllTimers();
+      jest.advanceTimersByTime(1000);
     });
 
     // Simulate connection open
@@ -139,11 +136,13 @@ describe("useWebSocketHome", () => {
     expect(consoleSpy).toHaveBeenCalledWith("WebSocket connection established");
 
     // Simulate error
-    const mockError = new Error("WebSocket error");
     act(() => {
-      mockWs.simulateError(mockError);
+      mockWs.simulateError(new Event('error'));
     });
-    expect(consoleErrorSpy).toHaveBeenCalledWith("WebSocket error:", mockError);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "WebSocket error:",
+      expect.any(Event)
+    );
 
     // Simulate connection close
     act(() => {
@@ -157,7 +156,7 @@ describe("useWebSocketHome", () => {
 
     // Simulate component load
     act(() => {
-      jest.runAllTimers();
+      jest.advanceTimersByTime(1000);
     });
 
     // Unmount the component

@@ -4,6 +4,7 @@ import History from "@/components/Vault/VaultActions/Tabs/Buyer/History";
 import { useExplorer, useProvider } from "@starknet-react/core";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useProtocolContext } from "@/context/ProtocolProvider";
+import { useHelpContext } from "@/context/HelpProvider";
 import { formatUnits } from "ethers";
 
 // Mock the hooks
@@ -21,6 +22,10 @@ jest.mock("@/context/TransactionProvider", () => ({
 jest.mock("@/context/ProtocolProvider", () => ({
   __esModule: true,
   useProtocolContext: jest.fn(),
+}));
+
+jest.mock("@/context/HelpProvider", () => ({
+  useHelpContext: jest.fn(),
 }));
 
 jest.mock("ethers", () => ({
@@ -65,6 +70,12 @@ describe("History Component", () => {
       selectedRoundState: {
         roundState: "Auctioning",
       },
+    });
+
+    // Mock useHelpContext hook
+    (useHelpContext as jest.Mock).mockReturnValue({
+      setHelpContent: jest.fn(),
+      clearHelpContent: jest.fn(),
     });
 
     // Mock formatUnits

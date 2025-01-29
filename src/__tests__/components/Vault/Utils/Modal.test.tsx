@@ -29,15 +29,17 @@ describe("Modal", () => {
   });
 
   it("handles close actions", () => {
-    render(
+    const { container } = render(
       <Modal title="Test Modal" onClose={mockOnClose}>
         <div>Content</div>
       </Modal>
     );
 
-    // Click close button
-    const closeButton = screen.getByRole("button", { name: "" });
-    fireEvent.click(closeButton);
-    expect(mockOnClose).toHaveBeenCalledTimes(1);
+    const closeButton = container.querySelector('.modal-close');
+    expect(closeButton).not.toBeNull();
+    if (closeButton) {
+      fireEvent.click(closeButton);
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
+    }
   });
 }); 

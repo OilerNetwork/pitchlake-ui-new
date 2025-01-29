@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { Tooltip, BalanceTooltip } from "@/components/BaseComponents/Tooltip";
+import { HelpProvider } from "@/context/HelpProvider";
 
 // Mock createPortal since we're using it in BalanceTooltip
 jest.mock("react-dom", () => ({
@@ -7,12 +8,22 @@ jest.mock("react-dom", () => ({
   createPortal: (node: React.ReactNode) => node,
 }));
 
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <HelpProvider>
+      {children}
+    </HelpProvider>
+  );
+};
+
 describe("Tooltip", () => {
   it("renders tooltip content", () => {
     render(
-      <Tooltip text="Test tooltip">
-        <button>Hover me</button>
-      </Tooltip>
+      <TestWrapper>
+        <Tooltip text="Test tooltip">
+          <button>Hover me</button>
+        </Tooltip>
+      </TestWrapper>
     );
 
     const tooltipContainer = screen.getByText("Hover me").closest(".tooltip-container");
@@ -33,10 +44,12 @@ describe("BalanceTooltip", () => {
       stashed: "25000000000000000000"
     };
 
-    const { container } = render(
-      <BalanceTooltip balance={balance}>
-        <div>Balance</div>
-      </BalanceTooltip>
+    render(
+      <TestWrapper>
+        <BalanceTooltip balance={balance}>
+          <div>Balance</div>
+        </BalanceTooltip>
+      </TestWrapper>
     );
 
     const tooltipTrigger = screen.getByText("Balance").closest(".flex.flex-row.items-center");
@@ -59,10 +72,12 @@ describe("BalanceTooltip", () => {
       stashed: "0"
     };
 
-    const { container } = render(
-      <BalanceTooltip balance={balance}>
-        <div>Balance</div>
-      </BalanceTooltip>
+    render(
+      <TestWrapper>
+        <BalanceTooltip balance={balance}>
+          <div>Balance</div>
+        </BalanceTooltip>
+      </TestWrapper>
     );
 
     const tooltipTrigger = screen.getByText("Balance").closest(".flex.flex-row.items-center");

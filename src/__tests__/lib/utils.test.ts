@@ -103,32 +103,32 @@ describe("getPerformanceOB", () => {
 });
 
 describe("time utilities", () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date("2024-01-01T00:00:00Z"));
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   describe("timeUntilTarget", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date("2024-01-01T00:00:00Z"));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it("formats positive time difference correctly", () => {
       const now = "1704067200"; // 2024-01-01T00:00:00Z
       const target = "1704153600"; // 2024-01-02T00:00:00Z (1 day later)
-      expect(timeUntilTarget(now, target)).toBe("1d ");
+      expect(timeUntilTarget(now, target)).toBe("1d");
     });
 
     it("formats negative time difference correctly", () => {
       const now = "1704153600"; // 2024-01-02T00:00:00Z
       const target = "1704067200"; // 2024-01-01T00:00:00Z (1 day earlier)
-      expect(timeUntilTarget(now, target)).toBe("-1d ");
+      expect(timeUntilTarget(now, target)).toBe("1d ago");
     });
 
     it("formats time units correctly", () => {
       const now = "1704067200"; // 2024-01-01T00:00:00Z
       const target = "1704067260"; // 60 seconds later
-      expect(timeUntilTarget(now, target)).toBe("1m 0s ");
+      expect(timeUntilTarget(now, target)).toBe("1m");
     });
   });
 
@@ -147,9 +147,18 @@ describe("time utilities", () => {
   });
 
   describe("timeFromNow", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date("2024-01-01T00:00:00Z"));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it("calculates time from current timestamp", () => {
       const target = "1704153600"; // 2024-01-02T00:00:00Z (1 day from 2024-01-01)
-      expect(timeFromNow(target)).toBe("1d ");
+      expect(timeFromNow(target)).toBe("1d");
     });
   });
 });

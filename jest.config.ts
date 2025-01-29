@@ -8,12 +8,15 @@ import type { Config } from 'jest';
 const config: Config = {
   testEnvironment: "jsdom",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
-  testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/"],
+  testPathIgnorePatterns: ["<rootDir>/node_modules/"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
+    "^@core/(.*)$": "<rootDir>/src/core/$1",
+    "^@/core$": "<rootDir>/src/__tests__/mocks/hooks.ts",
+    "^@core$": "<rootDir>/src/__tests__/mocks/hooks.ts"
   },
   transform: {
-    "^.+\\.(js|jsx|ts|tsx)$": ["babel-jest", { presets: ["next/babel"] }],
+    "^.+\\.(js|jsx|ts|tsx)$": ['babel-jest', { presets: ['next/babel'] }]
   },
   transformIgnorePatterns: [
     "node_modules/(?!(@starknet-react|starknet|get-starknet|@starknet-react/chains|eventemitter3)/)"

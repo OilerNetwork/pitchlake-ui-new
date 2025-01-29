@@ -6,6 +6,7 @@ import { useAccount } from "@starknet-react/core";
 import useFossilStatus from "../../../hooks/fossil/useFossilStatus";
 import { useRoundState } from "../../../hooks/stateTransition/useRoundState";
 import { useRoundPermissions } from "../../../hooks/stateTransition/useRoundPermissions";
+import { useHelpContext } from "@/context/HelpProvider";
 
 // Mock all hooks
 jest.mock("../../../context/ProtocolProvider");
@@ -14,6 +15,7 @@ jest.mock("@starknet-react/core");
 jest.mock("../../../hooks/fossil/useFossilStatus");
 jest.mock("../../../hooks/stateTransition/useRoundState");
 jest.mock("../../../hooks/stateTransition/useRoundPermissions");
+jest.mock("@/context/HelpProvider");
 
 // Mock fetch for fossil requests
 global.fetch = jest.fn();
@@ -24,9 +26,18 @@ describe("StateTransition", () => {
   const mockEndAuction = jest.fn();
   const mockSettleOptionRound = jest.fn();
   const mockSetFossilStatus = jest.fn();
+  const mockSetContent = jest.fn();
+  const mockSetHeader = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Mock useHelpContext
+    (useHelpContext as jest.Mock).mockReturnValue({
+      setContent: mockSetContent,
+      setHeader: mockSetHeader,
+      isHoveringHelpBox: false
+    });
 
     // Mock useProtocolContext
     (useProtocolContext as jest.Mock).mockReturnValue({

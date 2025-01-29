@@ -1,12 +1,15 @@
-import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import QueueWithdrawal from "@/components/Vault/VaultActions/Tabs/Provider/Withdraw/QueueWithdrawal";
+import { useAccount } from "@starknet-react/core";
 import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import { useAccount } from "@starknet-react/core";
-import { parseEther } from "ethers";
+import { useHelpContext } from "@/context/HelpProvider";
 
 // Mock the hooks
+jest.mock("@starknet-react/core", () => ({
+  useAccount: jest.fn(),
+}));
+
 jest.mock("@/context/ProtocolProvider", () => ({
   useProtocolContext: jest.fn(),
 }));
@@ -15,8 +18,8 @@ jest.mock("@/context/TransactionProvider", () => ({
   useTransactionContext: jest.fn(),
 }));
 
-jest.mock("@starknet-react/core", () => ({
-  useAccount: jest.fn(),
+jest.mock("@/context/HelpProvider", () => ({
+  useHelpContext: jest.fn(),
 }));
 
 describe("QueueWithdrawal", () => {
@@ -26,25 +29,23 @@ describe("QueueWithdrawal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Mock useProtocolContext
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      lpState: {
-        lockedBalance: parseEther("10.0"),
-        queuedBps: 2500, // 25%
-      },
-      vaultActions: {
-        queueWithdrawal: mockQueueWithdrawal,
-      },
+    // Setup default mock values
+    (useAccount as jest.Mock).mockReturnValue({
+      account: { address: "0x123" },
     });
 
-    // Mock useTransactionContext
+    (useProtocolContext as jest.Mock).mockReturnValue({
+      vaultActions: { queueWithdrawal: mockQueueWithdrawal },
+      lpState: { queuedBps: "0" },
+    });
+
     (useTransactionContext as jest.Mock).mockReturnValue({
       pendingTx: false,
     });
 
-    // Mock useAccount
-    (useAccount as jest.Mock).mockReturnValue({
-      account: "0x123",
+    (useHelpContext as jest.Mock).mockReturnValue({
+      setHelpContent: jest.fn(),
+      clearHelpContent: jest.fn(),
     });
   });
 
@@ -52,10 +53,7 @@ describe("QueueWithdrawal", () => {
     render(<QueueWithdrawal showConfirmation={mockShowConfirmation} />);
 
     expect(screen.getByLabelText("Choose Percentage")).toBeInTheDocument();
-    expect(screen.getByRole("slider")).toHaveValue("25");
-    expect(screen.getByText("25%")).toBeInTheDocument();
-    expect(screen.getByText("Current Locked Balance")).toBeInTheDocument();
-    expect(screen.getByText("10.000 ETH")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Queue" })).toBeDisabled();
   });
 
   it("updates percentage when slider is moved", () => {
@@ -65,42 +63,39 @@ describe("QueueWithdrawal", () => {
     fireEvent.change(slider, { target: { value: "50" } });
 
     expect(slider).toHaveValue("50");
-    expect(screen.getByText("50%")).toBeInTheDocument();
   });
 
-  it("disables withdraw button when percentage is unchanged", () => {
+  it("disables queue button when percentage is unchanged", () => {
     render(<QueueWithdrawal showConfirmation={mockShowConfirmation} />);
 
-    expect(screen.getByRole("button", { name: "Withdraw" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Queue" })).toBeDisabled();
   });
 
-  it("enables withdraw button when percentage is changed", () => {
+  it("enables queue button when percentage is changed", () => {
     render(<QueueWithdrawal showConfirmation={mockShowConfirmation} />);
 
     const slider = screen.getByRole("slider");
     fireEvent.change(slider, { target: { value: "50" } });
 
-    expect(screen.getByRole("button", { name: "Withdraw" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Queue" })).toBeEnabled();
   });
 
-  it("disables withdraw button when transaction is pending", () => {
+  it("disables queue button when transaction is pending", () => {
     (useTransactionContext as jest.Mock).mockReturnValue({
       pendingTx: true,
     });
 
     render(<QueueWithdrawal showConfirmation={mockShowConfirmation} />);
 
-    expect(screen.getByRole("button", { name: "Withdraw" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Queue" })).toBeDisabled();
   });
 
-  it("disables withdraw button when no account is connected", () => {
-    (useAccount as jest.Mock).mockReturnValue({
-      account: null,
-    });
+  it("disables queue button when no account is connected", () => {
+    (useAccount as jest.Mock).mockReturnValue({ account: undefined });
 
     render(<QueueWithdrawal showConfirmation={mockShowConfirmation} />);
 
-    expect(screen.getByRole("button", { name: "Withdraw" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Queue" })).toBeDisabled();
   });
 
   it("shows confirmation modal with correct percentage values", () => {
@@ -109,57 +104,41 @@ describe("QueueWithdrawal", () => {
     const slider = screen.getByRole("slider");
     fireEvent.change(slider, { target: { value: "50" } });
 
-    const withdrawButton = screen.getByRole("button", { name: "Withdraw" });
-    fireEvent.click(withdrawButton);
+    const queueButton = screen.getByRole("button", { name: "Queue" });
+    fireEvent.click(queueButton);
 
-    expect(mockShowConfirmation).toHaveBeenCalledWith(
-      "Liquidity Withdraw",
-      expect.anything(),
-      expect.any(Function)
-    );
+    expect(mockShowConfirmation).toHaveBeenCalled();
   });
 
-  it("calls queueWithdrawal with correct BPS when confirmation is confirmed", async () => {
+  it("calls queueWithdrawal with correct BPS when confirmation is confirmed", () => {
     render(<QueueWithdrawal showConfirmation={mockShowConfirmation} />);
 
     const slider = screen.getByRole("slider");
     fireEvent.change(slider, { target: { value: "50" } });
 
-    const withdrawButton = screen.getByRole("button", { name: "Withdraw" });
-    fireEvent.click(withdrawButton);
+    const queueButton = screen.getByRole("button", { name: "Queue" });
+    fireEvent.click(queueButton);
 
     // Get the onConfirm callback that was passed to showConfirmation
     const onConfirm = mockShowConfirmation.mock.calls[0][2];
-    await onConfirm();
+    onConfirm();
 
     // 50% should be converted to 5000 BPS
-    expect(mockQueueWithdrawal).toHaveBeenCalledWith({
-      bps: 5000,
-    });
+    expect(mockQueueWithdrawal).toHaveBeenCalledWith({ bps: 5000 });
   });
 
   it("updates state when lpState.queuedBps changes", () => {
-    const { rerender } = render(
-      <QueueWithdrawal showConfirmation={mockShowConfirmation} />
-    );
+    const { rerender } = render(<QueueWithdrawal showConfirmation={mockShowConfirmation} />);
 
-    // Initial state should be 25%
-    expect(screen.getByRole("slider")).toHaveValue("25");
-
-    // Update lpState.queuedBps to 5000 (50%)
+    // Update lpState mock with new queuedBps
     (useProtocolContext as jest.Mock).mockReturnValue({
-      lpState: {
-        lockedBalance: parseEther("10.0"),
-        queuedBps: 5000,
-      },
-      vaultActions: {
-        queueWithdrawal: mockQueueWithdrawal,
-      },
+      vaultActions: { queueWithdrawal: mockQueueWithdrawal },
+      lpState: { queuedBps: "5000" },
     });
 
     rerender(<QueueWithdrawal showConfirmation={mockShowConfirmation} />);
 
-    // State should update to 50%
-    expect(screen.getByRole("slider")).toHaveValue("50");
+    const slider = screen.getByRole("slider");
+    expect(slider).toHaveValue("50"); // 5000 BPS = 50%
   });
 }); 

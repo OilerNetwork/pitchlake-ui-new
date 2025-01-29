@@ -1,10 +1,10 @@
 import { renderHook } from "@testing-library/react";
 import useContractReads from "@/lib/useContractReads";
-import { useReadContract } from "@starknet-react/core";
+import { useContractRead } from "@starknet-react/core";
 
-// Mock the useReadContract hook
+// Mock the useContractRead hook
 jest.mock("@starknet-react/core", () => ({
-  useReadContract: jest.fn(),
+  useContractRead: jest.fn(),
 }));
 
 describe("useContractReads", () => {
@@ -13,8 +13,8 @@ describe("useContractReads", () => {
   });
 
   it("returns data for multiple contract reads", () => {
-    // Mock the useReadContract hook to return different data for different function calls
-    (useReadContract as jest.Mock)
+    // Mock the useContractRead hook to return different data for different function calls
+    (useContractRead as jest.Mock)
       .mockReturnValueOnce({ data: "100" }) // For balance
       .mockReturnValueOnce({ data: "true" }); // For isApproved
 
@@ -37,14 +37,14 @@ describe("useContractReads", () => {
       approved: "true",
     });
 
-    expect(useReadContract).toHaveBeenCalledTimes(2);
-    expect(useReadContract).toHaveBeenCalledWith({
+    expect(useContractRead).toHaveBeenCalledTimes(2);
+    expect(useContractRead).toHaveBeenCalledWith({
       ...contractData,
       functionName: "balance",
       args: ["0x123"],
       watch: false,
     });
-    expect(useReadContract).toHaveBeenCalledWith({
+    expect(useContractRead).toHaveBeenCalledWith({
       ...contractData,
       functionName: "isApproved",
       args: ["0x123"],
@@ -53,7 +53,7 @@ describe("useContractReads", () => {
   });
 
   it("handles undefined contract data", () => {
-    (useReadContract as jest.Mock).mockReturnValue({ data: undefined });
+    (useContractRead as jest.Mock).mockReturnValue({ data: undefined });
 
     const contractData = {
       abi: undefined,
@@ -74,7 +74,7 @@ describe("useContractReads", () => {
   });
 
   it("handles missing args", () => {
-    (useReadContract as jest.Mock).mockReturnValue({ data: "100" });
+    (useContractRead as jest.Mock).mockReturnValue({ data: "100" });
 
     const contractData = {
       abi: {} as any,
@@ -93,7 +93,7 @@ describe("useContractReads", () => {
       supply: "100",
     });
 
-    expect(useReadContract).toHaveBeenCalledWith({
+    expect(useContractRead).toHaveBeenCalledWith({
       ...contractData,
       functionName: "totalSupply",
       args: [], // Should default to empty array
@@ -102,7 +102,7 @@ describe("useContractReads", () => {
   });
 
   it("updates when watch is true", () => {
-    (useReadContract as jest.Mock).mockReturnValue({ data: "100" });
+    (useContractRead as jest.Mock).mockReturnValue({ data: "100" });
 
     const contractData = {
       abi: {} as any,
@@ -121,7 +121,7 @@ describe("useContractReads", () => {
       balance: "100",
     });
 
-    expect(useReadContract).toHaveBeenCalledWith({
+    expect(useContractRead).toHaveBeenCalledWith({
       ...contractData,
       functionName: "balance",
       args: ["0x123"],

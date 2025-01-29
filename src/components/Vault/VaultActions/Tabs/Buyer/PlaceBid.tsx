@@ -319,11 +319,6 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
           />
         </Hoverable>
       </div>
-      <ActionButton
-        onClick={handleSubmitForMulticall}
-        disabled={state.isButtonDisabled}
-        text="Place Bid"
-      />
     </div>
   );
 };
