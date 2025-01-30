@@ -18,16 +18,16 @@ const StateTransition = ({
   setModalState: any;
   fossilDelay: number;
 }) => {
-  const {
-    vaultState,
-    vaultActions,
-    selectedRoundState,
-    timestamp: timestampRaw,
-    conn,
-  } = useProtocolContext();
-  const { pendingTx, lastBlock } = useTransactionContext();
+  const { vaultState, vaultActions, selectedRoundState, conn } =
+    useProtocolContext();
+  const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
-  const timestamp = timestampRaw ? timestampRaw : "0";
+
+  // @NOTE: Wallet will say the txn will fail even if now.getTime() is >= state_transition_date.
+  // - Needs latest L2 block timestamp
+  const now = new Date();
+  const timestamp: number = Math.floor(now.getTime() / 1000);
+
   const {
     status: fossilStatus,
     error: fossilError,
@@ -53,11 +53,7 @@ const StateTransition = ({
     canAuctionEnd,
     canRoundSettle,
     canSendFossilRequest,
-  } = useRoundPermissions(
-    timestamp.toString(),
-    selectedRoundState,
-    fossilDelay,
-  );
+  } = useRoundPermissions(timestamp, selectedRoundState, fossilDelay);
 
   const actions: Record<string, string> = useMemo(
     () => ({
@@ -118,7 +114,7 @@ const StateTransition = ({
   };
 
   const isDisabled = useMemo(() => {
-    console.log("ROUNDSTATE",roundState)
+    console.log("ROUNDSTATE", roundState);
     if (!account) return true;
     if (pendingTx) return true;
     if (isAwaitingRoundStateUpdate) return true;
@@ -176,11 +172,10 @@ const StateTransition = ({
           : "border border-transparent border-t-[#262626]"
       } flex flex-col w-full mx-auto mt-auto mb-4 ${isPanelOpen ? "" : "items-center justify-center"}`}
     >
-
       <Hoverable dataId={`leftPanelStateTransitionButton_${roundState}`}>
         <div className={`${isPanelOpen ? "px-6" : ""}`}>
           <button
-            disabled={isDisabled || check }
+            disabled={isDisabled || check}
             className={`flex ${!isPanelOpen && !isDisabled ? "hover-zoom-small" : ""} ${
               roundState === "Settled" ? "hidden" : ""
             } ${isPanelOpen ? "p-2" : "w-[44px] h-[44px]"} border border-greyscale-700 text-primary disabled:text-greyscale rounded-md mt-4 justify-center items-center min-w-[44px] min-h-[44px] w-full`}
