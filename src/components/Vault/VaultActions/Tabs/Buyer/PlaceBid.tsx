@@ -259,7 +259,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-grow space-y-6 p-6">
-        <Hoverable dataId="inputBidAmount">
+        <Hoverable dataId="inputBidAmount" className="place-bid-container">
           <InputField
             label="Enter Amount"
             type="integer"
@@ -295,7 +295,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
       </div>
       <Hoverable dataId="newBidSummary" className="flex flex-col h-[full]">
         <div className="flex justify-between text-sm px-6 pb-1">
-          <span className="text-gray-400">Total</span>
+          <span className="text-gray-400 place-bid-total">Total</span>
           <span>{bidTotalEth.toFixed(2)} ETH</span>
         </div>
       </Hoverable>

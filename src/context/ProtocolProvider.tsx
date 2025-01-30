@@ -65,7 +65,7 @@ const ProtocolProvider = ({ children }: { children: ReactNode }) => {
   const [selectedRound, setSelectedRound] = useState<number>(0);
   const [mockTimestamp, setMockTimestamp] = useState(0);
   const { data: block } = useBlock({
-    refetchInterval: 5000,
+    refetchInterval: 1000,
   });
   const mockTimeForward = () => {
     if (conn === "mock") setMockTimestamp((prevState) => prevState + 100001);

@@ -85,13 +85,13 @@ const WithdrawStash: React.FC<WithdrawStashProps> = ({
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-center">
             <div className="bg-[#1E1E1E] rounded-lg p-4">
-              <CollectEthIcon classname="w-16 h-16 mx-auto" stroke="" fill="" />
+              <CollectEthIcon classname="w-16 h-16 mx-auto collect-eth-icon" stroke="" fill="" />
             </div>
           </div>
-          <p className="text-[#BFBFBF] text-center font-regular text-[14px]">
+          <p className="text-[#BFBFBF] text-center font-regular text-[14px] stash-balance-text">
             Your current stashed balance is
             <br />
-            <b className="mt-0 text-[#FAFAFA] text-[14px] font-bold text-center">
+            <b className="mt-0 text-[#FAFAFA] text-[14px] font-bold text-center stash-balance-amount">
               {lpState?.stashedBalance
                 ? parseFloat(formatEther(lpState.stashedBalance.toString()))
                     .toFixed(3)

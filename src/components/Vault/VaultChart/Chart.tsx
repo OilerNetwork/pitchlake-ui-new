@@ -113,7 +113,7 @@ const RoundPerformanceChart = () => {
           </div>
         </Hoverable>
         <div className="flex flex-row items-center gap-4">
-          <Hoverable dataId="chartPreviousRound" onClick={decrementRound}>
+          <Hoverable dataId="chartPreviousRound" onClick={decrementRound} className="chart-previous-round">
             <ArrowLeftIcon
               stroke={
                 !selectedRound || selectedRound === 1
@@ -134,36 +134,36 @@ const RoundPerformanceChart = () => {
           <Hoverable dataId="chartNextRound" onClick={incrementRound}>
             <ArrowRightIcon
               stroke={
-                selectedRound &&
-                vaultState?.currentRoundId &&
-                Number(vaultState.currentRoundId) > selectedRound
-                  ? "var(--primary)"
-                  : "var(--greyscale)"
+                !selectedRound ||
+                !vaultState?.currentRoundId ||
+                selectedRound === Number(vaultState.currentRoundId)
+                  ? "var(--greyscale)"
+                  : "var(--primary)"
               }
               classname={`${
-                selectedRound &&
-                vaultState?.currentRoundId &&
-                Number(vaultState.currentRoundId) > selectedRound
-                  ? "hover-zoom hover:cursor-pointer"
-                  : ""
-              } w-[15px] h-[15px] mr-2 ${
                 !selectedRound ||
-                selectedRound === Number(vaultState?.currentRoundId)
+                !vaultState?.currentRoundId ||
+                selectedRound === Number(vaultState.currentRoundId)
+                  ? ""
+                  : "hover:cursor-pointer hover-zoom"
+              } w-[15px] h-[15px] ml-2 ${
+                !selectedRound ||
+                !vaultState?.currentRoundId ||
+                selectedRound === Number(vaultState.currentRoundId)
                   ? "hover:cursor-default"
                   : ""
               }`}
             />
           </Hoverable>
-          <Hoverable dataId="chartHistory">
+          <Hoverable
+            dataId="chartHistory"
+            onClick={() => setIsExpandedView(!isExpandedView)}
+            className="chart-history-button"
+          >
             <History
-              onClick={() => setIsExpandedView(!isExpandedView)}
               className={classNames(
                 "w-5 h-5 mr-2 cursor-pointer",
-                {
-                  "stroke-[var(--primary)]": isExpandedView,
-                  "stroke-[var(--greyscale)]": !isExpandedView,
-                },
-                "hover:stroke-[var(--primary)]  hover-zoom",
+                isExpandedView ? "text-primary" : "text-greyscale"
               )}
             />
           </Hoverable>

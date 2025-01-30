@@ -9,6 +9,7 @@ import {
 } from "@/lib/types";
 import { Bid } from "@/lib/types";
 import { useAccount } from "@starknet-react/core";
+
 const useMockOptionRounds = (selectedRound: number) => {
   const { address } = useAccount();
   const date = Date.now();
@@ -59,22 +60,31 @@ const useMockOptionRounds = (selectedRound: number) => {
     },
   ]);
 
-  // Function to update a specific field in the option round state
-
-  // Function to update a specific field in the OptionBuyerState
+  // Function to place a bid
   const placeBid = async (placeBidArgs: PlaceBidArgs) => {
     setBuyerStates((prevState) => {
-      const newState = prevState;
+      const newState = [...prevState];
+      const buyerStateIndex = newState.findIndex(state => state.address === (address ?? "0xbuyer"));
+      
+      if (buyerStateIndex === -1) {
+        return prevState;
+      }
+
       const newBid: Bid = {
         bidId: "3",
         address: address ?? "",
-        roundAddress: rounds[selectedRound-1].address??"",
-
+        roundAddress: rounds[selectedRound-1].address ?? "",
         treeNonce: "2",
         amount: placeBidArgs.amount,
         price: placeBidArgs.price,
       };
-      newState[selectedRound].bids?.push();
+      
+      // Initialize bids array if it doesn't exist
+      if (!newState[buyerStateIndex].bids) {
+        newState[buyerStateIndex].bids = [];
+      }
+      
+      newState[buyerStateIndex].bids = [...(newState[buyerStateIndex].bids || []), newBid];
       return newState;
     });
   };
@@ -86,9 +96,11 @@ const useMockOptionRounds = (selectedRound: number) => {
   const updateBid = async (updateBidArgs: UpdateBidArgs) => {
     await new Promise((resolve) => setTimeout(resolve, 2000));
   };
+
   const tokenizeOptions = async () => {
     await new Promise((resolve) => setTimeout(resolve, 2000));
   };
+
   const exerciseOptions = async () => {
     await new Promise((resolve) => setTimeout(resolve, 2000));
   };
@@ -100,12 +112,13 @@ const useMockOptionRounds = (selectedRound: number) => {
     tokenizeOptions,
     exerciseOptions,
   };
+
   return {
     rounds,
     setRounds,
     buyerStates,
     setBuyerStates,
-    roundActions, // Expose the function for updating option round fields
+    roundActions,
   };
 };
 

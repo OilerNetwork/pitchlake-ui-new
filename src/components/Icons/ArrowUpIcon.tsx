@@ -2,10 +2,12 @@ const ArrowUpIcon = ({
   classname,
   stroke,
   fill,
+  strokeWidth = "1.5",
 }: {
   classname?: string;
   fill?: string;
   stroke?: string;
+  strokeWidth?: string;
 }) => {
   return (
     <svg
@@ -19,7 +21,7 @@ const ArrowUpIcon = ({
       <path
         d="M4 10L8 6L12 10"
         stroke={stroke}
-        strokeWidth="1.5"
+        strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
       />

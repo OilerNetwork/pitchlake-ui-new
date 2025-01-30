@@ -30,13 +30,13 @@ export const Vault = () => {
         <div className="flex flex-row rounded-md border-[1px] border-greyscale-800 h-[55px]">
           <Hoverable
             dataId="userToggleLP"
+            className={`user-toggle-lp provider-tab flex flex-row items-center justify-center m-[1px] hover:cursor-pointer px-4 py-1 rounded-md text-[14px] w-[115px] ${
+              isProviderView ? "bg-primary-900" : ""
+            }`}
             onClick={() => {
               setIsProviderView(true);
               setIsEditOpen(false);
             }}
-            className={`flex flex-row items-center  justify-center m-[1px] hover:cursor-pointer px-4 py-1 rounded-md text-[14px] w-[115px] ${
-              isProviderView ? "bg-primary-900" : ""
-            }`}
           >
             <CoinStackedIcon
               classname="mr-2"
@@ -52,13 +52,13 @@ export const Vault = () => {
           </Hoverable>
           <Hoverable
             dataId="userToggleOB"
+            className={`user-toggle-ob buyer-tab flex flex-row items-center justify-center m-[1px] hover:cursor-pointer px-4 py-1 rounded-md text-[14px] w-[115px] ${
+              !isProviderView ? "bg-primary-900" : ""
+            }`}
             onClick={() => {
               setIsProviderView(false);
               //setIsEditOpen(false);
             }}
-            className={`flex flex-row items-center justify-center m-[1px] hover:cursor-pointer px-4 py-1 rounded-md text-[14px] w-[115px] ${
-              !isProviderView ? "bg-primary-900" : ""
-            }`}
           >
             <AuctionIcon
               classname="mr-2"
@@ -79,13 +79,13 @@ export const Vault = () => {
         </div>
         <Hoverable
           dataId="logo"
-          className="hover-zoom-small flex items-center justify-center"
+          className="vault-back-button back-button-container hover-zoom-small flex items-center justify-center"
         >
           <div
             onClick={() => {
               router.push("/");
             }}
-            className="flex items-center justify-center w-[44px] h-[44px] border border-[#262626] rounded-lg cursor-pointer"
+            className="back-button flex items-center justify-center w-[44px] h-[44px] border border-[#262626] rounded-lg cursor-pointer"
           >
             <ChevronLeft className="w-[16px] h-[16px] stroke-[#F5EBB8]" />
           </div>

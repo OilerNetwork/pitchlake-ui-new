@@ -101,7 +101,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
       !account ||
       (state.isDepositAsBeneficiary &&
         !isValidHex64(state.beneficiaryAddress)) ||
-      !isValidHex64(account.address) ||
+      !isValidHex64(account?.address) ||
       Number(state.amount) <= 0
     ) {
       return calls;
