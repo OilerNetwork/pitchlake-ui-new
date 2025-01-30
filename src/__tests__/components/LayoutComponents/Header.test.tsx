@@ -10,18 +10,22 @@ import { useAccount, useConnect, useDisconnect, useNetwork } from "@starknet-rea
 import { useHelpContext } from "@/context/HelpProvider";
 import { useUiContext } from "@/context/UiProvider";
 
-// Mock next/image
-jest.mock("next/image", () => ({ src, alt, className }: any) => (
-  <img src={src} alt={alt} className={className} />
-));
-
-// Mock SVG imports
+// Mock SVG imports first
 jest.mock("@/../public/logo_full.svg", () => "logo_full");
 jest.mock("@/../public/login.svg", () => "login");
 jest.mock("@/../public/braavos.svg", () => "braavos");
 jest.mock("@/../public/argent.svg", () => "argent");
 jest.mock("@/../public/keplr.svg", () => "keplr");
 jest.mock("@/../public/avatar.svg", () => "avatar");
+
+// Mock next/image with a function that returns the component
+jest.mock("next/image", () => {
+  const MockImage = ({ src, alt, className }: any) => (
+    <img src={src} alt={alt} className={className} />
+  );
+  MockImage.displayName = 'Image';
+  return MockImage;
+});
 
 // Mock hooks
 jest.mock("@starknet-react/core", () => ({
