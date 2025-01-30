@@ -29,6 +29,7 @@ export const useUnconfirmedBlocks = (
     queryKey,
     queryFn: () => fetchFeeHistory(),
     enabled: xMin != 0 || xMax != 0,
+    placeholderData: (prev) => prev,
   });
 
   const feeHistory: FormattedBlockData[] = data ? data : [];

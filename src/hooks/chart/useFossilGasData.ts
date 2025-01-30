@@ -41,10 +41,8 @@ export const useFossilGasData = ({
   isError: boolean;
   error: any;
 } => {
-  const { conn } = useProtocolContext();
-
   // Define a unique query key based on parameters
-  const step = parseInt((new Date().getTime() / (120 * 1000)).toString());
+  const step = parseInt((new Date().getTime() / (30 * 1000)).toString());
   const queryKey = [
     "gasData",
     lowerTimestamp,
@@ -65,6 +63,7 @@ export const useFossilGasData = ({
       lowerTimestamp > 0 &&
       upperTimestamp > 0 &&
       blocksToFetch > 0,
+    placeholderData: (prev) => prev,
   });
 
   return {
