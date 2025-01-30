@@ -95,7 +95,7 @@ const EditModal: React.FC<EditModalProps> = ({
   const priceIncreaseWei = useMemo(() => {
     const newPriceWei = stringGweiToWei(state.newPriceGwei);
     if (newPriceWei <= oldPriceWei) return num.toBigInt(0);
-    else return newPriceWei - oldPriceWei;
+    else return num.toBigInt(newPriceWei) - num.toBigInt(oldPriceWei);
   }, [state.newPriceGwei, oldPriceWei]);
 
   const totalNewCostWei = useMemo((): bigint => {
@@ -225,22 +225,22 @@ const EditModal: React.FC<EditModalProps> = ({
   ]);
 
   return (
-    <div className="bg-[#121212] border border-[#262626] rounded-xl p-0 w-full flex flex-col h-full">
+    <div className="bg-[#121212] border border-[#262626] rounded-xl p-0 w-full flex flex-col h-full edit-bid-modal">
       <div className="flex items-center p-4">
         <button
           onClick={onClose}
-          className="flex justify-center items-center mr-4 w-[44px] h-[44px] rounded-lg border-[1px] border-[#262626] bg-[#0D0D0D]"
+          className="flex justify-center items-center mr-4 w-[44px] h-[44px] rounded-lg border-[1px] border-[#262626] bg-[#0D0D0D] edit-bid-close"
         >
           <ChevronLeft className="size-[16px] stroke-[4px] text-[#F5EBB8]" />
         </button>
-        <h2 className="text-[#FAFAFA] text-[16px] font-medium text-md">
+        <h2 className="text-[#FAFAFA] text-[16px] font-medium text-md edit-bid-header">
           Edit Bid
         </h2>
       </div>
 
       <div className="flex flex-col h-full">
         <div className="flex-grow space-y-6 pt-2 px-4">
-          <Hoverable dataId="inputUpdateBidAmount">
+          <Hoverable dataId="inputUpdateBidAmount" className="edit-bid-current-amount">
             <InputField
               type="number"
               value={""}
@@ -258,7 +258,7 @@ const EditModal: React.FC<EditModalProps> = ({
               }
             />
           </Hoverable>
-          <Hoverable dataId="inputUpdateBidPrice">
+          <Hoverable dataId="inputUpdateBidPrice" className="edit-bid-new-price">
             <InputField
               type="number"
               value={state.newPriceGwei}
@@ -280,14 +280,14 @@ const EditModal: React.FC<EditModalProps> = ({
 
       <Hoverable
         dataId="updateBidSummary"
-        className="flex justify-between text-sm px-6 pb-1"
+        className="flex justify-between text-sm px-6 pb-1 edit-bid-total"
       >
         <span className="text-gray-400">Total</span>
         <span>{formatNumber(parseFloat(totalNewCostEth))} ETH</span>
       </Hoverable>
       <Hoverable
         dataId="placingBidBalance"
-        className="flex justify-between text-sm px-6 pb-6"
+        className="flex justify-between text-sm px-6 pb-6 edit-bid-balance"
       >
         <span className="text-gray-400">Balance</span>
         <span>

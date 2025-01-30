@@ -75,7 +75,7 @@ const useFossilStatus = () => {
     };
   }, [fetchStatus, targetTimestamp, selectedRoundState?.roundState]);
 
-  return { status: statusData, error, loading, setStatusData };
+  return { status: statusData, error, loading, setStatusData, fetchStatus };
 };
 
 export default useFossilStatus;

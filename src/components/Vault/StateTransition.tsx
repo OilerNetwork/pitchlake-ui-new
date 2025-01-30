@@ -48,6 +48,7 @@ const StateTransition = ({
     expectedNextState,
   });
 
+  console.log("states",selectedRoundState,roundState,prevRoundState,)
   const {
     canAuctionStart,
     canAuctionEnd,

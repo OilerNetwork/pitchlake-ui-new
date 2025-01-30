@@ -58,7 +58,7 @@ const HistoryItem: React.FC<{
       {roundState === "Auctioning" && (
         <Hoverable
           dataId="openUpdateBidPanel"
-          className="bg-[#262626] p-2 rounded-lg cursor-pointer"
+          className="edit-button bg-[#262626] p-2 rounded-lg cursor-pointer"
         >
           <SquarePen
             onClick={() => {

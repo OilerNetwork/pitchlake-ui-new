@@ -79,6 +79,7 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
 
   return (
     <div
+      data-testid="vault-card"
       className={`hover-zoom-tiny col-span-1 w-full border-[1px] border-[#262626] hover:border-[#454545] rounded-lg hover:cursor-pointer transition duration-200 group`}
       onClick={() => {
         setSelectedRound(Number(vaultState?.currentRoundId));
@@ -87,7 +88,7 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
     >
       <div className="bg-[#1A1A16] rounded-t-lg p-4 text-white group-hover:bg-[#1D1D18] transition duration-200">
         <div className="flex flex-row items-center">
-          <p className="text-[14px] font-semibold">
+          <p data-testid="vault-duration" className="text-[14px] font-semibold">
             {auctionEndDate && optionSettleDate
               ? timeUntilTargetFormal(
                   auctionEndDate.toString(),
@@ -96,11 +97,11 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
               : "Loading..."}
           </p>
           <div className="bg-primary-800 rounded-full w-[5px] h-[5px] m-2 vault-type" />
-          <p className="text-[16px] font-regular text-[var(--buttongrey)]">
+          <p data-testid="vault-type" className="text-[16px] font-regular text-[var(--buttongrey)]">
             {vaultState?.vaultType ? vaultState.vaultType : "--"}
           </p>
         </div>
-        <p className="text-[16px] font-regular text-[var(--buttongrey)]">
+        <p data-testid="vault-address" className="text-[16px] font-regular text-[var(--buttongrey)]">
           {shortenString(vaultAddress)}{" "}
         </p>
       </div>
@@ -114,7 +115,7 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
               />
               <p className="font-regular text-[14px] text-[#BFBFBF]">APY:</p>
             </div>
-            <p className="text-[#fafafa] font-medium text-[14px]">{"--"}</p>
+            <p data-testid="vault-apy" className="text-[#fafafa] font-medium text-[14px]">{"--"}</p>
           </div>
           <div className="flex flex-row justify-between m-2">
             <div className="flex flex-row items-center">
@@ -124,7 +125,7 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
               />
               <p className="font-regular text-[14px] text-[#BFBFBF]">Cap:</p>
             </div>
-            <p className="text-[#fafafa] font-medium text-[14px]">
+            <p data-testid="vault-cap" className="text-[#fafafa] font-medium text-[14px]">
               {capLevel.toString() === "0"
                 ? "Loading..."
                 : `${parseInt(capLevel.toString()) / 100}%`}
@@ -138,7 +139,7 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
               />
               <p className="font-regular text-[14px] text-[#BFBFBF]">Strike:</p>
             </div>
-            <p className="text-[#fafafa] font-medium text-[14px]">
+            <p data-testid="vault-strike" className="text-[#fafafa] font-medium text-[14px]">
               {strikePrice.toString() === "0"
                 ? "Loading..."
                 : `${parseFloat(
@@ -153,7 +154,7 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
               <TagIcon classname="w-4 h-4 mr-2" stroke={"var(--greyscale)"} />
               <p className="font-regular text-[14px] text-[#BFBFBF]">FEES:</p>
             </div>
-            <p className="text-[#fafafa] font-medium text-[14px]">{"--"}</p>
+            <p data-testid="vault-fees" className="text-[#fafafa] font-medium text-[14px]">{"--"}</p>
           </div>
           <div className="flex flex-row justify-between m-2">
             <div className="flex flex-row items-center">
@@ -163,7 +164,7 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
               />
               <p className="font-regular text-[14px] text-[#BFBFBF]">TVL:</p>
             </div>
-            <p className="text-[#fafafa] font-medium text-[14px]">
+            <p data-testid="vault-tvl" className="text-[#fafafa] font-medium text-[14px]">
               {parseFloat(
                 formatEther(
                   num.toBigInt(lockedBalance) +
@@ -180,12 +181,12 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
                 classname="w-4 h-4 mr-2"
                 stroke={"var(--greyscale)"}
               />
-              <p className="font-regular text-[14px] text-[#BFBFBF]">
+              <p data-testid="vault-time-label" className="font-regular text-[14px] text-[#BFBFBF]">
                 {timeUntilText}
               </p>
             </div>
 
-            <p className="text-[#fafafa] font-medium text-[14px]">
+            <p data-testid="vault-time-value" className="text-[#fafafa] font-medium text-[14px]">
               {timeUntilValue === "0" ? "Loading..." : timeUntilValue}
             </p>
           </div>

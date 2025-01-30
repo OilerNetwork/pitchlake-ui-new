@@ -26,7 +26,7 @@ export default function Home() {
 
   return (
     <div
-      className={`flex flex-grow flex-col px-8 py-4 pt-[84px] w-full bg-faded-black-alt`}
+      className={`flex flex-grow flex-col px-8  pt-[84px] py-4  w-full bg-faded-black-alt `}
     >
       {
         //Disable mainnet

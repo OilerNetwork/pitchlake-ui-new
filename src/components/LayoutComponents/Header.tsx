@@ -1,7 +1,12 @@
 "use client";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { ChevronDownIcon } from "lucide-react";
+import { BellIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import {
+  ArrowUpIcon,
+  CheckIcon,
+  GlobeIcon,
+} from "@/components/Icons";
 import logo_full from "@/../public/logo_full.svg";
 import braavosIcon from "@/../public/braavos.svg";
 import argent from "@/../public/argent.svg";
@@ -141,7 +146,7 @@ export default function Header() {
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      document.addEventListener("mousedown", handleClickOutsideChain);
+      document.removeEventListener("mousedown", handleClickOutsideChain);
       document.removeEventListener("keydown", handleEscKey);
     };
   }, []);
@@ -222,34 +227,54 @@ export default function Header() {
           >
             {
               <button
-                className="flex flex-row min-w-16 border-[1px] border-primary-400 text-primary-400 text-sm px-4 py-3 rounded-md  items-center justify-center"
-                onClick={() => {
+                className="w-[150px] h-[44px] flex flex-row min-w-16 border-[1px] border-[#454545] text-white text-sm px-2 text-white py-3 rounded-md items-center"
+        onClick={() => {
                   setIsDropdownChainOpen(true);
                   setBlurOpen(!isBlurOpen);
                 }}
               >
-                <p>{chain.network}</p>
-                <ArrowDownIcon
-                  stroke="var(--primary)"
-                  classname="flex items-center ml-2 w-4 h-4"
-                />
+                <GlobeIcon fill="none" />
+                <p className="pl-[0.5rem]">{`${chain.network.charAt(0).toUpperCase() + chain.network.slice(1)}`}</p>
+
+                {isDropdownChainOpen ? (
+                  <ArrowUpIcon
+                    stroke="#bfbfbf"
+                    strokeWidth="1"
+                    classname="flex flex-row justify-center items-center w-5 h-5 ml-auto"
+                  />
+                ) : (
+                  <ArrowDownIcon
+                    stroke="#bfbfbf"
+                    strokeWidth="1"
+                    classname="flex flex-row justify-center items-center w-5 h-5 ml-auto"
+                  />
+                )}
               </button>
             }
 
             {isDropdownChainOpen && (
-              <div className="absolute right-0 bg-[#161616] text-center text-primary-400 w-full text-sm flex flex-col">
-                {chains.map((chain: Chain, index: number) => {
+              <div className="absolute left-0 mt-[0.5rem] rounded-md border-[#262626] border-[1px] bg-[#161616] w-[167px] h-[196px] text-left text-primary-400 text-sm flex flex-col justify-center">
+                {chains.map((c: Chain, index: number) => {
                   return (
                     <div
                       key={index}
                       onClick={() => {
                         handleSwitchChain(chain.network);
                       }}
-                      className={`cursor-pointer sticky p-2 px-3 w-full text-[12px] font-medium hover:bg-[#262626] ${
-                        chain.network === "mainnet" ? "text-greyscale-400" : ""
-                      }`}
+                      className={`p-2 flex flex-row  ${chain.network === c.network ? "bg-[#262626]" : ""} ${c.network === "mainnet" ? "" : "hover:bg-[#262626]"}`}
                     >
-                      {chain.network.toLocaleUpperCase()}
+                      <div
+                        className={`px-2 py-1 cursor-pointer sticky w-full text-[14px] text-[#FFFFFF] font-normal text-nowrap ${
+                          c.network === "mainnet" ? "text-greyscale-500" : ""
+                        }`}
+                      >
+                        {`${c.network.charAt(0).toUpperCase() + c.network.slice(1)}${c.network === "mainnet" ? " (Disabled)" : ""}`}
+                      </div>
+                      {chain.network === c.network && (
+                        <div className="px-2 flex flex-row items-center justify-center">
+                          <CheckIcon stroke="#ffffff" fill="none" />
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -286,6 +311,7 @@ export default function Header() {
                   <span className="text-white font-medium">
                     {shortenString(account.address)}
                   </span>
+
                   <ChevronDownIcon className="h-4 w-4 text-white" />
                 </button>
 
