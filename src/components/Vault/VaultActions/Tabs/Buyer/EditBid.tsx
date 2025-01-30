@@ -16,6 +16,7 @@ import { useProvider } from "@starknet-react/core";
 import { useContractWrite, useContract } from "@starknet-react/core";
 import { erc20ABI, optionRoundABI } from "@/lib/abi";
 import Hoverable from "@/components/BaseComponents/Hoverable";
+import { formatNumber } from "@/lib/utils";
 
 interface EditModalProps {
   onConfirm: () => void;
@@ -159,7 +160,7 @@ const EditModal: React.FC<EditModalProps> = ({
         <br /> be spending an additional
         <br />
         <span className="font-semibold text-[#fafafa]">
-          {totalNewCostEth} ETH
+          {formatNumber(Number(totalNewCostEth))} ETH
         </span>
       </>,
       async () => {
@@ -282,7 +283,7 @@ const EditModal: React.FC<EditModalProps> = ({
         className="flex justify-between text-sm px-6 pb-1"
       >
         <span className="text-gray-400">Total</span>
-        <span>{parseFloat(totalNewCostEth).toFixed(6)} ETH</span>
+        <span>{formatNumber(parseFloat(totalNewCostEth))} ETH</span>
       </Hoverable>
       <Hoverable
         dataId="placingBidBalance"
@@ -290,7 +291,7 @@ const EditModal: React.FC<EditModalProps> = ({
       >
         <span className="text-gray-400">Balance</span>
         <span>
-          {parseFloat(formatEther(num.toBigInt(balance))).toFixed(3)} ETH
+          {formatNumber(parseFloat(formatEther(num.toBigInt(balance))))} ETH
         </span>
       </Hoverable>
       <div className="mt-auto">

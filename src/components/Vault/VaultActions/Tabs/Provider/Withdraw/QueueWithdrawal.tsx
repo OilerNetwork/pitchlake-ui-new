@@ -6,6 +6,7 @@ import { useTransactionContext } from "@/context/TransactionProvider";
 import { useAccount } from "@starknet-react/core";
 import { formatEther } from "ethers";
 import Hoverable from "@/components/BaseComponents/Hoverable";
+import { formatNumber } from "@/lib/utils";
 
 interface WithdrawQueueProps {
   showConfirmation: (
@@ -134,9 +135,11 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
         >
           <span className="text-gray-400">Locked Balance</span>
           <span className="text-white">
-            {parseFloat(
-              formatEther(lpState?.lockedBalance?.toString() || "0"),
-            ).toFixed(3)}{" "}
+            {formatNumber(
+              parseFloat(
+                formatEther(lpState?.lockedBalance?.toString() || "0"),
+              ),
+            )}{" "}
             ETH
           </span>
         </Hoverable>

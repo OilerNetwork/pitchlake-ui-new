@@ -6,7 +6,7 @@ import { PlaceBidArgs } from "@/lib/types";
 import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useAccount } from "@starknet-react/core";
 import { RepeatEthIcon } from "@/components/Icons";
-import { formatNumberText } from "@/lib/utils";
+import { formatNumber, formatNumberText } from "@/lib/utils";
 import { num } from "starknet";
 import { formatEther } from "ethers";
 import { useTransactionContext } from "@/context/TransactionProvider";
@@ -45,7 +45,7 @@ const Refund: React.FC<RefundProps> = ({ showConfirmation }) => {
       <>
         refund bids worth{" "}
         <span className="font-semibold text-[#fafafa]">
-          {Number(refundBalanceEth)} ETH
+          {formatNumber(Number(refundBalanceEth))} ETH
         </span>
       </>,
       handleRefundBid,
@@ -72,7 +72,7 @@ const Refund: React.FC<RefundProps> = ({ showConfirmation }) => {
         <p className="text-center text-[#bfbfbf]">
           Your refundable balance is <br />
           <span className="font-semibold text-[#fafafa]">
-            {refundBalanceEth} ETH
+            {formatNumber(Number(refundBalanceEth))} ETH
           </span>
         </p>
       </div>

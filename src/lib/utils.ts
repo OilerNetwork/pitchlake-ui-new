@@ -110,15 +110,11 @@ export const getPerformanceLP = (
   premiums: bigint | string | number,
   totalPayout: bigint | string | number,
 ) => {
-  const soldLiq = soldLiquidity
-    ? num.toBigInt(soldLiquidity.toString())
-    : num.toBigInt(0);
-  const prem = premiums ? num.toBigInt(premiums.toString()) : num.toBigInt(0);
-  const payout = totalPayout
-    ? num.toBigInt(totalPayout.toString())
-    : num.toBigInt(0);
+  const soldLiq = soldLiquidity ? BigInt(soldLiquidity.toString()) : BigInt(0);
+  const prem = premiums ? BigInt(premiums.toString()) : BigInt(0);
+  const payout = totalPayout ? BigInt(totalPayout.toString()) : BigInt(0);
 
-  if (soldLiq === num.toBigInt(0)) return 0;
+  if (soldLiq === BigInt(0)) return 0;
 
   const gainLoss = Number(prem) - Number(payout);
   const percentage = (gainLoss / Number(soldLiq.toString())) * 100.0;
@@ -131,14 +127,14 @@ export const getPerformanceOB = (
   premiums: bigint | string | number,
   totalPayout: bigint | string | number,
 ) => {
-  const prem = premiums ? BigInt(premiums.toString()) : BigInt(0);
-  const payout = totalPayout ? BigInt(totalPayout.toString()) : BigInt(0);
+  const prem: number = premiums ? Number(premiums) : 0;
+  const payout: number = totalPayout ? Number(totalPayout) : 0;
 
-  if (prem === BigInt(0)) {
+  if (prem === 0) {
     return 0;
   } else {
-    const gainLoss = Number(payout) - Number(prem);
-    const percentage = (gainLoss / Number(prem)) * 100;
+    const remainingLiq = payout - prem;
+    const percentage = 100 * (remainingLiq / prem);
 
     const sign = percentage > 0 ? "+" : "";
     return `${sign}${percentage.toFixed(2)}`;
@@ -305,6 +301,36 @@ export const isValidHex64 = (input: string): boolean => {
 
   // Check if the length is less than or equal to 64 (after removing '0x')
   return hexPart.length <= 64;
+};
+
+// Format an Eth amount to a readable string
+export const formatNumber = (num: number): string => {
+  // Ensure the input is a number
+  if (typeof num !== "number") {
+    throw new TypeError("Input must be a number");
+  }
+
+  // Handle negative numbers by working with their absolute values
+  const absNum = Math.abs(num);
+  let formattedNumber;
+
+  if (absNum >= 10) {
+    formattedNumber = num.toFixed(1);
+  } else if (absNum >= 1) {
+    formattedNumber = num.toFixed(2);
+  }
+  //  else if (absNum >= 0.001) {
+  //    formattedNumber = num.toFixed(3);
+  //  }
+  else if (absNum >= 0.00001) {
+    formattedNumber = num.toFixed(5);
+  } else if (absNum === 0) {
+    formattedNumber = "0.000";
+  } else {
+    formattedNumber = "< 0.00001";
+  }
+
+  return formattedNumber;
 };
 
 export const getTWAPs = (

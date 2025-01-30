@@ -15,6 +15,7 @@ import { useTransactionContext } from "@/context/TransactionProvider";
 import { useAccount } from "@starknet-react/core";
 import { num } from "starknet";
 import Hoverable from "@/components/BaseComponents/Hoverable";
+import { formatNumber } from "@/lib/utils";
 
 interface WithdrawLiquidityProps {
   showConfirmation: (
@@ -53,7 +54,7 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
         withdraw
         <br />
         <span className="font-semibold text-[#fafafa]">
-          {state.amount} ETH
+          {formatNumber(Number(state.amount))} ETH
         </span>{" "}
         from your unlocked balance
       </>,
@@ -153,9 +154,11 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
         >
           <span className="text-gray-400">Unlocked Balance</span>
           <span className="text-white">
-            {parseFloat(
-              formatEther(lpState?.unlockedBalance?.toString() || "0"),
-            ).toFixed(3)}{" "}
+            {formatNumber(
+              parseFloat(
+                formatEther(lpState?.unlockedBalance?.toString() || "0"),
+              ),
+            )}{" "}
             ETH
           </span>
         </Hoverable>

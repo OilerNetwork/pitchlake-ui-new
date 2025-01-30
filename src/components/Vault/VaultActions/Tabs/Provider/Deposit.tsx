@@ -13,7 +13,7 @@ import { num, Call } from "starknet";
 import { useContractWrite, useContract } from "@starknet-react/core";
 import { erc20ABI, vaultABI } from "@/lib/abi";
 import useERC20 from "@/hooks/erc20/useERC20";
-import { shortenString, isValidHex64 } from "@/lib/utils";
+import { shortenString, isValidHex64, formatNumber } from "@/lib/utils";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 
 interface DepositProps {
@@ -142,7 +142,9 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
       <>
         <br />
         deposit{" "}
-        <span className="font-semibold text-[#fafafa]">{state.amount} ETH</span>
+        <span className="font-semibold text-[#fafafa]">
+          {formatNumber(Number(state.amount))} ETH
+        </span>
         {state.isDepositAsBeneficiary && (
           <>
             <br />
@@ -275,11 +277,13 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
           >
             <span className="text-gray-400">Unlocked Balance</span>
             <span className="text-white">
-              {parseFloat(
-                formatEther(
-                  BigInt(lpState?.unlockedBalance?.toString() || "0"),
+              {formatNumber(
+                parseFloat(
+                  formatEther(
+                    BigInt(lpState?.unlockedBalance?.toString() || "0"),
+                  ),
                 ),
-              ).toFixed(3)}{" "}
+              )}{" "}
               ETH
             </span>
           </Hoverable>

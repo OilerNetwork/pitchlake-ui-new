@@ -10,6 +10,7 @@ import { CollectEthIcon } from "@/components/Icons";
 import { num } from "starknet";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import Hoverable from "@/components/BaseComponents/Hoverable";
+import { formatNumber } from "@/lib/utils";
 
 interface WithdrawStashProps {
   //withdrawStash: () => Promise<void>;
@@ -49,8 +50,14 @@ const WithdrawStash: React.FC<WithdrawStashProps> = ({
       <>
         collect your stashed{" "}
         <span className="font-semibold text-[#fafafa]">
-          {formatEther(
-            lpState?.stashedBalance ? lpState.stashedBalance.toString() : "0",
+          {formatNumber(
+            Number(
+              formatEther(
+                lpState?.stashedBalance
+                  ? lpState.stashedBalance.toString()
+                  : "0",
+              ),
+            ),
           )}{" "}
           ETH
         </span>{" "}
@@ -93,9 +100,9 @@ const WithdrawStash: React.FC<WithdrawStashProps> = ({
             <br />
             <b className="mt-0 text-[#FAFAFA] text-[14px] font-bold text-center">
               {lpState?.stashedBalance
-                ? parseFloat(formatEther(lpState.stashedBalance.toString()))
-                    .toFixed(3)
-                    .toString()
+                ? formatNumber(
+                    parseFloat(formatEther(lpState.stashedBalance.toString())),
+                  )
                 : "0"}{" "}
               ETH
             </b>

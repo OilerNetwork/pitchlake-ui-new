@@ -28,6 +28,7 @@ import { useHelpContext } from "@/context/HelpProvider";
 import QuestionCircleIcon from "../Icons/QuestionCircleIcon";
 import Hoverable from "../BaseComponents/Hoverable";
 import { useUiContext } from "@/context/UiProvider";
+import { formatNumber } from "@/lib/utils";
 
 export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -44,7 +45,7 @@ export default function Header() {
   const router = useRouter();
   const pathName = usePathname();
   const { connect, connectors } = useConnect();
- // const { switchChainAsync } = useSwitchChain({});
+  // const { switchChainAsync } = useSwitchChain({});
   const { disconnect } = useDisconnect();
   const { chains, chain } = useNetwork();
   //console.log("CHAINS", chains);
@@ -71,19 +72,21 @@ export default function Header() {
     const { lockedBalance, unlockedBalance, stashedBalance } = lpState;
 
     if (balance)
-      wallet = parseFloat(formatEther(BigInt(balance).toString())).toFixed(3);
+      wallet = formatNumber(
+        parseFloat(formatEther(BigInt(balance).toString())),
+      );
     if (lockedBalance)
-      locked = parseFloat(
-        formatEther(BigInt(lpState.lockedBalance).toString()),
-      ).toFixed(3);
+      locked = formatNumber(
+        parseFloat(formatEther(BigInt(lpState.lockedBalance).toString())),
+      );
     if (unlockedBalance)
-      unlocked = parseFloat(
-        formatEther(BigInt(lpState.unlockedBalance).toString()),
-      ).toFixed(3);
+      unlocked = formatNumber(
+        parseFloat(formatEther(BigInt(lpState.unlockedBalance).toString())),
+      );
     if (stashedBalance)
-      stashed = parseFloat(
-        formatEther(BigInt(lpState.stashedBalance).toString()),
-      ).toFixed(3);
+      stashed = formatNumber(
+        parseFloat(formatEther(BigInt(lpState.stashedBalance).toString())),
+      );
 
     return { wallet, locked, unlocked, stashed };
   }, [
@@ -159,10 +162,10 @@ export default function Header() {
       console.log("FAILED");
       return Error("Chain not found");
     }
-      // await switchChainAsync({
-      //   chainId: chain,
-      // });
-      console.log("CHAIN SWITCHED");
+    // await switchChainAsync({
+    //   chainId: chain,
+    // });
+    console.log("CHAIN SWITCHED");
     return;
   };
   const copyToClipboard = (text: string) => {

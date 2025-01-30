@@ -9,7 +9,7 @@ import { formatUnits, parseUnits, parseEther, formatEther } from "ethers";
 import { useAccount, useContractWrite } from "@starknet-react/core";
 import useERC20 from "@/hooks/erc20/useERC20";
 import { num, Call } from "starknet";
-import { formatNumberText } from "@/lib/utils";
+import { formatNumber, formatNumberText } from "@/lib/utils";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import useLatestTimetamp from "@/hooks/chain/useLatestTimestamp";
 import { useProvider } from "@starknet-react/core";
@@ -143,7 +143,10 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
         </span>
         , totaling
         <br />
-        <span className="font-semibold text-[#fafafa]">{bidTotalEth} ETH</span>?
+        <span className="font-semibold text-[#fafafa]">
+          {formatNumber(bidTotalEth)} ETH
+        </span>
+        ?
       </>,
       async () => {
         await handleMulticall();
@@ -296,14 +299,14 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
       <Hoverable dataId="newBidSummary" className="flex flex-col h-[full]">
         <div className="flex justify-between text-sm px-6 pb-1">
           <span className="text-gray-400">Total</span>
-          <span>{bidTotalEth.toFixed(2)} ETH</span>
+          <span>{formatNumber(bidTotalEth)} ETH</span>
         </div>
       </Hoverable>
       <Hoverable dataId="placingBidBalance" className="flex flex-col h-[full]">
         <div className="flex justify-between text-sm px-6 pb-6">
           <span className="text-gray-400">Balance</span>
           <span>
-            {parseFloat(formatEther(num.toBigInt(balance))).toFixed(3)} ETH
+            {formatNumber(parseFloat(formatEther(BigInt(balance))))} ETH
           </span>
         </div>
       </Hoverable>

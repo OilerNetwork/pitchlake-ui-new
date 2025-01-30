@@ -7,7 +7,7 @@ import { PlaceBidArgs } from "@/lib/types";
 import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useAccount } from "@starknet-react/core";
 import { RepeatEthIcon } from "@/components/Icons";
-import { formatNumberText } from "@/lib/utils";
+import { formatNumber, formatNumberText } from "@/lib/utils";
 import { num } from "starknet";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import useERC20 from "@/hooks/erc20/useERC20";
@@ -57,7 +57,7 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
         </span>{" "}
         options for{" "}
         <span className="font-semibold text-[#fafafa]">
-          {Number(payoutBalanceEth).toFixed(3)} ETH
+          {formatNumber(Number(payoutBalanceEth))} ETH
         </span>
       </>,
       handleExerciseOptions,
@@ -92,7 +92,7 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
           <br />{" "}
           <span className="font-semibold text-[#fafafa]">
             {" "}
-            {Number(payoutBalanceEth).toFixed(3)} ETH
+            {formatNumber(Number(payoutBalanceEth))} ETH
           </span>
         </p>
       </div>
