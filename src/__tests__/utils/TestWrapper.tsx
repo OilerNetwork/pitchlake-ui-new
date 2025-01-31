@@ -1,5 +1,5 @@
-import React from 'react';
-import { render } from '@testing-library/react';
+import React from "react";
+import { render } from "@testing-library/react";
 import { ReactNode } from "react";
 import { HelpProvider } from "@/context/HelpProvider";
 import { useProtocolContext } from "@/context/ProtocolProvider";
@@ -11,7 +11,7 @@ jest.mock("@/context/ProtocolProvider", () => ({
       roundId: "1",
       startTimestamp: "1000",
       duration: "1000",
-      roundState: "Auctioning"
+      roundState: "Auctioning",
     },
     connectionType: "mock",
   }),
@@ -22,11 +22,7 @@ interface TestWrapperProps {
 }
 
 export const TestWrapper: React.FC<TestWrapperProps> = ({ children }) => {
-  return (
-    <HelpProvider>
-      {children}
-    </HelpProvider>
-  );
+  return <HelpProvider>{children}</HelpProvider>;
 };
 
 export const renderWithProviders = (ui: ReactNode) => {
@@ -34,12 +30,12 @@ export const renderWithProviders = (ui: ReactNode) => {
 };
 
 // Add tests for the wrapper itself
-describe('TestWrapper', () => {
-  it('provides help context to children', () => {
+describe("TestWrapper", () => {
+  it("provides help context to children", () => {
     const { container } = render(
       <TestWrapper>
         <div>Test Child</div>
-      </TestWrapper>
+      </TestWrapper>,
     );
     expect(container).toBeInTheDocument();
   });
