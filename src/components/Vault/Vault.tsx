@@ -12,18 +12,24 @@ import MobileScreen from "../BaseComponents/MobileScreen";
 import { useHelpContext } from "@/context/HelpProvider";
 import { HelpBoxPanel } from "../HelpBoxComponents/HelpBoxPanel";
 import Hoverable from "../BaseComponents/Hoverable";
+import WrongNetworkScreen from "@/__tests__/components/BaseComponents/WrongNetworkScreen";
+import { useNetwork } from "@starknet-react/core";
 
 export const Vault = () => {
   const [isProviderView, setIsProviderView] = useState(true);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const { isMobile } = useIsMobile();
   const { isHelpBoxOpen } = useHelpContext();
+  const { chain } = useNetwork();
   const router = useRouter();
 
   if (isMobile) {
     return <MobileScreen />;
   }
 
+  if (chain.network === "mainnet") {
+    return <WrongNetworkScreen />;
+  }
   return (
     <div className="px-6 py-4 pt-[120px] bg-faded-black-alt flex-grow flex-box overflow-auto">
       <div className="flex flex-row-reverse text-primary">

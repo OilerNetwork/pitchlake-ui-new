@@ -3,6 +3,7 @@ import { Vault } from "../../../components/Vault/Vault";
 import useIsMobile from "../../../hooks/window/useIsMobile";
 import { useRouter } from "next/navigation";
 import { TestWrapper } from "../../utils/TestWrapper";
+import { useNetwork } from "@starknet-react/core";
 
 // Mock the hooks
 jest.mock("../../../hooks/window/useIsMobile", () => ({
@@ -29,14 +30,24 @@ jest.mock("../../../components/Vault/PanelLeft", () => ({
 
 jest.mock("../../../components/Vault/PanelRight", () => ({
   __esModule: true,
-  default: ({ userType, isEditOpen, setIsEditOpen }: { userType: string; isEditOpen: boolean; setIsEditOpen: (value: boolean) => void }) => (
-    <div className={`panel-right-${userType}`}>Panel Right</div>
-  ),
+  default: ({
+    userType,
+    isEditOpen,
+    setIsEditOpen,
+  }: {
+    userType: string;
+    isEditOpen: boolean;
+    setIsEditOpen: (value: boolean) => void;
+  }) => <div className={`panel-right-${userType}`}>Panel Right</div>,
 }));
 
 jest.mock("../../../components/BaseComponents/MobileScreen", () => ({
   __esModule: true,
   default: () => <div className="mobile-screen">Mobile Screen</div>,
+}));
+
+jest.mock("@starknet-react/core", () => ({
+  useNetwork: jest.fn(),
 }));
 
 describe("Vault Component", () => {
@@ -50,34 +61,52 @@ describe("Vault Component", () => {
     (useRouter as jest.Mock).mockReturnValue(mockRouter);
   });
 
-  it("renders desktop layout when not mobile", () => {
+  it("renders mainnet warning when network is mainnet", () => {
+    (useNetwork as jest.Mock).mockReturnValue({
+      chain: { network: "mainnet" },
+    });
+
     render(
       <TestWrapper>
         <Vault />
-      </TestWrapper>
+      </TestWrapper>,
     );
-    
+
+    expect(screen.getByText(/Mainnet is not yet released/)).toBeInTheDocument();
+  });
+
+  it("renders desktop layout when not mobile", () => {
+    (useNetwork as jest.Mock).mockReturnValue({
+      chain: { network: "sepolia" },
+    });
+
+    render(
+      <TestWrapper>
+        <Vault />
+      </TestWrapper>,
+    );
+
     // Check initial desktop layout
     const chart = screen.getByText("Chart");
     const leftPanel = screen.getByText("Panel Left");
     const rightPanel = screen.getByText("Panel Right");
-    
+
     expect(chart).toBeInTheDocument();
     expect(leftPanel).toBeInTheDocument();
     expect(rightPanel).toBeInTheDocument();
-    
+
     // Test view switching
-    const buyerTab = document.querySelector('.buyer-tab');
-    if (!buyerTab) throw new Error('Buyer tab not found');
+    const buyerTab = document.querySelector(".buyer-tab");
+    if (!buyerTab) throw new Error("Buyer tab not found");
     fireEvent.click(buyerTab);
-    
+
     expect(screen.getByText("Panel Left")).toBeInTheDocument();
     expect(screen.getByText("Panel Right")).toBeInTheDocument();
-    
+
     // Test back navigation
-    const backButton = document.querySelector('.back-button-container');
-    if (!backButton) throw new Error('Back button not found');
-    fireEvent.click(backButton.querySelector('.back-button')!);
+    const backButton = document.querySelector(".back-button-container");
+    if (!backButton) throw new Error("Back button not found");
+    fireEvent.click(backButton.querySelector(".back-button")!);
     expect(mockRouter.push).toHaveBeenCalledWith("/");
   });
 
@@ -86,8 +115,9 @@ describe("Vault Component", () => {
     render(
       <TestWrapper>
         <Vault />
-      </TestWrapper>
+      </TestWrapper>,
     );
     expect(screen.getByText("Mobile Screen")).toBeInTheDocument();
   });
-}); 
+});
+

@@ -2,11 +2,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { BellIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
-import {
-  ArrowUpIcon,
-  CheckIcon,
-  GlobeIcon,
-} from "@/components/Icons";
+import { ArrowUpIcon, CheckIcon, GlobeIcon } from "@/components/Icons";
 import logo_full from "@/../public/logo_full.svg";
 import braavosIcon from "@/../public/braavos.svg";
 import argent from "@/../public/argent.svg";
@@ -189,6 +185,11 @@ export default function Header() {
     return str ? `${str.slice(0, 6)}...${str.slice(-4)}` : "";
   };
 
+  useEffect(() => {
+    if (isDropdownChainOpen || isDropdownOpen) setBlurOpen(true);
+    else setBlurOpen(false);
+  }, [isDropdownChainOpen, isDropdownOpen]);
+
   return (
     !isMobile && (
       <nav className="absolute top-0 z-50 w-full h-[84px] bg-[#121212] px-8 py-6 flex justify-between items-center border-b border-[#262626]">
@@ -228,27 +229,29 @@ export default function Header() {
             {
               <button
                 className="w-[150px] h-[44px] flex flex-row min-w-16 border-[1px] border-[#454545] text-white text-sm px-2 text-white py-3 rounded-md items-center"
-        onClick={() => {
+                onClick={() => {
                   setIsDropdownChainOpen(true);
-                  setBlurOpen(!isBlurOpen);
                 }}
+                disabled
               >
                 <GlobeIcon fill="none" />
                 <p className="pl-[0.5rem]">{`${chain.network.charAt(0).toUpperCase() + chain.network.slice(1)}`}</p>
 
-                {isDropdownChainOpen ? (
-                  <ArrowUpIcon
-                    stroke="#bfbfbf"
-                    strokeWidth="1"
-                    classname="flex flex-row justify-center items-center w-5 h-5 ml-auto"
-                  />
-                ) : (
-                  <ArrowDownIcon
-                    stroke="#bfbfbf"
-                    strokeWidth="1"
-                    classname="flex flex-row justify-center items-center w-5 h-5 ml-auto"
-                  />
-                )}
+                {
+                  //  isDropdownChainOpen ? (
+                  //  <ArrowUpIcon
+                  //    stroke="#bfbfbf"
+                  //    strokeWidth="1"
+                  //    classname="flex flex-row justify-center items-center w-5 h-5 ml-auto"
+                  //  />
+                  //) : (
+                  //  <ArrowDownIcon
+                  //    stroke="#bfbfbf"
+                  //    strokeWidth="1"
+                  //    classname="flex flex-row justify-center items-center w-5 h-5 ml-auto"
+                  //  />
+                  //)
+                }
               </button>
             }
 
@@ -297,7 +300,6 @@ export default function Header() {
                 <button
                   onClick={() => {
                     setIsDropdownOpen(!isDropdownOpen);
-                    //setBlurOpen(!isBlurOpen);
                   }}
                   className="flex items-center space-x-2 py-2 px-3 rounded-md border border-greyscale-800 w-[164px] h-[44px]"
                 >
@@ -322,8 +324,6 @@ export default function Header() {
                       balance={balanceData}
                       disconnect={() => {
                         disconnect();
-                        //setBlurOpen(!isBlurOpen);
-                        //setIsDropdownOpen((state) => !state);
                       }}
                       copyToClipboard={copyToClipboard}
                     />
