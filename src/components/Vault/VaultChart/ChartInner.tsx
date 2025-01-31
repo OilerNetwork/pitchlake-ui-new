@@ -446,9 +446,11 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
                     style={{ backgroundColor: entry?.color }}
                   ></div>
                   <p className="text-white text-sm">
-                    {entry?.name === "basefee"
+                    {entry?.name?.includes("Basefee")
                       ? "BASEFEE"
-                      : entry?.name.replace("_", " ")}
+                      : entry?.name?.includes("Twap")
+                        ? "TWAP"
+                        : entry?.name.replace("_", " ")}
                     {": "}
                     {entry?.value !== undefined
                       ? Number(entry?.value).toFixed(2)
@@ -474,7 +476,11 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
   }
 
   return (
-    <ResponsiveContainer width="100%" maxHeight={665} className="pr-4 gas-price-chart-container">
+    <ResponsiveContainer
+      width="100%"
+      maxHeight={665}
+      className="pr-4 gas-price-chart-container"
+    >
       <ComposedChart
         margin={{ left: -20 }}
         data={parsedData}
@@ -564,6 +570,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
             <Area
               height={400}
               type="monotone"
+              className="chart-area-twap"
               dataKey="confirmedTwap"
               stroke="var(--error-300)"
               strokeWidth={2}
@@ -574,6 +581,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
               isAnimationActive={!isExpandedView}
             />
             <Line
+              className="chart-area-twap"
               height={400}
               type="monotone"
               dataKey="unconfirmedTwap"
@@ -593,6 +601,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
           <>
             <Area
               type="monotone"
+              className="chart-area-basefee"
               dataKey="confirmedBasefee"
               stroke="var(--greyscale)"
               strokeWidth={0.5}
@@ -604,6 +613,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
             />
             <Line
               type="monotone"
+              className="chart-area-basefee"
               dataKey="unconfirmedBasefee"
               stroke="#8B8460"
               strokeDasharray="1 0 1"
