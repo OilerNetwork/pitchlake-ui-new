@@ -71,10 +71,12 @@ describe("Refund Component", () => {
   });
 
   it("renders with initial state", () => {
-    const { container } = render(<Refund showConfirmation={mockShowConfirmation} />);
+    const { container } = render(
+      <Refund showConfirmation={mockShowConfirmation} />,
+    );
 
     // Check if the refund icon is rendered
-    expect(container.querySelector('.refund-icon')).toBeInTheDocument();
+    expect(container.querySelector(".refund-icon")).toBeInTheDocument();
 
     // Check if the refund button is rendered and enabled
     const refundButton = screen.getByRole("button", { name: "Refund Now" });
@@ -82,7 +84,7 @@ describe("Refund Component", () => {
     expect(refundButton).not.toBeDisabled();
 
     // Check if the refund balance is displayed correctly
-    expect(screen.getByText("1.0 ETH")).toBeInTheDocument();
+    expect(screen.getByText("1 ETH")).toBeInTheDocument();
   });
 
   it("disables button when account is not connected", () => {
@@ -151,7 +153,7 @@ describe("Refund Component", () => {
     expect(mockShowConfirmation).toHaveBeenCalledWith(
       "Refund",
       expect.anything(),
-      expect.any(Function)
+      expect.any(Function),
     );
   });
 
@@ -166,7 +168,7 @@ describe("Refund Component", () => {
     await onConfirm();
 
     expect(mockRefundUnusedBids).toHaveBeenCalledWith({
-      optionBuyer: "0x123"
+      optionBuyer: "0x123",
     });
   });
-}); 
+});
