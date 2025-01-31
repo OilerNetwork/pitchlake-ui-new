@@ -42,13 +42,13 @@ describe("History Component", () => {
   const mockHistoryItems = [
     {
       bid_id: "1",
-      amount: "1000",
+      amount: "1000000000", // 1 billion
       price: "500000000", // 0.5 GWEI
       roundState: "Auctioning",
     },
     {
       bid_id: "2",
-      amount: "2000",
+      amount: "2000000000", // 2 billion
       price: "1000000000", // 1 GWEI
       roundState: "Auctioning",
     },
@@ -98,18 +98,20 @@ describe("History Component", () => {
         isTabsHidden={false}
         setBidToEdit={mockSetBidToEdit}
         setIsTabsHidden={mockSetIsTabsHidden}
-      />
+      />,
     );
 
     // Check if both history items are rendered
-    expect(screen.getByText(/1,000 options at 0.5 GWEI each/)).toBeInTheDocument();
-    expect(screen.getByText(/2,000 options at 1 GWEI each/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/1.0b options at 0.5 GWEI each/),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/2.0b options at 1 GWEI each/)).toBeInTheDocument();
 
     // Check if total ETH values are displayed
     const ethValues = screen.getAllByText(/Total: .* ETH/);
     expect(ethValues).toHaveLength(2);
-    expect(ethValues[0]).toHaveTextContent("Total: 5.000000000000001e-7 ETH");
-    expect(ethValues[1]).toHaveTextContent("Total: 0.0000020000000000000003 ETH");
+    expect(ethValues[0]).toHaveTextContent("Total: 0.5 ETH");
+    expect(ethValues[1]).toHaveTextContent("Total: 2 ETH");
   });
 
   it("shows edit button only when roundState is Auctioning", () => {
@@ -120,7 +122,7 @@ describe("History Component", () => {
         isTabsHidden={false}
         setBidToEdit={mockSetBidToEdit}
         setIsTabsHidden={mockSetIsTabsHidden}
-      />
+      />,
     );
 
     // Should find two edit buttons (one for each history item)
@@ -141,7 +143,7 @@ describe("History Component", () => {
         isTabsHidden={false}
         setBidToEdit={mockSetBidToEdit}
         setIsTabsHidden={mockSetIsTabsHidden}
-      />
+      />,
     );
 
     // Should not find any edit buttons
@@ -156,7 +158,7 @@ describe("History Component", () => {
         isTabsHidden={false}
         setBidToEdit={mockSetBidToEdit}
         setIsTabsHidden={mockSetIsTabsHidden}
-      />
+      />,
     );
 
     const editButtons = container.getElementsByClassName("edit-button");
@@ -176,7 +178,7 @@ describe("History Component", () => {
         isTabsHidden={false}
         setBidToEdit={mockSetBidToEdit}
         setIsTabsHidden={mockSetIsTabsHidden}
-      />
+      />,
     );
 
     // Should render an empty div
@@ -192,15 +194,20 @@ describe("History Component", () => {
         isTabsHidden={false}
         setBidToEdit={mockSetBidToEdit}
         setIsTabsHidden={mockSetIsTabsHidden}
-      />
+      />,
     );
 
     const historyItems = screen.getAllByText(/options at/);
-    
+
     // First item should have border
-    expect(historyItems[0].parentElement?.parentElement).toHaveClass("border-b");
-    
+    expect(historyItems[0].parentElement?.parentElement).toHaveClass(
+      "border-b",
+    );
+
     // Last item should not have border
-    expect(historyItems[1].parentElement?.parentElement).not.toHaveClass("border-b");
+    expect(historyItems[1].parentElement?.parentElement).not.toHaveClass(
+      "border-b",
+    );
   });
-}); 
+});
+
