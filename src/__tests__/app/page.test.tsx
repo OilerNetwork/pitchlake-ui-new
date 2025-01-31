@@ -49,13 +49,15 @@ describe("Home Component", () => {
         chain: { network: "mainnet" },
       });
       render(<Home />);
-      
-      expect(screen.getByText(/Mainnet is not yet released/)).toBeInTheDocument();
+
+      expect(
+        screen.getByText(/Mainnet is not yet released/),
+      ).toBeInTheDocument();
     });
 
     it("renders content when network is testnet", () => {
       render(<Home />);
-      
+
       expect(screen.getByText("Popular Vaults")).toBeInTheDocument();
     });
   });
@@ -64,7 +66,7 @@ describe("Home Component", () => {
     it("renders mobile screen when on mobile device", () => {
       (useIsMobile as jest.Mock).mockReturnValue({ isMobile: true });
       render(<Home />);
-      
+
       expect(screen.getByText("Device Not Supported")).toBeInTheDocument();
     });
   });
@@ -73,7 +75,7 @@ describe("Home Component", () => {
     it("handles empty vault list gracefully", () => {
       (useWebSocketHome as jest.Mock).mockReturnValue({ vaults: [] });
       render(<Home />);
-      
+
       expect(screen.getByText("Popular Vaults")).toBeInTheDocument();
       expect(screen.queryByRole("article")).not.toBeInTheDocument();
     });
