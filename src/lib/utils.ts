@@ -306,31 +306,64 @@ export const isValidHex64 = (input: string): boolean => {
 // Format an Eth amount to a readable string
 export const formatNumber = (num: number): string => {
   // Ensure the input is a number
-  if (typeof num !== "number") {
-    throw new TypeError("Input must be a number");
+  if (typeof num !== "number" || isNaN(num)) {
+    throw new TypeError("Input must be a valid number");
   }
 
-  // Handle negative numbers by working with their absolute values
-  const absNum = Math.abs(num);
-  let formattedNumber;
+  const numString = num.toString();
 
-  if (absNum >= 10) {
-    formattedNumber = num.toFixed(1);
-  } else if (absNum >= 1) {
-    formattedNumber = num.toFixed(2);
-  }
-  //  else if (absNum >= 0.001) {
-  //    formattedNumber = num.toFixed(3);
-  //  }
-  else if (absNum >= 0.00001) {
-    formattedNumber = num.toFixed(5);
-  } else if (absNum === 0) {
-    formattedNumber = "0.000";
-  } else {
-    formattedNumber = "< 0.00001";
+  if (numString.includes(".")) {
+    if (num < 0.00001) return "< 0.00001";
+    const [whole, decimal] = numString.split(".");
+    return `${whole}.${decimal.slice(0, 5)}`;
   }
 
-  return formattedNumber;
+  return numString;
+
+  //return num.toString();
+
+  //// Handle negative numbers by working with their absolute values
+  //const absNum = Math.abs(num);
+  //let truncatedNumber: number;
+  //let formattedNumber: string;
+
+  //const truncate = (value: number, decimals: number): number => {
+  //  const factor = Math.pow(10, decimals);
+  //  return Math.floor(value * factor) / factor;
+  //};
+
+  //if (absNum >= 10) {
+  //  truncatedNumber = truncate(absNum, 1);
+  //  formattedNumber = truncatedNumber.toFixed(1);
+  //} else if (absNum >= 1) {
+  //  truncatedNumber = truncate(absNum, 2);
+  //  formattedNumber = truncatedNumber.toFixed(2);
+  //} else if (absNum >= 0.00001) {
+  //  truncatedNumber = truncate(absNum, 5);
+  //  formattedNumber = truncatedNumber.toFixed(5);
+  //} else if (absNum === 0) {
+  //  formattedNumber = "0.00000";
+  //} else {
+  //  formattedNumber = "< 0.00001";
+  //}
+
+  ////if (absNum >= 10) {
+  ////  formattedNumber = num.toFixed(1);
+  ////} else if (absNum >= 1) {
+  ////  formattedNumber = num.toFixed(2);
+  ////}
+  //////  else if (absNum >= 0.001) {
+  //////    formattedNumber = num.toFixed(3);
+  //////  }
+  ////else if (absNum >= 0.00001) {
+  ////  formattedNumber = num.toFixed(5);
+  ////} else if (absNum === 0) {
+  ////  formattedNumber = "0.000";
+  ////} else {
+  ////  formattedNumber = "< 0.00001";
+  ////}
+
+  //return formattedNumber;
 };
 
 export const getTWAPs = (
