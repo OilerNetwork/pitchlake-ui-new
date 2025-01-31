@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { SquarePen, SquareArrowOutUpRight, ChevronLeft } from "lucide-react";
 import { useProvider, useExplorer, Explorer } from "@starknet-react/core";
 import { Provider } from "starknet";
-import { formatNumberText } from "@/lib/utils";
+import { formatNumber, formatNumberText } from "@/lib/utils";
 import { formatUnits } from "ethers";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useProtocolContext } from "@/context/ProtocolProvider";
@@ -52,7 +52,10 @@ const HistoryItem: React.FC<{
         </p>
         <p className="text-[12px] text-[var(--buttongrey)] font-regular">
           Total:{" "}
-          {Number(formatUnits(item.price, "ether")) * Number(item.amount)} ETH
+          {formatNumber(
+            Number(formatUnits(item.price, "ether")) * Number(item.amount),
+          )}{" "}
+          ETH
         </p>
       </div>
       {roundState === "Auctioning" && (
