@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feat/test
   pull_request:
     branches:
       - main
@@ -29,3 +30,6 @@ jobs:
 
       - name: Run tests
         run: pnpm test
+
+      - name: Run build
+        run: pnpm run build
