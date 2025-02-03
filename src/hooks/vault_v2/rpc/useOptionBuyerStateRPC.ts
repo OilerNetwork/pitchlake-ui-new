@@ -5,7 +5,7 @@ import useContractReads from "@/lib/useContractReads";
 import { useAccount } from "@starknet-react/core";
 import { useMemo } from "react";
 
-const useOptionBuyerStateRPC = (address:string)=>{
+const useOptionBuyerStateRPC = (address?:string)=>{
     const {conn} = useNewContext();
     const contractData = useMemo(() => {
         if (conn === "mock") return { abi: optionRoundABI, address: undefined };

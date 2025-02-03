@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import useLPState from "@/hooks/vault/useLPState";
+import useLPState from "@/hooks/vault_v2/states/useLPState";
 import { useAccount } from "@starknet-react/core";
 import useContractReads from "@/lib/useContractReads";
 import { LiquidityProviderStateType } from "@/lib/types";

@@ -24,12 +24,7 @@ const useVaultStateRPC = ({
     };
   }, [address, conn]);
 
-  const actionsContractData = useMemo(() => {
-    return {
-      abi: vaultABI,
-      address: address as `0x${string}`,
-    };
-  }, [address]);
+
   const { account } = useAccount();
 
   //Read States
@@ -121,33 +116,11 @@ const useVaultStateRPC = ({
     stringToHex(round1Address ? round1Address.toString() : ""),
   );
 
-  const { data: currentRoundAddress } = useContractRead({
-    ...contractData,
-    functionName: "get_round_address",
-    args: currentRoundId ? [currentRoundId.toString()] : undefined,
-    watch: true,
-  });
-
-  const { data: selectedRoundAddress } = useContractRead({
-    ...actionsContractData,
-    functionName: "get_round_address",
-    args:
-      selectedRound && selectedRound !== 0
-        ? [selectedRound.toString()]
-        : undefined,
-    watch: true,
-  });
-
-  const usableString = useMemo(() => {
-    return stringToHex(selectedRoundAddress?.toString());
-  }, [selectedRoundAddress]);
-
 
   const k = strikeLevel ? Number(strikeLevel.toString()) : 0;
   const vaultType = k > 0 ? "OTM" : k == 0 ? "ATM" : "ITM";
 
-  return {
-    vaultState: {
+  return  {
       address,
       alpha: alpha ? alpha.toString() : 0,
       strikeLevel: strikeLevel ? strikeLevel.toString() : 0,
@@ -162,12 +135,7 @@ const useVaultStateRPC = ({
       queuedBps: queuedBps ? queuedBps.toString() : 0,
       vaultType,
       deploymentDate,
-    } as VaultStateType,
-    lpState,
-    currentRoundAddress: currentRoundAddress
-      ? stringToHex(currentRoundAddress?.toString())
-      : "",
-  };
+    } as VaultStateType
 };
 
 export default useVaultStateRPC;

@@ -153,6 +153,24 @@ export interface VaultDetailsProps {
   optionSettleDate?: string | number | bigint;
 }
 
+export type WebSocketData = {
+  wsVaultState: VaultStateType | undefined;
+  wsOptionRoundStates: OptionRoundStateType[];
+  wsLiquidityProviderState: LiquidityProviderStateType | undefined;
+  wsOptionBuyerStates: OptionBuyerStateType[];
+}
+
+export type MockData =  {
+  vaultState: VaultStateType;
+  lpState: LiquidityProviderStateType;
+  currentRoundAddress: string;
+  vaultActions: VaultActionsType;
+  optionRoundStates: OptionRoundStateType[];
+  optionRoundActions: OptionRoundActionsType;
+  optionBuyerStates: OptionBuyerStateType[];
+  roundActions: OptionRoundActionsType;
+}
+
 export type OptionRoundActionsType = {
   placeBid: (placeBids: PlaceBidArgs) => Promise<void>;
   updateBid: (updateBid: UpdateBidArgs) => Promise<void>;

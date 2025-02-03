@@ -1,7 +1,7 @@
 "use client";
-import useMockVault from "@/hooks/mocks/useMockVault";
+import useMockVault from "@/hooks/vault_v2/mock/useMockVault";
 import useWebSocketVault from "@/hooks/vault_v2/websocket/useWebSocketVault";
-import { LiquidityProviderStateType, OptionBuyerStateType, OptionRoundStateType, VaultStateType } from "@/lib/types";
+import {  MockData, WebSocketData } from "@/lib/types";
 import {
   Dispatch,
   ReactNode,
@@ -18,18 +18,17 @@ import {
 //Possible Updates:
 //Make transactions accepted only after 2 confirmations
 
+
+
+
 export type NewContextType = {
   conn: string;
   vaultAddress?: string;
   selectedRound: number;
   setSelectedRound: (roundId: number) => void;
   setVaultAddress: Dispatch<SetStateAction<string | undefined>>;
-  wsData: {
-    wsVaultState: VaultStateType | undefined;
-    wsOptionRoundStates: OptionRoundStateType[];
-    wsLiquidityProviderState: LiquidityProviderStateType | undefined;
-    wsOptionBuyerStates: OptionBuyerStateType[];
-}
+  wsData: WebSocketData,
+  mockData:MockData
 };
 
 export const NewContext = createContext<NewContextType>(
@@ -42,23 +41,11 @@ const NewContextProvider = ({ children }: { children: ReactNode }) => {
   const [selectedRound, setSelectedRound] = useState<number>(0);
 
   const wsData=useWebSocketVault(conn,vaultAddress)
-  //Mock States
+  const mockData = useMockVault({
+    selectedRound,
+    address:vaultAddress
+  })
 
-
-//   const setRound = useCallback(
-//     (roundId: number) => {
-//       if (roundId < 1) return;
-//       if (
-//         vaultState?.currentRoundId &&
-//         BigInt(roundId) <= BigInt(vaultState?.currentRoundId)
-//       ) {
-//         setSelectedRound(roundId);
-//       }
-//     },
-//     [vaultState?.currentRoundId],
-//   );
-
-  //Side Effects
 
 
   const contextValue = {
@@ -68,6 +55,7 @@ const NewContextProvider = ({ children }: { children: ReactNode }) => {
     selectedRound,
     setSelectedRound, //: setRound,
     wsData,
+    mockData,
   };
 
   return (

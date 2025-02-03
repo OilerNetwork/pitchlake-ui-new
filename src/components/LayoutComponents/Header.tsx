@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { BellIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
-import { ArrowUpIcon, CheckIcon, GlobeIcon } from "@/components/Icons";
+import {  ChevronDownIcon } from "lucide-react";
+import {  CheckIcon, GlobeIcon } from "@/components/Icons";
 import logo_full from "@/../public/logo_full.svg";
 import braavosIcon from "@/../public/braavos.svg";
 import argent from "@/../public/argent.svg";
@@ -14,7 +14,6 @@ import {
   useAccount,
   useConnect,
   useDisconnect,
-  useProvider,
 } from "@starknet-react/core";
 import ProfileDropdown from "../BaseComponents/ProfileDropdown";
 import { useRouter, usePathname } from "next/navigation";
@@ -22,7 +21,7 @@ import { useProtocolContext } from "@/context/ProtocolProvider";
 import { constants } from "starknet";
 import { formatEther } from "ethers";
 import useERC20 from "@/hooks/erc20/useERC20";
-import { ArrowDownIcon, LoginIcon } from "../Icons";
+import { LoginIcon } from "../Icons";
 import useIsMobile from "@/hooks/window/useIsMobile";
 import { Chain } from "@starknet-react/chains";
 import { useHelpContext } from "@/context/HelpProvider";
@@ -30,12 +29,16 @@ import QuestionCircleIcon from "../Icons/QuestionCircleIcon";
 import Hoverable from "../BaseComponents/Hoverable";
 import { useUiContext } from "@/context/UiProvider";
 import { formatNumber } from "@/lib/utils";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useLPState from "@/hooks/vault_v2/states/useLPState";
 
 export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownChainRef = useRef<HTMLDivElement>(null);
-  const { conn, timestamp, mockTimeForward, vaultState, lpState } =
+  const { conn, timestamp, mockTimeForward,vaultAddress } =
     useProtocolContext();
+    const vaultState = useVaultState();
+    const lpState = useLPState()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownChainOpen, setIsDropdownChainOpen] = useState(false);
   const isDropdownOpenRef = useRef(isDropdownOpen);
