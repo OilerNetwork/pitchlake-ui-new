@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { LayerStackIcon, SafeIcon } from "@/components/Icons";
 import { timeUntilTarget, shortenString, formatNumberText } from "@/lib/utils";
 import { formatUnits, formatEther } from "ethers";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import StateTransitionConfirmationModal from "@/components/Vault/Utils/StateTransitionConfirmationModal";
 import {
   ChevronUp,
@@ -15,8 +14,9 @@ import {
 import { useExplorer } from "@starknet-react/core";
 import { BalanceTooltip } from "@/components/BaseComponents/Tooltip";
 import StateTransition from "@/components/Vault/StateTransition";
-import { useProvider } from "@starknet-react/core";
 import Hoverable from "@/components/BaseComponents/Hoverable";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 
 // @NOTE: Replace this with difference between latest fossil block timestamp & now
 // - create a useLatestFossilBlockTimestamp hook
@@ -24,7 +24,9 @@ const FOSSIL_DELAY =
   process.env.NEXT_PUBLIC_FOSSIL_USE_MOCK_PRICING_DATA === "true" ? 0 : 15 * 60;
 
 const PanelLeft = ({ userType }: { userType: string }) => {
-  const { vaultState, selectedRoundState, timestamp } = useProtocolContext();
+  const {vaultState,selectedRoundAddress} = useVaultState()
+  const selectedRoundState = useRoundState(selectedRoundAddress)
+  console.log("RERENDERING HEADER")
   const [vaultIsOpen, setVaultIsOpen] = useState<boolean>(false);
   const [optionRoundIsOpen, setOptionRoundIsOpen] = useState<boolean>(false);
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
@@ -166,7 +168,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
           isPanelOpen ? "w-full" : "w-[110px]"
         } ${!isPanelOpen ? "" : ""}`}
       >
-        <div className="flex items-center align-center text-[14px] bg-black-alt border-[1px] border-greyscale-800 items-start rounded-lg w-full flex flex-col flex-grow h-full max-h-full">
+        <div className="align-center text-[14px] bg-black-alt border-[1px] border-greyscale-800 items-start rounded-lg w-full flex flex-col flex-grow h-full max-h-full">
           <Hoverable
             dataId="leftPanelStatisticsBar"
             onClick={() => {

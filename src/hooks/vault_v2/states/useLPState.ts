@@ -3,7 +3,7 @@ import {  useMemo } from "react";
 import useLPStateRPC from "../rpc/useLPStateRPC";
 
 const useLPState = () => {
-  const {conn,vaultAddress,wsData,mockData} = useNewContext();
+  const {conn,wsData,mockData} = useNewContext();
   const lpStateRPC = useLPStateRPC();
   const lpStateWS = wsData.wsLiquidityProviderState
   const lpStateMock = mockData.lpState

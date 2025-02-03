@@ -4,10 +4,12 @@ import { useTabContent } from "@/hooks/vault/useTabContent";
 import ConfirmationModal from "@/components/Vault/Utils/ConfirmationModal";
 import SuccessModal from "@/components/Vault/Utils/SuccessModal";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import EditModal from "@/components/Vault/VaultActions/Tabs/Buyer/EditBid";
 import { HourglassIcon } from "@/components/Icons";
 import { useAccount } from "@starknet-react/core";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
+import useOBState from "@/hooks/vault_v2/states/useOBState";
 
 interface VaultDetailsProps {
   userType: string;
@@ -28,7 +30,9 @@ const PanelRight: React.FC<VaultDetailsProps> = ({
   isEditOpen,
   setIsEditOpen,
 }) => {
-  const { selectedRoundState, selectedRoundBuyerState } = useProtocolContext();
+  const { selectedRoundAddress } = useVaultState();
+  const selectedRoundState = useRoundState(selectedRoundAddress)
+  const selectedRoundBuyerState = useOBState(selectedRoundAddress)
   const [activeTab, setActiveTab] = useState<string>("");
   const { account } = useAccount();
   const [bidToEdit, setBidToEdit] = useState({});

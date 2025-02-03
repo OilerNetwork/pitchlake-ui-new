@@ -14,14 +14,15 @@ import {
 } from "@/lib/types";
 import { useCallback, useMemo } from "react";
 import { useTransactionContext } from "@/context/TransactionProvider";
-
-const useVaultActions = (address?: `0x${string}`) => {
+import { useNewContext } from "@/context/NewProvider";
+const useVaultActions = () => {
+  const {vaultAddress} = useNewContext()
   const { setPendingTx } = useTransactionContext();
   const { account } = useAccount();
   const { provider } = useProvider();
   const { contract } = useContract({
     abi: vaultABI,
-    address,
+    address: vaultAddress as `0x${string}`,
   });
 
   const typedContract = useMemo(() => {

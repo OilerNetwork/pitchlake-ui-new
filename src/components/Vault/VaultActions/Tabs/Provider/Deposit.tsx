@@ -2,7 +2,6 @@ import React, { useState, ReactNode, useMemo, useEffect } from "react";
 import { useAccount } from "@starknet-react/core";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { parseEther, formatEther } from "ethers";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import InputField from "@/components/Vault/Utils/InputField";
 import { User } from "lucide-react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
@@ -15,7 +14,8 @@ import { erc20ABI, vaultABI } from "@/lib/abi";
 import useERC20 from "@/hooks/erc20/useERC20";
 import { shortenString, isValidHex64, formatNumber } from "@/lib/utils";
 import Hoverable from "@/components/BaseComponents/Hoverable";
-
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useLPState from "@/hooks/vault_v2/states/useLPState";
 interface DepositProps {
   showConfirmation: (
     modalHeader: string,
@@ -37,7 +37,8 @@ interface DepositState {
 }
 
 const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
-  const { vaultState, lpState } = useProtocolContext();
+  const {vaultState} = useVaultState()
+  const lpState = useLPState()
   //  console.log("check_", lpState?.unlockedBalance);
   const [state, setState] = useState<DepositState>({
     amount: "",

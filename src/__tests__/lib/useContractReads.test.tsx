@@ -40,12 +40,14 @@ describe("useContractReads", () => {
     expect(useContractRead).toHaveBeenCalledTimes(2);
     expect(useContractRead).toHaveBeenCalledWith({
       ...contractData,
+blockIdentifier:BlockTag.PENDING,
       functionName: "balance",
       args: ["0x123"],
       watch: false,
     });
     expect(useContractRead).toHaveBeenCalledWith({
       ...contractData,
+blockIdentifier:BlockTag.PENDING,
       functionName: "isApproved",
       args: ["0x123"],
       watch: false,
@@ -95,6 +97,7 @@ describe("useContractReads", () => {
 
     expect(useContractRead).toHaveBeenCalledWith({
       ...contractData,
+blockIdentifier:BlockTag.PENDING,
       functionName: "totalSupply",
       args: [], // Should default to empty array
       watch: false,
@@ -123,6 +126,7 @@ describe("useContractReads", () => {
 
     expect(useContractRead).toHaveBeenCalledWith({
       ...contractData,
+blockIdentifier:BlockTag.PENDING,
       functionName: "balance",
       args: ["0x123"],
       watch: true,

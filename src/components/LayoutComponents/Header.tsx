@@ -17,7 +17,6 @@ import {
 } from "@starknet-react/core";
 import ProfileDropdown from "../BaseComponents/ProfileDropdown";
 import { useRouter, usePathname } from "next/navigation";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { constants } from "starknet";
 import { formatEther } from "ethers";
 import useERC20 from "@/hooks/erc20/useERC20";
@@ -31,13 +30,16 @@ import { useUiContext } from "@/context/UiProvider";
 import { formatNumber } from "@/lib/utils";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useLPState from "@/hooks/vault_v2/states/useLPState";
+import { useNewContext } from "@/context/NewProvider";
+import { useTimeContext } from "@/context/TimeProvider";
 
 export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownChainRef = useRef<HTMLDivElement>(null);
-  const { conn, timestamp, mockTimeForward,vaultAddress } =
-    useProtocolContext();
-    const vaultState = useVaultState();
+  const { conn } =
+    useNewContext();
+    const {timestamp,mockTimeForward} = useTimeContext()
+    const {vaultState} = useVaultState();
     const lpState = useLPState()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownChainOpen, setIsDropdownChainOpen] = useState(false);

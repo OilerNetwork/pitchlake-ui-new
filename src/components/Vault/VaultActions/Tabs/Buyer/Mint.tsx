@@ -1,14 +1,14 @@
-import React, { useState, ReactNode, useEffect } from "react";
-import InputField from "@/components/Vault/Utils/InputField";
+import React, { ReactNode, useEffect } from "react";
 import { HammerIcon } from "@/components/Icons";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
-import { PlaceBidArgs } from "@/lib/types";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useAccount } from "@starknet-react/core";
-import { RepeatEthIcon } from "@/components/Icons";
 import { formatNumberText } from "@/lib/utils";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import Hoverable from "@/components/BaseComponents/Hoverable";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useOBState from "@/hooks/vault_v2/states/useOBState";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
+import useOptionRoundActions from "@/hooks/vault_v2/actions/useOptionRoundActions";
 
 interface MintProps {
   showConfirmation: (
@@ -19,7 +19,11 @@ interface MintProps {
 }
 
 const Mint: React.FC<MintProps> = ({ showConfirmation }) => {
-  const { roundActions, selectedRoundBuyerState } = useProtocolContext();
+
+  const {selectedRoundAddress} = useVaultState()  
+  const selectedRoundState = useRoundState(selectedRoundAddress)
+  const selectedRoundBuyerState = useOBState(selectedRoundAddress)
+  const roundActions = useOptionRoundActions(selectedRoundAddress);
   const { address, account } = useAccount();
   const { pendingTx } = useTransactionContext();
 

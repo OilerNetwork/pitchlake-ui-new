@@ -2,11 +2,15 @@ import { useNewContext } from "@/context/NewProvider";
 import useOptionBuyerStateRPC from "../rpc/useOptionBuyerStateRPC";
 import { useMemo } from "react";
 
-const useOBState = ()=>{
-    const {conn,vaultAddress,wsData,mockData} = useNewContext();
-    const obStateRPC = useOptionBuyerStateRPC(vaultAddress);
-    const obStateWS = wsData.wsOptionBuyerStates
-    const obStateMock = mockData.optionBuyerStates
+const useOBState = (address?:string)=>{
+    const {conn,wsData,mockData} = useNewContext();
+    const obStateRPC = useOptionBuyerStateRPC(address);
+    const obStateWS = wsData.wsOptionBuyerStates.find(
+        (state) => state.address?.toLowerCase() === address?.toLowerCase()
+    );
+    const obStateMock = mockData.optionBuyerStates.find(
+        (state) => state.address?.toLowerCase() === address?.toLowerCase()
+    );
 
     const obState = useMemo(()=>{
         if(conn==="mock"){

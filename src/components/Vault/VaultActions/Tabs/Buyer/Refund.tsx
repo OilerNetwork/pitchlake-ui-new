@@ -1,9 +1,5 @@
-import React, { ReactNode, useState, useEffect } from "react";
-import InputField from "@/components/Vault/Utils/InputField";
-import { Layers3, Currency } from "lucide-react";
+import React, { ReactNode, useEffect } from "react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
-import { PlaceBidArgs } from "@/lib/types";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useAccount } from "@starknet-react/core";
 import { RepeatEthIcon } from "@/components/Icons";
 import { formatNumber, formatNumberText } from "@/lib/utils";
@@ -11,6 +7,10 @@ import { num } from "starknet";
 import { formatEther } from "ethers";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import Hoverable from "@/components/BaseComponents/Hoverable";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useOptionRoundActions from "@/hooks/vault_v2/actions/useOptionRoundActions";
+import useOBState from "@/hooks/vault_v2/states/useOBState";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 
 interface RefundProps {
   showConfirmation: (
@@ -22,7 +22,9 @@ interface RefundProps {
 
 const Refund: React.FC<RefundProps> = ({ showConfirmation }) => {
   const { address, account } = useAccount();
-  const { roundActions, selectedRoundBuyerState } = useProtocolContext();
+  const {selectedRoundAddress} = useVaultState()
+  const selectedRoundBuyerState = useOBState(selectedRoundAddress)
+  const roundActions = useOptionRoundActions(selectedRoundAddress);
   const { pendingTx } = useTransactionContext();
 
   const refundBalanceWei = selectedRoundBuyerState?.refundableOptions

@@ -8,20 +8,14 @@ import {
   QueueArgs,
   CollectArgs,
 } from "@/lib/types";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import useMockOptionRounds from "./useMockOptionRounds";
 import { useTimeContext } from "@/context/TimeProvider";
-
-const useMockVault = ({
-  selectedRound,
-  address,
-}: {
-  selectedRound: number;
-
-  address?: string;
-}) => {
+import { useNewContext } from "@/context/NewProvider";
+const useMockVault = ({ address }: { address?: string }) => {
   const { address: accountAddress } = useAccount();
-  const {timestamp} = useTimeContext()
+  const { timestamp } = useTimeContext();
+  const { selectedRound } = useNewContext();
   //Read States
   const [vaultState, setVaultState] = useState<VaultStateType>({
     address: address ?? "0x1",
@@ -37,6 +31,7 @@ const useMockVault = ({
     strikeLevel: "-1111",
     now: "0",
     deploymentDate: "1",
+    currentRoundAddress: "0x11",
   });
   //States without a param
 
@@ -53,17 +48,9 @@ const useMockVault = ({
     useMockOptionRounds(selectedRound);
 
   // Function to update a specific field in the LP state
-  const currentRoundAddress = "";
   //Round Addresses and States
   const depositLiquidity = async (depositArgs: DepositArgs) => {
-    // setLPState((prevState) => {
-    //   return {
-    //     ...prevState,
-    //     unlockedBalance: (
-    //       BigInt(prevState.unlockedBalance) + BigInt(depositArgs.amount)
-    //     ).toString(),
-    //   };
-    // });
+
     await new Promise((resolve) => setTimeout(resolve, 1500));
   };
 
@@ -97,6 +84,8 @@ const useMockVault = ({
   };
 
   const settleOptionRound = async () => {
+    const newRoundId = BigInt(vaultState.currentRoundId) + BigInt(1);
+    const newRoundAddress = "0x1" + newRoundId.toString();
     if (rounds[selectedRound - 1].roundState === "Running")
       setRounds((prevState) => {
         const newState = [...prevState];
@@ -105,7 +94,7 @@ const useMockVault = ({
           roundId: BigInt(vaultState.currentRoundId) + BigInt(1),
           clearingPrice: "0",
           strikePrice: "10000000000",
-          address: "0x1",
+          address: newRoundAddress,
           capLevel: "2480",
           startingLiquidity: "",
           availableOptions: "",
@@ -166,6 +155,17 @@ const useMockVault = ({
     settleOptionRound,
   };
 
+  const selectedRoundAddress = useMemo(() => {
+    if(!selectedRound) return "0x1"
+    if (selectedRound > rounds?.length || !rounds[selectedRound].address) {
+      return "0x1";
+    }
+    return rounds[selectedRound].address;
+  }, [rounds, selectedRound]);
+
+  const currentRoundAddress = useMemo(() => {
+    return rounds[rounds.length - 1].address;
+  }, [rounds]);
   return {
     vaultState,
     lpState,
@@ -175,6 +175,7 @@ const useMockVault = ({
     optionRoundActions: roundActions,
     optionBuyerStates: buyerStates,
     roundActions: roundActions,
+    selectedRoundAddress,
   };
 };
 

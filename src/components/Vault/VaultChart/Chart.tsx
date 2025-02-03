@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import classNames from "classnames";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import {
@@ -9,16 +9,16 @@ import {
   CheckIcon,
 } from "@/components/Icons";
 import { History } from "lucide-react";
-import { useProtocolContext } from "@/context/ProtocolProvider";
-import { formatUnits } from "ethers";
 import GasPriceChart from "@/components/Vault/VaultChart/ChartInner";
-import { useHistoricalRoundParams } from "@/hooks/chart/useHistoricalRoundParams";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import { useChartContext } from "@/context/ChartProvider";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import { useNewContext } from "@/context/NewProvider";
 
 const RoundPerformanceChart = () => {
   // Protocol context
-  const { selectedRound, setSelectedRound, vaultState } = useProtocolContext();
+  const {  selectedRound,setSelectedRound } = useNewContext();
+  const {vaultState} = useVaultState()
   // Chart context
   const { isExpandedView, setIsExpandedView } = useChartContext();
 

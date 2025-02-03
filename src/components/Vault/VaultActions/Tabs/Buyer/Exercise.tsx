@@ -1,17 +1,16 @@
-import React, { ReactNode, useState, useEffect } from "react";
-import { formatEther, parseEther } from "ethers";
-import InputField from "@/components/Vault/Utils/InputField";
+import React, { ReactNode } from "react";
+import { formatEther } from "ethers";
 import { ExerciseOptionsIcon } from "@/components/Icons";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
-import { PlaceBidArgs } from "@/lib/types";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useAccount } from "@starknet-react/core";
-import { RepeatEthIcon } from "@/components/Icons";
 import { formatNumber, formatNumberText } from "@/lib/utils";
-import { num } from "starknet";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import useERC20 from "@/hooks/erc20/useERC20";
 import Hoverable from "@/components/BaseComponents/Hoverable";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useOptionRoundActions from "@/hooks/vault_v2/actions/useOptionRoundActions";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
+import useOBState from "@/hooks/vault_v2/states/useOBState";
 
 interface ExerciseProps {
   showConfirmation: (
@@ -24,11 +23,11 @@ interface ExerciseProps {
 const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
   const { address, account } = useAccount();
   const {
-    roundActions,
-    selectedRoundBuyerState,
-    selectedRoundState,
-    vaultAddress,
-  } = useProtocolContext();
+    selectedRoundAddress
+  } = useVaultState()
+  const selectedRoundState = useRoundState(selectedRoundAddress)
+  const selectedRoundBuyerState = useOBState(selectedRoundAddress)
+  const roundActions = useOptionRoundActions(selectedRoundAddress);
   const { pendingTx } = useTransactionContext();
 
   const { balance } = useERC20(selectedRoundState?.address as `0x${string}`);

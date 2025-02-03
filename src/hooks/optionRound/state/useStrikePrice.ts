@@ -1,6 +1,7 @@
 import { optionRoundABI } from "@/lib/abi";
-import useContractReads from "@/lib/useContractReads";
+import { useContractRead } from "@starknet-react/core";
 import { useMemo } from "react";
+import { BlockTag } from "starknet";
 
 const useStrikePrice = (address: string, args?: { watch?: boolean }) => {
   const watch = args?.watch ?? false;
@@ -8,16 +9,15 @@ const useStrikePrice = (address: string, args?: { watch?: boolean }) => {
     return { abi: optionRoundABI, address:address as `0x${string}` };
   }, [address]);
 
-  const { strikePrice } = useContractReads({
-    contractData,
-    watch,
-    states: [
-      {
-        functionName: "get_strike_price",
-        key: "strikePrice",
-      },
-    ],
-  });
+  const { data: strikePrice } = useContractRead({
+    ...contractData,
+blockIdentifier:BlockTag.PENDING,
+    functionName: "get_strike_price",
+    args:[],
+    watch: true,
+    
+  })
+
 
   return { strikePrice: strikePrice ? strikePrice.toString() : 0 };
 };

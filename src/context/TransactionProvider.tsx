@@ -6,10 +6,9 @@ import {
   createContext,
   useContext,
   useEffect,
-  useRef,
   useState,
 } from "react";
-import { useBlockNumber, useWaitForTransaction } from "@starknet-react/core";
+import { useWaitForTransaction } from "@starknet-react/core";
 
 
 /*This is the bridge for any transactions to go through, it's disabled by isTxDisabled if there is data loading or if
@@ -36,9 +35,6 @@ const TransactionProvider = ({ children }: { children: ReactNode }) => {
   const [pendingTx, setPendingTx] = useState<string | undefined>();
   const { status,data } = useWaitForTransaction({ hash: pendingTx });
 
-  const { data: blockNumber } = useBlockNumber({
-    refetchInterval: 2000,
-  });
   const resetState = () => {
     
     setPendingTx(undefined);

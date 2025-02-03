@@ -2,28 +2,28 @@ import { useNewContext } from "@/context/NewProvider";
 import useOptionRoundStateRPC from "../rpc/useOptionRoundStateRPC";
 import { useMemo } from "react";
 
-const useRoundState = (address: string) => {
-  const { conn, vaultAddress, wsData, mockData } =
+const useRoundState = (address?: string) => {
+  const { conn, wsData, mockData } =
     useNewContext();
 
-  const roundStateRPC = useOptionRoundStateRPC(conn, vaultAddress);
+  const roundStateRPC = useOptionRoundStateRPC(conn, address);
   const roundStateWS = useMemo(() => {
     return wsData.wsOptionRoundStates.find(
-      (round) => round.address === address
+      (round) => round.address?.toLowerCase() === address?.toLowerCase()
     );
   }, [wsData, address]);
 
-  const roundState = useMemo(() => {
-    if (conn === "mock") {
-      return mockData.optionRoundStates.find(
-        (round) => round.address === address
-      );
-    }
-    if (conn === "rpc") {
-      return roundStateRPC;
-    }
-    return roundStateWS;
-  }, [conn, address]);
+  const roundStateMock = useMemo(() => {
+    return mockData.optionRoundStates.find(
+      (round) => round.address?.toLowerCase() === address?.toLowerCase()
+    );
+  }, [mockData, address]);
+
+
+  const roundState =useMemo(() => {
+    return conn === "mock" ? roundStateMock : conn === "rpc" ? roundStateRPC : roundStateWS;
+  },[conn,roundStateMock,roundStateRPC,roundStateWS])
+  console.log("roundState", roundState)
 
   return roundState;
 };

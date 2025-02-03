@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { FormattedBlockData } from "@/app/api/getFossilGasData/route";
 
 // Define the hook parameters
@@ -55,7 +54,7 @@ export const useFossilGasData = ({
   const { data, isLoading, isError, error } = useQuery({
     queryKey,
     queryFn: () => fetchGasData(lowerTimestamp, upperTimestamp, blocksToFetch),
-    //refetchInterval: 30 * 1000,
+    refetchInterval: 30 * 1000,
     enabled:
       typeof lowerTimestamp === "number" &&
       typeof upperTimestamp === "number" &&

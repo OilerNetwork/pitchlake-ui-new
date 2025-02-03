@@ -11,16 +11,6 @@ import {
   useState,
 } from "react";
 
-/*This is the bridge for any transactions to go through, it's disabled by isTxDisabled if there is data loading or if
-  there's a pending transaction. The data loading is enforced to ensure no transaction is done without latest data.
-  Add pendingStates from any critical data here and add it in the subsequent hooks
-*/
-//Possible Updates:
-//Make transactions accepted only after 2 confirmations
-
-
-
-
 export type NewContextType = {
   conn: string;
   vaultAddress?: string;
@@ -36,18 +26,15 @@ export const NewContext = createContext<NewContextType>(
 );
 const NewContextProvider = ({ children }: { children: ReactNode }) => {
   const [vaultAddress, setVaultAddress] = useState<string | undefined>();
-  const conn = process.env.NEXT_PUBLIC_ENVIRONMENT ?? "rpc";
+  const conn = "rpc";
 
+  console.log("RERENDERING")
   const [selectedRound, setSelectedRound] = useState<number>(0);
 
   const wsData=useWebSocketVault(conn,vaultAddress)
   const mockData = useMockVault({
-    selectedRound,
     address:vaultAddress
   })
-
-
-
   const contextValue = {
     conn,
     vaultAddress,

@@ -58,6 +58,7 @@ export type VaultStateType = {
   queuedBps: number | bigint | string;
   now: number | bigint | string;
   deploymentDate: string;
+  currentRoundAddress: string;
 };
 
 export type LiquidityProviderStateType = {
@@ -163,7 +164,6 @@ export type WebSocketData = {
 export type MockData =  {
   vaultState: VaultStateType;
   lpState: LiquidityProviderStateType;
-  currentRoundAddress: string;
   vaultActions: VaultActionsType;
   optionRoundStates: OptionRoundStateType[];
   optionRoundActions: OptionRoundActionsType;

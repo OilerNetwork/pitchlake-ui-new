@@ -1,11 +1,11 @@
 "use client";
 import React, { createContext, useContext, useMemo, useState } from "react";
-import { useProtocolContext } from "./ProtocolProvider";
 import { useFossilGasData } from "@/hooks/chart/useFossilGasData";
 import { useUnconfirmedBlocks } from "@/hooks/chart/useUnconfirmedBlocks";
 import { FormattedBlockData } from "@/app/api/getFossilGasData/route";
 import { getTWAPs } from "@/lib/utils";
-
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 interface ChartContextProps {
   gasData: FormattedBlockData[];
   isExpandedView: boolean;
@@ -20,7 +20,8 @@ export const ChartProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [isExpandedView, setIsExpandedView] = useState<boolean>(false);
-  const { selectedRoundState } = useProtocolContext();
+  const {selectedRoundAddress} = useVaultState()
+  const selectedRoundState = useRoundState(selectedRoundAddress)
 
   const { xMin, xMax } = useMemo(() => {
     if (!selectedRoundState) return { xMin: 0, xMax: 0 };

@@ -1,16 +1,15 @@
 import React, { useEffect, ReactNode } from "react";
-import { VaultStateType, LiquidityProviderStateType } from "@/lib/types";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
-import collect from "@/../public/collect.svg";
 import { formatEther, parseEther } from "ethers";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useAccount } from "@starknet-react/core";
-import { DepositArgs } from "@/lib/types";
 import { CollectEthIcon } from "@/components/Icons";
 import { num } from "starknet";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import { formatNumber } from "@/lib/utils";
+import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
+import useLPState from "@/hooks/vault_v2/states/useLPState";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 
 interface WithdrawStashProps {
   //withdrawStash: () => Promise<void>;
@@ -25,7 +24,9 @@ const WithdrawStash: React.FC<WithdrawStashProps> = ({
   showConfirmation,
   //withdrawStash,
 }) => {
-  const { vaultState, lpState, vaultActions } = useProtocolContext();
+  const {vaultState} = useVaultState()
+  const lpState = useLPState()
+  const vaultActions = useVaultActions()
   const { account } = useAccount();
   const { pendingTx } = useTransactionContext();
   const [state, setState] = React.useState({

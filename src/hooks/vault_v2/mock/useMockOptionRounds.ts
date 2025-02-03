@@ -20,7 +20,7 @@ const useMockOptionRounds = (selectedRound: number) => {
         roundId: 1,
         clearingPrice: "0",
         strikePrice: "10000000000",
-        address: "0x1",
+        address: "0x11",
         capLevel: "2480",
         startingLiquidity: "",
         availableOptions: "",
@@ -51,7 +51,7 @@ const useMockOptionRounds = (selectedRound: number) => {
   const [buyerStates, setBuyerStates] = useState<OptionBuyerStateType[]>([
     {
       address: address ?? "0xbuyer",
-      roundAddress: "0x1",
+      roundAddress: "0x11",
       mintableOptions: 11,
       refundableOptions: 24,
       totalOptions: 35,

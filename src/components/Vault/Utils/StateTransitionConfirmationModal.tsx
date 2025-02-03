@@ -1,7 +1,5 @@
 import React, { useEffect } from "react";
 
-import { useProtocolContext } from "@/context/ProtocolProvider";
-
 interface StateTransitionConfirmationModalProps {
   action: string;
   onConfirm: () => void;

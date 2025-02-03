@@ -1,6 +1,6 @@
 import { renderHook } from "@testing-library/react";
 import useOptionRoundState from "@/hooks/optionRound/useOptionRoundState";
-import { useAccount, useContract, useReadContract } from "@starknet-react/core";
+import { useAccount, useContract, useContractRead } from "@starknet-react/core";
 import useContractReads from "@/lib/useContractReads";
 import { CairoCustomEnum } from "starknet";
 
@@ -8,7 +8,7 @@ import { CairoCustomEnum } from "starknet";
 jest.mock("@starknet-react/core", () => ({
   useAccount: jest.fn(),
   useContract: jest.fn(),
-  useReadContract: jest.fn(),
+  useContractRead: jest.fn(),
 }));
 
 jest.mock("@/lib/useContractReads", () => ({
