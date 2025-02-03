@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - feat/update-ci
   pull_request:
     branches:
       - develop
@@ -29,3 +30,6 @@ jobs:
 
       - name: Run tests
         run: pnpm test
+
+      - name: Run build
+        run: pnpm run build
