@@ -1,8 +1,6 @@
 import React, {
-  useState,
   useMemo,
   useRef,
-  useEffect,
   useCallback,
 } from "react";
 import {
@@ -18,11 +16,13 @@ import {
   Tooltip,
 } from "recharts";
 import { formatUnits } from "ethers";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useHelpContext } from "@/context/HelpProvider";
 import { useHistoricalRoundParams } from "@/hooks/chart/useHistoricalRoundParams";
 import { useChartContext } from "@/context/ChartProvider";
 import { FormattedBlockData } from "@/app/api/getFossilGasData/route";
+import { useNewContext } from "@/context/NewProvider";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 
 const HOVER_DELAY = 888;
 
@@ -32,8 +32,9 @@ interface GasPriceChartProps {
 
 const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
   // Protocol context
-  const { selectedRound, selectedRoundState, setSelectedRound, vaultState } =
-    useProtocolContext();
+  const { selectedRound } = useNewContext();
+  const {vaultState} = useVaultState()
+  const selectedRoundState = useRoundState(vaultState?.address)
 
   // Chart context
   const { gasData, isExpandedView, setIsExpandedView, xMax, xMin } =

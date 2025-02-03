@@ -11,7 +11,6 @@ import {
 } from "@starknet-react/core";
 import { stringToHexString } from "@/lib/utils";
 
-const newDevnet = { ...devnet, id: BigInt("0x534e5f4a554e4f5f53455155454e434552") };
 export const juno = {
   id: BigInt("0x534e5f4a554e4f5f53455155454e434552"), // SN_JUNO_SEQUENCER
   network: "juno",

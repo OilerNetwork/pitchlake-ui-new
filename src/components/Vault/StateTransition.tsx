@@ -1,14 +1,17 @@
-import { useProtocolContext } from "@/context/ProtocolProvider";
+
 import { useAccount } from "@starknet-react/core";
 import { useMemo, useState, useEffect } from "react";
 import useFossilStatus from "@/hooks/fossil/useFossilStatus";
 import { getDurationForRound, getTargetTimestampForRound } from "@/lib/utils";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import { useRoundState } from "@/hooks/stateTransition/useRoundState";
+import { useRoundState as useRoundStateTransition } from "@/hooks/stateTransition/useRoundState";
 import { getIconByRoundState } from "@/hooks/stateTransition/getIconByRoundState";
 import { useRoundPermissions } from "@/hooks/stateTransition/useRoundPermissions";
 import Hoverable from "../BaseComponents/Hoverable";
-
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
+import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
+import { useNewContext } from "@/context/NewProvider";
 const StateTransition = ({
   isPanelOpen,
   setModalState,
@@ -18,8 +21,11 @@ const StateTransition = ({
   setModalState: any;
   fossilDelay: number;
 }) => {
-  const { vaultState, vaultActions, selectedRoundState, conn } =
-    useProtocolContext();
+
+  const {conn} = useNewContext()
+  const {vaultState,selectedRoundAddress} = useVaultState()
+  const selectedRoundState = useRoundState(selectedRoundAddress)
+  const vaultActions = useVaultActions()
   const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
 
@@ -40,7 +46,7 @@ const StateTransition = ({
     null,
   );
 
-  const { roundState, prevRoundState } = useRoundState({
+  const { roundState, prevRoundState } = useRoundStateTransition({
     selectedRoundState,
     fossilStatus,
     fossilError,

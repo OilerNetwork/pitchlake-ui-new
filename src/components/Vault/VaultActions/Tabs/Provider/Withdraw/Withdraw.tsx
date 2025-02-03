@@ -4,7 +4,8 @@ import ButtonTabs from "../../ButtonTabs";
 import WithdrawLiquidity from "@/components/Vault/VaultActions/Tabs/Provider/Withdraw/WithdrawLiquidity";
 import QueueWithdrawal from "@/components/Vault/VaultActions/Tabs/Provider/Withdraw/QueueWithdrawal";
 import WithdrawStash from "@/components/Vault/VaultActions/Tabs/Provider/Withdraw/WithdrawStash";
-import { useProtocolContext } from "@/context/ProtocolProvider";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 
 interface WithdrawProps {
   showConfirmation: (
@@ -15,7 +16,8 @@ interface WithdrawProps {
 }
 
 const Withdraw: React.FC<WithdrawProps> = ({ showConfirmation }) => {
-  const { selectedRoundState } = useProtocolContext();
+  const {selectedRoundAddress} = useVaultState()  
+  const selectedRoundState = useRoundState(selectedRoundAddress)
   const [state, setState] = useState({
     activeWithdrawTab: "Liquidity" as WithdrawSubTabs,
   });

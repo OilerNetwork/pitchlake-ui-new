@@ -3,7 +3,7 @@ import Deposit from "@/components/Vault/VaultActions/Tabs/Provider/Deposit";
 import { HelpProvider } from "@/context/HelpProvider";
 
 // Mock all external dependencies
-const mockWriteAsync = jest.fn().mockResolvedValue({ transaction_hash: "0x123" });
+const mockwriteAsync = jest.fn().mockResolvedValue({ transaction_hash: "0x123" });
 
 jest.mock("@starknet-react/core", () => ({
   useContract: () => ({
@@ -23,7 +23,7 @@ jest.mock("@starknet-react/core", () => ({
     }
   }),
   useContractWrite: () => ({
-    writeAsync: mockWriteAsync
+    writeAsync: mockwriteAsync
   })
 }));
 
@@ -90,6 +90,6 @@ describe("Deposit Component", () => {
       await onConfirm();
     });
 
-    expect(mockWriteAsync).toHaveBeenCalled();
+    expect(mockwriteAsync).toHaveBeenCalled();
   });
 }); 

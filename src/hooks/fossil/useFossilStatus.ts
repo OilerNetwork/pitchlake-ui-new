@@ -4,7 +4,9 @@ import {
   getDurationForRound,
   getTargetTimestampForRound,
 } from "@/lib/utils";
-import { useProtocolContext } from "@/context/ProtocolProvider";
+import useVaultState from "../vault_v2/states/useVaultState";
+import useRoundState from "../vault_v2/states/useRoundState";
+import { useNewContext } from "@/context/NewProvider";
 
 export interface StatusData {
   status?: string;
@@ -12,7 +14,9 @@ export interface StatusData {
 }
 
 const useFossilStatus = () => {
-  const { selectedRoundState, conn } = useProtocolContext();
+  const {selectedRoundAddress} = useVaultState()
+  const selectedRoundState = useRoundState(selectedRoundAddress)
+  const {conn} = useNewContext()
   const targetTimestamp = getTargetTimestampForRound(selectedRoundState);
   const roundDuration = getDurationForRound(selectedRoundState);
   const [statusData, setStatusData] = useState<StatusData | null>(null);
@@ -65,7 +69,7 @@ const useFossilStatus = () => {
       if (statusData?.status === "Completed") {
         clearInterval(intervalId);
       }
-    }, 9999);
+    }, 100000);
 
     // Fetch immediately on mount
     fetchStatus();

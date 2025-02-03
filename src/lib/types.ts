@@ -58,6 +58,7 @@ export type VaultStateType = {
   queuedBps: number | bigint | string;
   now: number | bigint | string;
   deploymentDate: string;
+  currentRoundAddress: string;
 };
 
 export type LiquidityProviderStateType = {
@@ -151,6 +152,23 @@ export interface VaultDetailsProps {
   auctionStartDate: string | number | bigint;
   auctionEndDate: string | number | bigint;
   optionSettleDate?: string | number | bigint;
+}
+
+export type WebSocketData = {
+  wsVaultState: VaultStateType | undefined;
+  wsOptionRoundStates: OptionRoundStateType[];
+  wsLiquidityProviderState: LiquidityProviderStateType | undefined;
+  wsOptionBuyerStates: OptionBuyerStateType[];
+}
+
+export type MockData =  {
+  vaultState: VaultStateType;
+  lpState: LiquidityProviderStateType;
+  vaultActions: VaultActionsType;
+  optionRoundStates: OptionRoundStateType[];
+  optionRoundActions: OptionRoundActionsType;
+  optionBuyerStates: OptionBuyerStateType[];
+  roundActions: OptionRoundActionsType;
 }
 
 export type OptionRoundActionsType = {

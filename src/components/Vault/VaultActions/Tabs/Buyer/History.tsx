@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { SquarePen, SquareArrowOutUpRight, ChevronLeft } from "lucide-react";
-import { useProvider, useExplorer, Explorer } from "@starknet-react/core";
-import { Provider } from "starknet";
+import { SquarePen } from "lucide-react";
+import { useExplorer, Explorer } from "@starknet-react/core";
 import { formatNumber, formatNumberText } from "@/lib/utils";
 import { formatUnits } from "ethers";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import Hoverable from "@/components/BaseComponents/Hoverable";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 
 interface HistoryItem {
   bid_id: string;
@@ -86,7 +86,8 @@ const History: React.FC<HistoryProps> = ({
 }) => {
   const explorer = useExplorer();
   const { pendingTx } = useTransactionContext();
-  const { selectedRoundState } = useProtocolContext();
+  const {selectedRoundAddress} = useVaultState()
+  const selectedRoundState = useRoundState(selectedRoundAddress)
 
   const [modalState, setModalState] = useState<{
     show: boolean;

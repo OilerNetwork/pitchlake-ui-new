@@ -72,8 +72,8 @@ jest.mock("@starknet-react/core", () => ({
   useAccount: () => ({
     account: "0x789",
   }),
-  useSendTransaction: () => ({
-    sendAsync: jest.fn().mockResolvedValue({ transaction_hash: "0x123" }),
+  useContractWrite: () => ({
+    writeAsync: jest.fn().mockResolvedValue({ transaction_hash: "0x123" }),
   }),
   useProvider: () => ({
     provider: {},

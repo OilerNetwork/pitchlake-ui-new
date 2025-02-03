@@ -4,7 +4,7 @@ import {
   timeUntilTarget,
   timeUntilTargetFormal,
 } from "@/lib/utils";
-import useVaultState from "@/hooks/vault/useVaultState";
+
 import {
   ActivityIcon,
   BarChartIcon,
@@ -20,22 +20,17 @@ import useStrikePrice from "@/hooks/optionRound/state/useStrikePrice";
 import useCapLevel from "@/hooks/optionRound/state/useCapLevel";
 import useRoundState from "@/hooks/optionRound/state/useRoundState";
 import useTimestamps from "@/hooks/optionRound/state/useTimestamps";
-import useLatestTimestamp from "@/hooks/chain/useLatestTimestamp";
-import { useProvider } from "@starknet-react/core";
-import { useProtocolContext } from "@/context/ProtocolProvider";
+import { useNewContext } from "@/context/NewProvider";
+import { useTimeContext } from "@/context/TimeProvider";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 
 export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
-  const { provider } = useProvider();
   const { lockedBalance, unlockedBalance, stashedBalance } =
     useVaultBalances(vaultAddress);
 
-  const { setSelectedRound } = useProtocolContext();
-  const { vaultState, currentRoundAddress } = useVaultState({
-    conn: "rpc",
-    address: vaultAddress,
-    getRounds: false,
-  }); //conn arguement hardcoded here. Make conn a context variable to feed everywhere
-
+  const { setSelectedRound } = useNewContext();
+  const { vaultState } =useVaultState() //conn arguement hardcoded here. Make conn a context variable to feed everywhere
+  const currentRoundAddress = vaultState?.currentRoundAddress
   const { roundState } = useRoundState(
     currentRoundAddress ? currentRoundAddress : "Loading",
   );
@@ -45,7 +40,7 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
   const { strikePrice } = useStrikePrice(
     currentRoundAddress ? currentRoundAddress : "",
   );
-  const { timestamp } = useLatestTimestamp(provider);
+  const { timestamp } = useTimeContext();
   const { auctionStartDate, auctionEndDate, optionSettleDate } = useTimestamps(
     currentRoundAddress ? currentRoundAddress : "",
   );
