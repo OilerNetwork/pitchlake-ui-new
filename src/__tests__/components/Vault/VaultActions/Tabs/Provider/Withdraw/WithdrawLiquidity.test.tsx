@@ -1,15 +1,21 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import WithdrawLiquidity from "@/components/Vault/VaultActions/Tabs/Provider/Withdraw/WithdrawLiquidity";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useAccount } from "@starknet-react/core";
 import { parseEther } from "ethers";
 import { TestWrapper } from "../../../../../../utils/TestWrapper";
+import { useNewContext } from "@/context/NewProvider";
+import useLPState from "@/hooks/vault_v2/states/useLPState";
 
 // Mock the hooks
-jest.mock("@/context/ProtocolProvider", () => ({
-  useProtocolContext: jest.fn(),
+jest.mock("@/context/NewProvider", () => ({
+  useNewContext: jest.fn(),
+}));
+
+jest.mock("@/hooks/vault_v2/states/useLPState", () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 jest.mock("@/context/TransactionProvider", () => ({
@@ -31,13 +37,19 @@ describe("WithdrawLiquidity", () => {
 
   it("renders withdrawal form with correct states and handles interactions", () => {
     // Test with balance
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      lpState: {
-        unlockedBalance: parseEther("10.0"),
+    (useNewContext as jest.Mock).mockReturnValue({
+      conn: "mock",
+      vaultAddress: "0x123",
+      mockData: {
+        lpState: {
+          unlockedBalance: parseEther("10.0"),
+        },
       },
-      vaultActions: {
-        withdrawLiquidity: mockWithdrawLiquidity,
-      },
+    });
+
+    (useLPState as jest.Mock).mockReturnValue({
+      unlockedBalance: parseEther("10.0"),
+      withdrawLiquidity: mockWithdrawLiquidity,
     });
 
     (useTransactionContext as jest.Mock).mockReturnValue({
@@ -143,13 +155,19 @@ describe("WithdrawLiquidity", () => {
   });
 
   it("disables form when transaction is pending", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      lpState: {
-        unlockedBalance: parseEther("10.0"),
+    (useNewContext as jest.Mock).mockReturnValue({
+      conn: "mock",
+      vaultAddress: "0x123",
+      mockData: {
+        lpState: {
+          unlockedBalance: parseEther("10.0"),
+        },
       },
-      vaultActions: {
-        withdrawLiquidity: mockWithdrawLiquidity,
-      },
+    });
+
+    (useLPState as jest.Mock).mockReturnValue({
+      unlockedBalance: parseEther("10.0"),
+      withdrawLiquidity: mockWithdrawLiquidity,
     });
 
     (useTransactionContext as jest.Mock).mockReturnValue({
@@ -166,6 +184,7 @@ describe("WithdrawLiquidity", () => {
       </TestWrapper>
     );
 
-    // ... rest of the test ...
+    const withdrawButton = screen.getByRole("button");
+    expect(withdrawButton).toBeDisabled();
   });
 }); 

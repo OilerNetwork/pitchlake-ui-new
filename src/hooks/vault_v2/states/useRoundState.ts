@@ -23,7 +23,6 @@ const useRoundState = (address?: string) => {
   const roundState =useMemo(() => {
     return conn === "mock" ? roundStateMock : conn === "rpc" ? roundStateRPC : roundStateWS;
   },[conn,roundStateMock,roundStateRPC,roundStateWS])
-  console.log("roundState", roundState)
 
   return roundState;
 };

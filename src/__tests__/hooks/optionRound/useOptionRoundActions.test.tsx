@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import useOptionRoundActions from "@/hooks/optionRound/useOptionRoundActions";
+import useOptionRoundActions from "@/hooks/vault_v2/actions/useOptionRoundActions";
 import { useAccount, useContract, useProvider } from "@starknet-react/core";
 import { useTransactionContext } from "@/context/TransactionProvider";
 

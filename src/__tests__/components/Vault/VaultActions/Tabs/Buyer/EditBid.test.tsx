@@ -47,19 +47,6 @@ jest.mock("ethers", () => ({
 }));
 
 // Mock hooks
-jest.mock("@/context/ProtocolProvider", () => ({
-  useProtocolContext: () => ({
-    vaultState: {
-      ethAddress: "0x123",
-    },
-    selectedRoundState: {
-      address: "0x456",
-      availableOptions: "1000000",
-      reservePrice: "1000000000", // 1 GWEI
-      auctionEndDate: "9999999999",
-    },
-  }),
-}));
 
 jest.mock("@/context/TransactionProvider", () => ({
   useTransactionContext: () => ({
@@ -88,9 +75,6 @@ jest.mock("@starknet-react/core", () => ({
         }
       })
     }
-  }),
-  useContractWrite: jest.fn().mockReturnValue({
-    writeAsync: jest.fn().mockResolvedValue({ transaction_hash: "0x123" }),
   }),
 }));
 

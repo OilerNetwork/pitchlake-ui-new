@@ -16,13 +16,13 @@ import { Blur } from "@/components/BaseComponents/Blur";
 import { ChartProvider } from "@/context/ChartProvider";
 import NewProvider from "@/context/NewProvider";
 import QueryProvider from "@/components/Providers/queryProvider";
+import TimeContextProvider from "@/context/TimeProvider";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--mainFont",
 });
-
 
 export const metadata: Metadata = {
   title: "Pitchlake",
@@ -38,25 +38,27 @@ export default function RootLayout({
     <html className={`${montserrat.variable}`} lang="en">
       <body className="flex flex-col min-h-[100vh] text-white">
         <StarknetProvider>
-          <TransactionProvider>
+          <TimeContextProvider>
+            <TransactionProvider>
               <NewProvider>
-              <ChartProvider>
-                <UiProvider>
-                  <HelpProvider>
-                    <Header />
-                    <Blur>
-                      <main className="flex-grow bg-faded-black-alt">
-                        {children}
-                      </main>
-                      <div className="flex flex-col-reverse">
-                        <Footer />
-                      </div>
-                    </Blur>
-                  </HelpProvider>
-                </UiProvider>
-              </ChartProvider>
+                <ChartProvider>
+                  <UiProvider>
+                    <HelpProvider>
+                      <Header />
+                      <Blur>
+                        <main className="flex-grow bg-faded-black-alt">
+                          {children}
+                        </main>
+                        <div className="flex flex-col-reverse">
+                          <Footer />
+                        </div>
+                      </Blur>
+                    </HelpProvider>
+                  </UiProvider>
+                </ChartProvider>
               </NewProvider>
-          </TransactionProvider>
+            </TransactionProvider>
+          </TimeContextProvider>
         </StarknetProvider>
       </body>
     </html>

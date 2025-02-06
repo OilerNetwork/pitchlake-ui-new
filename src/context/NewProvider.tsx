@@ -28,7 +28,6 @@ const NewContextProvider = ({ children }: { children: ReactNode }) => {
   const [vaultAddress, setVaultAddress] = useState<string | undefined>();
   const conn = "rpc";
 
-  console.log("RERENDERING")
   const [selectedRound, setSelectedRound] = useState<number>(0);
 
   const wsData=useWebSocketVault(conn,vaultAddress)

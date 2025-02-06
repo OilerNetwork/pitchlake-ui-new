@@ -1,14 +1,21 @@
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import Mint from "@/components/Vault/VaultActions/Tabs/Buyer/Mint";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useAccount } from "@starknet-react/core";
 import { TestWrapper } from "../../../../../utils/TestWrapper";
+import useOptionRoundActions from "@/hooks/vault_v2/actions/useOptionRoundActions";
+import useOptionBuyerStateRPC from "@/hooks/vault_v2/rpc/useOptionBuyerStateRPC";
 
 // Mock the hooks
-jest.mock("@/context/ProtocolProvider", () => ({
-  useProtocolContext: jest.fn(),
+jest.mock("@/hooks/vault_v2/actions/useOptionRoundActions", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+jest.mock("@/hooks/vault_v2/rpc/useOptionBuyerStateRPC", () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 jest.mock("@/context/TransactionProvider", () => ({
@@ -35,13 +42,11 @@ describe("Mint Component", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      selectedRoundBuyerState: {
-        mintableOptions: "1000",
-      },
-      roundActions: {
-        tokenizeOptions: mockTokenizeOptions,
-      },
+    (useOptionBuyerStateRPC as jest.Mock).mockReturnValue({
+      mintableOptions: "1000",
+    });
+    (useOptionRoundActions as jest.Mock).mockReturnValue({
+      tokenizeOptions: mockTokenizeOptions,
     });
   });
 

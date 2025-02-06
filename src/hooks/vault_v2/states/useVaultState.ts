@@ -2,16 +2,15 @@ import useVaultStateRPC from "../rpc/useVaultStateRPC";
 import { useNewContext } from "@/context/NewProvider";
 import { useEffect, useMemo } from "react";
 
-const useVaultState = () => {
-  const { conn, selectedRound, setSelectedRound, vaultAddress, wsData, mockData } =
+const useVaultState = (address?: string) => {
+  const { conn, selectedRound, vaultAddress, setSelectedRound, wsData, mockData } =
     useNewContext();
 
   const {
     vaultState: vaultStateRPC,
     selectedRoundAddress: selectedRoundAddressRPC,
-  } = useVaultStateRPC();
+  } = useVaultStateRPC({vaultAddress:address ?? vaultAddress,selectedRound});
 
-  console.log("R2D@")
   const vaultState = useMemo(() => {  
     return conn === "rpc"
       ? vaultStateRPC
@@ -20,7 +19,6 @@ const useVaultState = () => {
       : mockData.vaultState;
   }, [conn, vaultStateRPC, wsData.wsVaultState, mockData.vaultState])
 
-  console.log("selectedRoundAddressRPC", selectedRoundAddressRPC)
   const selectedRoundAddress = useMemo(() => {
     if (conn === "mock") {
       return mockData.optionRoundStates[selectedRound].address;
@@ -29,9 +27,7 @@ const useVaultState = () => {
   }, [conn, mockData.optionRoundStates,selectedRoundAddressRPC]);
 
 
-  console.log("vaultState", vaultState)
   useEffect(() => {
-    console.log("vaultState?.currentRoundId", vaultState?.currentRoundId)
     if(selectedRound)return
     if(vaultState?.currentRoundId){
       setSelectedRound(Number(vaultState?.currentRoundId))

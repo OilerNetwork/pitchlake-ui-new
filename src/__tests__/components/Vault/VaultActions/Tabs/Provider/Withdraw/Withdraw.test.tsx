@@ -1,12 +1,23 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import Withdraw from "@/components/Vault/VaultActions/Tabs/Provider/Withdraw/Withdraw";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { HelpProvider } from "@/context/HelpProvider";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
+import { useContractRead } from "@starknet-react/core";
+
+// Mock starknet-react
+jest.mock("@starknet-react/core", () => ({
+  __esModule: true,
+  useContractRead: jest.fn(),
+  useAccount: () => ({ account: { address: "0x123" } }),
+  useContract: () => ({ contract: null }),
+  useProvider: () => ({ provider: null }),
+}));
 
 // Mock the hooks
-jest.mock("@/context/ProtocolProvider", () => ({
-  useProtocolContext: jest.fn(),
+jest.mock("@/hooks/vault_v2/states/useRoundState", () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 // Mock the sub-components
@@ -38,12 +49,17 @@ describe("Withdraw Component", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useContractRead as jest.Mock).mockReturnValue({
+      data: "1000",
+      isLoading: false,
+      error: null,
+    });
   });
 
   it("renders correct tabs based on round state", () => {
     // Test Auctioning state
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      selectedRoundState: { roundState: "Auctioning" },
+    (useRoundState as jest.Mock).mockReturnValue({
+      roundState: "Auctioning",
     });
 
     const { rerender } = render(
@@ -56,8 +72,8 @@ describe("Withdraw Component", () => {
     expect(screen.getByText("Collect")).toBeInTheDocument();
 
     // Test Settled state
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      selectedRoundState: { roundState: "Settled" },
+    (useRoundState as jest.Mock).mockReturnValue({
+      roundState: "Settled",
     });
     rerender(
       <TestWrapper>
@@ -70,8 +86,8 @@ describe("Withdraw Component", () => {
   });
 
   it("shows correct component when switching tabs", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      selectedRoundState: { roundState: "Auctioning" },
+    (useRoundState as jest.Mock).mockReturnValue({
+      roundState: "Auctioning",
     });
 
     render(
@@ -93,8 +109,8 @@ describe("Withdraw Component", () => {
   });
 
   it("maintains correct tab visibility based on round state", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      selectedRoundState: { roundState: "Settled" },
+    (useRoundState as jest.Mock).mockReturnValue({
+      roundState: "Settled",
     });
 
     render(

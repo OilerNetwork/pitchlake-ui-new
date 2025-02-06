@@ -1,103 +1,95 @@
-import { useAccount, useContractRead } from "@starknet-react/core";
+import { useContractRead } from "@starknet-react/core";
 import { optionRoundABI, vaultABI } from "@/lib/abi";
 import { VaultStateType } from "@/lib/types";
 import { stringToHex } from "@/lib/utils";
 import { useMemo } from "react";
-import useTimestamps from "@/hooks/optionRound/state/useTimestamps";
 import { useNewContext } from "@/context/NewProvider";
 import { BlockTag } from "starknet";
-const useVaultStateRPC = () => {
-  const { conn, vaultAddress:address, selectedRound } = useNewContext()
+
+const useVaultStateRPC = ({
+  vaultAddress,
+  selectedRound,
+}: {
+  vaultAddress?: string;
+  selectedRound?: number;
+}) => {
   const contractData = useMemo(() => {
-    console.log("RENRENCONDAT")
     return {
       abi: vaultABI,
-      address: conn === "rpc" ? (address as `0x${string}`) : undefined,
+      address: vaultAddress as `0x${string}`,
     };
-  }, [address, conn]);
+  }, [vaultAddress]);
 
-
-  console.log("RENRENCONVAUHOO")
   //Read States
 
   //States without a param
-  
-  const {data:alpha}= useContractRead({
+  const { data: alpha } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_alpha",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:strikeLevel}= useContractRead({
+  });
+  const { data: strikeLevel } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_strike_level",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:ethAddress}= useContractRead({
+  });
+  const { data: ethAddress } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_eth_address",
-    args:[],
+    args: [],
     watch: true,
-    
-  })      
-  const {data:fossilClientAddress}= useContractRead({
+  });
+  const { data: fossilClientAddress } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_fossil_client_address",
-    args:[],
+    args: [],
     watch: true,
-    
-  })  
-  const {data:currentRoundId}= useContractRead({
+  });
+  const { data: currentRoundId } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_current_round_id",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:lockedBalance}= useContractRead({
+  });
+  const { data: lockedBalance } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
     functionName: "get_vault_locked_balance",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:unlockedBalance}= useContractRead({
+    blockIdentifier: BlockTag.PENDING,
+  });
+  const { data: unlockedBalance } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_vault_unlocked_balance",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:stashedBalance}= useContractRead({
+  });
+  const { data: stashedBalance } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_vault_stashed_balance",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:queuedBps}= useContractRead({
+  });
+  const { data: queuedBps } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_vault_queued_bps",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
+  });
 
   const { data: round1Address } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_round_address",
     args: [1],
     watch: false,
@@ -105,17 +97,16 @@ blockIdentifier:BlockTag.PENDING,
 
   const { data: deploymentDate } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    address: round1Address?.toString(),
+    blockIdentifier: BlockTag.PENDING,
     abi: optionRoundABI,
     functionName: "get_deployment_date",
     args: [],
     watch: true,
-    
   });
-
   const { data: selectedRoundAddress } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_round_address",
     args:
       selectedRound && selectedRound !== 0
@@ -123,17 +114,31 @@ blockIdentifier:BlockTag.PENDING,
         : undefined,
     watch: true,
   });
-
-  const usableString = useMemo(() => {
+  const {data:currentRoundAddress} = useContractRead({
+    ...contractData,
+    blockIdentifier:BlockTag.PENDING,
+    functionName:"get_round_address",
+    args:currentRoundId?[currentRoundId?.toString()]:[],
+    watch:true,
+  })
+  const usableStringSelectedRoundAddress = useMemo(() => {
     return stringToHex(selectedRoundAddress?.toString());
   }, [selectedRoundAddress]);
+  const usableStringCurrentRoundAddress = useMemo(() => {
+    return stringToHex(currentRoundAddress?.toString());
+  }, [currentRoundAddress]);
 
-  const k = useMemo(() => strikeLevel ? Number(strikeLevel.toString()) : 0, [strikeLevel]);
-  const vaultType = useMemo(() => k > 0 ? "OTM" : k == 0 ? "ATM" : "ITM", [k]);
-
+  const k = useMemo(
+    () => (strikeLevel ? Number(strikeLevel.toString()) : 0),
+    [strikeLevel]
+  );
+  const vaultType = useMemo(
+    () => (k > 0 ? "OTM" : k == 0 ? "ATM" : "ITM"),
+    [k]
+  );
   return {
     vaultState: {
-      address,
+      address: vaultAddress,
       alpha: alpha ? alpha.toString() : 0,
       strikeLevel: strikeLevel ? strikeLevel.toString() : 0,
       ethAddress: ethAddress ? stringToHex(ethAddress?.toString()) : "",
@@ -147,9 +152,9 @@ blockIdentifier:BlockTag.PENDING,
       queuedBps: queuedBps ? queuedBps.toString() : 0,
       vaultType,
       deploymentDate: deploymentDate ? deploymentDate.toString() : 0,
-      currentRoundAddress: usableString,
+      currentRoundAddress: usableStringCurrentRoundAddress,
     } as VaultStateType,
-    selectedRoundAddress:usableString,
+    selectedRoundAddress: usableStringSelectedRoundAddress,
   };
 };
 

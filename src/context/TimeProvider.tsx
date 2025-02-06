@@ -40,11 +40,13 @@ const TimeContextProvider = ({ children }: { children: ReactNode }) => {
     refetchInterval: 1000,
   });
 
-  console.log("block,blockNumber",block,blockNumber)
   const timestamp = useMemo(() => {
     if (conn === "mock") return mockTimestamp;
-    else return block?.timestamp ?? 0;
+   
+   return block?.timestamp ?? 0;
   }, [conn, block?.timestamp]);
+  console.log("abc", timestamp)
+  console.log("abc",block)
 
   const mockTimeForward = () => {
     if (conn === "mock") setMockTimestamp((prevState) => prevState + 100001);
@@ -55,7 +57,6 @@ const TimeContextProvider = ({ children }: { children: ReactNode }) => {
     mockTimeForward,
   };
 
-  console.log("BLOCK")
   return (
     <TimeContext.Provider value={contextValue}>{children}</TimeContext.Provider>
   );

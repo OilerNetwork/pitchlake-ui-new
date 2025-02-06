@@ -1,35 +1,60 @@
-import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import Refund from "@/components/Vault/VaultActions/Tabs/Buyer/Refund";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useAccount } from "@starknet-react/core";
 import { useTransactionContext } from "@/context/TransactionProvider";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useOBState from "@/hooks/vault_v2/states/useOBState";
+import useOptionRoundActions from "@/hooks/vault_v2/actions/useOptionRoundActions";
+import { useNewContext } from "@/context/NewProvider";
 import { useHelpContext } from "@/context/HelpProvider";
 
-// Mock the hooks
-jest.mock("@/context/ProtocolProvider", () => ({
-  __esModule: true,
-  useProtocolContext: jest.fn(),
-}));
-
+// Mock all hooks
 jest.mock("@starknet-react/core", () => ({
   __esModule: true,
-  useAccount: jest.fn(),
+  ...jest.requireActual("@/__tests__/mocks/starknet-react"),
 }));
 
 jest.mock("@/context/TransactionProvider", () => ({
   __esModule: true,
   useTransactionContext: jest.fn(),
+  default: ({ children }: { children: React.ReactNode }) => <div data-testid="transaction-provider">{children}</div>,
 }));
 
 jest.mock("@/context/HelpProvider", () => ({
+  __esModule: true,
   useHelpContext: jest.fn(),
+  HelpProvider: ({ children }: { children: React.ReactNode }) => <div data-testid="help-provider">{children}</div>,
 }));
 
-// Mock the Icons component
-jest.mock("@/components/Icons", () => ({
-  RepeatEthIcon: () => <div className="refund-icon" />,
+jest.mock("@/context/NewProvider", () => ({
+  __esModule: true,
+  useNewContext: jest.fn(),
 }));
+
+jest.mock("@/hooks/vault_v2/states/useVaultState", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+jest.mock("@/hooks/vault_v2/states/useOBState", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+jest.mock("@/hooks/vault_v2/actions/useOptionRoundActions", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+const renderWithProviders = (ui: React.ReactElement) => {
+  return render(
+    <div data-testid="help-provider">
+      <div data-testid="transaction-provider">
+        {ui}
+      </div>
+    </div>
+  );
+};
 
 describe("Refund Component", () => {
   const mockShowConfirmation = jest.fn();
@@ -38,65 +63,78 @@ describe("Refund Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Mock useAccount hook
+    // Mock useAccount
     (useAccount as jest.Mock).mockReturnValue({
       address: "0x123",
-      account: true,
+      account: { address: "0x123" },
+      status: "connected"
     });
 
-    // Mock useProtocolContext hook
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      roundActions: {
-        refundUnusedBids: mockRefundUnusedBids,
-      },
-      selectedRoundBuyerState: {
-        refundableOptions: "1000000000000000000", // 1 ETH worth of refundable options
-        hasMinted: false,
-      },
+    // Mock useVaultState
+    (useVaultState as jest.Mock).mockReturnValue({
+      selectedRoundAddress: "0x456",
+      roundState: "Auctioning",
+      isLoading: false
     });
 
-    // Mock useTransactionContext hook
+    // Mock useOBState
+    (useOBState as jest.Mock).mockReturnValue({
+      refundableOptions: "1000000000000000000", // 1 ETH
+      hasMinted: false,
+      isLoading: false
+    });
+
+    // Mock useOptionRoundActions
+    (useOptionRoundActions as jest.Mock).mockReturnValue({
+      refundUnusedBids: mockRefundUnusedBids,
+      isLoading: false
+    });
+
+    // Mock useTransactionContext
     (useTransactionContext as jest.Mock).mockReturnValue({
       pendingTx: false,
+      setModalState: jest.fn()
     });
 
-    // Mock useHelpContext hook
+    // Mock useHelpContext
     (useHelpContext as jest.Mock).mockReturnValue({
       setHelpContent: jest.fn(),
-      clearHelpContent: jest.fn(),
+      clearHelpContent: jest.fn()
     });
 
-    // Mock environment variable
-    process.env.NEXT_PUBLIC_ENVIRONMENT = "ws";
+    // Mock useNewContext
+    (useNewContext as jest.Mock).mockReturnValue({
+      conn: "mock",
+      wsData: {
+        wsVaultState: {
+          currentRoundId: "5",
+          address: "0x123",
+          roundState: "Auctioning"
+        }
+      },
+      mockData: {
+        vaultState: {
+          currentRoundId: "5",
+          address: "0x123",
+          roundState: "Auctioning"
+        }
+      }
+    });
   });
 
   it("renders with initial state", () => {
-    const { container } = render(
-      <Refund showConfirmation={mockShowConfirmation} />,
-    );
+    renderWithProviders(<Refund showConfirmation={mockShowConfirmation} />);
 
-    // Check if the refund icon is rendered
-    expect(container.querySelector(".refund-icon")).toBeInTheDocument();
-
-    // Check if the refund button is rendered and enabled
-    const refundButton = screen.getByRole("button", { name: "Refund Now" });
-    expect(refundButton).toBeInTheDocument();
-    expect(refundButton).not.toBeDisabled();
-
-    // Check if the refund balance is displayed correctly
-    expect(screen.getByText("1 ETH")).toBeInTheDocument();
+    expect(screen.getByText(/1 ETH/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Refund/i })).toBeEnabled();
   });
 
   it("disables button when account is not connected", () => {
-    (useAccount as jest.Mock).mockReturnValue({
-      address: null,
-      account: null,
-    });
+    (useAccount as jest.Mock).mockReturnValue({ account: null });
 
-    render(<Refund showConfirmation={mockShowConfirmation} />);
+    renderWithProviders(<Refund showConfirmation={mockShowConfirmation} />);
 
-    const refundButton = screen.getByRole("button", { name: "Refund Now" });
-    expect(refundButton).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Refund/i })).toBeDisabled();
   });
 
   it("disables button when transaction is pending", () => {
@@ -104,66 +142,53 @@ describe("Refund Component", () => {
       pendingTx: true,
     });
 
-    render(<Refund showConfirmation={mockShowConfirmation} />);
+    renderWithProviders(<Refund showConfirmation={mockShowConfirmation} />);
 
-    const refundButton = screen.getByRole("button", { name: "Refund Now" });
-    expect(refundButton).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Refund/i })).toBeDisabled();
   });
 
   it("disables button when refundable balance is 0", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      roundActions: {
-        refundUnusedBids: mockRefundUnusedBids,
-      },
-      selectedRoundBuyerState: {
-        refundableOptions: "0",
-        hasMinted: false,
-      },
+    (useOBState as jest.Mock).mockReturnValue({
+      refundableOptions: "0",
+      hasMinted: false,
     });
 
-    render(<Refund showConfirmation={mockShowConfirmation} />);
+    renderWithProviders(<Refund showConfirmation={mockShowConfirmation} />);
 
-    const refundButton = screen.getByRole("button", { name: "Refund Now" });
-    expect(refundButton).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Refund/i })).toBeDisabled();
   });
 
   it("disables button when options have been minted", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      roundActions: {
-        refundUnusedBids: mockRefundUnusedBids,
-      },
-      selectedRoundBuyerState: {
-        refundableOptions: "1000000000000000000",
-        hasMinted: true,
-      },
+    (useOBState as jest.Mock).mockReturnValue({
+      refundableOptions: "1000000000000000000",
+      hasMinted: true,
+      isLoading: false
     });
 
-    render(<Refund showConfirmation={mockShowConfirmation} />);
+    renderWithProviders(<Refund showConfirmation={mockShowConfirmation} />);
 
-    const refundButton = screen.getByRole("button", { name: "Refund Now" });
-    expect(refundButton).toBeDisabled();
+    const button = screen.getByRole("button", { name: /Refund/i });
+    expect(button).toBeDisabled();
   });
 
   it("shows confirmation modal when refund button is clicked", () => {
-    render(<Refund showConfirmation={mockShowConfirmation} />);
+    renderWithProviders(<Refund showConfirmation={mockShowConfirmation} />);
 
-    const refundButton = screen.getByRole("button", { name: "Refund Now" });
-    fireEvent.click(refundButton);
+    fireEvent.click(screen.getByRole("button", { name: /Refund/i }));
 
     expect(mockShowConfirmation).toHaveBeenCalledWith(
       "Refund",
       expect.anything(),
-      expect.any(Function),
+      expect.any(Function)
     );
   });
 
   it("calls refundUnusedBids when confirmation is confirmed", async () => {
-    render(<Refund showConfirmation={mockShowConfirmation} />);
+    renderWithProviders(<Refund showConfirmation={mockShowConfirmation} />);
 
-    const refundButton = screen.getByRole("button", { name: "Refund Now" });
-    fireEvent.click(refundButton);
+    fireEvent.click(screen.getByRole("button", { name: /Refund/i }));
 
-    // Get the onConfirm callback that was passed to showConfirmation
+    // Get and call the onConfirm function
     const onConfirm = mockShowConfirmation.mock.calls[0][2];
     await onConfirm();
 

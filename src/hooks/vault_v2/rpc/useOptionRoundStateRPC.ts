@@ -7,7 +7,6 @@ import { useContractRead } from "@starknet-react/core";
 
 const useOptionRoundStateRPC = (conn: string, address: string | undefined) => {
   const contractData = useMemo(() => {
-    console.log("REDO")
     if (conn === "mock") return { abi: optionRoundABI, address: undefined };
     else return { abi: optionRoundABI, address: address as `0x${string}` };
   }, [conn,address]);

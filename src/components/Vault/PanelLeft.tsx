@@ -26,7 +26,6 @@ const FOSSIL_DELAY =
 const PanelLeft = ({ userType }: { userType: string }) => {
   const {vaultState,selectedRoundAddress} = useVaultState()
   const selectedRoundState = useRoundState(selectedRoundAddress)
-  console.log("RERENDERING HEADER")
   const [vaultIsOpen, setVaultIsOpen] = useState<boolean>(false);
   const [optionRoundIsOpen, setOptionRoundIsOpen] = useState<boolean>(false);
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);

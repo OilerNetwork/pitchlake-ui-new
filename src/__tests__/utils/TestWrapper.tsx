@@ -2,18 +2,25 @@ import React from "react";
 import { render } from "@testing-library/react";
 import { ReactNode } from "react";
 import { HelpProvider } from "@/context/HelpProvider";
-import { useProtocolContext } from "@/context/ProtocolProvider";
+import { useNewContext } from "@/context/NewProvider";
 
-// Mock the protocol context
-jest.mock("@/context/ProtocolProvider", () => ({
-  useProtocolContext: jest.fn().mockReturnValue({
-    selectedRoundState: {
-      roundId: "1",
-      startTimestamp: "1000",
-      duration: "1000",
-      roundState: "Auctioning",
+// Mock the new context
+jest.mock("@/context/NewProvider", () => ({
+  useNewContext: jest.fn().mockReturnValue({
+    conn: "ws",
+    wsData: {
+      wsOptionBuyerStates: [],
+      wsRoundStates: [{
+        roundId: "1",
+        startTimestamp: "1000",
+        duration: "1000",
+        roundState: "Open",
+      }],
     },
-    connectionType: "mock",
+    mockData: {
+      optionBuyerStates: [],
+      roundStates: [],
+    },
   }),
 }));
 

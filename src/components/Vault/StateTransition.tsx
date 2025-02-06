@@ -54,7 +54,6 @@ const StateTransition = ({
     expectedNextState,
   });
 
-  console.log("states",selectedRoundState,roundState,prevRoundState,)
   const {
     canAuctionStart,
     canAuctionEnd,
@@ -121,7 +120,6 @@ const StateTransition = ({
   };
 
   const isDisabled = useMemo(() => {
-    console.log("ROUNDSTATE", roundState);
     if (!account) return true;
     if (pendingTx) return true;
     if (isAwaitingRoundStateUpdate) return true;

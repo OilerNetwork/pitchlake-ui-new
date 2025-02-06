@@ -1,8 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import Header from "../../../components/LayoutComponents/Header";
 import useIsMobile from "../../../hooks/window/useIsMobile";
-import { useTransactionContext } from "../../../context/TransactionProvider";
-import { useProtocolContext } from "../../../context/ProtocolProvider";
 import { useRouter } from "next/navigation";
 import useERC20 from "@/hooks/erc20/useERC20";
 import useAccountBalances from "@/hooks/vault/state/useAccountBalances";
@@ -37,7 +35,6 @@ jest.mock("@starknet-react/core", () => ({
 
 jest.mock("../../../hooks/window/useIsMobile");
 jest.mock("../../../context/TransactionProvider");
-jest.mock("../../../context/ProtocolProvider");
 jest.mock("next/navigation");
 jest.mock("@/hooks/erc20/useERC20");
 jest.mock("@/hooks/vault/state/useAccountBalances");
@@ -87,15 +84,6 @@ const mockHooks = (overrides: MockOverrides = {}) => {
     ]
   });
 
-  (useProtocolContext as jest.Mock).mockReturnValue({
-    conn,
-    timestamp,
-    mockTime,
-    mockTimeForward: jest.fn(),
-    vaultState: {
-      address: "0x456"
-    }
-  });
 
   (useERC20 as jest.Mock).mockReturnValue({
     balance: "1000000000000000000" // 1 ETH
@@ -197,7 +185,6 @@ describe("Header Component", () => {
     expect(mockTimeButton).toBeInTheDocument();
     
     fireEvent.click(mockTimeButton);
-    expect(useProtocolContext().mockTimeForward).toHaveBeenCalled();
   });
 
   it("does not render on mobile", () => {

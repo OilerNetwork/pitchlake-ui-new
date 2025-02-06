@@ -1,36 +1,60 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import History from "@/components/Vault/VaultActions/Tabs/Buyer/History";
-import { useExplorer, useProvider } from "@starknet-react/core";
+import { useExplorer } from "@starknet-react/core";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useHelpContext } from "@/context/HelpProvider";
 import { formatUnits } from "ethers";
+import useOptionBuyerStateRPC from "@/hooks/vault_v2/rpc/useOptionBuyerStateRPC";
+import useOptionRoundActions from "@/hooks/vault_v2/actions/useOptionRoundActions";
+import { useNewContext } from "@/context/NewProvider";
 
 // Mock the hooks
 jest.mock("@starknet-react/core", () => ({
   __esModule: true,
-  useExplorer: jest.fn(),
-  useProvider: jest.fn(),
+  ...jest.requireActual("@/__tests__/mocks/starknet-react"),
 }));
 
 jest.mock("@/context/TransactionProvider", () => ({
   __esModule: true,
   useTransactionContext: jest.fn(),
-}));
-
-jest.mock("@/context/ProtocolProvider", () => ({
-  __esModule: true,
-  useProtocolContext: jest.fn(),
+  default: ({ children }: { children: React.ReactNode }) => <div data-testid="transaction-provider">{children}</div>,
 }));
 
 jest.mock("@/context/HelpProvider", () => ({
+  __esModule: true,
   useHelpContext: jest.fn(),
+  HelpProvider: ({ children }: { children: React.ReactNode }) => <div data-testid="help-provider">{children}</div>,
+}));
+
+jest.mock("@/context/NewProvider", () => ({
+  __esModule: true,
+  useNewContext: jest.fn(),
+}));
+
+jest.mock("@/hooks/vault_v2/rpc/useOptionBuyerStateRPC", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+jest.mock("@/hooks/vault_v2/actions/useOptionRoundActions", () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 jest.mock("ethers", () => ({
   formatUnits: jest.fn(),
 }));
+
+const renderWithProviders = (ui: React.ReactElement) => {
+  return render(
+    <div data-testid="help-provider">
+      <div data-testid="transaction-provider">
+        {ui}
+      </div>
+    </div>
+  );
+};
 
 describe("History Component", () => {
   const mockSetBidToEdit = jest.fn();
@@ -65,17 +89,45 @@ describe("History Component", () => {
       pendingTx: false,
     });
 
-    // Mock useProtocolContext hook
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      selectedRoundState: {
-        roundState: "Auctioning",
-      },
-    });
-
     // Mock useHelpContext hook
     (useHelpContext as jest.Mock).mockReturnValue({
       setHelpContent: jest.fn(),
       clearHelpContent: jest.fn(),
+    });
+
+    // Mock useOptionBuyerStateRPC hook
+    (useOptionBuyerStateRPC as jest.Mock).mockReturnValue({
+      historyItems: mockHistoryItems,
+    });
+
+    // Mock useOptionRoundActions hook
+    (useOptionRoundActions as jest.Mock).mockReturnValue({
+      editBid: jest.fn(),
+      cancelBid: jest.fn(),
+    });
+
+    // Mock useNewContext hook
+    (useNewContext as jest.Mock).mockReturnValue({
+      conn: "mock",
+      wsData: {
+        wsVaultState: {
+          currentRoundId: "5",
+          address: "0x123"
+        }
+      },
+      mockData: {
+        vaultState: {
+          currentRoundId: "5",
+          address: "0x123"
+        },
+        optionRoundStates: {
+          "5": {
+            address: "0x123",
+            roundId: "5",
+            roundState: "Auctioning"
+          }
+        }
+      }
     });
 
     // Mock formatUnits
@@ -91,7 +143,7 @@ describe("History Component", () => {
   });
 
   it("renders history items correctly", () => {
-    render(
+    renderWithProviders(
       <History
         items={mockHistoryItems}
         bidToEdit={null}
@@ -115,7 +167,7 @@ describe("History Component", () => {
   });
 
   it("shows edit button only when roundState is Auctioning", () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <History
         items={mockHistoryItems}
         bidToEdit={null}
@@ -130,13 +182,8 @@ describe("History Component", () => {
     expect(editButtons.length).toBe(2);
 
     // Change roundState to something else
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      selectedRoundState: {
-        roundState: "Completed",
-      },
-    });
 
-    const { container: newContainer } = render(
+    const { container: newContainer } = renderWithProviders(
       <History
         items={mockHistoryItems}
         bidToEdit={null}
@@ -151,7 +198,7 @@ describe("History Component", () => {
   });
 
   it("calls setBidToEdit and setIsTabsHidden when edit button is clicked", () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <History
         items={mockHistoryItems}
         bidToEdit={null}
@@ -171,7 +218,7 @@ describe("History Component", () => {
   });
 
   it("handles empty history items array", () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <History
         items={[]}
         bidToEdit={null}
@@ -187,7 +234,7 @@ describe("History Component", () => {
   });
 
   it("applies correct styling to history items", () => {
-    render(
+    renderWithProviders(
       <History
         items={mockHistoryItems}
         bidToEdit={null}

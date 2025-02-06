@@ -11,9 +11,7 @@ const config: Config = {
   testPathIgnorePatterns: ["<rootDir>/node_modules/"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
-    "^@core/(.*)$": "<rootDir>/src/core/$1",
-    "^@/core$": "<rootDir>/src/__tests__/mocks/hooks.ts",
-    "^@core$": "<rootDir>/src/__tests__/mocks/hooks.ts"
+    "\\.(css|less|scss|sass)$": "identity-obj-proxy"
   },
   transform: {
     "^.+\\.(js|jsx|ts|tsx)$": ['babel-jest', { presets: ['next/babel'] }]
@@ -21,13 +19,16 @@ const config: Config = {
   transformIgnorePatterns: [
     "node_modules/(?!(@starknet-react|starknet|get-starknet|@starknet-react/chains|eventemitter3)/)"
   ],
-  moduleDirectories: ["node_modules", "<rootDir>"],
+  moduleDirectories: ["node_modules", "<rootDir>", "src"],
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   globals: {
     'ts-jest': {
       useESM: true,
     },
   },
+  roots: ['<rootDir>/src'],
+  modulePaths: ['<rootDir>/src'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };
 
 export default config;

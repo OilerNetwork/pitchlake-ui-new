@@ -4,13 +4,12 @@ import { Layers3 } from "lucide-react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEthereum } from "@fortawesome/free-brands-svg-icons";
-import { formatUnits, parseUnits, parseEther, formatEther } from "ethers";
+import { formatUnits, parseUnits, formatEther } from "ethers";
 import { useAccount, useContractWrite } from "@starknet-react/core";
 import useERC20 from "@/hooks/erc20/useERC20";
 import { num, Call } from "starknet";
 import { formatNumber, formatNumberText } from "@/lib/utils";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import { useProvider } from "@starknet-react/core";
 import { useContract } from "@starknet-react/core";
 import { erc20ABI, optionRoundABI } from "@/lib/abi";
 import Hoverable from "@/components/BaseComponents/Hoverable";
@@ -44,7 +43,6 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
   const { pendingTx, setPendingTx } = useTransactionContext();
   const { timestamp } = useTimeContext();
 
-  console.log("timestamp",timestamp)
   const { allowance, balance } = useERC20(
     vaultState?.ethAddress as `0x${string}`,
     selectedRoundState?.address,
@@ -315,7 +313,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
       <div className="mt-auto">
         <Hoverable
           dataId="placeBidButton"
-          className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
+          className="place-bid-action-button px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
         >
           <ActionButton
             onClick={handleSubmitForMulticall}

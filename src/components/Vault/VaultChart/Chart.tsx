@@ -11,9 +11,9 @@ import {
 import { History } from "lucide-react";
 import GasPriceChart from "@/components/Vault/VaultChart/ChartInner";
 import Hoverable from "@/components/BaseComponents/Hoverable";
-import { useChartContext } from "@/context/ChartProvider";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import { useNewContext } from "@/context/NewProvider";
+import { useChartContext } from "@/context/ChartProvider";
 
 const RoundPerformanceChart = () => {
   // Protocol context

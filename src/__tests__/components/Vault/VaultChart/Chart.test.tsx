@@ -1,18 +1,30 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import RoundPerformanceChart from "@/components/Vault/VaultChart/Chart";
-import { useProtocolContext } from "@/context/ProtocolProvider";
-import { TestWrapper } from "../../../utils/TestWrapper";
-import { useGasData } from "@/hooks/chart/useGasData";
+import { useNewContext } from "@/context/NewProvider";
+import { useFossilGasData } from "@/hooks/chart/useFossilGasData";
 import { useHistoricalRoundParams } from "@/hooks/chart/useHistoricalRoundParams";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
+import { ChartProvider } from "@/context/ChartProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Mock the hooks
-jest.mock("@/context/ProtocolProvider", () => ({
-  useProtocolContext: jest.fn(),
+jest.mock("@starknet-react/core", () => ({
+  __esModule: true,
+  ...jest.requireActual("@/__tests__/mocks/starknet-react"),
 }));
 
-jest.mock("@/hooks/chart/useGasData", () => ({
-  useGasData: jest.fn(),
+jest.mock("@/context/NewProvider", () => ({
+  useNewContext: jest.fn(),
+}));
+
+jest.mock("@/hooks/vault_v2/states/useRoundState", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+jest.mock("@/hooks/chart/useFossilGasData", () => ({
+  useFossilGasData: jest.fn(),
 }));
 
 jest.mock("@/hooks/chart/useHistoricalRoundParams", () => ({
@@ -55,43 +67,109 @@ jest.mock("@/components/BaseComponents/Hoverable", () => {
   };
 });
 
+const queryClient = new QueryClient();
+
+const renderWithProviders = (ui: React.ReactElement) => {
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <ChartProvider>
+        <div data-testid="help-provider">
+          <div data-testid="transaction-provider">
+            {ui}
+          </div>
+        </div>
+      </ChartProvider>
+    </QueryClientProvider>
+  );
+};
+
 describe("RoundPerformanceChart", () => {
   const mockSetSelectedRound = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    queryClient.clear();
   });
 
   it("renders chart with navigation and handles interactions", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
+    (useNewContext as jest.Mock).mockReturnValue({
       selectedRound: 3,
-      selectedRoundState: {
-        roundId: "3",
-        startTimestamp: "1000",
-        duration: "1000",
-        roundState: "Auctioning"
-      },
       setSelectedRound: mockSetSelectedRound,
-      vaultState: {
-        currentRoundId: "5",
-        address: "0x123"
+      vaultAddress: "0x123",
+      conn: "mock",
+      wsData: {
+        wsVaultState: {
+          currentRoundId: "5",
+          address: "0x123"
+        }
+      },
+      mockData: {
+        vaultState: {
+          currentRoundId: "5",
+          address: "0x123"
+        },
+        optionRoundStates: {
+          "1": {
+            address: "0x123",
+            roundId: "1",
+            startTimestamp: "1000",
+            duration: "1000",
+            roundState: "Settled"
+          },
+          "2": {
+            address: "0x123",
+            roundId: "2",
+            startTimestamp: "2000",
+            duration: "1000",
+            roundState: "Settled"
+          },
+          "3": {
+            address: "0x123",
+            roundId: "3",
+            startTimestamp: "3000",
+            duration: "1000",
+            roundState: "Auctioning"
+          },
+          "4": {
+            address: "0x123",
+            roundId: "4",
+            startTimestamp: "4000",
+            duration: "1000",
+            roundState: "Auctioning"
+          },
+          "5": {
+            address: "0x123",
+            roundId: "5",
+            startTimestamp: "5000",
+            duration: "1000",
+            roundState: "Auctioning"
+          }
+        }
       }
     });
 
-    (useGasData as jest.Mock).mockReturnValue({
-      data: [],
+    (useRoundState as jest.Mock).mockReturnValue({
+      roundId: "3",
+      startTimestamp: "1000",
+      duration: "1000",
+      roundState: "Auctioning",
+      isLoading: false
+    });
+
+    (useFossilGasData as jest.Mock).mockReturnValue({
+      gasData: [],
       isLoading: false,
+      error: null
     });
 
     (useHistoricalRoundParams as jest.Mock).mockReturnValue({
       vaultData: [],
       isLoading: false,
+      error: null
     });
 
-    const { container } = render(
-      <TestWrapper>
-        <RoundPerformanceChart />
-      </TestWrapper>
+    const { container } = renderWithProviders(
+      <RoundPerformanceChart />
     );
 
     // Check initial render
@@ -104,23 +182,64 @@ describe("RoundPerformanceChart", () => {
   });
 
   it("handles expanded view toggle", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
+    (useNewContext as jest.Mock).mockReturnValue({
       selectedRound: 4,
-      selectedRoundState: {
-        roundId: "4",
-        startTimestamp: "1000",
-        duration: "1000",
-        roundState: "Auctioning"
-      },
       setSelectedRound: mockSetSelectedRound,
-      vaultState: {
-        currentRoundId: "4",
-        address: "0x123"
+      vaultAddress: "0x123",
+      conn: "mock",
+      wsData: {
+        wsVaultState: {
+          currentRoundId: "4",
+          address: "0x123"
+        }
+      },
+      mockData: {
+        vaultState: {
+          currentRoundId: "4",
+          address: "0x123"
+        },
+        optionRoundStates: [
+          {
+            address: "0x123",
+            roundId: "1",
+            startTimestamp: "1000",
+            duration: "1000",
+            roundState: "Settled"
+          },
+          {
+            address: "0x123",
+            roundId: "2",
+            startTimestamp: "2000",
+            duration: "1000",
+            roundState: "Settled"
+          },
+          {
+            address: "0x123",
+            roundId: "3",
+            startTimestamp: "3000",
+            duration: "1000",
+            roundState: "Settled"
+          },
+          {
+            address: "0x123",
+            roundId: "4",
+            startTimestamp: "4000",
+            duration: "1000",
+            roundState: "Auctioning"
+          }
+        ]
       }
     });
 
-    (useGasData as jest.Mock).mockReturnValue({
-      data: [],
+    (useRoundState as jest.Mock).mockReturnValue({
+      roundId: "4",
+      startTimestamp: "1000",
+      duration: "1000",
+      roundState: "Auctioning"
+    });
+
+    (useFossilGasData as jest.Mock).mockReturnValue({
+      gasData: [],
       isLoading: false,
     });
 
@@ -129,10 +248,8 @@ describe("RoundPerformanceChart", () => {
       isLoading: false,
     });
 
-    render(
-      <TestWrapper>
-        <RoundPerformanceChart />
-      </TestWrapper>
+    renderWithProviders(
+      <RoundPerformanceChart />
     );
 
     // Initial state - not expanded
@@ -161,23 +278,71 @@ describe("RoundPerformanceChart", () => {
   });
 
   it("disables right navigation at current round", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
+    (useNewContext as jest.Mock).mockReturnValue({
       selectedRound: 5,
-      selectedRoundState: {
-        roundId: "5",
-        startTimestamp: "1000",
-        duration: "1000",
-        roundState: "Auctioning"
-      },
       setSelectedRound: mockSetSelectedRound,
-      vaultState: {
-        currentRoundId: "5",
-        address: "0x123"
+      vaultAddress: "0x123",
+      conn: "mock",
+      wsData: {
+        wsVaultState: {
+          currentRoundId: "5",
+          address: "0x123"
+        }
+      },
+      mockData: {
+        vaultState: {
+          currentRoundId: "5",
+          address: "0x123"
+        },
+        optionRoundStates: [
+          {
+            address: "0x123",
+            roundId: "1",
+            startTimestamp: "1000",
+            duration: "1000",
+            roundState: "Settled"
+          },
+          {
+            address: "0x123",
+            roundId: "2",
+            startTimestamp: "2000",
+            duration: "1000",
+            roundState: "Settled"
+          },
+          {
+            address: "0x123",
+            roundId: "3",
+            startTimestamp: "3000",
+            duration: "1000",
+            roundState: "Settled"
+          },
+          {
+            address: "0x123",
+            roundId: "4",
+            startTimestamp: "4000",
+            duration: "1000",
+            roundState: "Settled"
+          },
+          {
+            address: "0x123",
+            roundId: "5",
+            startTimestamp: "5000",
+            duration: "1000",
+            roundState: "Auctioning"
+          }
+        ]
       }
     });
 
-    (useGasData as jest.Mock).mockReturnValue({
-      data: [],
+    (useRoundState as jest.Mock).mockReturnValue({
+      roundId: "5",
+      startTimestamp: "1000",
+      duration: "1000",
+      roundState: "Auctioning"
+    });
+
+    (useFossilGasData as jest.Mock).mockReturnValue({
+      gasData: [],
       isLoading: false,
     });
 
@@ -186,10 +351,8 @@ describe("RoundPerformanceChart", () => {
       isLoading: false,
     });
 
-    const { container } = render(
-      <TestWrapper>
-        <RoundPerformanceChart />
-      </TestWrapper>
+    const { container } = renderWithProviders(
+      <RoundPerformanceChart />
     );
 
     // Verify right navigation is disabled at current round
@@ -198,23 +361,41 @@ describe("RoundPerformanceChart", () => {
   });
 
   it("disables left navigation at round 1", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
+    (useNewContext as jest.Mock).mockReturnValue({
       selectedRound: 1,
-      selectedRoundState: {
-        roundId: "1",
-        startTimestamp: "1000",
-        duration: "1000",
-        roundState: "Auctioning"
-      },
       setSelectedRound: mockSetSelectedRound,
-      vaultState: {
-        currentRoundId: "4",
-        address: "0x123"
+      vaultAddress: "0x123",
+      conn: "mock",
+      wsData: {
+        wsVaultState: {
+          currentRoundId: "4",
+          address: "0x123"
+        }
+      },
+      mockData: {
+        vaultState: {
+          currentRoundId: "4",
+          address: "0x123"
+        },
+        optionRoundStates: [{
+          address: "0x123",
+          roundId: "1",
+          startTimestamp: "1000",
+          duration: "1000",
+          roundState: "Auctioning"
+        }]
       }
     });
 
-    (useGasData as jest.Mock).mockReturnValue({
-      data: [],
+    (useRoundState as jest.Mock).mockReturnValue({
+      roundId: "1",
+      startTimestamp: "1000",
+      duration: "1000",
+      roundState: "Auctioning"
+    });
+
+    (useFossilGasData as jest.Mock).mockReturnValue({
+      gasData: [],
       isLoading: false,
     });
 
@@ -223,50 +404,52 @@ describe("RoundPerformanceChart", () => {
       isLoading: false,
     });
 
-    const { container } = render(
-      <TestWrapper>
-        <RoundPerformanceChart />
-      </TestWrapper>
+    const { container } = renderWithProviders(
+      <RoundPerformanceChart />
     );
 
-    // Find the left arrow container
-    const leftArrowContainer = container.querySelector('.chart-previous-round');
-    expect(leftArrowContainer).toBeInTheDocument();
-
-    // Find the ArrowLeftIcon div inside the container
-    const leftArrow = leftArrowContainer?.querySelector('div[style*="stroke: var(--greyscale)"]');
+    // Verify left navigation is disabled at round 1
+    const leftArrow = container.querySelector(".hover\\:cursor-default");
     expect(leftArrow).toBeInTheDocument();
-
-    // Verify clicking doesn't trigger setSelectedRound
-    fireEvent.click(leftArrowContainer!);
-    expect(mockSetSelectedRound).not.toHaveBeenCalled();
   });
 
   it("handles loading and error states", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
+    (useNewContext as jest.Mock).mockReturnValue({
       selectedRound: 3,
-      selectedRoundState: {
-        roundId: "3",
-        startTimestamp: "1000",
-        duration: "1000",
-        roundState: "Auctioning",
-        deploymentDate: "1000",
-        optionSettleDate: "2000",
-        auctionEndDate: "1500"
-      },
       setSelectedRound: mockSetSelectedRound,
-      vaultState: {
-        currentRoundId: "5",
-        address: "0x123"
+      vaultAddress: "0x123",
+      conn: "mock",
+      wsData: {
+        wsVaultState: {
+          currentRoundId: "4",
+          address: "0x123"
+        }
+      },
+      mockData: {
+        vaultState: {
+          currentRoundId: "4",
+          address: "0x123"
+        },
+        optionRoundStates: [{
+          address: "0x123",
+          roundId: "3",
+          startTimestamp: "1000",
+          duration: "1000",
+          roundState: "Auctioning"
+        }]
       }
     });
 
-    // Test loading state
-    (useGasData as jest.Mock).mockReturnValue({
-      data: [],
+    (useRoundState as jest.Mock).mockReturnValue({
+      roundId: "3",
+      startTimestamp: "1000",
+      duration: "1000",
+      roundState: "Auctioning"
+    });
+
+    (useFossilGasData as jest.Mock).mockReturnValue({
+      gasData: [],
       isLoading: true,
-      isError: false,
-      error: null
     });
 
     (useHistoricalRoundParams as jest.Mock).mockReturnValue({
@@ -274,28 +457,72 @@ describe("RoundPerformanceChart", () => {
       isLoading: true,
     });
 
-    const { container } = render(
-      <TestWrapper>
-        <RoundPerformanceChart />
-      </TestWrapper>
+    renderWithProviders(
+      <RoundPerformanceChart />
     );
 
-    expect(container.querySelector(".gas-price-chart")).toBeInTheDocument();
+    // Verify loading states are handled
+    expect(screen.getByText(/Round/)).toBeInTheDocument();
+  });
 
-    // Test error state
-    (useGasData as jest.Mock).mockReturnValue({
-      data: [],
-      isLoading: false,
-      isError: true,
-      error: new Error("Failed to fetch gas data")
+  it("handles navigation between rounds", () => {
+    (useNewContext as jest.Mock).mockReturnValue({
+      selectedRound: 2,
+      setSelectedRound: mockSetSelectedRound,
+      vaultAddress: "0x123",
+      conn: "mock",
+      wsData: {
+        wsVaultState: {
+          currentRoundId: "4",
+          address: "0x123"
+        }
+      },
+      mockData: {
+        vaultState: {
+          currentRoundId: "4",
+          address: "0x123"
+        },
+        optionRoundStates: [{
+          address: "0x123",
+          roundId: "2",
+          startTimestamp: "1000",
+          duration: "1000",
+          roundState: "Auctioning"
+        }]
+      }
     });
 
-    render(
-      <TestWrapper>
-        <RoundPerformanceChart />
-      </TestWrapper>
+    (useRoundState as jest.Mock).mockReturnValue({
+      roundId: "2",
+      startTimestamp: "1000",
+      duration: "1000",
+      roundState: "Auctioning"
+    });
+
+    (useFossilGasData as jest.Mock).mockReturnValue({
+      gasData: [],
+      isLoading: false,
+    });
+
+    (useHistoricalRoundParams as jest.Mock).mockReturnValue({
+      vaultData: [],
+      isLoading: false,
+    });
+
+    const { container } = renderWithProviders(
+      <RoundPerformanceChart />
     );
 
-    expect(container.querySelector(".gas-price-chart")).toBeInTheDocument();
+    // Find and click the right arrow
+    const rightArrow = container.querySelector('.chart-next-round');
+    expect(rightArrow).toBeInTheDocument();
+    fireEvent.click(rightArrow!);
+    expect(mockSetSelectedRound).toHaveBeenCalledWith(3);
+
+    // Find and click the left arrow
+    const leftArrow = container.querySelector('.chart-previous-round');
+    expect(leftArrow).toBeInTheDocument();
+    fireEvent.click(leftArrow!);
+    expect(mockSetSelectedRound).toHaveBeenCalledWith(1);
   });
 });

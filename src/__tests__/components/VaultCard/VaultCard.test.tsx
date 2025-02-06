@@ -1,14 +1,14 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import VaultCard from "../../../components/VaultCard/VaultCard";
-import useVaultState from "../../../hooks/vault/useVaultState";
-import useVaultBalances from "../../../hooks/vault/state/useVaultBalances";
-import useRoundState from "../../../hooks/optionRound/state/useRoundState";
-import useCapLevel from "../../../hooks/optionRound/state/useCapLevel";
-import useStrikePrice from "../../../hooks/optionRound/state/useStrikePrice";
-import useTimestamps from "../../../hooks/optionRound/state/useTimestamps";
-import useLatestTimestamp from "../../../hooks/chain/useLatestTimestamp";
+import VaultCard from "@/components/VaultCard/VaultCard";
+import useVaultState from "@/hooks/vault/useVaultState";
+import useVaultBalances from "@/hooks/vault/state/useVaultBalances";
+import useRoundState from "@/hooks/optionRound/state/useRoundState";
+import useCapLevel from "@/hooks/optionRound/state/useCapLevel";
+import useStrikePrice from "@/hooks/optionRound/state/useStrikePrice";
+import useTimestamps from "@/hooks/optionRound/state/useTimestamps";
+import useLatestTimestamp from "@/hooks/chain/useLatestTimestamp";
 import { useRouter } from "next/navigation";
-import { useProtocolContext } from "../../../context/ProtocolProvider";
+import { useNewContext } from "@/context/NewProvider";
 
 jest.mock("@starknet-react/core", () => ({
   useProvider: () => ({
@@ -26,14 +26,16 @@ jest.mock("next/navigation", () => ({
   useRouter: jest.fn()
 }));
 
-jest.mock("../../../hooks/vault/useVaultState");
-jest.mock("../../../hooks/vault/state/useVaultBalances");
-jest.mock("../../../hooks/optionRound/state/useRoundState");
-jest.mock("../../../hooks/optionRound/state/useCapLevel");
-jest.mock("../../../hooks/optionRound/state/useStrikePrice");
-jest.mock("../../../hooks/optionRound/state/useTimestamps");
-jest.mock("../../../hooks/chain/useLatestTimestamp");
-jest.mock("../../../context/ProtocolProvider");
+jest.mock("@/hooks/vault/useVaultState");
+jest.mock("@/hooks/vault/state/useVaultBalances");
+jest.mock("@/hooks/optionRound/state/useRoundState");
+jest.mock("@/hooks/optionRound/state/useCapLevel");
+jest.mock("@/hooks/optionRound/state/useStrikePrice");
+jest.mock("@/hooks/optionRound/state/useTimestamps");
+jest.mock("@/hooks/chain/useLatestTimestamp");
+jest.mock("@/context/NewProvider", () => ({
+  useNewContext: jest.fn()
+}));
 
 describe("VaultCard", () => {
   const mockRouter = {
@@ -45,8 +47,15 @@ describe("VaultCard", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useRouter as jest.Mock).mockReturnValue(mockRouter);
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      setSelectedRound: mockSetSelectedRound
+    (useNewContext as jest.Mock).mockReturnValue({
+      setSelectedRound: mockSetSelectedRound,
+      conn: "mock",
+      mockData: {
+        vaultState: {
+          vaultType: "Call",
+          currentRoundId: "1"
+        }
+      }
     });
     (useVaultState as jest.Mock).mockReturnValue({
       vaultState: {
