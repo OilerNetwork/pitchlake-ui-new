@@ -7,97 +7,90 @@ import useTimestamps from "@/hooks/optionRound/state/useTimestamps";
 import { useNewContext } from "@/context/NewProvider";
 import { BlockTag } from "starknet";
 const useVaultStateRPC = () => {
-  const { conn, vaultAddress:address, selectedRound } = useNewContext()
+  const { conn, vaultAddress: address, selectedRound } = useNewContext();
   const contractData = useMemo(() => {
-    console.log("RENRENCONDAT")
+    console.log("RENRENCONDAT");
     return {
       abi: vaultABI,
-      address: conn === "rpc" ? (address as `0x${string}`) : undefined,
+      address:
+        conn === "rpc" || conn === "demo"
+          ? (address as `0x${string}`)
+          : undefined,
     };
   }, [address, conn]);
 
-
-  console.log("RENRENCONVAUHOO")
+  console.log("RENRENCONVAUHOO");
   //Read States
 
   //States without a param
-  
-  const {data:alpha}= useContractRead({
+
+  const { data: alpha } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_alpha",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:strikeLevel}= useContractRead({
+  });
+  const { data: strikeLevel } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_strike_level",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:ethAddress}= useContractRead({
+  });
+  const { data: ethAddress } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_eth_address",
-    args:[],
+    args: [],
     watch: true,
-    
-  })      
-  const {data:fossilClientAddress}= useContractRead({
+  });
+  const { data: fossilClientAddress } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_fossil_client_address",
-    args:[],
+    args: [],
     watch: true,
-    
-  })  
-  const {data:currentRoundId}= useContractRead({
+  });
+  const { data: currentRoundId } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_current_round_id",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:lockedBalance}= useContractRead({
+  });
+  const { data: lockedBalance } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_vault_locked_balance",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:unlockedBalance}= useContractRead({
+  });
+  const { data: unlockedBalance } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_vault_unlocked_balance",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:stashedBalance}= useContractRead({
+  });
+  const { data: stashedBalance } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_vault_stashed_balance",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:queuedBps}= useContractRead({
+  });
+  const { data: queuedBps } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_vault_queued_bps",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
+  });
 
   const { data: round1Address } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_round_address",
     args: [1],
     watch: false,
@@ -105,17 +98,16 @@ blockIdentifier:BlockTag.PENDING,
 
   const { data: deploymentDate } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     abi: optionRoundABI,
     functionName: "get_deployment_date",
     args: [],
     watch: true,
-    
   });
 
   const { data: selectedRoundAddress } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+    blockIdentifier: BlockTag.PENDING,
     functionName: "get_round_address",
     args:
       selectedRound && selectedRound !== 0
@@ -128,8 +120,14 @@ blockIdentifier:BlockTag.PENDING,
     return stringToHex(selectedRoundAddress?.toString());
   }, [selectedRoundAddress]);
 
-  const k = useMemo(() => strikeLevel ? Number(strikeLevel.toString()) : 0, [strikeLevel]);
-  const vaultType = useMemo(() => k > 0 ? "OTM" : k == 0 ? "ATM" : "ITM", [k]);
+  const k = useMemo(
+    () => (strikeLevel ? Number(strikeLevel.toString()) : 0),
+    [strikeLevel],
+  );
+  const vaultType = useMemo(
+    () => (k > 0 ? "OTM" : k == 0 ? "ATM" : "ITM"),
+    [k],
+  );
 
   return {
     vaultState: {
@@ -149,7 +147,7 @@ blockIdentifier:BlockTag.PENDING,
       deploymentDate: deploymentDate ? deploymentDate.toString() : 0,
       currentRoundAddress: usableString,
     } as VaultStateType,
-    selectedRoundAddress:usableString,
+    selectedRoundAddress: usableString,
   };
 };
 

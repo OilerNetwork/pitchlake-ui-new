@@ -1,4 +1,3 @@
-
 import { useAccount } from "@starknet-react/core";
 import { useMemo, useState, useEffect } from "react";
 import useFossilStatus from "@/hooks/fossil/useFossilStatus";
@@ -21,11 +20,10 @@ const StateTransition = ({
   setModalState: any;
   fossilDelay: number;
 }) => {
-
-  const {conn} = useNewContext()
-  const {vaultState,selectedRoundAddress} = useVaultState()
-  const selectedRoundState = useRoundState(selectedRoundAddress)
-  const vaultActions = useVaultActions()
+  const { conn } = useNewContext();
+  const { vaultState, selectedRoundAddress } = useVaultState();
+  const selectedRoundState = useRoundState(selectedRoundAddress);
+  const vaultActions = useVaultActions();
   const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
 
@@ -54,7 +52,7 @@ const StateTransition = ({
     expectedNextState,
   });
 
-  console.log("states",selectedRoundState,roundState,prevRoundState,)
+  console.log("states", selectedRoundState, roundState, prevRoundState);
   const {
     canAuctionStart,
     canAuctionEnd,
