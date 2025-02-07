@@ -91,13 +91,19 @@ export const ChartProvider: React.FC<{ children: React.ReactNode }> = ({
       return block.timestamp <= xMax + 30;
     });
 
-    if (fossilGasData.length >= 1) {
+    if (fossilGasData.length === 0) {
+      fossilGasData.push({ timestamp: xMin }, { timestamp: xMax });
+    } else if (fossilGasData.length >= 1) {
       const lastFossilBlockTimestamp =
         fossilGasData[fossilGasData.length - 1].timestamp;
       filteredFeeHistory = feeHistory.filter((block) => {
         return block.timestamp >= lastFossilBlockTimestamp;
       });
     }
+
+    //if (filteredFeeHistory.length === 0) {
+    //  filteredFeeHistory.push({ timestamp: xMax });
+    //}
 
     const allGasData: FormattedBlockData[] = [
       ...historicGasData,
