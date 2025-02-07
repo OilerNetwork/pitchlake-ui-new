@@ -6,6 +6,12 @@ import { FormattedBlockData } from "@/app/api/getFossilGasData/route";
 import { getTWAPs } from "@/lib/utils";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
+import { useNewContext } from "./NewProvider";
+import demoGasData from "@/lib/demo/demo-gas-data.json";
+import { DemoRoundDataType, getDemoRoundData } from "@/lib/demo/utils";
+import { useDemoTime } from "@/lib/demo/useDemoTime";
+import { scaleInRange } from "@/lib/utils";
+
 interface ChartContextProps {
   gasData: FormattedBlockData[];
   isExpandedView: boolean;
@@ -20,8 +26,9 @@ export const ChartProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [isExpandedView, setIsExpandedView] = useState<boolean>(false);
-  const {selectedRoundAddress} = useVaultState()
-  const selectedRoundState = useRoundState(selectedRoundAddress)
+  const { selectedRoundAddress } = useVaultState();
+  const selectedRoundState = useRoundState(selectedRoundAddress);
+  const { conn, selectedRound } = useNewContext();
 
   const { xMin, xMax } = useMemo(() => {
     if (!selectedRoundState) return { xMin: 0, xMax: 0 };
@@ -77,12 +84,8 @@ export const ChartProvider: React.FC<{ children: React.ReactNode }> = ({
   const { feeHistory } = useUnconfirmedBlocks(xMin, xMax);
 
   const { combinedGasData } = useMemo(() => {
-    if (!historicGasData || !fossilGasData || !feeHistory)
+    if (!historicGasData || !fossilGasData || !feeHistory || conn === "demo")
       return { combinedGasData: [] };
-
-    //if (fossilGasData.length === 0) {
-    //  fossilGasData.push({ blockNumber: 0, timestamp: xMin, basefee: 0 });
-    //}
 
     // Remove all unconfirmed blocks if timestamp < last fossil block
     let filteredFeeHistory = feeHistory.filter((block) => {
@@ -126,24 +129,50 @@ export const ChartProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [historicGasData, fossilGasData, feeHistory]);
 
-  const { gasData } = useMemo(() => {
-    const withTwaps = getTWAPs(combinedGasData, xMin, roundDuration);
-    //if (withTwaps.length === 0) {
-    //  withTwaps.push({
-    //    blockNumber: 1,
-    //    basefee: 1,
-    //    timestamp: 1,
-    //  });
-    //}
-    return { gasData: withTwaps };
-  }, [combinedGasData]);
+  /// DEMO ///
+  const demoNow = conn === "demo" ? useDemoTime(true) : undefined;
 
-  //console.log({
-  //  xMin,
-  //  xMax,
-  //  gasDataXMin: gasData[0]?.timestamp,
-  //  gasDataXMax: gasData[gasData.length - 1]?.timestamp,
-  //});
+  const { gasData } = useMemo(() => {
+    if (conn === "ws" || conn === "rpc") {
+      return {
+        gasData: getTWAPs(combinedGasData, xMin, roundDuration),
+      };
+    }
+    /// DEMO ///
+    else {
+      if (!demoNow) return { gasData: [] };
+      const demoRoundData: DemoRoundDataType = getDemoRoundData(selectedRound);
+      const roundStart = Number(demoRoundData.deploymentDate);
+      const demoXMax = Number(demoRoundData.optionSettleDate);
+      const demoData = demoGasData.filter((d) => d.timestamp <= demoXMax);
+
+      const roundDuration = demoXMax - Number(demoRoundData.deploymentDate);
+
+      const demoXMin = isExpandedView
+        ? roundStart - 4 * roundDuration
+        : roundStart;
+
+      const allDemoGasData = getTWAPs(demoData, demoXMin, roundDuration);
+
+      const scaledDemoNow = scaleInRange(
+        demoNow,
+        [xMin, xMax],
+        [demoXMin, demoXMax],
+      );
+
+      const filteredDemoData = allDemoGasData.filter(
+        (d) => d.timestamp <= scaledDemoNow,
+      );
+
+      if (
+        filteredDemoData[filteredDemoData.length - 1]?.timestamp + 12 <=
+        demoXMax
+      )
+        filteredDemoData.push({ timestamp: demoXMax });
+
+      return { gasData: filteredDemoData };
+    }
+  }, [combinedGasData, selectedRound, demoNow]); // @NOTE: selectedRound & demoNow are only a deps for "demo", is there a better way ?
 
   return (
     <ChartContext.Provider
