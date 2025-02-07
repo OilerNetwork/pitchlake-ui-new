@@ -1,16 +1,11 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import PanelRight from "../../../components/Vault/PanelRight";
-import { useProtocolContext } from "../../../context/ProtocolProvider";
 import { useTransactionContext } from "../../../context/TransactionProvider";
 import { useAccount } from "@starknet-react/core";
 import { useTabContent } from "../../../hooks/vault/useTabContent";
-
-// Mock the hooks
-jest.mock("../../../context/ProtocolProvider", () => ({
-  __esModule: true,
-  useProtocolContext: jest.fn(),
-}));
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 
 jest.mock("../../../context/TransactionProvider", () => ({
   __esModule: true,
@@ -20,11 +15,55 @@ jest.mock("../../../context/TransactionProvider", () => ({
 jest.mock("@starknet-react/core", () => ({
   __esModule: true,
   useAccount: jest.fn(),
+  useContractRead: jest.fn().mockReturnValue({
+    data: "1000000000000000000",
+    isError: false,
+    isLoading: false,
+  }),
 }));
 
 jest.mock("../../../hooks/vault/useTabContent", () => ({
   __esModule: true,
   useTabContent: jest.fn(),
+}));
+
+jest.mock("@/hooks/vault_v2/states/useVaultState", () => ({
+  __esModule: true,
+  default: jest.fn().mockReturnValue({
+    vaultState: {
+      address: "0x123",
+      currentRoundId: "1",
+    },
+    selectedRoundAddress: "0x456",
+  }),
+}));
+
+jest.mock("@/hooks/vault_v2/states/useRoundState", () => ({
+  __esModule: true,
+  default: jest.fn().mockReturnValue({
+    roundId: "1",
+    startTimestamp: "1000",
+    duration: "1000",
+    roundState: "Auctioning",
+  }),
+}));
+
+jest.mock("@/context/NewProvider", () => ({
+  __esModule: true,
+  useNewContext: jest.fn().mockReturnValue({
+    conn: "rpc",
+    wsData: {
+      wsOptionBuyerStates: [],
+    },
+    mockData: {
+      optionBuyerStates: [],
+    },
+  }),
+}));
+
+jest.mock("@/hooks/vault_v2/rpc/useOptionBuyerStateRPC", () => ({
+  __esModule: true,
+  default: jest.fn().mockReturnValue(null),
 }));
 
 // Mock child components
@@ -80,23 +119,20 @@ describe("PanelRight Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      selectedRoundState: mockSelectedRoundState,
-      selectedRoundBuyerState: mockSelectedRoundBuyerState,
-    });
-
     (useTransactionContext as jest.Mock).mockReturnValue({
       pendingTx: false,
-      status: null,
     });
 
     (useAccount as jest.Mock).mockReturnValue({
-      account: "0x123",
+      address: "0x123",
+      account: {
+        address: "0x123",
+      },
     });
 
     (useTabContent as jest.Mock).mockReturnValue({
-      tabs: mockTabs,
-      tabContent: mockTabContent,
+      tabs: ["Tab1", "Tab2"],
+      tabContent: <div className="tab-content">Tab Content</div>,
     });
   });
 
@@ -109,23 +145,23 @@ describe("PanelRight Component", () => {
       />
     );
 
-    const tabsContainer = screen.getByText("Deposit").closest(".vault-tabs");
-    expect(tabsContainer).toBeInTheDocument();
-    expect(screen.getByText("Mock Tab Content")).toBeInTheDocument();
+    expect(screen.getByText("Tab1")).toBeInTheDocument();
+    expect(screen.getByText("Tab2")).toBeInTheDocument();
+    expect(screen.getByText("Tab Content")).toBeInTheDocument();
   });
 
   it("handles tab changes", () => {
-    const setIsEditOpen = jest.fn();
     render(
       <PanelRight
         userType="lp"
         isEditOpen={false}
-        setIsEditOpen={setIsEditOpen}
+        setIsEditOpen={jest.fn()}
       />
     );
 
-    fireEvent.click(screen.getByText("Withdraw"));
-    expect(setIsEditOpen).toHaveBeenCalledWith(false);
+    const tab2Button = screen.getByText("Tab2");
+    fireEvent.click(tab2Button);
+    expect(tab2Button).toHaveClass("active");
   });
 
   it("renders NotStartedYet when no tabs are available", () => {
@@ -161,11 +197,6 @@ describe("PanelRight Component", () => {
     (useTabContent as jest.Mock).mockReturnValue({
       tabs: newTabs,
       tabContent: <div className="tab-content">New Tab Content</div>,
-    });
-
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      selectedRoundState: { ...mockSelectedRoundState, roundState: "Running" },
-      selectedRoundBuyerState: mockSelectedRoundBuyerState,
     });
 
     // Rerender to reflect changes

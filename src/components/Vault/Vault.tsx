@@ -12,18 +12,25 @@ import MobileScreen from "../BaseComponents/MobileScreen";
 import { useHelpContext } from "@/context/HelpProvider";
 import { HelpBoxPanel } from "../HelpBoxComponents/HelpBoxPanel";
 import Hoverable from "../BaseComponents/Hoverable";
+import WrongNetworkScreen from "@/components/WrongNetworkScreen";
+import { useNetwork } from "@starknet-react/core";
+import { ChartProvider } from "@/context/ChartProvider";
 
 export const Vault = () => {
   const [isProviderView, setIsProviderView] = useState(true);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const { isMobile } = useIsMobile();
   const { isHelpBoxOpen } = useHelpContext();
+  const { chain } = useNetwork();
   const router = useRouter();
 
   if (isMobile) {
     return <MobileScreen />;
   }
 
+  if (chain.network === "mainnet") {
+    return <WrongNetworkScreen />;
+  }
   return (
     <div className="px-6 py-4 pt-[120px] bg-faded-black-alt flex-grow flex-box overflow-auto">
       <div className="flex flex-row-reverse text-primary">
@@ -93,10 +100,9 @@ export const Vault = () => {
       </div>
       <div className="mt-6 flex flex-row">
         {<PanelLeft userType={isProviderView ? "lp" : "ob"} />}
-        {
-          //Update the roundState to multiple roundStates and set selected round in the component
-        }
-        <RoundPerformanceChart />
+        <ChartProvider>
+          <RoundPerformanceChart />
+        </ChartProvider>
 
         <div className="w-full ml-6 max-w-[350px] flex flex-col max-h-[834px]">
           <div

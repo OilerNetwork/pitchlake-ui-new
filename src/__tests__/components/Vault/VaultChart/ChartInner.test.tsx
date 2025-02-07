@@ -1,107 +1,248 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import GasPriceChart from "@/components/Vault/VaultChart/ChartInner";
-import { useProtocolContext } from "@/context/ProtocolProvider";
-import { useHelpContext } from "@/context/HelpProvider";
+import { useChartContext } from "@/context/ChartProvider";
+import useChart from "@/hooks/chart/useChartData";
+import { useHistoricalRoundParams } from "@/hooks/chart/useHistoricalRoundParams";
 
 // Mock the hooks
-jest.mock("@/context/ProtocolProvider", () => ({
-  useProtocolContext: jest.fn(),
+jest.mock("@starknet-react/core", () => ({
+  useProvider: jest.fn(() => ({
+    provider: {
+      getBlock: jest.fn(),
+      callContract: jest.fn()
+    }
+  }))
+}));
+
+jest.mock("@/context/NewProvider", () => ({
+  useNewContext: jest.fn(() => ({
+    selectedRound: "1",
+    conn: "mock",
+    wsData: {
+      wsVaultState: {
+        currentRoundId: "5",
+        address: "0x123"
+      }
+    },
+    mockData: {
+      vaultState: {
+        currentRoundId: "5",
+        address: "0x123"
+      },
+      optionRoundStates: [
+        {
+          address: "0x123",
+          roundId: "1",
+          startTimestamp: "1000",
+          duration: "1000",
+          roundState: "Auctioning"
+        }
+      ]
+    }
+  }))
 }));
 
 jest.mock("@/context/HelpProvider", () => ({
-  useHelpContext: jest.fn(),
+  useHelpContext: jest.fn(() => ({
+    setContent: jest.fn(),
+    setHeader: jest.fn(),
+    isHoveringHelpBox: false,
+  }))
+}));
+
+jest.mock("@/hooks/chart/useHistoricalRoundParams", () => ({
+  useHistoricalRoundParams: jest.fn(({ vaultAddress, fromRound, toRound }) => ({
+    vaultData: {
+      rounds: [
+        {
+          roundId: fromRound,
+          deploymentDate: "1000",
+          optionSettleDate: "2000",
+          strikePrice: "100000000000",
+          capLevel: "1000",
+          address: vaultAddress
+        }
+      ]
+    }
+  }))
+}));
+
+jest.mock("@/hooks/chart/useChartData", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    gasData: [
+      { 
+        timestamp: 1000, 
+        TWAP: 100, 
+        BASEFEE: 90, 
+        confirmedTwap: 100, 
+        confirmedBasefee: 90,
+        unconfirmedTwap: 110,
+        unconfirmedBasefee: 95,
+        STRIKE: 100,
+        CAP_LEVEL: 110,
+        twap: 100,
+        basefee: 90
+      },
+      { 
+        timestamp: 1500, 
+        TWAP: 200, 
+        BASEFEE: 180, 
+        confirmedTwap: 200, 
+        confirmedBasefee: 180,
+        unconfirmedTwap: 210,
+        unconfirmedBasefee: 185,
+        STRIKE: 100,
+        CAP_LEVEL: 110,
+        twap: 200,
+        basefee: 180
+      },
+      { 
+        timestamp: 2000, 
+        TWAP: 300, 
+        BASEFEE: 270, 
+        confirmedTwap: 300, 
+        confirmedBasefee: 270,
+        unconfirmedTwap: 310,
+        unconfirmedBasefee: 275,
+        STRIKE: 100,
+        CAP_LEVEL: 110,
+        twap: 300,
+        basefee: 270
+      }
+    ]
+  }))
+}));
+
+jest.mock("@/context/ChartProvider", () => ({
+  useChartContext: jest.fn(() => ({
+    isExpandedView: false,
+    setIsExpandedView: jest.fn(),
+    xMax: 2000,
+    xMin: 1000,
+  }))
+}));
+
+jest.mock("@/hooks/vault_v2/states/useRoundState", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    deploymentDate: "1000",
+    optionSettleDate: "2000",
+    strikePrice: "100000000000",
+    capLevel: "1000",
+  }))
+}));
+
+jest.mock("@/hooks/vault_v2/states/useVaultState", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    vaultState: {
+      address: "0x123",
+      currentRoundId: "5"
+    },
+    isLoading: false,
+    error: null
+  }))
 }));
 
 // Mock recharts components
 jest.mock("recharts", () => ({
   ComposedChart: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
+    <div data-testid="composed-chart">{children}</div>
   ),
-  Area: ({ dataKey }: { dataKey: string }) => <div className={`chart-area-${dataKey.toLowerCase()}`} />,
-  Line: ({ dataKey }: { dataKey: string }) => <div className={`chart-line-${dataKey.toLowerCase()}`} />,
-  XAxis: () => <div />,
-  YAxis: () => <div />,
-  CartesianGrid: () => <div />,
-  ResponsiveContainer: ({ children, className }: { children: React.ReactNode, className: string }) => (
-    <div className={className}>{children}</div>
+  Area: ({ dataKey }: { dataKey: string }) => {
+    const testId = `chart-area-${dataKey.toLowerCase().replace(/\./g, '')}`;
+    return <div data-testid={testId} />;
+  },
+  Line: ({ dataKey }: { dataKey: string }) => {
+    const testId = `chart-line-${dataKey.toLowerCase().replace(/\./g, '')}`;
+    return <div data-testid={testId} />;
+  },
+  XAxis: () => <div data-testid="x-axis" />,
+  YAxis: () => <div data-testid="y-axis" />,
+  CartesianGrid: () => <div data-testid="cartesian-grid" />,
+  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="responsive-container">{children}</div>
   ),
-  ReferenceLine: () => <div />,
-  ReferenceArea: () => <div />,
-  Tooltip: () => <div />,
+  ReferenceLine: () => <div data-testid="reference-line" />,
+  ReferenceArea: () => <div data-testid="reference-area" />,
+  Tooltip: () => <div data-testid="tooltip" />,
   Defs: ({ children }: { children: React.ReactNode }) => (
-    <svg>
-      <defs>{children}</defs>
-    </svg>
+    <div data-testid="defs">{children}</div>
   ),
-  LinearGradient: ({ id, children }: { id: string; children: React.ReactNode }) => (
-    <defs>
-      <linearGradient id={id}>{children}</linearGradient>
-    </defs>
+  LinearGradient: ({ children, id }: { children: React.ReactNode; id: string }) => (
+    <div data-testid="linear-gradient">{children}</div>
   ),
   Stop: ({ offset, stopColor }: { offset: string; stopColor: string }) => (
-    <stop offset={offset} stopColor={stopColor} />
+    <div data-testid="stop" style={{ offset, backgroundColor: stopColor }} />
   ),
 }));
 
+const renderWithProviders = (ui: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      {ui}
+    </QueryClientProvider>
+  );
+};
+
 describe("GasPriceChart", () => {
-  const mockSetSelectedRound = jest.fn();
-  const mockSetIsExpandedView = jest.fn();
-
-  const defaultProps = {
-    data: [
-      { timestamp: 1, TWAP: 100, BASEFEE: 90 },
-      { timestamp: 2, TWAP: 200, BASEFEE: 180 },
-      { timestamp: 3, TWAP: 300, BASEFEE: 270 },
-    ],
-    activeLines: {
-      TWAP: true,
-      BASEFEE: true,
-    },
-    historicalData: {
-      rounds: [
-        {
-          roundId: 1,
-          deploymentDate: "1000",
-          optionSettleDate: "2000",
-        },
-      ],
-    },
-    fromRound: 1,
-    toRound: 1,
-    isExpandedView: false,
-    selectedRound: 1,
-    setIsExpandedView: mockSetIsExpandedView,
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      setSelectedRound: mockSetSelectedRound,
-      selectedRoundState: {
-        deploymentDate: "1000",
-        optionSettleDate: "2000",
-      },
-    });
-    (useHelpContext as jest.Mock).mockReturnValue({
-      setHelpContent: jest.fn(),
-      clearHelpContent: jest.fn(),
-    });
   });
 
   it("renders chart with correct components and data visualization", () => {
-    const { container } = render(<GasPriceChart {...defaultProps} />);
+    (useChart as jest.Mock).mockReturnValue({
+      gasData: [
+        { 
+          timestamp: 1000, 
+          confirmedTwap: 100,
+          confirmedBasefee: 90,
+          unconfirmedTwap: 110,
+          unconfirmedBasefee: 95,
+          STRIKE: 100,
+          CAP_LEVEL: 110
+        }
+      ]
+    });
 
-    // Verify chart components are rendered
-    expect(container.querySelector(".gas-price-chart-container")).toBeInTheDocument();
+    const { getByTestId } = renderWithProviders(
+      <GasPriceChart 
+        activeLines={{
+          TWAP: true,
+          BASEFEE: true,
+          STRIKE: true,
+          CAP_LEVEL: true,
+        }}
+      />
+    );
+
+    expect(getByTestId("responsive-container")).toBeInTheDocument();
+    expect(getByTestId("composed-chart")).toBeInTheDocument();
+    expect(getByTestId("chart-area-confirmedtwap")).toBeInTheDocument();
+    expect(getByTestId("chart-area-confirmedbasefee")).toBeInTheDocument();
   });
 
   it("handles missing data by showing loading state", () => {
-    const { container } = render(
+    (useChart as jest.Mock).mockReturnValue({ gasData: undefined });
+    (useHistoricalRoundParams as jest.Mock).mockReturnValue({ vaultData: undefined });
+
+    const { container } = renderWithProviders(
       <GasPriceChart 
-        {...defaultProps}
-        data={[]}
-        historicalData={{ rounds: [] }}
+        activeLines={{
+          TWAP: true,
+          BASEFEE: true,
+        }}
       />
     );
 
@@ -109,52 +250,122 @@ describe("GasPriceChart", () => {
   });
 
   it("renders only active data lines", () => {
-    const { container } = render(
+    (useChart as jest.Mock).mockReturnValue({
+      gasData: [
+        { 
+          timestamp: 1000, 
+          confirmedTwap: 100,
+          confirmedBasefee: 90,
+          unconfirmedTwap: 110,
+          unconfirmedBasefee: 95,
+          STRIKE: 100,
+          CAP_LEVEL: 110
+        }
+      ],
+      isLoading: false
+    });
+
+    (useHistoricalRoundParams as jest.Mock).mockReturnValue({
+      vaultData: {
+        rounds: [
+          {
+            roundId: "1",
+            deploymentDate: "1000",
+            optionSettleDate: "2000",
+            strikePrice: "100000000000",
+            capLevel: "1000",
+            address: "0x123"
+          }
+        ]
+      },
+      isLoading: false
+    });
+
+    const { getByTestId, queryByTestId } = renderWithProviders(
       <GasPriceChart 
-        {...defaultProps}
         activeLines={{
           TWAP: true,
           BASEFEE: false,
+          STRIKE: false,
+          CAP_LEVEL: false,
         }}
       />
     );
 
-    expect(container.querySelector(".chart-area-twap")).toBeInTheDocument();
-    expect(container.querySelector(".chart-area-basefee")).not.toBeInTheDocument();
+    expect(getByTestId("responsive-container")).toBeInTheDocument();
+    expect(getByTestId("chart-area-confirmedtwap")).toBeInTheDocument();
+    expect(queryByTestId("chart-area-confirmedbasefee")).not.toBeInTheDocument();
   });
 
   it("handles expanded view with multiple rounds", () => {
-    const expandedProps = {
-      ...defaultProps,
+    (useChartContext as jest.Mock).mockReturnValue({
       isExpandedView: true,
-      fromRound: 1,
-      toRound: 2,
-      historicalData: {
+      setIsExpandedView: jest.fn(),
+      xMax: 2000,
+      xMin: 1000,
+    });
+
+    (useChart as jest.Mock).mockReturnValue({
+      gasData: [
+        { 
+          timestamp: 1000, 
+          confirmedTwap: 100,
+          confirmedBasefee: 90,
+          unconfirmedTwap: 110,
+          unconfirmedBasefee: 95,
+          STRIKE: 100,
+          CAP_LEVEL: 110
+        },
+        { 
+          timestamp: 2000, 
+          confirmedTwap: 200,
+          confirmedBasefee: 180,
+          unconfirmedTwap: 210,
+          unconfirmedBasefee: 185,
+          STRIKE: 100,
+          CAP_LEVEL: 110
+        }
+      ],
+      isLoading: false
+    });
+
+    (useHistoricalRoundParams as jest.Mock).mockReturnValue({
+      vaultData: {
         rounds: [
           {
-            roundId: 1,
+            roundId: "1",
             deploymentDate: "1000",
-            optionSettleDate: "2000",
+            optionSettleDate: "1500",
+            strikePrice: "100000000000",
+            capLevel: "1000",
+            address: "0x123"
           },
           {
-            roundId: 2,
-            deploymentDate: "2000",
-            optionSettleDate: "3000",
-          },
-        ],
+            roundId: "2",
+            deploymentDate: "1500",
+            optionSettleDate: "2000",
+            strikePrice: "100000000000",
+            capLevel: "1000",
+            address: "0x123"
+          }
+        ]
       },
-      data: [
-        { timestamp: 1, TWAP: 100, BASEFEE: 90 },
-        { timestamp: 2, TWAP: 200, BASEFEE: 180 },
-        { timestamp: 3, TWAP: 300, BASEFEE: 270 },
-        { timestamp: 4, TWAP: 400, BASEFEE: 360 },
-        { timestamp: 5, TWAP: 500, BASEFEE: 450 },
-        { timestamp: 6, TWAP: 600, BASEFEE: 540 },
-      ],
-    };
+      isLoading: false
+    });
 
-    const { container } = render(<GasPriceChart {...expandedProps} />);
+    const { getByTestId } = renderWithProviders(
+      <GasPriceChart 
+        activeLines={{
+          TWAP: true,
+          BASEFEE: true,
+          STRIKE: true,
+          CAP_LEVEL: true,
+        }}
+      />
+    );
 
-    expect(container.querySelector(".gas-price-chart-container")).toBeInTheDocument();
+    expect(getByTestId("responsive-container")).toBeInTheDocument();
+    expect(getByTestId("chart-area-confirmedtwap")).toBeInTheDocument();
+    expect(getByTestId("reference-area")).toBeInTheDocument();
   });
 }); 

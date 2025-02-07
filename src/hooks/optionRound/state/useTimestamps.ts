@@ -1,40 +1,47 @@
 import { optionRoundABI } from "@/lib/abi";
-import useContractReads from "@/lib/useContractReads";
+import { useContractRead } from "@starknet-react/core";
 import { useMemo } from "react";
+import { BlockTag } from "starknet";
 
 const useTimestamps = (
   address: string | undefined,
-  args?: { watch?: boolean },
+  args?: { watch?: boolean }
 ) => {
   const watch = args?.watch ?? false;
   const contractData = useMemo(() => {
-    return { abi: optionRoundABI, address:address as `0x${string}` };
+    return { abi: optionRoundABI, address: address as `0x${string}` };
   }, [address]);
 
-  const { deploymentDate, auctionStartDate, auctionEndDate, optionSettleDate } =
-    useContractReads({
-      contractData,
-      watch,
-      states: [
-        {
-          functionName: "get_deployment_date",
-          key: "deploymentDate",
-        },
+  const { data: deploymentDate } = useContractRead({
+    ...contractData,
+    
+    functionName: "get_deployment_date",
+    args: [],
+    watch: true,
+  });
+  const { data: auctionStartDate } = useContractRead({
+    ...contractData,
+    
+    watch,
+    functionName: "get_auction_start_date",
+    args: [],
+  });
 
-        {
-          functionName: "get_auction_start_date",
-          key: "auctionStartDate",
-        },
-        {
-          functionName: "get_auction_end_date",
-          key: "auctionEndDate",
-        },
-        {
-          functionName: "get_option_settlement_date",
-          key: "optionSettleDate",
-        },
-      ],
-    });
+  const { data: auctionEndDate } = useContractRead({
+    ...contractData,
+    
+    functionName: "get_auction_end_date",
+    args: [],
+    watch: true,
+  });
+
+  const { data: optionSettleDate } = useContractRead({
+    ...contractData,
+    
+    functionName: "get_option_settlement_date",
+    args: [],
+    watch: true,
+  });
 
   return {
     deploymentDate: deploymentDate?.toString(),

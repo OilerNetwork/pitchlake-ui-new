@@ -1,301 +1,337 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import RoundPerformanceChart from "@/components/Vault/VaultChart/Chart";
-import { useProtocolContext } from "@/context/ProtocolProvider";
-import { TestWrapper } from "../../../utils/TestWrapper";
-import { useGasData } from "@/hooks/chart/useGasData";
+import { useNewContext } from "@/context/NewProvider";
 import { useHistoricalRoundParams } from "@/hooks/chart/useHistoricalRoundParams";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
+import { ChartProvider } from "@/context/ChartProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useChartContext } from "@/context/ChartProvider";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import { useHelpContext } from "@/context/HelpProvider";
 
-// Mock the hooks
-jest.mock("@/context/ProtocolProvider", () => ({
-  useProtocolContext: jest.fn(),
+// Mock modules
+jest.mock("@starknet-react/core", () => ({
+  useAccount: jest.fn(),
+  useContract: jest.fn(),
+  useProvider: jest.fn(),
+  useContractRead: jest.fn().mockReturnValue({
+    data: "0",
+    isLoading: false,
+    error: null,
+  }),
 }));
 
-jest.mock("@/hooks/chart/useGasData", () => ({
-  useGasData: jest.fn(),
+jest.mock("@/context/NewProvider");
+jest.mock("@/hooks/vault_v2/states/useRoundState");
+jest.mock("@/hooks/chart/useHistoricalRoundParams");
+jest.mock("@/hooks/vault_v2/states/useVaultState");
+jest.mock("@/context/HelpProvider");
+jest.mock("@/context/ChartProvider", () => ({
+  useChartContext: jest.fn(),
+  ChartProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
 }));
 
-jest.mock("@/hooks/chart/useHistoricalRoundParams", () => ({
-  useHistoricalRoundParams: jest.fn(),
-}));
-
-// Mock the Icons
-jest.mock("@/components/Icons", () => ({
-  ArrowDownIcon: ({ stroke, classname }: { stroke: string; classname: string }) => (
-    <div className={classname} style={{ stroke }} />
-  ),
-  ArrowUpIcon: ({ stroke, classname }: { stroke: string; classname: string }) => (
-    <div className={classname} style={{ stroke }} />
-  ),
-  ArrowLeftIcon: ({ stroke, classname }: { stroke: string; classname: string }) => (
-    <div className={classname} style={{ stroke }} />
-  ),
-  ArrowRightIcon: ({ stroke, classname }: { stroke: string; classname: string }) => (
-    <div className={classname} style={{ stroke }} />
-  ),
-  CheckIcon: ({ stroke, fill }: { stroke: string; fill: string }) => (
-    <div className="check-icon" style={{ stroke, fill }} />
-  ),
-}));
-
-// Mock the ChartInner component
+// Mock ChartInner since it's a complex component with its own tests
 jest.mock("@/components/Vault/VaultChart/ChartInner", () => ({
   __esModule: true,
-  default: () => <div className="gas-price-chart" />,
+  default: () => <div role="img" aria-label="chart" />,
 }));
 
-// Mock the Hoverable component
-jest.mock("@/components/BaseComponents/Hoverable", () => {
-  return function MockHoverable({ children, onClick, className }: any) {
-    return (
-      <div className={className} onClick={onClick}>
-        {children}
-      </div>
-    );
-  };
-});
+// Initialize mocks
+const mockContext = {
+  useNewContext: jest.fn(),
+  useHelpContext: jest.fn(() => ({
+    setContent: jest.fn(),
+    setHeader: jest.fn(),
+    isHoveringHelpBox: false,
+    isHelpBoxOpen: false,
+    toggleHelpBoxOpen: jest.fn(),
+    content: "",
+    header: "",
+    setIsHoveringHelpBox: jest.fn(),
+    severity: "info"
+  })),
+  useChartContext: jest.fn(),
+};
+
+const mockHooks = {
+  useRoundState: jest.fn(),
+  useVaultState: jest.fn(),
+  useHistoricalRoundParams: jest.fn(),
+};
+
+// Set up mock implementations
+jest.mocked(useNewContext).mockImplementation(mockContext.useNewContext);
+jest.mocked(useHelpContext).mockImplementation(mockContext.useHelpContext);
+jest.mocked(useChartContext).mockImplementation(mockContext.useChartContext);
+jest.mocked(useRoundState).mockImplementation(mockHooks.useRoundState);
+jest.mocked(useVaultState).mockImplementation(mockHooks.useVaultState);
+jest.mocked(useHistoricalRoundParams).mockImplementation(mockHooks.useHistoricalRoundParams);
+
+// Test setup
+const queryClient = new QueryClient();
+
+const renderWithProviders = (ui: React.ReactElement) => {
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <ChartProvider>
+        {ui}
+      </ChartProvider>
+    </QueryClientProvider>
+  );
+};
 
 describe("RoundPerformanceChart", () => {
   const mockSetSelectedRound = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    queryClient.clear();
   });
 
-  it("renders chart with navigation and handles interactions", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
+  it("renders chart with navigation controls", () => {
+    // Arrange
+    mockContext.useNewContext.mockReturnValue({
       selectedRound: 3,
-      selectedRoundState: {
-        roundId: "3",
-        startTimestamp: "1000",
-        duration: "1000",
-        roundState: "Auctioning"
-      },
       setSelectedRound: mockSetSelectedRound,
+      vaultAddress: "0x123",
+      conn: "mock",
+      wsData: { wsVaultState: {} },
+      mockData: {
+        vaultState: {},
+        optionRoundStates: {
+          "1": { address: "0x1" },
+          "2": { address: "0x2" },
+          "3": { address: "0x3" }
+        }
+      }
+    });
+
+    mockHooks.useVaultState.mockReturnValue({
       vaultState: {
-        currentRoundId: "5",
+        currentRoundId: "4",
         address: "0x123"
       }
     });
 
-    (useGasData as jest.Mock).mockReturnValue({
-      data: [],
-      isLoading: false,
+    mockContext.useChartContext.mockReturnValue({
+      isExpandedView: false,
+      setIsExpandedView: jest.fn()
     });
 
-    (useHistoricalRoundParams as jest.Mock).mockReturnValue({
-      vaultData: [],
-      isLoading: false,
-    });
+    // Act
+    renderWithProviders(<RoundPerformanceChart />);
 
-    const { container } = render(
-      <TestWrapper>
-        <RoundPerformanceChart />
-      </TestWrapper>
-    );
-
-    // Check initial render
-    expect(container.querySelector(".w-full.h-\\[800px\\].bg-black-alt")).toBeInTheDocument();
-    
-    // Check round selector
-    const roundSelector = screen.getByText(/Round/);
-    expect(roundSelector).toBeInTheDocument();
-    expect(screen.getByText("3")).toBeInTheDocument();
+    // Assert
+    expect(screen.getByRole("img", { name: "chart" })).toBeInTheDocument();
+    expect(screen.getByText(/Round/)).toBeInTheDocument();
+    expect(screen.getByText("Round 3")).toBeInTheDocument();
   });
 
   it("handles expanded view toggle", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
+    // Arrange
+    const mockSetIsExpandedView = jest.fn();
+
+    mockContext.useChartContext.mockReturnValue({
+      isExpandedView: false,
+      setIsExpandedView: mockSetIsExpandedView
+    });
+
+    mockContext.useNewContext.mockReturnValue({
       selectedRound: 4,
-      selectedRoundState: {
-        roundId: "4",
-        startTimestamp: "1000",
-        duration: "1000",
-        roundState: "Auctioning"
-      },
       setSelectedRound: mockSetSelectedRound,
+      vaultAddress: "0x123",
+      conn: "mock",
+      wsData: { wsVaultState: {} },
+      mockData: {
+        vaultState: {},
+        optionRoundStates: {
+          "4": { address: "0x4" }
+        }
+      }
+    });
+
+    mockHooks.useVaultState.mockReturnValue({
       vaultState: {
         currentRoundId: "4",
         address: "0x123"
       }
     });
 
-    (useGasData as jest.Mock).mockReturnValue({
-      data: [],
-      isLoading: false,
-    });
+    const { container } = renderWithProviders(<RoundPerformanceChart />);
 
-    (useHistoricalRoundParams as jest.Mock).mockReturnValue({
-      vaultData: [],
-      isLoading: false,
-    });
-
-    render(
-      <TestWrapper>
-        <RoundPerformanceChart />
-      </TestWrapper>
-    );
-
-    // Initial state - not expanded
-    expect(useHistoricalRoundParams).toHaveBeenCalledWith(
-      expect.objectContaining({
-        fromRound: 4,
-        toRound: 4,
-        vaultAddress: "0x123"
-      })
-    );
-
-    // Toggle expanded view
-    const historyButton = document.querySelector('.chart-history-button');
-    expect(historyButton).not.toBeNull();
-    if (historyButton) {
-      fireEvent.click(historyButton);
+    // Act
+    const historyButton = container.querySelector('[data-item="chartHistory"]');
+    if (!historyButton) {
+      throw new Error("History button not found");
     }
+    fireEvent.click(historyButton);
 
-    // Verify that useHistoricalRoundParams was called with correct fromRound
-    expect(useHistoricalRoundParams).toHaveBeenCalledWith(
-      expect.objectContaining({
-        fromRound: 1,
-        toRound: 4,
-      })
-    );
+    // Assert
+    expect(mockSetIsExpandedView).toHaveBeenCalledWith(true);
+  });
+
+  it("opens history modal when history button is clicked", () => {
+    // Arrange
+    const mockSetIsExpandedView = jest.fn();
+    mockContext.useChartContext.mockReturnValue({
+      isExpandedView: false,
+      setIsExpandedView: mockSetIsExpandedView
+    });
+
+    mockContext.useNewContext.mockReturnValue({
+      selectedRound: 2,
+      setSelectedRound: mockSetSelectedRound,
+      vaultAddress: "0x123",
+      conn: "mock",
+      wsData: { wsVaultState: {} },
+      mockData: {
+        vaultState: {},
+        optionRoundStates: {
+          "2": { address: "0x2" }
+        }
+      }
+    });
+
+    mockHooks.useVaultState.mockReturnValue({
+      vaultState: {
+        currentRoundId: "5",
+        address: "0x123"
+      }
+    });
+
+    const { container } = renderWithProviders(<RoundPerformanceChart />);
+
+    // Act
+    const historyButton = container.querySelector('[data-item="chartHistory"]');
+    if (!historyButton) throw new Error("History button not found");
+    fireEvent.click(historyButton);
+
+    // Assert
+    expect(mockSetIsExpandedView).toHaveBeenCalledWith(true);
   });
 
   it("disables right navigation at current round", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
+    // Arrange
+    mockContext.useNewContext.mockReturnValue({
       selectedRound: 5,
-      selectedRoundState: {
-        roundId: "5",
-        startTimestamp: "1000",
-        duration: "1000",
-        roundState: "Auctioning"
-      },
       setSelectedRound: mockSetSelectedRound,
+      vaultAddress: "0x123",
+      conn: "mock",
+      wsData: { wsVaultState: {} },
+      mockData: {
+        vaultState: {},
+        optionRoundStates: {
+          "5": { address: "0x5" }
+        }
+      }
+    });
+
+    mockHooks.useVaultState.mockReturnValue({
       vaultState: {
         currentRoundId: "5",
         address: "0x123"
       }
     });
 
-    (useGasData as jest.Mock).mockReturnValue({
-      data: [],
-      isLoading: false,
+    mockContext.useChartContext.mockReturnValue({
+      isExpandedView: false,
+      setIsExpandedView: jest.fn()
     });
 
-    (useHistoricalRoundParams as jest.Mock).mockReturnValue({
-      vaultData: [],
-      isLoading: false,
-    });
+    const { container } = renderWithProviders(<RoundPerformanceChart />);
 
-    const { container } = render(
-      <TestWrapper>
-        <RoundPerformanceChart />
-      </TestWrapper>
-    );
+    // Act
+    const nextButton = container.querySelector('[data-item="chartNextRound"]');
+    if (!nextButton) throw new Error("Next button not found");
+    fireEvent.click(nextButton);
 
-    // Verify right navigation is disabled at current round
-    const rightArrow = container.querySelector(".hover\\:cursor-default");
-    expect(rightArrow).toBeInTheDocument();
+    // Assert
+    expect(mockSetSelectedRound).not.toHaveBeenCalled();
   });
 
   it("disables left navigation at round 1", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
+    // Arrange
+    mockContext.useNewContext.mockReturnValue({
       selectedRound: 1,
-      selectedRoundState: {
-        roundId: "1",
-        startTimestamp: "1000",
-        duration: "1000",
-        roundState: "Auctioning"
-      },
       setSelectedRound: mockSetSelectedRound,
+      vaultAddress: "0x123",
+      conn: "mock",
+      wsData: { wsVaultState: {} },
+      mockData: {
+        vaultState: {},
+        optionRoundStates: {
+          "1": { address: "0x1" }
+        }
+      }
+    });
+
+    mockHooks.useVaultState.mockReturnValue({
       vaultState: {
         currentRoundId: "4",
         address: "0x123"
       }
     });
 
-    (useGasData as jest.Mock).mockReturnValue({
-      data: [],
-      isLoading: false,
+    mockContext.useChartContext.mockReturnValue({
+      isExpandedView: false,
+      setIsExpandedView: jest.fn()
     });
 
-    (useHistoricalRoundParams as jest.Mock).mockReturnValue({
-      vaultData: [],
-      isLoading: false,
-    });
+    const { container } = renderWithProviders(<RoundPerformanceChart />);
 
-    const { container } = render(
-      <TestWrapper>
-        <RoundPerformanceChart />
-      </TestWrapper>
-    );
+    // Act
+    const prevButton = container.querySelector('[data-item="chartPreviousRound"]');
+    if (!prevButton) throw new Error("Previous button not found");
+    fireEvent.click(prevButton);
 
-    // Find the left arrow container
-    const leftArrowContainer = container.querySelector('.chart-previous-round');
-    expect(leftArrowContainer).toBeInTheDocument();
-
-    // Find the ArrowLeftIcon div inside the container
-    const leftArrow = leftArrowContainer?.querySelector('div[style*="stroke: var(--greyscale)"]');
-    expect(leftArrow).toBeInTheDocument();
-
-    // Verify clicking doesn't trigger setSelectedRound
-    fireEvent.click(leftArrowContainer!);
+    // Assert
     expect(mockSetSelectedRound).not.toHaveBeenCalled();
   });
 
-  it("handles loading and error states", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      selectedRound: 3,
-      selectedRoundState: {
-        roundId: "3",
-        startTimestamp: "1000",
-        duration: "1000",
-        roundState: "Auctioning",
-        deploymentDate: "1000",
-        optionSettleDate: "2000",
-        auctionEndDate: "1500"
-      },
+  it("handles navigation between rounds", () => {
+    // Arrange
+    mockContext.useNewContext.mockReturnValue({
+      selectedRound: 2,
       setSelectedRound: mockSetSelectedRound,
+      vaultAddress: "0x123",
+      conn: "mock",
+      wsData: { wsVaultState: {} },
+      mockData: {
+        vaultState: {},
+        optionRoundStates: {
+          "1": { address: "0x1" },
+          "2": { address: "0x2" },
+          "3": { address: "0x3" }
+        }
+      }
+    });
+
+    mockHooks.useVaultState.mockReturnValue({
       vaultState: {
-        currentRoundId: "5",
+        currentRoundId: "4",
         address: "0x123"
       }
     });
 
-    // Test loading state
-    (useGasData as jest.Mock).mockReturnValue({
-      data: [],
-      isLoading: true,
-      isError: false,
-      error: null
+    mockContext.useChartContext.mockReturnValue({
+      isExpandedView: false,
+      setIsExpandedView: jest.fn()
     });
 
-    (useHistoricalRoundParams as jest.Mock).mockReturnValue({
-      vaultData: [],
-      isLoading: true,
-    });
+    const { container } = renderWithProviders(<RoundPerformanceChart />);
 
-    const { container } = render(
-      <TestWrapper>
-        <RoundPerformanceChart />
-      </TestWrapper>
-    );
+    // Act & Assert - Next Round
+    const nextButton = container.querySelector('[data-item="chartNextRound"]');
+    if (!nextButton) throw new Error("Next button not found");
+    fireEvent.click(nextButton);
+    expect(mockSetSelectedRound).toHaveBeenCalledWith(3);
 
-    expect(container.querySelector(".gas-price-chart")).toBeInTheDocument();
-
-    // Test error state
-    (useGasData as jest.Mock).mockReturnValue({
-      data: [],
-      isLoading: false,
-      isError: true,
-      error: new Error("Failed to fetch gas data")
-    });
-
-    render(
-      <TestWrapper>
-        <RoundPerformanceChart />
-      </TestWrapper>
-    );
-
-    expect(container.querySelector(".gas-price-chart")).toBeInTheDocument();
+    // Act & Assert - Previous Round
+    const prevButton = container.querySelector('[data-item="chartPreviousRound"]');
+    if (!prevButton) throw new Error("Previous button not found");
+    fireEvent.click(prevButton);
+    expect(mockSetSelectedRound).toHaveBeenCalledWith(1);
   });
 });

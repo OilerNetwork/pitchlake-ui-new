@@ -2,7 +2,6 @@ import React, { useState, ReactNode, useMemo, useEffect } from "react";
 import { useAccount } from "@starknet-react/core";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { parseEther, formatEther } from "ethers";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import InputField from "@/components/Vault/Utils/InputField";
 import { User } from "lucide-react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
@@ -10,12 +9,13 @@ import ButtonTabs from "../ButtonTabs";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEthereum } from "@fortawesome/free-brands-svg-icons";
 import { num, Call } from "starknet";
-import {useContractWrite, useContract } from "@starknet-react/core";
+import { useContractWrite, useContract } from "@starknet-react/core";
 import { erc20ABI, vaultABI } from "@/lib/abi";
 import useERC20 from "@/hooks/erc20/useERC20";
-import { shortenString, isValidHex64 } from "@/lib/utils";
+import { shortenString, isValidHex64, formatNumber } from "@/lib/utils";
 import Hoverable from "@/components/BaseComponents/Hoverable";
-
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useLPState from "@/hooks/vault_v2/states/useLPState";
 interface DepositProps {
   showConfirmation: (
     modalHeader: string,
@@ -37,8 +37,9 @@ interface DepositState {
 }
 
 const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
-  const { vaultState, lpState } = useProtocolContext();
-  console.log("check_", lpState?.unlockedBalance);
+  const {vaultState} = useVaultState()
+  const lpState = useLPState()
+  //  console.log("check_", lpState?.unlockedBalance);
   const [state, setState] = useState<DepositState>({
     amount: "",
     isDepositAsBeneficiary: false,
@@ -142,7 +143,9 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
       <>
         <br />
         deposit{" "}
-        <span className="font-semibold text-[#fafafa]">{state.amount} ETH</span>
+        <span className="font-semibold text-[#fafafa]">
+          {formatNumber(Number(state.amount))} ETH
+        </span>
         {state.isDepositAsBeneficiary && (
           <>
             <br />
@@ -275,11 +278,13 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
           >
             <span className="text-gray-400">Unlocked Balance</span>
             <span className="text-white">
-              {parseFloat(
-                formatEther(
-                  BigInt(lpState?.unlockedBalance?.toString() || "0"),
+              {formatNumber(
+                parseFloat(
+                  formatEther(
+                    BigInt(lpState?.unlockedBalance?.toString() || "0"),
+                  ),
                 ),
-              ).toFixed(3)}{" "}
+              )}{" "}
               ETH
             </span>
           </Hoverable>

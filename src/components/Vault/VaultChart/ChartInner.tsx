@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useMemo,
-  useRef,
-  useEffect,
-  useCallback,
-} from "react";
+import React, { useMemo, useRef, useCallback } from "react";
 import {
   ComposedChart,
   Area,
@@ -18,43 +12,107 @@ import {
   Tooltip,
 } from "recharts";
 import { formatUnits } from "ethers";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useHelpContext } from "@/context/HelpProvider";
+import { useHistoricalRoundParams } from "@/hooks/chart/useHistoricalRoundParams";
+import { useChartContext } from "@/context/ChartProvider";
+import { FormattedBlockData } from "@/app/api/getFossilGasData/route";
+import { useNewContext } from "@/context/NewProvider";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useChart from "@/hooks/chart/useChartData";
+import { getDemoRoundId } from "@/lib/demo/utils";
+import demoRoundData from "@/lib/demo/demo-round-data.json";
 
 const HOVER_DELAY = 888;
 
 interface GasPriceChartProps {
-  data: any[] | undefined;
   activeLines: { [key: string]: boolean };
-  historicalData: any;
-  fromRound: number;
-  toRound: number;
-  isExpandedView: boolean;
-  selectedRound: number;
-  setIsExpandedView: (value: boolean) => void;
 }
 
-const GasPriceChart: React.FC<GasPriceChartProps> = ({
-  data,
-  historicalData,
-  activeLines,
-  fromRound,
-  toRound,
-  isExpandedView,
-  selectedRound,
-  setIsExpandedView,
-}) => {
-  const { setSelectedRound, selectedRoundState } = useProtocolContext();
+const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
+  // Protocol context
+  const { conn, selectedRound } = useNewContext();
+  const { vaultState } = useVaultState();
+  const selectedRoundState = useRoundState(vaultState?.address);
+
+  // Chart context
+  const { isExpandedView, setIsExpandedView, xMax, xMin } =
+    useChartContext();
+  const { gasData } =
+    useChart();
+
+  // Help context
   const { setContent, setHeader, isHoveringHelpBox } = useHelpContext();
 
-  const hoverTimer = useRef<NodeJS.Timeout | null>(null);
+  // Strike and cap for all possibly displayed rounds
+  const { fromRound, toRound } = useMemo(() => {
+    if (!selectedRound) return { fromRound: 1, toRound: 1 };
+
+    const toRound =
+      conn === "demo" ? getDemoRoundId(selectedRound) : Number(selectedRound);
+    const fromRound = !isExpandedView ? toRound : toRound > 3 ? toRound - 3 : 1;
+
+    return { fromRound, toRound };
+  }, [selectedRound, isExpandedView]);
+
+  const { vaultData: _historicalData } = useHistoricalRoundParams({
+    vaultAddress: vaultState?.address,
+    fromRound,
+    toRound,
+  });
+
+  const historicalData = useMemo(() => {
+    if (conn === "demo") {
+      return { rounds: demoRoundData };
+    } else return _historicalData;
+  }, [_historicalData]);
+
+  // Add strike and cap to gas data
+  const parsedData: FormattedBlockData[] = useMemo(() => {
+    if (!selectedRound || !historicalData || !gasData) return [];
+
+    const dataPoints =
+      gasData.length > 0 ? gasData : [{ timestamp: xMin }, { timestamp: xMax }];
+
+    const refined = dataPoints?.map((item: any) => {
+      const newItem: any = { ...item };
+
+      // Find the round this gas point falls in
+      const roundThisItemIsIn = historicalData.rounds.find((r: any) => {
+        const lowerBound = Number(r.deploymentDate);
+        const upperBound = Number(r.optionSettleDate);
+        return item?.timestamp >= lowerBound && item?.timestamp <= upperBound;
+      });
+
+      if (roundThisItemIsIn) {
+        const strike = Number(
+          formatUnits(roundThisItemIsIn.strikePrice, "gwei"),
+        );
+        const cap =
+          Number(formatUnits(roundThisItemIsIn.strikePrice, "gwei")) *
+          (1 + Number(roundThisItemIsIn.capLevel) / 10000);
+
+        newItem.STRIKE = strike;
+        newItem.CAP_LEVEL = cap;
+      } else {
+        newItem.STRIKE = undefined;
+        newItem.CAP_LEVEL = undefined;
+      }
+
+      return newItem;
+    });
+
+    let sorted = refined.sort((a, b) => a.timestamp - b.timestamp);
+
+    return sorted;
+  }, [gasData, historicalData]);
 
   // Compute vertical segments and round areas based on historical data
   const { verticalSegments, roundAreas } = useMemo(() => {
     if (
       !historicalData ||
       !historicalData.rounds ||
-      !data ||
+      !parsedData ||
       !fromRound ||
       !toRound ||
       !isExpandedView
@@ -63,7 +121,9 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
 
     const segments: any = [];
     const areas: any = [];
-    const sortedData: any = [...data].sort((a, b) => a.timestamp - b.timestamp);
+    const sortedData: any = [...parsedData].sort(
+      (a, b) => a.timestamp - b.timestamp,
+    );
 
     // Filter rounds based on fromRoundId and toRoundId
     const filteredRounds = historicalData.rounds.filter(
@@ -84,14 +144,11 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
 
       // Find the nearest data points for deploymentDate and optionSettleDate
       const start = sortedData.find((d: any) => d.timestamp >= deploymentDate);
-
       const end = [...sortedData]
         .reverse()
         .find((d) => d.timestamp <= optionSettleDate);
 
-      if (!start || !end) {
-        return;
-      }
+      if (!start || !end) return;
 
       // Add deployment date line
       segments.push({
@@ -122,9 +179,11 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
     });
 
     return { verticalSegments: segments, roundAreas: areas };
-  }, [isExpandedView, historicalData, data, fromRound, toRound]);
+  }, [isExpandedView, historicalData, parsedData, fromRound, toRound]);
 
+  // Hover logic
   const isInChartRef = useRef(false);
+  const hoverTimer = useRef<NodeJS.Timeout | null>(null);
   const clearHoverTimer = () => {
     if (hoverTimer.current) {
       clearTimeout(hoverTimer.current);
@@ -161,35 +220,19 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
     clearHoverTimer();
   }, [clearHoverTimer]);
 
-  //  const findHoveredArea = useCallback(
-  //    (chartX: number, chartY: number): string | null => {
-  //      // e.g. your roundAreas = [{ roundId, x1, x2, y1, y2 }, ...]
-  //      // If chartX, chartY is within x1..x2 and y1..y2, we consider that hovered
-  //      for (const area of roundAreas) {
-  //        if (
-  //          chartX >= area.x1 &&
-  //          chartX <= area.x2 &&
-  //          chartY >= area.y1 &&
-  //          chartY <= area.y2
-  //        ) {
-  //          return `area-${area.roundId}`;
-  //        }
-  //      }
-  //      return null;
-  //    },
-  //    [roundAreas],
-  //  );
-
   // Compute the maximum Y value based on active lines
-  const yMax = useMemo(() => {
-    if (!data) return 0;
+  const { yMax, yTicks } = useMemo((): { yMax: number; yTicks: number[] } => {
+    if (!parsedData) return { yMax: 0, yTicks: [] };
+
+    // Find the maximum value in the data
     let max = 0;
-    data.forEach((item) => {
+
+    parsedData.forEach((item: any) => {
       if (activeLines.TWAP && item.TWAP !== null && item.TWAP > max) {
-        max = item.TWAP;
+        max = item.twap;
       }
       if (activeLines.BASEFEE && item.BASEFEE !== null && item.BASEFEE > max) {
-        max = item.BASEFEE;
+        max = item.basefee;
       }
       if (activeLines.STRIKE && item.STRIKE !== null && item.STRIKE > max) {
         max = item.STRIKE;
@@ -197,100 +240,109 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
       if (item.CAP_LEVEL !== null && item.CAP_LEVEL > max) {
         max = item.CAP_LEVEL;
       }
+      if (activeLines.BASEFEE && item.basefee && item.basefee > max) {
+        max = item.basefee;
+      }
+      if (
+        activeLines.BASEFEE &&
+        item.unconfirmedBasefee &&
+        item.unconfirmedBasefee > max
+      ) {
+        max = item.unconfirmedBasefee;
+      }
+      if (
+        activeLines.BASEFEE &&
+        item.confirmedBasefee &&
+        item.confirmedBasefee > max
+      ) {
+        max = item.confirmedBasefee;
+      }
+      if (
+        activeLines.TWAP &&
+        item.unconfirmedTwap &&
+        item.unconfirmedBasefee > max
+      ) {
+        max = item.unconfirmedTwap;
+      }
+      if (
+        activeLines.TWAP &&
+        item.confirmedTwap &&
+        item.confirmedBasefee > max
+      ) {
+        max = item.confirmedTwap;
+      }
     });
-    // Optionally, add some padding to yMax
-    return max * 1.2; // 20% padding
-  }, [data, activeLines]);
 
-  // Define Y-axis ticks
-  const yTicks = useMemo(() => {
-    if (yMax === 0) return [0];
-    const step = yMax / 4;
-    return [
+    const _yMax = max * 1.2; // 20% padding
+
+    if (_yMax === 0) return { yMax: _yMax, yTicks: [] };
+
+    // Define Y-axis ticks
+    const step = _yMax / 4;
+    const _yTicks = [
       0,
-      parseFloat(step.toFixed(2)),
-      parseFloat((step * 2).toFixed(2)),
-      parseFloat((step * 3).toFixed(2)),
-      parseFloat(yMax.toFixed(2)),
+      parseInt(step.toFixed(1)),
+      parseInt((step * 2).toFixed(1)),
+      parseInt((step * 3).toFixed(1)),
+      parseInt(_yMax.toFixed(1)),
     ];
-  }, [yMax]);
 
-  const desiredXTickCount = 5;
+    return { yMax: _yMax, yTicks: _yTicks };
+  }, [parsedData, activeLines]);
 
   // Compute X-axis ticks and labels based on view
   const { xTicks, xTickLabels } = useMemo(() => {
-    if (!data) return { xTicks: [], xTickLabels: {} };
-
-    const ticks: number[] = [];
-    const labels: {
+    let _xTicks: number[] = [];
+    let _xTickLabels: {
       [key: number]: { label: string | null; roundId?: number };
     } = {};
 
+    if (!parsedData) return { xTicks: _xTicks, xTickLabels: _xTickLabels };
+
     if (!historicalData || !historicalData.rounds || !fromRound || !toRound) {
-      return { xTicks: ticks, xTickLabels: labels };
+      return { xTicks: _xTicks, xTickLabels: _xTickLabels };
     }
 
-    const sortedData = [...data].sort((a, b) => a.timestamp - b.timestamp);
+    const sortedData = [...parsedData].sort(
+      (a, b) => a.timestamp - b.timestamp,
+    );
     const filteredRounds = historicalData.rounds.filter(
       (round: any) => round.roundId >= fromRound && round.roundId <= toRound,
     );
 
     // Generate midpoints for round IDs
     filteredRounds.forEach((round: any) => {
-      const deploymentDate = Number(round.deploymentDate);
-      const optionSettleDate = Number(round.optionSettleDate);
-      const start = sortedData.find((d) => d.timestamp >= deploymentDate);
-      const end = [...sortedData]
-        .reverse()
-        .find((d) => d.timestamp <= optionSettleDate);
+      const start = Number(round.deploymentDate);
+      const end = Number(round.optionSettleDate);
 
-      if (!start || !end) {
-        console.warn(
-          `Could not find matching data points for roundId ${round.roundId}`,
-        );
-        return;
+      const midpoint = (Number(start) + Number(end)) / 2;
+      if (
+        midpoint >= sortedData[1]?.timestamp &&
+        midpoint <= sortedData[sortedData.length - 1]?.timestamp
+      ) {
+        _xTickLabels[midpoint] = {
+          label: `Round ${round.roundId}`,
+          roundId: round.roundId,
+        };
+        _xTicks.push(midpoint);
       }
-
-      const midpoint = (Number(start.timestamp) + Number(end.timestamp)) / 2;
-      ticks.push(midpoint);
-      labels[midpoint] = {
-        label: `Round ${round.roundId}`,
-        roundId: round.roundId,
-      };
     });
 
     // Generate timestamp ticks
-    const timestamps = data.map((item) => item.timestamp);
+    const timestamps = parsedData.map((item: any) => item.timestamp);
     const minTimestamp = Math.min(...timestamps);
     const maxTimestamp = Math.max(...timestamps);
 
-    let timestampTickCount = desiredXTickCount;
-    if (isExpandedView) {
-      timestampTickCount = 0; // Fewer ticks in expanded view
-    }
-
-    const step = Math.floor(
-      (maxTimestamp - minTimestamp) / (timestampTickCount - 1),
-    );
-
-    for (let i = 0; i < timestampTickCount; i++) {
-      const tickValue = minTimestamp + step * i;
-      ticks.push(tickValue);
-      labels[tickValue] = { label: null }; // Will format in custom tick
-    }
+    _xTicks.push(minTimestamp);
+    _xTickLabels[minTimestamp] = { label: null }; // Will format in custom tick
+    _xTicks.push(maxTimestamp);
+    _xTickLabels[maxTimestamp] = { label: null }; // Will format in custom tick
 
     // Ensure ticks are sorted
-    ticks.sort((a, b) => a - b);
+    _xTicks.sort((a, b) => a - b);
 
-    return { xTicks: ticks, xTickLabels: labels };
-  }, [
-    data,
-    isExpandedView,
-    historicalData,
-    fromRound,
-    toRound,
-    desiredXTickCount,
-  ]);
+    return { xTicks: _xTicks, xTickLabels: _xTickLabels };
+  }, [parsedData, isExpandedView, historicalData, fromRound, toRound]);
 
   // Custom X-axis tick component
   const CustomizedXAxisTick = (props: any) => {
@@ -369,17 +421,36 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
           <p className="text-white text-sm mb-2">{dateString}</p>
           <div className="space-y-2">
             {Array.from(uniqueData.values()).map((entry: any, index: any) => (
-              <div key={index} className="flex items-center">
-                <div
-                  className="w-4 h-4 rounded-full mr-2"
-                  style={{ backgroundColor: entry?.color }}
-                ></div>
-                <p className="text-white text-sm">
-                  {entry?.name.replace("_", " ")}:{" "}
-                  {entry?.value !== undefined
-                    ? Number(entry?.value).toFixed(2)
-                    : "N/A"}
-                </p>
+              <div className="space-y-2" key={index}>
+                {entry?.name === "basefee" ? (
+                  <div className="flex items-center">
+                    <div
+                      className="w-4 h-4 rounded-full mr-2 flex flex-col"
+                      style={{ backgroundColor: entry?.color }}
+                    ></div>
+                    <p className="text-white text-sm">PENDING BLOCK</p>
+                  </div>
+                ) : (
+                  <></>
+                )}
+
+                <div className="flex items-center">
+                  <div
+                    className="w-4 h-4 rounded-full mr-2 flex flex-col"
+                    style={{ backgroundColor: entry?.color }}
+                  ></div>
+                  <p className="text-white text-sm">
+                    {entry?.name?.includes("Basefee")
+                      ? "BASEFEE"
+                      : entry?.name?.includes("Twap")
+                        ? "TWAP"
+                        : entry?.name.replace("_", " ")}
+                    {": "}
+                    {entry?.value !== undefined
+                      ? Number(entry?.value).toFixed(2)
+                      : "N/A"}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -390,7 +461,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
   };
 
   // Handle Loading State
-  if (!data || data.length === 0) {
+  if (!parsedData || parsedData.length === 0) {
     return (
       <div className="gas-price-chart-loading w-[100%] h-[665px] bg-black-alt rounded-[12px] flex flex-col items-center justify-center">
         Loading...
@@ -398,11 +469,18 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
     );
   }
 
+  const animationDuration = 500;
+  const isAnimationActive = !isExpandedView;
+
   return (
-    <ResponsiveContainer width="100%" maxHeight={665} className="pr-4 gas-price-chart-container">
+    <ResponsiveContainer
+      width="100%"
+      maxHeight={665}
+      className="pr-4 gas-price-chart-container"
+    >
       <ComposedChart
         margin={{ left: -20 }}
-        data={data}
+        data={parsedData}
         syncId="roundChart"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -485,31 +563,69 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
         />
 
         {activeLines.TWAP && (
-          <Area
-            height={400}
-            type="monotone"
-            dataKey="TWAP"
-            stroke="var(--error-300)"
-            strokeWidth={2}
-            fill="url(#twapGradient)"
-            fillOpacity={1}
-            connectNulls={true}
-            dot={false}
-            isAnimationActive={!isExpandedView}
-          />
+          <>
+            <Area
+              height={400}
+              type="monotone"
+              className="chart-area-twap"
+              dataKey="confirmedTwap"
+              stroke="var(--error-300)"
+              strokeWidth={2}
+              fill="url(#twapGradient)"
+              fillOpacity={1}
+              connectNulls={true}
+              dot={false}
+              isAnimationActive={isAnimationActive}
+              animationDuration={animationDuration}
+            />
+            <Line
+              className="chart-area-twap"
+              height={400}
+              type="monotone"
+              dataKey="unconfirmedTwap"
+              //stroke="var(--error-300)"
+              stroke="#E69EB1"
+              strokeWidth={2}
+              strokeDasharray="1 0 1"
+              //fill="url(#twapGradient)"
+              fillOpacity={1}
+              connectNulls={true}
+              dot={false}
+              isAnimationActive={isAnimationActive}
+              animationDuration={animationDuration}
+            />
+          </>
         )}
         {activeLines.BASEFEE && (
-          <Area
-            type="monotone"
-            dataKey="BASEFEE"
-            stroke="var(--greyscale)"
-            strokeWidth={0.5}
-            fill="url(#basefeeGradient)"
-            fillOpacity={1}
-            connectNulls={true}
-            dot={false}
-            isAnimationActive={!isExpandedView}
-          />
+          <>
+            <Area
+              type="monotone"
+              className="chart-area-basefee"
+              dataKey="confirmedBasefee"
+              stroke="var(--greyscale)"
+              strokeWidth={0.5}
+              fill="url(#basefeeGradient)"
+              fillOpacity={1}
+              connectNulls={true}
+              dot={false}
+              isAnimationActive={isAnimationActive}
+              animationDuration={animationDuration}
+            />
+            <Line
+              type="monotone"
+              className="chart-area-basefee"
+              dataKey="unconfirmedBasefee"
+              stroke="#8B8460"
+              strokeDasharray="1 0 1"
+              strokeWidth={0.5}
+              activeDot={true}
+              dot={false}
+              fill="url(#basefeeGradient)"
+              connectNulls={false}
+              isAnimationActive={isAnimationActive}
+              animationDuration={animationDuration}
+            />
+          </>
         )}
         {activeLines.STRIKE && (
           <Line
@@ -521,7 +637,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
             dot={false}
             fill="url(#strikeGradient)"
             connectNulls={false}
-            isAnimationActive={!isExpandedView}
+            isAnimationActive={isAnimationActive}
+            animationDuration={animationDuration}
           />
         )}
         {activeLines.CAP_LEVEL && (
@@ -535,7 +652,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
             dot={false}
             fill="url(#capLevelGradient)"
             connectNulls={false}
-            isAnimationActive={!isExpandedView}
+            isAnimationActive={isAnimationActive}
+            animationDuration={animationDuration}
           />
         )}
         {
@@ -575,6 +693,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({
                 setIsExpandedView(false);
               }}
               style={{ cursor: "pointer" }}
+              isAnimationActive={isAnimationActive}
+              animationDuration={animationDuration}
             />
           ))
         }

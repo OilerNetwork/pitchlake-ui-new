@@ -2,20 +2,20 @@ import React, { useState, ReactNode, useMemo, useEffect } from "react";
 import InputField from "@/components/Vault/Utils/InputField";
 import { Layers3 } from "lucide-react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEthereum } from "@fortawesome/free-brands-svg-icons";
-import { formatUnits, parseUnits, parseEther, formatEther } from "ethers";
+import { formatUnits, parseUnits, formatEther } from "ethers";
 import { useAccount, useContractWrite } from "@starknet-react/core";
 import useERC20 from "@/hooks/erc20/useERC20";
 import { num, Call } from "starknet";
-import { formatNumberText } from "@/lib/utils";
+import { formatNumber, formatNumberText } from "@/lib/utils";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import useLatestTimetamp from "@/hooks/chain/useLatestTimestamp";
-import { useProvider } from "@starknet-react/core";
 import { useContract } from "@starknet-react/core";
 import { erc20ABI, optionRoundABI } from "@/lib/abi";
 import Hoverable from "@/components/BaseComponents/Hoverable";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
+import { useTimeContext } from "@/context/TimeProvider";
 
 interface PlaceBidProps {
   showConfirmation: (
@@ -29,7 +29,8 @@ const LOCAL_STORAGE_KEY1 = "bidAmount";
 const LOCAL_STORAGE_KEY2 = "bidPriceGwei";
 
 const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
-  const { vaultState, roundActions, selectedRoundState } = useProtocolContext();
+  const {vaultState,selectedRoundAddress} = useVaultState()
+  const selectedRoundState = useRoundState(selectedRoundAddress)
   const [state, setState] = useState({
     bidAmount: localStorage.getItem(LOCAL_STORAGE_KEY1) || "",
     bidPrice: localStorage.getItem(LOCAL_STORAGE_KEY2) || "",
@@ -40,8 +41,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
 
   const { account } = useAccount();
   const { pendingTx, setPendingTx } = useTransactionContext();
-  const { provider } = useProvider();
-  const { timestamp } = useLatestTimetamp(provider);
+  const { timestamp } = useTimeContext();
 
   const { allowance, balance } = useERC20(
     vaultState?.ethAddress as `0x${string}`,
@@ -143,7 +143,10 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
         </span>
         , totaling
         <br />
-        <span className="font-semibold text-[#fafafa]">{bidTotalEth} ETH</span>?
+        <span className="font-semibold text-[#fafafa]">
+          {formatNumber(bidTotalEth)} ETH
+        </span>
+        ?
       </>,
       async () => {
         await handleMulticall();
@@ -296,21 +299,21 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
       <Hoverable dataId="newBidSummary" className="flex flex-col h-[full]">
         <div className="flex justify-between text-sm px-6 pb-1">
           <span className="text-gray-400 place-bid-total">Total</span>
-          <span>{bidTotalEth.toFixed(2)} ETH</span>
+          <span>{formatNumber(bidTotalEth)} ETH</span>
         </div>
       </Hoverable>
       <Hoverable dataId="placingBidBalance" className="flex flex-col h-[full]">
         <div className="flex justify-between text-sm px-6 pb-6">
           <span className="text-gray-400">Balance</span>
           <span>
-            {parseFloat(formatEther(num.toBigInt(balance))).toFixed(3)} ETH
+            {formatNumber(parseFloat(formatEther(BigInt(balance))))} ETH
           </span>
         </div>
       </Hoverable>
       <div className="mt-auto">
         <Hoverable
           dataId="placeBidButton"
-          className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
+          className="place-bid-action-button px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
         >
           <ActionButton
             onClick={handleSubmitForMulticall}

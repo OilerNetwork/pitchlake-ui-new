@@ -1,14 +1,26 @@
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import Mint from "@/components/Vault/VaultActions/Tabs/Buyer/Mint";
-import { useProtocolContext } from "@/context/ProtocolProvider";
-import { useTransactionContext } from "@/context/TransactionProvider";
-import { useAccount } from "@starknet-react/core";
 import { TestWrapper } from "../../../../../utils/TestWrapper";
+import useOptionRoundActions from "@/hooks/vault_v2/actions/useOptionRoundActions";
+import useOptionBuyerStateRPC from "@/hooks/vault_v2/rpc/useOptionBuyerStateRPC";
+import useOBState from "@/hooks/vault_v2/states/useOBState";
+import { useAccount } from "@starknet-react/core";
 
 // Mock the hooks
-jest.mock("@/context/ProtocolProvider", () => ({
-  useProtocolContext: jest.fn(),
+jest.mock("@/hooks/vault_v2/actions/useOptionRoundActions", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+jest.mock("@/hooks/vault_v2/rpc/useOptionBuyerStateRPC", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+jest.mock("@/hooks/vault_v2/states/useOBState", () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 jest.mock("@/context/TransactionProvider", () => ({
@@ -17,11 +29,89 @@ jest.mock("@/context/TransactionProvider", () => ({
   }),
 }));
 
+jest.mock("@/context/NewProvider", () => ({
+  useNewContext: () => ({
+    conn: "rpc",
+    selectedRound: 1,
+    vaultAddress: "0x123",
+    wsData: {
+      wsVaultState: {
+        alpha: "1000",
+        strikeLevel: "0",
+        lockedBalance: "1000000000000000000",
+        unlockedBalance: "2000000000000000000",
+        stashedBalance: "0",
+        queuedBps: "0",
+        roundAddress: "0x123",
+        deploymentDate: "1234567890",
+      },
+      wsOptionRoundStates: [{
+        address: "0x123",
+        alpha: "1000",
+        strikeLevel: "0",
+        ethAddress: "0x456",
+        fossilClientAddress: "0x789",
+        currentRoundId: "1",
+        lockedBalance: "1000000000000000000",
+        unlockedBalance: "2000000000000000000",
+        stashedBalance: "0",
+        queuedBps: "0",
+        roundAddress: "0x123",
+        deploymentDate: "1234567890",
+      }],
+      wsOptionBuyerStates: []
+    },
+    mockData: {
+      optionRoundStates: [],
+      optionBuyerStates: []
+    }
+  })
+}));
+
+type ContractFunctionName =
+  | "get_alpha"
+  | "get_strike_level"
+  | "get_eth_address"
+  | "get_fossil_client_address"
+  | "get_current_round_id"
+  | "get_vault_locked_balance"
+  | "get_vault_unlocked_balance"
+  | "get_vault_stashed_balance"
+  | "get_vault_queued_bps"
+  | "get_round_address"
+  | "get_deployment_date";
+
 jest.mock("@starknet-react/core", () => ({
   useAccount: jest.fn().mockReturnValue({
     account: "0x123",
     address: "0x123"
   }),
+  useContract: jest.fn(() => ({
+    contract: {
+      typedv2: jest.fn().mockReturnValue({
+        connect: jest.fn(),
+        withdraw: jest.fn().mockResolvedValue({
+          transaction_hash: "0x123"
+        })
+      })
+    }
+  })),
+  useContractRead: jest.fn().mockImplementation(({ functionName }: { functionName: ContractFunctionName }) => {
+    const mockData: Record<ContractFunctionName, { data: string }> = {
+      get_alpha: { data: "1000" },
+      get_strike_level: { data: "0" },
+      get_eth_address: { data: "0x123" },
+      get_fossil_client_address: { data: "0x456" },
+      get_current_round_id: { data: "1" },
+      get_vault_locked_balance: { data: "1000" },
+      get_vault_unlocked_balance: { data: "2000" },
+      get_vault_stashed_balance: { data: "500" },
+      get_vault_queued_bps: { data: "100" },
+      get_round_address: { data: "0x789" },
+      get_deployment_date: { data: "1000000" }
+    };
+    return mockData[functionName] || { data: undefined };
+  })
 }));
 
 // Mock the Icons component
@@ -35,13 +125,14 @@ describe("Mint Component", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      selectedRoundBuyerState: {
-        mintableOptions: "1000",
-      },
-      roundActions: {
-        tokenizeOptions: mockTokenizeOptions,
-      },
+    (useOptionBuyerStateRPC as jest.Mock).mockReturnValue({
+      mintableOptions: "1000",
+    });
+    (useOBState as jest.Mock).mockReturnValue({
+      mintableOptions: "1000",
+    });
+    (useOptionRoundActions as jest.Mock).mockReturnValue({
+      tokenizeOptions: mockTokenizeOptions,
     });
   });
 

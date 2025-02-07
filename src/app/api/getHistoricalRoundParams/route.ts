@@ -5,7 +5,6 @@ import { vaultABI, optionRoundABI } from "@/lib/abi"; // Ensure vaultABI is corr
 import { num, RpcProvider, Contract } from "starknet";
 import { stringToHex } from "@/lib/utils";
 
-// Type(s) to return
 interface ReadVaultRoundsResponse {
   vaultAddress: string;
   currentRoundId: number;
@@ -22,7 +21,6 @@ interface RoundData {
   optionSettleDate?: string;
   error?: string;
 }
-
 
 /// GET historical round params for a given vault (from round 1 to current round)
 export async function GET(request: Request) {

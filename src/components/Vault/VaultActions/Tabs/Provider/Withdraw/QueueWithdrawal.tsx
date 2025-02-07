@@ -1,11 +1,12 @@
 import React, { ReactNode } from "react";
-import { VaultStateType, LiquidityProviderStateType } from "@/lib/types";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useAccount } from "@starknet-react/core";
 import { formatEther } from "ethers";
 import Hoverable from "@/components/BaseComponents/Hoverable";
+import { formatNumber } from "@/lib/utils";
+import useLPState from "@/hooks/vault_v2/states/useLPState";
+import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
 
 interface WithdrawQueueProps {
   showConfirmation: (
@@ -18,7 +19,8 @@ interface WithdrawQueueProps {
 const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
   showConfirmation,
 }) => {
-  const { vaultActions, lpState } = useProtocolContext();
+  const lpState = useLPState()
+  const vaultActions = useVaultActions()
   const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
   const [state, setState] = React.useState({
@@ -135,9 +137,11 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
         >
           <span className="text-gray-400">Locked Balance</span>
           <span className="text-white">
-            {parseFloat(
-              formatEther(lpState?.lockedBalance?.toString() || "0"),
-            ).toFixed(3)}{" "}
+            {formatNumber(
+              parseFloat(
+                formatEther(lpState?.lockedBalance?.toString() || "0"),
+              ),
+            )}{" "}
             ETH
           </span>
         </Hoverable>

@@ -6,16 +6,18 @@ import { faEthereum } from "@fortawesome/free-brands-svg-icons";
 import InputField from "@/components/Vault/Utils/InputField";
 import { LayerStackIcon } from "@/components/Icons";
 import { formatUnits, parseUnits, formatEther } from "ethers";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { num, Call } from "starknet";
 import useERC20 from "@/hooks/erc20/useERC20";
 import { useAccount } from "@starknet-react/core";
-import useLatestTimetamp from "@/hooks/chain/useLatestTimestamp";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useProvider } from "@starknet-react/core";
 import { useContractWrite, useContract } from "@starknet-react/core";
 import { erc20ABI, optionRoundABI } from "@/lib/abi";
 import Hoverable from "@/components/BaseComponents/Hoverable";
+import { formatNumber } from "@/lib/utils";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
+import { useTimeContext } from "@/context/TimeProvider";
 
 interface EditModalProps {
   onConfirm: () => void;
@@ -42,8 +44,7 @@ const EditModal: React.FC<EditModalProps> = ({
 }) => {
   const { account } = useAccount();
   const { pendingTx, setPendingTx } = useTransactionContext();
-  const { provider } = useProvider();
-  const { timestamp } = useLatestTimetamp(provider);
+  const { timestamp } = useTimeContext();
   const bid = bidToEdit
     ? bidToEdit.item
     : { amount: "0", price: "0", bid_id: "" };
@@ -52,7 +53,8 @@ const EditModal: React.FC<EditModalProps> = ({
   const oldAmount = num.toBigInt(bid.amount);
   const oldPriceWei = num.toBigInt(bid.price);
   const oldPriceGwei = formatUnits(oldPriceWei, "gwei");
-  const { vaultState, selectedRoundState } = useProtocolContext();
+  const {vaultState,selectedRoundAddress} = useVaultState()
+  const selectedRoundState = useRoundState(selectedRoundAddress)
   const [state, setState] = useState({
     newPriceGwei: localStorage.getItem(LOCAL_STORAGE_KEY) || "",
     isButtonDisabled: true,
@@ -159,7 +161,7 @@ const EditModal: React.FC<EditModalProps> = ({
         <br /> be spending an additional
         <br />
         <span className="font-semibold text-[#fafafa]">
-          {totalNewCostEth} ETH
+          {formatNumber(Number(totalNewCostEth))} ETH
         </span>
       </>,
       async () => {
@@ -282,7 +284,7 @@ const EditModal: React.FC<EditModalProps> = ({
         className="flex justify-between text-sm px-6 pb-1 edit-bid-total"
       >
         <span className="text-gray-400">Total</span>
-        <span>{parseFloat(totalNewCostEth).toFixed(6)} ETH</span>
+        <span>{formatNumber(parseFloat(totalNewCostEth))} ETH</span>
       </Hoverable>
       <Hoverable
         dataId="placingBidBalance"
@@ -290,7 +292,7 @@ const EditModal: React.FC<EditModalProps> = ({
       >
         <span className="text-gray-400">Balance</span>
         <span>
-          {parseFloat(formatEther(num.toBigInt(balance))).toFixed(3)} ETH
+          {formatNumber(parseFloat(formatEther(num.toBigInt(balance))))} ETH
         </span>
       </Hoverable>
       <div className="mt-auto">

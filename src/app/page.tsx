@@ -1,4 +1,5 @@
 "use client";
+import WrongNetworkScreen from "@/components/WrongNetworkScreen";
 import MobileScreen from "@/components/BaseComponents/MobileScreen";
 import VaultCard from "@/components/VaultCard/VaultCard";
 import useWebSocketHome from "@/hooks/websocket/useWebSocketHome";
@@ -20,9 +21,7 @@ export default function Home() {
 
   const { isMobile } = useIsMobile();
 
-  if (isMobile) {
-    return <MobileScreen />;
-  }
+  if (isMobile) return <MobileScreen />;
 
   return (
     <div
@@ -46,20 +45,7 @@ export default function Home() {
           </div>
         )
       }
-
-      {chain.network === "mainnet" && (
-        //Disabled Mainnet Prompt
-        <div className="fixed h-full w-full text-error-400 justify-center text-center mt-[-80px] text-[40px]  flex flex-col">
-          <p>
-            {
-              "Mainnet is not yet released. Please switch to a supported network"
-            }
-          </p>
-        </div>
-      )}
-      {
-        // <CreateVaultModal isModalVisible={isModalVisible} closeModal={() => setIsModalVisible(false)} />
-      }
+      {chain.network === "mainnet" && <WrongNetworkScreen />}
     </div>
   );
 }

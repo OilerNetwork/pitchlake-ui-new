@@ -28,6 +28,7 @@ const useMockVault = (selectedRound: number, timestamp:number,address?: string) 
     strikeLevel: "-1111",
     now: "0",
     deploymentDate: "1",
+    currentRoundAddress:"",
   });
   //States without a param
 

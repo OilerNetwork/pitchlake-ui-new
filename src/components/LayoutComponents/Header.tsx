@@ -1,12 +1,8 @@
 "use client";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { BellIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
-import {
-  ArrowUpIcon,
-  CheckIcon,
-  GlobeIcon,
-} from "@/components/Icons";
+import {  ChevronDownIcon } from "lucide-react";
+import {  CheckIcon, GlobeIcon } from "@/components/Icons";
 import logo_full from "@/../public/logo_full.svg";
 import braavosIcon from "@/../public/braavos.svg";
 import argent from "@/../public/argent.svg";
@@ -14,31 +10,33 @@ import keplr from "@/../public/keplr.svg";
 import avatar from "@/../public/avatar.svg";
 import { toast } from "react-toastify";
 import { useNetwork } from "@starknet-react/core";
-import {
-  useAccount,
-  useConnect,
-  useDisconnect,
-  useProvider,
-} from "@starknet-react/core";
+import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
 import ProfileDropdown from "../BaseComponents/ProfileDropdown";
 import { useRouter, usePathname } from "next/navigation";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { constants } from "starknet";
 import { formatEther } from "ethers";
 import useERC20 from "@/hooks/erc20/useERC20";
-import { ArrowDownIcon, LoginIcon } from "../Icons";
+import { LoginIcon } from "../Icons";
 import useIsMobile from "@/hooks/window/useIsMobile";
 import { Chain } from "@starknet-react/chains";
 import { useHelpContext } from "@/context/HelpProvider";
 import QuestionCircleIcon from "../Icons/QuestionCircleIcon";
 import Hoverable from "../BaseComponents/Hoverable";
 import { useUiContext } from "@/context/UiProvider";
+import { formatNumber } from "@/lib/utils";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useLPState from "@/hooks/vault_v2/states/useLPState";
+import { useNewContext } from "@/context/NewProvider";
+import { useTimeContext } from "@/context/TimeProvider";
 
 export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownChainRef = useRef<HTMLDivElement>(null);
-  const { conn, timestamp, mockTimeForward, vaultState, lpState } =
-    useProtocolContext();
+  const { conn } = useNewContext();
+  const { timestamp, mockTimeForward } = useTimeContext();
+  const { vaultState } = useVaultState();
+  const lpState = useLPState();
+  console.log("lpStateUnlocked", lpState?.unlockedBalance);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownChainOpen, setIsDropdownChainOpen] = useState(false);
   const isDropdownOpenRef = useRef(isDropdownOpen);
@@ -49,7 +47,7 @@ export default function Header() {
   const router = useRouter();
   const pathName = usePathname();
   const { connect, connectors } = useConnect();
- // const { switchChainAsync } = useSwitchChain({});
+  // const { switchChainAsync } = useSwitchChain({});
   const { disconnect } = useDisconnect();
   const { chains, chain } = useNetwork();
   //console.log("CHAINS", chains);
@@ -76,19 +74,21 @@ export default function Header() {
     const { lockedBalance, unlockedBalance, stashedBalance } = lpState;
 
     if (balance)
-      wallet = parseFloat(formatEther(BigInt(balance).toString())).toFixed(3);
+      wallet = formatNumber(
+        parseFloat(formatEther(BigInt(balance).toString())),
+      );
     if (lockedBalance)
-      locked = parseFloat(
-        formatEther(BigInt(lpState.lockedBalance).toString()),
-      ).toFixed(3);
+      locked = formatNumber(
+        parseFloat(formatEther(BigInt(lpState.lockedBalance).toString())),
+      );
     if (unlockedBalance)
-      unlocked = parseFloat(
-        formatEther(BigInt(lpState.unlockedBalance).toString()),
-      ).toFixed(3);
+      unlocked = formatNumber(
+        parseFloat(formatEther(BigInt(lpState.unlockedBalance).toString())),
+      );
     if (stashedBalance)
-      stashed = parseFloat(
-        formatEther(BigInt(lpState.stashedBalance).toString()),
-      ).toFixed(3);
+      stashed = formatNumber(
+        parseFloat(formatEther(BigInt(lpState.stashedBalance).toString())),
+      );
 
     return { wallet, locked, unlocked, stashed };
   }, [
@@ -161,13 +161,11 @@ export default function Header() {
         chain = "0x534e5f4a554e4f5f53455155454e434552";
     }
     if (!chain) {
-      console.log("FAILED");
       return Error("Chain not found");
     }
-      // await switchChainAsync({
-      //   chainId: chain,
-      // });
-      console.log("CHAIN SWITCHED");
+    // await switchChainAsync({
+    //   chainId: chain,
+    // });
     return;
   };
   const copyToClipboard = (text: string) => {
@@ -185,6 +183,11 @@ export default function Header() {
   const shortenString = (str: string) => {
     return str ? `${str.slice(0, 6)}...${str.slice(-4)}` : "";
   };
+
+  useEffect(() => {
+    if (isDropdownChainOpen || isDropdownOpen) setBlurOpen(true);
+    else setBlurOpen(false);
+  }, [isDropdownChainOpen, isDropdownOpen]);
 
   return (
     !isMobile && (
@@ -224,28 +227,30 @@ export default function Header() {
           >
             {
               <button
-                className="w-[150px] h-[44px] flex flex-row min-w-16 border-[1px] border-[#454545] text-white text-sm px-2 text-white py-3 rounded-md items-center"
-        onClick={() => {
+                className="w-[150px] h-[44px] flex flex-row min-w-16 border-[1px] border-[#454545] text-sm px-2 text-white py-3 rounded-md items-center"
+                onClick={() => {
                   setIsDropdownChainOpen(true);
-                  setBlurOpen(!isBlurOpen);
                 }}
+                disabled
               >
                 <GlobeIcon fill="none" />
                 <p className="pl-[0.5rem]">{`${chain.network.charAt(0).toUpperCase() + chain.network.slice(1)}`}</p>
 
-                {isDropdownChainOpen ? (
-                  <ArrowUpIcon
-                    stroke="#bfbfbf"
-                    strokeWidth="1"
-                    classname="flex flex-row justify-center items-center w-5 h-5 ml-auto"
-                  />
-                ) : (
-                  <ArrowDownIcon
-                    stroke="#bfbfbf"
-                    strokeWidth="1"
-                    classname="flex flex-row justify-center items-center w-5 h-5 ml-auto"
-                  />
-                )}
+                {
+                  //  isDropdownChainOpen ? (
+                  //  <ArrowUpIcon
+                  //    stroke="#bfbfbf"
+                  //    strokeWidth="1"
+                  //    classname="flex flex-row justify-center items-center w-5 h-5 ml-auto"
+                  //  />
+                  //) : (
+                  //  <ArrowDownIcon
+                  //    stroke="#bfbfbf"
+                  //    strokeWidth="1"
+                  //    classname="flex flex-row justify-center items-center w-5 h-5 ml-auto"
+                  //  />
+                  //)
+                }
               </button>
             }
 
@@ -294,7 +299,6 @@ export default function Header() {
                 <button
                   onClick={() => {
                     setIsDropdownOpen(!isDropdownOpen);
-                    //setBlurOpen(!isBlurOpen);
                   }}
                   className="flex items-center space-x-2 py-2 px-3 rounded-md border border-greyscale-800 w-[164px] h-[44px]"
                 >
@@ -319,8 +323,6 @@ export default function Header() {
                       balance={balanceData}
                       disconnect={() => {
                         disconnect();
-                        //setBlurOpen(!isBlurOpen);
-                        //setIsDropdownOpen((state) => !state);
                       }}
                       copyToClipboard={copyToClipboard}
                     />

@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useEffect } from "react";
 import { useProvider } from "@starknet-react/core";
 

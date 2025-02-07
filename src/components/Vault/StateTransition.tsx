@@ -1,14 +1,16 @@
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useAccount } from "@starknet-react/core";
 import { useMemo, useState, useEffect } from "react";
 import useFossilStatus from "@/hooks/fossil/useFossilStatus";
 import { getDurationForRound, getTargetTimestampForRound } from "@/lib/utils";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import { useRoundState } from "@/hooks/stateTransition/useRoundState";
+import { useRoundState as useRoundStateTransition } from "@/hooks/stateTransition/useRoundState";
 import { getIconByRoundState } from "@/hooks/stateTransition/getIconByRoundState";
 import { useRoundPermissions } from "@/hooks/stateTransition/useRoundPermissions";
 import Hoverable from "../BaseComponents/Hoverable";
-
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
+import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
+import { useNewContext } from "@/context/NewProvider";
 const StateTransition = ({
   isPanelOpen,
   setModalState,
@@ -18,17 +20,18 @@ const StateTransition = ({
   setModalState: any;
   fossilDelay: number;
 }) => {
-  const {
-    vaultState,
-    vaultActions,
-    selectedRoundState,
-    timestamp: timestampRaw,
-    conn,
-  } = useProtocolContext();
-  const { pendingTx, lastBlock } = useTransactionContext();
-
+  const { conn } = useNewContext();
+  const { vaultState, selectedRoundAddress } = useVaultState();
+  const selectedRoundState = useRoundState(selectedRoundAddress);
+  const vaultActions = useVaultActions();
+  const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
-  const timestamp = timestampRaw ? timestampRaw : "0";
+
+  // @NOTE: Wallet will say the txn will fail even if now.getTime() is >= state_transition_date.
+  // - Needs latest L2 block timestamp
+  const now = new Date();
+  const timestamp: number = Math.floor(now.getTime() / 1000);
+
   const {
     status: fossilStatus,
     error: fossilError,
@@ -41,7 +44,7 @@ const StateTransition = ({
     null,
   );
 
-  const { roundState, prevRoundState } = useRoundState({
+  const { roundState, prevRoundState } = useRoundStateTransition({
     selectedRoundState,
     fossilStatus,
     fossilError,
@@ -49,17 +52,12 @@ const StateTransition = ({
     expectedNextState,
   });
 
-  console.log("states",selectedRoundState,roundState,prevRoundState,)
   const {
     canAuctionStart,
     canAuctionEnd,
     canRoundSettle,
     canSendFossilRequest,
-  } = useRoundPermissions(
-    timestamp.toString(),
-    selectedRoundState,
-    fossilDelay,
-  );
+  } = useRoundPermissions(timestamp, selectedRoundState, fossilDelay);
 
   const actions: Record<string, string> = useMemo(
     () => ({
@@ -89,7 +87,6 @@ const StateTransition = ({
         });
 
         const data = await response.json();
-        console.log("Fossil response:", data);
 
         if (!response.ok) {
           setFossilStatus({ status: "Error", error: data.error });
@@ -120,7 +117,6 @@ const StateTransition = ({
   };
 
   const isDisabled = useMemo(() => {
-    console.log("ROUNDSTATE",roundState)
     if (!account) return true;
     if (pendingTx) return true;
     if (isAwaitingRoundStateUpdate) return true;
@@ -178,11 +174,10 @@ const StateTransition = ({
           : "border border-transparent border-t-[#262626]"
       } flex flex-col w-full mx-auto mt-auto mb-4 ${isPanelOpen ? "" : "items-center justify-center"}`}
     >
-
       <Hoverable dataId={`leftPanelStateTransitionButton_${roundState}`}>
         <div className={`${isPanelOpen ? "px-6" : ""}`}>
           <button
-            disabled={isDisabled || check }
+            disabled={isDisabled || check}
             className={`flex ${!isPanelOpen && !isDisabled ? "hover-zoom-small" : ""} ${
               roundState === "Settled" ? "hidden" : ""
             } ${isPanelOpen ? "p-2" : "w-[44px] h-[44px]"} border border-greyscale-700 text-primary disabled:text-greyscale rounded-md mt-4 justify-center items-center min-w-[44px] min-h-[44px] w-full`}

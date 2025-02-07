@@ -1,17 +1,24 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import QueueWithdrawal from "@/components/Vault/VaultActions/Tabs/Provider/Withdraw/QueueWithdrawal";
 import { useAccount } from "@starknet-react/core";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useHelpContext } from "@/context/HelpProvider";
+import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
+import useLPState from "@/hooks/vault_v2/states/useLPState";
 
 // Mock the hooks
 jest.mock("@starknet-react/core", () => ({
   useAccount: jest.fn(),
 }));
 
-jest.mock("@/context/ProtocolProvider", () => ({
-  useProtocolContext: jest.fn(),
+jest.mock("@/hooks/vault_v2/actions/useVaultActions", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+jest.mock("@/hooks/vault_v2/states/useLPState", () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 jest.mock("@/context/TransactionProvider", () => ({
@@ -34,9 +41,12 @@ describe("QueueWithdrawal", () => {
       account: { address: "0x123" },
     });
 
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      vaultActions: { queueWithdrawal: mockQueueWithdrawal },
-      lpState: { queuedBps: "0" },
+    (useVaultActions as jest.Mock).mockReturnValue({
+      queueWithdrawal: mockQueueWithdrawal,
+    });
+
+    (useLPState as jest.Mock).mockReturnValue({
+      queuedBps: "0",
     });
 
     (useTransactionContext as jest.Mock).mockReturnValue({
@@ -131,9 +141,8 @@ describe("QueueWithdrawal", () => {
     const { rerender } = render(<QueueWithdrawal showConfirmation={mockShowConfirmation} />);
 
     // Update lpState mock with new queuedBps
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      vaultActions: { queueWithdrawal: mockQueueWithdrawal },
-      lpState: { queuedBps: "5000" },
+    (useLPState as jest.Mock).mockReturnValue({
+      queuedBps: "5000",
     });
 
     rerender(<QueueWithdrawal showConfirmation={mockShowConfirmation} />);

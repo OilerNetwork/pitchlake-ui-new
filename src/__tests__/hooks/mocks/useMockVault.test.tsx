@@ -86,6 +86,7 @@ describe("useMockVault", () => {
       strikeLevel: "-1111",
       now: "0",
       deploymentDate: "1",
+      currentRoundAddress: "",
     });
 
     expect(result.current.lpState).toEqual({

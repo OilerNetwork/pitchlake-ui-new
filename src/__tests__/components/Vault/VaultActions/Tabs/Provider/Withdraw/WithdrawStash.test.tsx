@@ -1,16 +1,29 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import WithdrawStash from "@/components/Vault/VaultActions/Tabs/Provider/Withdraw/WithdrawStash";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useAccount } from "@starknet-react/core";
 import { parseEther } from "ethers";
 import { num } from "starknet";
 import { TestWrapper } from "../../../../../../utils/TestWrapper";
+import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
+import useLPState from "@/hooks/vault_v2/states/useLPState";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 
 // Mock the hooks
-jest.mock("@/context/ProtocolProvider", () => ({
-  useProtocolContext: jest.fn(),
+jest.mock("@/hooks/vault_v2/actions/useVaultActions", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+jest.mock("@/hooks/vault_v2/states/useLPState", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
+jest.mock("@/hooks/vault_v2/states/useVaultState", () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 jest.mock("@/context/TransactionProvider", () => ({
@@ -44,16 +57,18 @@ describe("WithdrawStash", () => {
   });
 
   it("renders stash withdrawal with correct states and handles interactions", () => {
-    (useProtocolContext as jest.Mock).mockReturnValue({
-      lpState: {
-        stashedBalance: parseEther("1000"),
-      },
+    (useLPState as jest.Mock).mockReturnValue({
+      stashedBalance: parseEther("1000"),
+    });
+
+    (useVaultState as jest.Mock).mockReturnValue({
       vaultState: {
         stashedBalance: num.toBigInt(1000),
       },
-      vaultActions: {
-        withdrawStash: mockWithdrawStash,
-      },
+    });
+
+    (useVaultActions as jest.Mock).mockReturnValue({
+      withdrawStash: mockWithdrawStash,
     });
 
     (useTransactionContext as jest.Mock).mockReturnValue({
@@ -98,16 +113,18 @@ describe("WithdrawStash", () => {
     });
 
     // Test with zero balance
-    (useProtocolContext as jest.Mock).mockReturnValue({
+    (useLPState as jest.Mock).mockReturnValue({
+      stashedBalance: parseEther("0"),
+    });
+
+    (useVaultState as jest.Mock).mockReturnValue({
       vaultState: {
         stashedBalance: num.toBigInt(0),
       },
-      lpState: {
-        stashedBalance: parseEther("0"),
-      },
-      vaultActions: {
-        withdrawStash: mockWithdrawStash,
-      },
+    });
+
+    (useVaultActions as jest.Mock).mockReturnValue({
+      withdrawStash: mockWithdrawStash,
     });
 
     const { container: zeroBalanceContainer } = render(

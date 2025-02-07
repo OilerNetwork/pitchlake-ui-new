@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { SquarePen, SquareArrowOutUpRight, ChevronLeft } from "lucide-react";
-import { useProvider, useExplorer, Explorer } from "@starknet-react/core";
-import { Provider } from "starknet";
-import { formatNumberText } from "@/lib/utils";
+import { SquarePen } from "lucide-react";
+import { useExplorer, Explorer } from "@starknet-react/core";
+import { formatNumber, formatNumberText } from "@/lib/utils";
 import { formatUnits } from "ethers";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import { useProtocolContext } from "@/context/ProtocolProvider";
 import Hoverable from "@/components/BaseComponents/Hoverable";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 
 interface HistoryItem {
   bid_id: string;
@@ -52,7 +52,10 @@ const HistoryItem: React.FC<{
         </p>
         <p className="text-[12px] text-[var(--buttongrey)] font-regular">
           Total:{" "}
-          {Number(formatUnits(item.price, "ether")) * Number(item.amount)} ETH
+          {formatNumber(
+            Number(formatUnits(item.price, "ether")) * Number(item.amount),
+          )}{" "}
+          ETH
         </p>
       </div>
       {roundState === "Auctioning" && (
@@ -60,14 +63,16 @@ const HistoryItem: React.FC<{
           dataId="openUpdateBidPanel"
           className="edit-button bg-[#262626] p-2 rounded-lg cursor-pointer"
         >
-          <SquarePen
+          <button
+            className="edit-button"
+            aria-label="edit bid"
             onClick={() => {
               setBidToEdit({ item });
-              setIsTabsHidden(!isTabsHidden);
+              setIsTabsHidden(true);
             }}
-            size={20}
-            className="text-[#E2E2E2]"
-          />
+          >
+            <SquarePen size={20} className="text-[#E2E2E2]" />
+          </button>
         </Hoverable>
       )}
     </div>
@@ -83,7 +88,8 @@ const History: React.FC<HistoryProps> = ({
 }) => {
   const explorer = useExplorer();
   const { pendingTx } = useTransactionContext();
-  const { selectedRoundState } = useProtocolContext();
+  const {selectedRoundAddress} = useVaultState()
+  const selectedRoundState = useRoundState(selectedRoundAddress)
 
   const [modalState, setModalState] = useState<{
     show: boolean;

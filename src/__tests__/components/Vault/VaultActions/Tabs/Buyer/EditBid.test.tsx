@@ -1,32 +1,9 @@
 import React from "react";
-import { screen, fireEvent } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import EditBid from "@/components/Vault/VaultActions/Tabs/Buyer/EditBid";
 import { renderWithProviders } from "@/__tests__/utils/TestWrapper";
-
-// Mock child components
-jest.mock("@/components/Vault/Utils/InputField", () => {
-  return function MockInputField({ label, value, onChange, placeholder, error, "data-item": dataItem }: any) {
-    return (
-      <div>
-        <label>{label}</label>
-        <input
-          data-item={dataItem}
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-        />
-        {error && <span data-testid="error-message">{error}</span>}
-      </div>
-    );
-  };
-});
-
-jest.mock("@/components/Vault/Utils/ActionButton", () => ({
-  __esModule: true,
-  default: ({ onClick, disabled, text }: { onClick: () => void, disabled: boolean, text: string }) => (
-    <button onClick={onClick} disabled={disabled} data-testid="action-button">{text}</button>
-  ),
-}));
+import { useContract, useContractWrite } from "@starknet-react/core";
+import { num } from "starknet";
 
 // Mock utils
 jest.mock("ethers", () => ({
@@ -46,37 +23,33 @@ jest.mock("ethers", () => ({
   }),
 }));
 
-// Mock hooks
-jest.mock("@/context/ProtocolProvider", () => ({
-  useProtocolContext: () => ({
-    vaultState: {
-      ethAddress: "0x123",
-    },
-    selectedRoundState: {
-      address: "0x456",
-      availableOptions: "1000000",
-      reservePrice: "1000000000", // 1 GWEI
-      auctionEndDate: "9999999999",
-    },
-  }),
-}));
+const mockWriteAsync = jest.fn().mockResolvedValue({ transaction_hash: "0x123" });
 
-jest.mock("@/context/TransactionProvider", () => ({
+// Mock all required hooks
+const mockHooks = {
+  useAccount: () => ({
+    account: "0x789",
+  }),
   useTransactionContext: () => ({
     pendingTx: null,
     setPendingTx: jest.fn(),
   }),
-}));
-
-jest.mock("@starknet-react/core", () => ({
-  useAccount: () => ({
-    account: "0x789",
+  useTimeContext: () => ({
+    timestamp: "1234567890"
   }),
-  useSendTransaction: () => ({
-    sendAsync: jest.fn().mockResolvedValue({ transaction_hash: "0x123" }),
+  useERC20: () => ({
+    allowance: "1000000000000000000",
+    balance: "2000000000000000000",
   }),
-  useProvider: () => ({
-    provider: {},
+  useVaultState: () => ({
+    vaultState: {
+      ethAddress: "0x123",
+    },
+    selectedRoundAddress: "0x456"
+  }),
+  useRoundState: () => ({
+    address: "0x456",
+    auctionEndDate: "9999999999"
   }),
   useContract: () => ({
     contract: {
@@ -89,31 +62,47 @@ jest.mock("@starknet-react/core", () => ({
       })
     }
   }),
-  useContractWrite: jest.fn().mockReturnValue({
-    writeAsync: jest.fn().mockResolvedValue({ transaction_hash: "0x123" }),
+  useContractWrite: () => ({
+    writeAsync: mockWriteAsync,
   }),
+};
+
+// Mock all hooks
+jest.mock("@starknet-react/core", () => ({
+  useAccount: () => mockHooks.useAccount(),
+  useContractWrite: () => mockHooks.useContractWrite(),
+  useProvider: () => ({ provider: {} }),
+  useContract: () => mockHooks.useContract(),
 }));
 
-jest.mock("@/hooks/chain/useLatestTimestamp", () => ({
-  __esModule: true,
-  default: () => ({
-    timestamp: 1000000000,
-  }),
+jest.mock("@/context/TransactionProvider", () => ({
+  useTransactionContext: () => mockHooks.useTransactionContext(),
 }));
 
 jest.mock("@/hooks/erc20/useERC20", () => ({
   __esModule: true,
-  default: () => ({
-    allowance: "1000000000000000000",
-    balance: "2000000000000000000",
-  }),
+  default: () => mockHooks.useERC20(),
 }));
 
-describe("EditBid Component", () => {
+jest.mock("@/hooks/vault_v2/states/useVaultState", () => ({
+  __esModule: true,
+  default: () => mockHooks.useVaultState(),
+}));
+
+jest.mock("@/hooks/vault_v2/states/useRoundState", () => ({
+  __esModule: true,
+  default: () => mockHooks.useRoundState(),
+}));
+
+jest.mock("@/context/TimeProvider", () => ({
+  useTimeContext: () => mockHooks.useTimeContext(),
+}));
+
+// Helper function to setup tests
+const setupTest = (overrides = {}) => {
   const defaultProps = {
     onClose: jest.fn(),
     onSubmit: jest.fn(),
-    balance: "2000000000000000000",
     showConfirmation: jest.fn((header, action, onConfirm) => {
       onConfirm();
     }),
@@ -127,41 +116,104 @@ describe("EditBid Component", () => {
     },
   };
 
-  it("validates new price and updates error state", () => {
-    renderWithProviders(
-      <EditBid {...defaultProps} />
-    );
+  const props = { ...defaultProps, ...overrides };
+  const utils = renderWithProviders(<EditBid {...props} />);
 
-    const priceInput = screen.getByPlaceholderText("e.g. 1");
-    const amountInput = screen.getByPlaceholderText("100");
+  return {
+    ...utils,
+    props,
+    priceInput: screen.getByPlaceholderText("e.g. 1"),
+    editButton: screen.getByRole("button", { name: /edit bid/i }),
+  };
+};
+
+describe("EditBid Component", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    localStorage.clear();
+  });
+
+  it("validates new price and updates error state", () => {
+    const { priceInput, editButton } = setupTest();
 
     // Test lower price
     fireEvent.change(priceInput, { target: { value: "0.5" } });
-    fireEvent.change(amountInput, { target: { value: "100" } });
-
-    const editButton = screen.getByTestId("action-button");
+    expect(screen.getByText("Bid price must increase")).toBeInTheDocument();
     expect(editButton).toBeDisabled();
+
+    // Test valid price
+    fireEvent.change(priceInput, { target: { value: "2" } });
+    expect(screen.queryByText("Bid price must increase")).not.toBeInTheDocument();
+    expect(editButton).not.toBeDisabled();
   });
 
-  it("handles bid update flow correctly", () => {
-    renderWithProviders(
-      <EditBid {...defaultProps} />
-    );
-
-    const priceInput = screen.getByPlaceholderText("e.g. 1");
-    const amountInput = screen.getByPlaceholderText("100");
+  it("handles bid update flow correctly", async () => {
+    const { priceInput, editButton, props } = setupTest();
 
     fireEvent.change(priceInput, { target: { value: "2" } });
-    fireEvent.change(amountInput, { target: { value: "100" } });
-
-    const editButton = screen.getByTestId("action-button");
-    expect(editButton).not.toBeDisabled();
+    await waitFor(() => {
+      expect(editButton).not.toBeDisabled();
+    });
 
     fireEvent.click(editButton);
-    expect(defaultProps.showConfirmation).toHaveBeenCalledWith(
+    
+    expect(props.showConfirmation).toHaveBeenCalledWith(
       "Update Bid",
       expect.anything(),
       expect.any(Function)
     );
+
+    await waitFor(() => {
+      expect(mockWriteAsync).toHaveBeenCalled();
+    });
+  });
+
+  it("saves and loads price from localStorage", () => {
+    localStorage.setItem("editBidPriceGwei", "2.5");
+    const { priceInput } = setupTest();
+
+    expect((priceInput as HTMLInputElement).value).toBe("2.5");
+
+    fireEvent.change(priceInput, { target: { value: "3.0" } });
+    expect(localStorage.getItem("editBidPriceGwei")).toBe("3.0");
+  });
+
+  it("disables button when auction has ended", () => {
+    mockHooks.useRoundState = () => ({
+      address: "0x456",
+      auctionEndDate: "1000000000" // Past date
+    });
+
+    const { priceInput, editButton } = setupTest();
+    fireEvent.change(priceInput, { target: { value: "2" } });
+
+    expect(screen.getByText("Auction ended")).toBeInTheDocument();
+    expect(editButton).toBeDisabled();
+  });
+
+  it("cleans up localStorage on successful bid update", async () => {
+    mockHooks.useRoundState = () => ({
+      address: "0x456",
+      auctionEndDate: "9999999999" // Future date
+    });
+
+    localStorage.setItem("editBidPriceGwei", "2.0");
+    const { editButton, priceInput } = setupTest();
+
+    // Set a valid price to enable the button
+    fireEvent.change(priceInput, { target: { value: "2.0" } });
+    await waitFor(() => {
+      expect(editButton).not.toBeDisabled();
+    });
+    
+    fireEvent.click(editButton);
+
+    await waitFor(() => {
+      expect(mockWriteAsync).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(localStorage.getItem("editBidPriceGwei")).toBeNull();
+    }, { timeout: 2000 });
   });
 }); 

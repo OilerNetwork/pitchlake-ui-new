@@ -1,31 +1,25 @@
 import type { Metadata } from "next";
 import React from "react";
-import { Inter, Montserrat, Share_Tech } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "@/styles/global.css";
 import { StarknetProvider } from "../context/StarknetProvider";
 import { Header } from "@/components/LayoutComponents";
 import TransactionProvider from "@/context/TransactionProvider";
-import { ToastContainer } from "react-toastify";
+
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 import Footer from "@/components/LayoutComponents/Footer";
-import ProtocolProvider from "@/context/ProtocolProvider";
-import { AppProps } from "next/app";
-import QueryProvider from "@/components/Providers/queryProvider";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
 import { HelpProvider } from "@/context/HelpProvider";
 import { UiProvider } from "@/context/UiProvider";
 import { Blur } from "@/components/BaseComponents/Blur";
+import NewProvider from "@/context/NewProvider";
+import TimeContextProvider from "@/context/TimeProvider";
+import QueryProvider from "@/components/Providers/queryProvider";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
-  variable: "--mainFont",
-});
-
-const shareTech = Share_Tech({
-  subsets: ["latin"],
-  weight: ["400"],
   variable: "--mainFont",
 });
 
@@ -42,10 +36,11 @@ export default function RootLayout({
   return (
     <html className={`${montserrat.variable}`} lang="en">
       <body className="flex flex-col min-h-[100vh] text-white">
-
-          <StarknetProvider>
+        <QueryProvider>
+        <StarknetProvider>
+          <TimeContextProvider>
             <TransactionProvider>
-              <ProtocolProvider>
+              <NewProvider>
                 <UiProvider>
                   <HelpProvider>
                     <Header />
@@ -59,10 +54,11 @@ export default function RootLayout({
                     </Blur>
                   </HelpProvider>
                 </UiProvider>
-              </ProtocolProvider>
+              </NewProvider>
             </TransactionProvider>
-          </StarknetProvider>
-
+          </TimeContextProvider>
+        </StarknetProvider>
+        </QueryProvider>
       </body>
     </html>
   );

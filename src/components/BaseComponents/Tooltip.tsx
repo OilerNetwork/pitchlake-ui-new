@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { formatEther } from "ethers";
 import Hoverable from "./Hoverable";
+import { formatNumber } from "@/lib/utils";
 
 interface BalanceTooltipProps {
   balance: {
@@ -76,7 +77,7 @@ const BalanceTooltip: React.FC<BalanceTooltipProps> = ({
               >
                 <span>Locked</span>
                 <span>
-                  {parseFloat(formatEther(balance.locked)).toFixed(3) || "0"}{" "}
+                  {formatNumber(parseFloat(formatEther(balance.locked))) || "0"}{" "}
                   ETH
                 </span>
               </Hoverable>
@@ -86,7 +87,8 @@ const BalanceTooltip: React.FC<BalanceTooltipProps> = ({
               >
                 <span>Unlocked</span>
                 <span>
-                  {parseFloat(formatEther(balance.unlocked)).toFixed(3) || "0"}{" "}
+                  {formatNumber(parseFloat(formatEther(balance.unlocked))) ||
+                    "0"}{" "}
                   ETH
                 </span>
               </Hoverable>
@@ -96,7 +98,8 @@ const BalanceTooltip: React.FC<BalanceTooltipProps> = ({
               >
                 <span>Stashed</span>
                 <span>
-                  {parseFloat(formatEther(balance.stashed)).toFixed(3) || "0"}{" "}
+                  {formatNumber(parseFloat(formatEther(balance.stashed))) ||
+                    "0"}{" "}
                   ETH
                 </span>
               </Hoverable>

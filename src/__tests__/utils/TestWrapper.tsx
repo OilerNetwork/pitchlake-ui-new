@@ -1,19 +1,26 @@
-import React from 'react';
-import { render } from '@testing-library/react';
+import React from "react";
+import { render } from "@testing-library/react";
 import { ReactNode } from "react";
 import { HelpProvider } from "@/context/HelpProvider";
-import { useProtocolContext } from "@/context/ProtocolProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-// Mock the protocol context
-jest.mock("@/context/ProtocolProvider", () => ({
-  useProtocolContext: jest.fn().mockReturnValue({
-    selectedRoundState: {
-      roundId: "1",
-      startTimestamp: "1000",
-      duration: "1000",
-      roundState: "Auctioning"
+// Mock the new context
+jest.mock("@/context/NewProvider", () => ({
+  useNewContext: jest.fn().mockReturnValue({
+    conn: "rpc",
+    wsData: {
+      wsOptionBuyerStates: [],
+      wsRoundStates: [{
+        roundId: "1",
+        startTimestamp: "1000",
+        duration: "1000",
+        roundState: "Open",
+      }],
     },
-    connectionType: "mock",
+    mockData: {
+      optionBuyerStates: [],
+      roundStates: [],
+    },
   }),
 }));
 
@@ -21,11 +28,19 @@ interface TestWrapperProps {
   children: ReactNode;
 }
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
 export const TestWrapper: React.FC<TestWrapperProps> = ({ children }) => {
   return (
-    <HelpProvider>
-      {children}
-    </HelpProvider>
+    <QueryClientProvider client={queryClient}>
+      <HelpProvider>{children}</HelpProvider>
+    </QueryClientProvider>
   );
 };
 
@@ -34,12 +49,12 @@ export const renderWithProviders = (ui: ReactNode) => {
 };
 
 // Add tests for the wrapper itself
-describe('TestWrapper', () => {
-  it('provides help context to children', () => {
+describe("TestWrapper", () => {
+  it("provides required contexts to children", () => {
     const { container } = render(
       <TestWrapper>
         <div>Test Child</div>
-      </TestWrapper>
+      </TestWrapper>,
     );
     expect(container).toBeInTheDocument();
   });
