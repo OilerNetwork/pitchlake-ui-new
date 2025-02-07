@@ -19,7 +19,6 @@ const useVaultState = (address?: string) => {
         : mockData.vaultState;
   }, [conn, vaultStateRPC, wsData.wsVaultState, mockData.vaultState]);
 
-  console.log("selectedRoundAddressRPC", selectedRoundAddressRPC);
   const selectedRoundAddress = useMemo(() => {
     if (conn === "mock") {
       return mockData.optionRoundStates[selectedRound].address;
@@ -27,9 +26,7 @@ const useVaultState = (address?: string) => {
     return selectedRoundAddressRPC;
   }, [conn, mockData.optionRoundStates, selectedRoundAddressRPC]);
 
-  console.log("vaultState", vaultState);
   useEffect(() => {
-    console.log("vaultState?.currentRoundId", vaultState?.currentRoundId);
     if (selectedRound) return;
     if (vaultState?.currentRoundId) {
       setSelectedRound(Number(vaultState?.currentRoundId));

@@ -32,11 +32,11 @@ const TimeContextProvider = ({ children }: { children: ReactNode }) => {
   const [mockTimestamp, setMockTimestamp] = useState(0);
 
   const { data: block } = useBlock({
-    blockIdentifier:BlockTag.PENDING,
+    
     refetchInterval: 1000,
   });
   const blockNumber = useBlockNumber({
-    blockIdentifier:BlockTag.PENDING,
+    
     refetchInterval: 1000,
   });
 

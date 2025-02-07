@@ -23,7 +23,6 @@ const useRoundState = (address?: string) => {
     else if (conn === "rpc" || "demo") return roundStateRPC;
     else return roundStateMock;
   }, [conn, roundStateMock, roundStateRPC, roundStateWS]);
-  console.log("roundState", roundState);
 
   return roundState;
 };

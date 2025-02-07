@@ -55,7 +55,7 @@ describe("useVaultBalances", () => {
       expect(useContractRead).toHaveBeenNthCalledWith(1, {
         abi: vaultABI,
         address: mockAddress,
-        blockIdentifier: BlockTag.PENDING,
+        
         watch: false,
         functionName: "get_vault_locked_balance",
         args: [],
@@ -64,7 +64,7 @@ describe("useVaultBalances", () => {
       expect(useContractRead).toHaveBeenNthCalledWith(2, {
         abi: vaultABI,
         address: mockAddress,
-        blockIdentifier: BlockTag.PENDING,
+        
         watch: false,
         functionName: "get_vault_unlocked_balance",
         args: [],
@@ -73,7 +73,7 @@ describe("useVaultBalances", () => {
       expect(useContractRead).toHaveBeenNthCalledWith(3, {
         abi: vaultABI,
         address: mockAddress,
-        blockIdentifier: BlockTag.PENDING,
+        
         watch: false,
         functionName: "get_vault_stashed_balance",
         args: [],
@@ -123,17 +123,6 @@ describe("useVaultBalances", () => {
       const calls = (useContractRead as jest.Mock).mock.calls;
       calls.forEach(call => {
         expect(call[0].watch).toBe(true);
-      });
-    });
-
-    it("uses BlockTag.PENDING for all contract reads", () => {
-      // Execute
-      renderHook(() => useVaultBalances(mockAddress));
-
-      // Verify blockIdentifier for each call
-      const calls = (useContractRead as jest.Mock).mock.calls;
-      calls.forEach(call => {
-        expect(call[0].blockIdentifier).toBe(BlockTag.PENDING);
       });
     });
   });

@@ -7,7 +7,6 @@ import { useContractRead } from "@starknet-react/core";
 
 const useOptionRoundStateRPC = (conn: string, address: string | undefined) => {
   const contractData = useMemo(() => {
-    console.log("REDO")
     if (conn === "mock") return { abi: optionRoundABI, address: undefined };
     else return { abi: optionRoundABI, address: address as `0x${string}` };
   }, [conn,address]);
@@ -15,7 +14,7 @@ const useOptionRoundStateRPC = (conn: string, address: string | undefined) => {
 
   const {data:vaultAddress} = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_vault_address",
     args:[],
     watch: true,
@@ -23,7 +22,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:roundId} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_round_id",
     args:[],
     watch: true,
@@ -31,7 +30,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:roundState} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_state",
     args:[],
     watch: true,
@@ -39,7 +38,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:deploymentDate} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_deployment_date",
     args:[],
     watch: true,
@@ -47,7 +46,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:auctionStartDate} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_auction_start_date",
     args:[],
     watch: true,
@@ -55,7 +54,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:auctionEndDate} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_auction_end_date",
     args:[],
     watch: true,
@@ -63,7 +62,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:optionSettleDate} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
       functionName: "get_option_settlement_date",
     args:[],
     watch: true,
@@ -71,7 +70,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:treeNonce} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_bid_tree_nonce",
     args:[],
     watch: true,
@@ -79,7 +78,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:startingLiquidity} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_starting_liquidity",
     args:[],
     watch: true,
@@ -87,7 +86,7 @@ blockIdentifier:BlockTag.PENDING,
     })
   const {data:soldLiquidity} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_sold_liquidity",
     args:[],
     watch: true,
@@ -95,7 +94,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:unsoldLiquidity} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_unsold_liquidity",
     args:[],
     watch: true,
@@ -103,7 +102,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:reservePrice} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_reserve_price",
     args:[],
     watch: true,
@@ -111,7 +110,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:strikePrice} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_strike_price",
     args:[],
     watch: true,
@@ -119,7 +118,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:capLevel} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_cap_level",
     args:[],
     watch: true,
@@ -127,7 +126,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:availableOptions} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_options_available",
     args:[],
     watch: true,
@@ -135,7 +134,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:optionsSold} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_options_sold",
     args:[],
     watch: true,
@@ -143,7 +142,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:clearingPrice} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_clearing_price",
     args:[],
     watch: true,
@@ -151,7 +150,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:premiums} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_total_premium",
     args:[],
     watch: true,
@@ -159,7 +158,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:totalPayout} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_total_payout",
     args:[],
     watch: true,
@@ -167,14 +166,13 @@ blockIdentifier:BlockTag.PENDING,
   })
   const {data:settlementPrice} = useContractRead({ 
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_settlement_price",
     args:[],
     watch: true,
     
   })
 
-  console.log("settlementPrice",settlementPrice)
 
   const performanceLP = useMemo(() => {
     if(soldLiquidity && premiums && totalPayout){ 

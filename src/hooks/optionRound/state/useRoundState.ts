@@ -11,7 +11,7 @@ const useRoundState = (address: string, args?: { watch?: boolean }) => {
 
   const { data: roundState } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_state",
     args:[],
     watch: true,

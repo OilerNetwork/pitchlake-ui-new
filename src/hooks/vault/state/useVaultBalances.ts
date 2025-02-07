@@ -12,7 +12,7 @@ const useVaultBalances = (address: string | undefined, args?: { watch?: boolean 
 
   const { data: lockedBalance } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     watch,
     functionName:"get_vault_locked_balance",
     args:[],
@@ -20,7 +20,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const { data: unlockedBalance } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     watch,
     functionName:"get_vault_unlocked_balance",
     args:[],
@@ -28,7 +28,7 @@ blockIdentifier:BlockTag.PENDING,
   })
   const { data: stashedBalance } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     watch,
     functionName:"get_vault_stashed_balance",
     args:[],

@@ -11,7 +11,7 @@ const useStrikePrice = (address: string, args?: { watch?: boolean }) => {
 
   const { data: strikePrice } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_strike_price",
     args:[],
     watch: true,

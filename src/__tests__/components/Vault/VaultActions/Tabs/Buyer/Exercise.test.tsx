@@ -14,7 +14,7 @@ import { HelpProvider } from "@/context/HelpProvider";
 // Mock the new context
 jest.mock("@/context/NewProvider", () => ({
   useNewContext: jest.fn().mockReturnValue({
-    conn: "ws",
+    conn: "rpc",
     wsData: {
       wsOptionBuyerStates: [],
       wsRoundStates: [{

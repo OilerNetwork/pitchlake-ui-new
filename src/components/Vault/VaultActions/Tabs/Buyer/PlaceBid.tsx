@@ -43,7 +43,6 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
   const { pendingTx, setPendingTx } = useTransactionContext();
   const { timestamp } = useTimeContext();
 
-  console.log("timestamp",timestamp)
   const { allowance, balance } = useERC20(
     vaultState?.ethAddress as `0x${string}`,
     selectedRoundState?.address,
