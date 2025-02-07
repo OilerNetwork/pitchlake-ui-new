@@ -233,7 +233,7 @@ export default function Header() {
           >
             {
               <button
-                className="w-[150px] h-[44px] flex flex-row min-w-16 border-[1px] border-[#454545] text-white text-sm px-2 text-white py-3 rounded-md items-center"
+                className="w-[150px] h-[44px] flex flex-row min-w-16 border-[1px] border-[#454545] text-sm px-2 text-white py-3 rounded-md items-center"
                 onClick={() => {
                   setIsDropdownChainOpen(true);
                 }}

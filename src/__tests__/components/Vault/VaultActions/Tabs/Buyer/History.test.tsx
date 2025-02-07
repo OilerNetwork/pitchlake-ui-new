@@ -11,8 +11,12 @@ import { useNewContext } from "@/context/NewProvider";
 
 // Mock the hooks
 jest.mock("@starknet-react/core", () => ({
-  __esModule: true,
-  ...jest.requireActual("@/__tests__/mocks/starknet-react"),
+  useExplorer: jest.fn(),
+  useContractRead: jest.fn().mockReturnValue({
+    data: undefined,
+    isLoading: false,
+    isError: false,
+  }),
 }));
 
 jest.mock("@/context/TransactionProvider", () => ({
@@ -44,6 +48,20 @@ jest.mock("@/hooks/vault_v2/actions/useOptionRoundActions", () => ({
 
 jest.mock("ethers", () => ({
   formatUnits: jest.fn(),
+}));
+
+jest.mock("@/hooks/vault_v2/states/useRoundState", () => ({
+  __esModule: true,
+  default: jest.fn().mockReturnValue({
+    roundState: "Auctioning"
+  }),
+}));
+
+jest.mock("@/hooks/vault_v2/states/useVaultState", () => ({
+  __esModule: true,
+  default: jest.fn().mockReturnValue({
+    selectedRoundAddress: "0x456"
+  }),
 }));
 
 const renderWithProviders = (ui: React.ReactElement) => {
@@ -109,24 +127,21 @@ describe("History Component", () => {
     // Mock useNewContext hook
     (useNewContext as jest.Mock).mockReturnValue({
       conn: "mock",
+      selectedRound: 0,
+      vaultAddress: "0x123",
+      setSelectedRound: jest.fn(),
       wsData: {
-        wsVaultState: {
-          currentRoundId: "5",
-          address: "0x123"
-        }
+        wsOptionRoundStates: [{
+          address: "0x456",
+          state: "Auctioning"
+        }]
       },
       mockData: {
-        vaultState: {
-          currentRoundId: "5",
-          address: "0x123"
-        },
-        optionRoundStates: {
-          "5": {
-            address: "0x123",
-            roundId: "5",
-            roundState: "Auctioning"
-          }
-        }
+        vaultState: {},
+        optionRoundStates: [{
+          address: "0x456",
+          state: "Auctioning"
+        }]
       }
     });
 
@@ -167,6 +182,12 @@ describe("History Component", () => {
   });
 
   it("shows edit button only when roundState is Auctioning", () => {
+    // Mock useRoundState to return "Auctioning"
+    const useRoundState = require("@/hooks/vault_v2/states/useRoundState").default;
+    useRoundState.mockReturnValue({
+      roundState: "Auctioning"
+    });
+
     const { container } = renderWithProviders(
       <History
         items={mockHistoryItems}
@@ -182,6 +203,9 @@ describe("History Component", () => {
     expect(editButtons.length).toBe(2);
 
     // Change roundState to something else
+    useRoundState.mockReturnValue({
+      roundState: "Settled"
+    });
 
     const { container: newContainer } = renderWithProviders(
       <History
@@ -198,7 +222,13 @@ describe("History Component", () => {
   });
 
   it("calls setBidToEdit and setIsTabsHidden when edit button is clicked", () => {
-    const { container } = renderWithProviders(
+    // Mock useRoundState to return "Auctioning"
+    const useRoundState = require("@/hooks/vault_v2/states/useRoundState").default;
+    useRoundState.mockReturnValue({
+      roundState: "Auctioning"
+    });
+
+    renderWithProviders(
       <History
         items={mockHistoryItems}
         bidToEdit={null}
@@ -208,8 +238,8 @@ describe("History Component", () => {
       />,
     );
 
-    const editButtons = container.getElementsByClassName("edit-button");
-    fireEvent.click(editButtons[0].querySelector("svg")!);
+    const editButton = screen.getByLabelText("Edit bid");
+    fireEvent.click(editButton);
 
     expect(mockSetBidToEdit).toHaveBeenCalledWith({
       item: mockHistoryItems[0],

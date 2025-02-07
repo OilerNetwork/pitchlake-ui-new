@@ -114,13 +114,13 @@ const useVaultStateRPC = ({
         : undefined,
     watch: true,
   });
-  const {data:currentRoundAddress} = useContractRead({
+  const { data: currentRoundAddress } = useContractRead({
     ...contractData,
-    blockIdentifier:BlockTag.PENDING,
-    functionName:"get_round_address",
-    args:currentRoundId?[currentRoundId?.toString()]:[],
-    watch:true,
-  })
+    blockIdentifier: BlockTag.PENDING,
+    functionName: "get_round_address",
+    args: currentRoundId ? [currentRoundId?.toString()] : [],
+    watch: true,
+  });
   const usableStringSelectedRoundAddress = useMemo(() => {
     return stringToHex(selectedRoundAddress?.toString());
   }, [selectedRoundAddress]);

@@ -1,5 +1,5 @@
 "use client";
-import WrongNetworkScreen from "@/__tests__/components/BaseComponents/WrongNetworkScreen";
+import WrongNetworkScreen from "@/components/WrongNetworkScreen";
 import MobileScreen from "@/components/BaseComponents/MobileScreen";
 import VaultCard from "@/components/VaultCard/VaultCard";
 import useWebSocketHome from "@/hooks/websocket/useWebSocketHome";

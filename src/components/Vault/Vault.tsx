@@ -12,7 +12,7 @@ import MobileScreen from "../BaseComponents/MobileScreen";
 import { useHelpContext } from "@/context/HelpProvider";
 import { HelpBoxPanel } from "../HelpBoxComponents/HelpBoxPanel";
 import Hoverable from "../BaseComponents/Hoverable";
-import WrongNetworkScreen from "@/__tests__/components/BaseComponents/WrongNetworkScreen";
+import WrongNetworkScreen from "@/components/WrongNetworkScreen";
 import { useNetwork } from "@starknet-react/core";
 
 export const Vault = () => {
