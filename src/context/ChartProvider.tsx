@@ -160,12 +160,6 @@ export const ChartProvider: React.FC<{ children: React.ReactNode }> = ({
         [demoXMin, demoXMax],
       );
 
-      //      console.log(
-      //        "gggg",
-      //        [xMin, demoNow, xMax],
-      //        [demoXMin, scaledDemoNow, demoXMax],
-      //      );
-
       const filteredDemoData = allDemoGasData.filter(
         (d) => d.timestamp <= scaledDemoNow,
       );
