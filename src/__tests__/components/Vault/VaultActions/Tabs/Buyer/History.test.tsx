@@ -228,7 +228,7 @@ describe("History Component", () => {
       roundState: "Auctioning"
     });
 
-    renderWithProviders(
+    const { container } = renderWithProviders(
       <History
         items={mockHistoryItems}
         bidToEdit={null}
@@ -238,8 +238,8 @@ describe("History Component", () => {
       />,
     );
 
-    const editButton = screen.getByLabelText("Edit bid");
-    fireEvent.click(editButton);
+    const editButton = container.querySelector(".edit-button svg");
+    fireEvent.click(editButton!);
 
     expect(mockSetBidToEdit).toHaveBeenCalledWith({
       item: mockHistoryItems[0],
