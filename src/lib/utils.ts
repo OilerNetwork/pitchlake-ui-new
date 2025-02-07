@@ -367,12 +367,15 @@ export const formatNumber = (num: number): string => {
 };
 
 export const getTWAPs = (
-  blockData: FormattedBlockData[],
+  //blockData: FormattedBlockData[],
+  blockData: any[],
   firstTimestamp: number,
-  twapRange: number,
+  _twapRange: number,
 ): FormattedBlockData[] => {
-  if (!blockData?.length || twapRange <= 0)
+  if (!blockData?.length || _twapRange <= 0)
     return blockData.map((b) => ({ ...b }));
+
+  const twapRange = process.env.ENVIRONMENT === "demo" ? 60 : _twapRange;
 
   const dataWithTWAP: FormattedBlockData[] = blockData.map(
     (currentBlock, currentIndex) => {
@@ -500,6 +503,30 @@ export const getTWAPs = (
     });
 
   return filtered;
+};
+
+export const scaleInRange = (
+  value: number | undefined,
+  inRange: number[],
+  outRange: number[],
+) => {
+  if (!value) return 0;
+  const inMin = inRange[0];
+  const outMin = outRange[0];
+
+  const inMax = inRange[1];
+  const outMax = outRange[1];
+
+  const result =
+    ((value - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+
+  if (result < outMin) {
+    return outMin;
+  } else if (result > outMax) {
+    return outMax;
+  }
+
+  return result;
 };
 
 ///   function generateMockData(
