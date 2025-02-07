@@ -125,8 +125,7 @@ describe("RoundPerformanceChart", () => {
 
     // Assert
     expect(screen.getByRole("img", { name: "chart" })).toBeInTheDocument();
-    expect(screen.getByText(/Round/)).toBeInTheDocument();
-    expect(screen.getByText("3")).toBeInTheDocument();
+    expect(screen.getByText("Round 3")).toBeInTheDocument();
   });
 
   it("handles expanded view toggle", () => {
@@ -269,7 +268,7 @@ describe("RoundPerformanceChart", () => {
 
     mockHooks.useVaultState.mockReturnValue({
       vaultState: {
-        currentRoundId: "4",
+        currentRoundId: "5",
         address: "0x123"
       }
     });
@@ -301,16 +300,14 @@ describe("RoundPerformanceChart", () => {
       mockData: {
         vaultState: {},
         optionRoundStates: {
-          "1": { address: "0x1" },
-          "2": { address: "0x2" },
-          "3": { address: "0x3" }
+          "2": { address: "0x2" }
         }
       }
     });
 
     mockHooks.useVaultState.mockReturnValue({
       vaultState: {
-        currentRoundId: "4",
+        currentRoundId: "5",
         address: "0x123"
       }
     });
@@ -322,16 +319,20 @@ describe("RoundPerformanceChart", () => {
 
     const { container } = renderWithProviders(<RoundPerformanceChart />);
 
-    // Act & Assert - Next Round
+    // Act - Navigate forward
     const nextButton = container.querySelector('[data-item="chartNextRound"]');
     if (!nextButton) throw new Error("Next button not found");
     fireEvent.click(nextButton);
+
+    // Assert
     expect(mockSetSelectedRound).toHaveBeenCalledWith(3);
 
-    // Act & Assert - Previous Round
+    // Act - Navigate backward
     const prevButton = container.querySelector('[data-item="chartPreviousRound"]');
     if (!prevButton) throw new Error("Previous button not found");
     fireEvent.click(prevButton);
+
+    // Assert
     expect(mockSetSelectedRound).toHaveBeenCalledWith(1);
   });
 });

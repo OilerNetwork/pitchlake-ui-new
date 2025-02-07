@@ -3,6 +3,13 @@ import { useRoundPermissions } from "@/hooks/stateTransition/useRoundPermissions
 import { OptionRoundStateType } from "@/lib/types";
 import { num } from "starknet";
 
+// Mock the new context
+jest.mock("@/context/NewProvider", () => ({
+  useNewContext: jest.fn().mockReturnValue({
+    conn: "rpc"
+  })
+}));
+
 describe("useRoundPermissions", () => {
   const FOSSIL_DELAY = 3600; // 1 hour in seconds
   const mockRoundState: OptionRoundStateType = {
@@ -34,7 +41,7 @@ describe("useRoundPermissions", () => {
   };
 
   it("initializes with all permissions false when no round state", () => {
-    const timestamp = "500";
+    const timestamp = 500;
     const { result } = renderHook(() =>
       useRoundPermissions(timestamp, undefined, FOSSIL_DELAY)
     );
@@ -48,21 +55,21 @@ describe("useRoundPermissions", () => {
   it("calculates permissions correctly based on timestamps", () => {
     // Test before auction start
     const { result: beforeStart } = renderHook(() =>
-      useRoundPermissions("999", mockRoundState, FOSSIL_DELAY)
+      useRoundPermissions(999, mockRoundState, FOSSIL_DELAY)
     );
     expect(beforeStart.current.canAuctionStart).toBe(false);
     expect(beforeStart.current.canAuctionEnd).toBe(false);
 
     // Test at auction start
     const { result: atStart } = renderHook(() =>
-      useRoundPermissions("1000", mockRoundState, FOSSIL_DELAY)
+      useRoundPermissions(1000, mockRoundState, FOSSIL_DELAY)
     );
     expect(atStart.current.canAuctionStart).toBe(true);
     expect(atStart.current.canAuctionEnd).toBe(false);
 
     // Test at auction end
     const { result: atEnd } = renderHook(() =>
-      useRoundPermissions("2000", mockRoundState, FOSSIL_DELAY)
+      useRoundPermissions(2000, mockRoundState, FOSSIL_DELAY)
     );
     expect(atEnd.current.canAuctionStart).toBe(true);
     expect(atEnd.current.canAuctionEnd).toBe(true);
@@ -70,7 +77,7 @@ describe("useRoundPermissions", () => {
     // Test at fossil request time
     const fossilTime = Number(mockRoundState.optionSettleDate) + FOSSIL_DELAY;
     const { result: atFossil } = renderHook(() =>
-      useRoundPermissions(fossilTime.toString(), mockRoundState, FOSSIL_DELAY)
+      useRoundPermissions(fossilTime, mockRoundState, FOSSIL_DELAY)
     );
     expect(atFossil.current.canSendFossilRequest).toBe(true);
     expect(atFossil.current.canRoundSettle).toBe(true);
@@ -78,7 +85,7 @@ describe("useRoundPermissions", () => {
 
   it("handles undefined round state", () => {
     const { result } = renderHook(() =>
-      useRoundPermissions("1000", undefined, FOSSIL_DELAY)
+      useRoundPermissions(1000, undefined, FOSSIL_DELAY)
     );
     expect(result.current.canAuctionStart).toBe(false);
     expect(result.current.canAuctionEnd).toBe(false);
@@ -87,7 +94,7 @@ describe("useRoundPermissions", () => {
   });
 
   it("updates permissions when round state changes", () => {
-    const timestamp = "2500";
+    const timestamp = 2500;
     const { result, rerender } = renderHook(
       ({ state }) => useRoundPermissions(timestamp, state, FOSSIL_DELAY),
       {

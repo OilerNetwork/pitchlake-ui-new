@@ -36,9 +36,9 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
   const selectedRoundState = useRoundState(vaultState?.address);
 
   // Chart context
-  const { isExpandedView, setIsExpandedView, xMax, xMin } =
+  const { isExpandedView, setIsExpandedView,  } =
     useChartContext();
-  const { gasData } =
+  const { gasData,xMax, xMin } =
     useChart();
 
   // Help context

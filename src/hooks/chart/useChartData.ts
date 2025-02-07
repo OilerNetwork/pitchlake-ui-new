@@ -6,14 +6,41 @@ import { FormattedBlockData } from "@/app/api/getFossilGasData/route";
 import { getTWAPs } from "@/lib/utils";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
-import { useChartContext } from "@/context/ChartProvider";
 
 
 export const useChart = () => {
   const [isExpandedView, setIsExpandedView] = useState<boolean>(false);
   const {selectedRoundAddress} = useVaultState()
   const selectedRoundState = useRoundState(selectedRoundAddress)
-  const {xMin,xMax} = useChartContext()
+
+
+  const { xMin, xMax } = useMemo(() => {
+    if (!selectedRoundState) return { xMin: 0, xMax: 0 };
+
+    const xMax = Number(selectedRoundState.optionSettleDate);
+
+    if (!isExpandedView) {
+      const xMin = Number(selectedRoundState.deploymentDate);
+      return {
+        xMin,
+        xMax,
+      };
+    } else {
+      const roundOpenDate = Number(selectedRoundState.deploymentDate);
+      const roundDuration = xMax - roundOpenDate;
+      const expandedChartRange = 4 * roundDuration;
+      const xMin = xMax - expandedChartRange;
+
+      return {
+        xMin,
+        xMax,
+      };
+    }
+  }, [
+    selectedRoundState?.deploymentDate,
+    selectedRoundState?.optionSettleDate,
+    isExpandedView,
+  ]);
 
 
   const { roundDuration, twapXMin } = useMemo(() => {
@@ -110,7 +137,7 @@ export const useChart = () => {
   //  gasDataXMax: gasData[gasData.length - 1]?.timestamp,
   //});
 
-  return { gasData }
+  return { gasData,xMin,xMax }
 };
 
 export default useChart;
