@@ -10,7 +10,10 @@ const useLPStateRPC = () => {
   const contractData = useMemo(() => {
     return {
       abi: vaultABI,
-      address: conn === "rpc" ? (vaultAddress as `0x${string}`) : undefined,
+      address:
+        conn === "rpc" || conn === "demo"
+          ? (vaultAddress as `0x${string}`)
+          : undefined,
     };
   }, [vaultAddress, conn]);
 

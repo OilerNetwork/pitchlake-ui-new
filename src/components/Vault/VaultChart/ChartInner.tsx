@@ -1,8 +1,4 @@
-import React, {
-  useMemo,
-  useRef,
-  useCallback,
-} from "react";
+import React, { useMemo, useRef, useCallback } from "react";
 import {
   ComposedChart,
   Area,
@@ -24,6 +20,8 @@ import { useNewContext } from "@/context/NewProvider";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useChart from "@/hooks/chart/useChartData";
+import { getDemoRoundId } from "@/lib/demo/utils";
+import demoRoundData from "@/lib/demo/demo-round-data.json";
 
 const HOVER_DELAY = 888;
 
@@ -33,9 +31,9 @@ interface GasPriceChartProps {
 
 const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
   // Protocol context
-  const { selectedRound } = useNewContext();
-  const {vaultState} = useVaultState()
-  const selectedRoundState = useRoundState(vaultState?.address)
+  const { conn, selectedRound } = useNewContext();
+  const { vaultState } = useVaultState();
+  const selectedRoundState = useRoundState(vaultState?.address);
 
   // Chart context
   const { isExpandedView, setIsExpandedView, xMax, xMin } =
@@ -50,23 +48,33 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
   const { fromRound, toRound } = useMemo(() => {
     if (!selectedRound) return { fromRound: 1, toRound: 1 };
 
-    const toRound = Number(selectedRound);
+    const toRound =
+      conn === "demo" ? getDemoRoundId(selectedRound) : Number(selectedRound);
     const fromRound = !isExpandedView ? toRound : toRound > 3 ? toRound - 3 : 1;
 
     return { fromRound, toRound };
   }, [selectedRound, isExpandedView]);
 
-  const { vaultData: historicalData } = useHistoricalRoundParams({
+  const { vaultData: _historicalData } = useHistoricalRoundParams({
     vaultAddress: vaultState?.address,
     fromRound,
     toRound,
   });
 
+  const historicalData = useMemo(() => {
+    if (conn === "demo") {
+      return { rounds: demoRoundData };
+    } else return _historicalData;
+  }, [_historicalData]);
+
   // Add strike and cap to gas data
   const parsedData: FormattedBlockData[] = useMemo(() => {
     if (!selectedRound || !historicalData || !gasData) return [];
 
-    const refined = gasData?.map((item: any) => {
+    const dataPoints =
+      gasData.length > 0 ? gasData : [{ timestamp: xMin }, { timestamp: xMax }];
+
+    const refined = dataPoints?.map((item: any) => {
       const newItem: any = { ...item };
 
       // Find the round this gas point falls in
@@ -94,25 +102,9 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
       return newItem;
     });
 
-    //historicalData.rounds.forEach((r: any) => {
-    //  if (r.deploymentDate >= refined[0].timestamp) {
-    //    refined.push({
-    //      blockNumber: undefined,
-    //      Opened: r.deploymentDate,
-    //      basefee: undefined,
-    //    });
-    //    refined.push({
-    //      blockNumber: undefined,
-    //      Settled: r.optionSettleDate,
-    //      basefee: undefined,
-    //      asdf: "asdf",
-    //    });
-    //  }
-    //  if (r.settlementDate <= refined[refined.length - 1].timestamp) {
-    //  }
-    //});
+    let sorted = refined.sort((a, b) => a.timestamp - b.timestamp);
 
-    return refined.sort((a, b) => a.timestamp - b.timestamp);
+    return sorted;
   }, [gasData, historicalData]);
 
   // Compute vertical segments and round areas based on historical data
@@ -325,7 +317,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
 
       const midpoint = (Number(start) + Number(end)) / 2;
       if (
-        midpoint >= sortedData[0]?.timestamp &&
+        midpoint >= sortedData[1]?.timestamp &&
         midpoint <= sortedData[sortedData.length - 1]?.timestamp
       ) {
         _xTickLabels[midpoint] = {
@@ -340,8 +332,6 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
     const timestamps = parsedData.map((item: any) => item.timestamp);
     const minTimestamp = Math.min(...timestamps);
     const maxTimestamp = Math.max(...timestamps);
-
-    const step = Math.floor((xMax - xMin) / 5);
 
     _xTicks.push(minTimestamp);
     _xTickLabels[minTimestamp] = { label: null }; // Will format in custom tick
@@ -479,6 +469,9 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
     );
   }
 
+  const animationDuration = 500;
+  const isAnimationActive = !isExpandedView;
+
   return (
     <ResponsiveContainer
       width="100%"
@@ -582,7 +575,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
               fillOpacity={1}
               connectNulls={true}
               dot={false}
-              isAnimationActive={!isExpandedView}
+              isAnimationActive={isAnimationActive}
+              animationDuration={animationDuration}
             />
             <Line
               className="chart-area-twap"
@@ -597,7 +591,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
               fillOpacity={1}
               connectNulls={true}
               dot={false}
-              isAnimationActive={!isExpandedView}
+              isAnimationActive={isAnimationActive}
+              animationDuration={animationDuration}
             />
           </>
         )}
@@ -613,7 +608,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
               fillOpacity={1}
               connectNulls={true}
               dot={false}
-              isAnimationActive={!isExpandedView}
+              isAnimationActive={isAnimationActive}
+              animationDuration={animationDuration}
             />
             <Line
               type="monotone"
@@ -626,7 +622,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
               dot={false}
               fill="url(#basefeeGradient)"
               connectNulls={false}
-              isAnimationActive={!isExpandedView}
+              isAnimationActive={isAnimationActive}
+              animationDuration={animationDuration}
             />
           </>
         )}
@@ -640,7 +637,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
             dot={false}
             fill="url(#strikeGradient)"
             connectNulls={false}
-            isAnimationActive={!isExpandedView}
+            isAnimationActive={isAnimationActive}
+            animationDuration={animationDuration}
           />
         )}
         {activeLines.CAP_LEVEL && (
@@ -654,7 +652,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
             dot={false}
             fill="url(#capLevelGradient)"
             connectNulls={false}
-            isAnimationActive={!isExpandedView}
+            isAnimationActive={isAnimationActive}
+            animationDuration={animationDuration}
           />
         )}
         {
@@ -694,6 +693,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
                 setIsExpandedView(false);
               }}
               style={{ cursor: "pointer" }}
+              isAnimationActive={isAnimationActive}
+              animationDuration={animationDuration}
             />
           ))
         }

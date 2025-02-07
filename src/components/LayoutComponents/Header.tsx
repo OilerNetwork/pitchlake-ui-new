@@ -10,11 +10,7 @@ import keplr from "@/../public/keplr.svg";
 import avatar from "@/../public/avatar.svg";
 import { toast } from "react-toastify";
 import { useNetwork } from "@starknet-react/core";
-import {
-  useAccount,
-  useConnect,
-  useDisconnect,
-} from "@starknet-react/core";
+import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
 import ProfileDropdown from "../BaseComponents/ProfileDropdown";
 import { useRouter, usePathname } from "next/navigation";
 import { constants } from "starknet";
@@ -36,11 +32,10 @@ import { useTimeContext } from "@/context/TimeProvider";
 export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownChainRef = useRef<HTMLDivElement>(null);
-  const { conn } =
-    useNewContext();
-    const {timestamp,mockTimeForward} = useTimeContext()
-    const {vaultState} = useVaultState();
-    const lpState = useLPState()
+  const { conn } = useNewContext();
+  const { timestamp, mockTimeForward } = useTimeContext();
+  const { vaultState } = useVaultState();
+  const lpState = useLPState();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownChainOpen, setIsDropdownChainOpen] = useState(false);
   const isDropdownOpenRef = useRef(isDropdownOpen);

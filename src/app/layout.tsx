@@ -59,6 +59,25 @@ export default function RootLayout({
               </NewProvider>
             </TransactionProvider>
           </TimeContextProvider>
+          <TransactionProvider>
+              <NewProvider>
+              <ChartProvider>
+                <UiProvider>
+                  <HelpProvider>
+                    <Header />
+                    <Blur>
+                      <main className="flex-grow bg-faded-black-alt">
+                        {children}
+                      </main>
+                      <div className="flex flex-col-reverse">
+                        <Footer />
+                      </div>
+                    </Blur>
+                  </HelpProvider>
+                </UiProvider>
+              </ChartProvider>
+              </NewProvider>
+          </TransactionProvider>
         </StarknetProvider>
       </body>
     </html>

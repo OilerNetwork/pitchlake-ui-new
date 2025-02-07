@@ -17,6 +17,8 @@ import StateTransition from "@/components/Vault/StateTransition";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
+import { getDemoRoundId } from "@/lib/demo/utils";
+import { useNewContext } from "@/context/NewProvider";
 
 // @NOTE: Replace this with difference between latest fossil block timestamp & now
 // - create a useLatestFossilBlockTimestamp hook
@@ -24,8 +26,9 @@ const FOSSIL_DELAY =
   process.env.NEXT_PUBLIC_FOSSIL_USE_MOCK_PRICING_DATA === "true" ? 0 : 15 * 60;
 
 const PanelLeft = ({ userType }: { userType: string }) => {
-  const {vaultState,selectedRoundAddress} = useVaultState()
-  const selectedRoundState = useRoundState(selectedRoundAddress)
+  const { conn } = useNewContext();
+  const { vaultState, selectedRoundAddress } = useVaultState();
+  const selectedRoundState = useRoundState(selectedRoundAddress);
   const [vaultIsOpen, setVaultIsOpen] = useState<boolean>(false);
   const [optionRoundIsOpen, setOptionRoundIsOpen] = useState<boolean>(false);
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
@@ -96,6 +99,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
         break;
       case "Running":
         targetTimestamp = Number(optionSettleDate) + FOSSIL_DELAY;
+        if (conn === "demo") targetTimestamp -= FOSSIL_DELAY;
         break;
       case "Settled":
         targetTimestamp = Number(optionSettleDate);
@@ -159,6 +163,16 @@ const PanelLeft = ({ userType }: { userType: string }) => {
   };
   const roundState = selectedRoundState?.roundState.toString() || "Loading";
   const styles = stateStyles[roundState] || stateStyles.Default;
+
+  const roundIdFormatter = (roundId: string, conn: string): string => {
+    let id: string = roundId;
+
+    if (conn === "demo") id = getDemoRoundId(Number(roundId)).toString();
+
+    if (id.length === 1) id = `0${id}`;
+
+    return `Round ${id}`;
+  };
 
   return (
     <>
@@ -468,10 +482,10 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                     className="flex flex-row justify-center items-center text-[#F5EBB8] cursor-pointer gap-[4px]"
                   >
                     <p>
-                      Round{" "}
-                      {selectedRoundState?.roundId
-                        ? `${selectedRoundState.roundId.toString().length == 1 ? "0" : ""}${selectedRoundState.roundId}`
-                        : ""}
+                      {roundIdFormatter(
+                        selectedRoundState.roundId.toString(),
+                        conn,
+                      )}
                     </p>
                     <SquareArrowOutUpRight className="size-[16px]" />
                   </a>

@@ -1,0 +1,42 @@
+[
+  {
+    "roundId": 1,
+    "roundAddress": "0xd702db5a990e53a2b553486a932f2506567075b7c92c2fd636e20f218a28f60d",
+    "capLevel": "4500",
+    "strikePrice": "6500000000",
+    "deploymentDate": "1735711223",
+    "auctionStartDate": "1735711283",
+    "auctionEndDate": "1735711463",
+    "optionSettleDate": "1735711643"
+  },
+  {
+    "roundId": 2,
+    "roundAddress": "0xf282182ed0ea2d4a2dd3af59a394318b2f89aa15dfb90075456a43f717b081b6",
+    "capLevel": "5200",
+    "strikePrice": "6130000000",
+    "deploymentDate": "1735711673",
+    "auctionStartDate": "1735711733",
+    "auctionEndDate": "1735711913",
+    "optionSettleDate": "1735712093"
+  },
+  {
+    "roundId": 3,
+    "roundAddress": "0x5f7d3124eefab0262d182f777897d04ef40af5dac445aecbccc8b80260376c73",
+    "capLevel": "4500",
+    "strikePrice": "7220000000",
+    "deploymentDate": "1735712123",
+    "auctionStartDate": "1735712183",
+    "auctionEndDate": "1735712363",
+    "optionSettleDate": "1735712543"
+  },
+  {
+    "roundId": 4,
+    "roundAddress": "0x025654e13c41a6b984453e9edd7245752580934c27bafc2b90763b132be5264a",
+    "capLevel": "2300",
+    "strikePrice": "9160000000",
+    "deploymentDate": "1735712573",
+    "auctionStartDate": "1735712633",
+    "auctionEndDate": "1735712813",
+    "optionSettleDate": "1735712993"
+  }
+]

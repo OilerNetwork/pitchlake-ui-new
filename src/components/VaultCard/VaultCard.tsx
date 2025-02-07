@@ -28,11 +28,9 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
     useVaultBalances(vaultAddress);
 
   const { setSelectedRound } = useNewContext();
-  const { vaultState, selectedRoundAddress } = useVaultStateRPC({
+  const { vaultState } = useVaultStateRPC({
     vaultAddress,
   });
-  console.log("vaultState", vaultState);
-  console.log("selectedRoundAddress", selectedRoundAddress);
   const currentRoundAddress = vaultState?.currentRoundAddress;
   const { roundState } = useRoundState(
     currentRoundAddress ? currentRoundAddress : "Loading"

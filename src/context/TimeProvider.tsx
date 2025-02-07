@@ -42,11 +42,8 @@ const TimeContextProvider = ({ children }: { children: ReactNode }) => {
 
   const timestamp = useMemo(() => {
     if (conn === "mock") return mockTimestamp;
-   
-   return block?.timestamp ?? 0;
+    else return block?.timestamp ?? 0;
   }, [conn, block?.timestamp]);
-  console.log("abc", timestamp)
-  console.log("abc",block)
 
   const mockTimeForward = () => {
     if (conn === "mock") setMockTimestamp((prevState) => prevState + 100001);
