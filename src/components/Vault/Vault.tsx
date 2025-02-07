@@ -14,6 +14,7 @@ import { HelpBoxPanel } from "../HelpBoxComponents/HelpBoxPanel";
 import Hoverable from "../BaseComponents/Hoverable";
 import WrongNetworkScreen from "@/components/WrongNetworkScreen";
 import { useNetwork } from "@starknet-react/core";
+import { ChartProvider } from "@/context/ChartProvider";
 
 export const Vault = () => {
   const [isProviderView, setIsProviderView] = useState(true);
@@ -99,10 +100,9 @@ export const Vault = () => {
       </div>
       <div className="mt-6 flex flex-row">
         {<PanelLeft userType={isProviderView ? "lp" : "ob"} />}
-        {
-          //Update the roundState to multiple roundStates and set selected round in the component
-        }
-        <RoundPerformanceChart />
+        <ChartProvider>
+          <RoundPerformanceChart />
+        </ChartProvider>
 
         <div className="w-full ml-6 max-w-[350px] flex flex-col max-h-[834px]">
           <div

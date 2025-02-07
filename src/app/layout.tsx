@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import React from "react";
-import { Montserrat, Share_Tech } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "@/styles/global.css";
 import { StarknetProvider } from "../context/StarknetProvider";
 import { Header } from "@/components/LayoutComponents";
@@ -13,9 +13,7 @@ import Footer from "@/components/LayoutComponents/Footer";
 import { HelpProvider } from "@/context/HelpProvider";
 import { UiProvider } from "@/context/UiProvider";
 import { Blur } from "@/components/BaseComponents/Blur";
-import { ChartProvider } from "@/context/ChartProvider";
 import NewProvider from "@/context/NewProvider";
-import QueryProvider from "@/components/Providers/queryProvider";
 import TimeContextProvider from "@/context/TimeProvider";
 
 const montserrat = Montserrat({
@@ -41,27 +39,6 @@ export default function RootLayout({
           <TimeContextProvider>
             <TransactionProvider>
               <NewProvider>
-                <ChartProvider>
-                  <UiProvider>
-                    <HelpProvider>
-                      <Header />
-                      <Blur>
-                        <main className="flex-grow bg-faded-black-alt">
-                          {children}
-                        </main>
-                        <div className="flex flex-col-reverse">
-                          <Footer />
-                        </div>
-                      </Blur>
-                    </HelpProvider>
-                  </UiProvider>
-                </ChartProvider>
-              </NewProvider>
-            </TransactionProvider>
-          </TimeContextProvider>
-          <TransactionProvider>
-              <NewProvider>
-              <ChartProvider>
                 <UiProvider>
                   <HelpProvider>
                     <Header />
@@ -75,9 +52,9 @@ export default function RootLayout({
                     </Blur>
                   </HelpProvider>
                 </UiProvider>
-              </ChartProvider>
               </NewProvider>
-          </TransactionProvider>
+            </TransactionProvider>
+          </TimeContextProvider>
         </StarknetProvider>
       </body>
     </html>
