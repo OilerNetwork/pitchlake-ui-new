@@ -14,11 +14,12 @@ import Hoverable from "@/components/BaseComponents/Hoverable";
 import { useChartContext } from "@/context/ChartProvider";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import { useNewContext } from "@/context/NewProvider";
+import { getDemoRoundId } from "@/lib/demo/utils";
 
 const RoundPerformanceChart = () => {
   // Protocol context
-  const {  selectedRound,setSelectedRound } = useNewContext();
-  const {vaultState} = useVaultState()
+  const { conn, selectedRound, setSelectedRound } = useNewContext();
+  const { vaultState } = useVaultState();
   // Chart context
   const { isExpandedView, setIsExpandedView } = useChartContext();
 
@@ -86,6 +87,26 @@ const RoundPerformanceChart = () => {
     };
   }, [roundNavIsOpen]);
 
+  const roundHeaderFormatter = (
+    selectedRound: string | undefined,
+    currentRoundId: string | undefined,
+    conn: string,
+  ): string => {
+    if (!selectedRound || !currentRoundId) return "";
+
+    let str: string = `Round `;
+
+    if (conn === "demo")
+      str += `${getDemoRoundId(Number(selectedRound))} (${selectedRound})`;
+    else str += selectedRound;
+
+    if (selectedRound === currentRoundId) {
+      str += " (Live)";
+    }
+
+    return str;
+  };
+
   return (
     <div className="w-full h-[800px] bg-black-alt rounded-[12px] border border-greyscale-800 relative">
       {/* Round Navigation */}
@@ -96,11 +117,13 @@ const RoundPerformanceChart = () => {
           onClick={() => setRoundNavIsOpen(!roundNavIsOpen)}
           className="cursor-pointer font-medium text-[14px] text-primary flex flex-row items-center"
         >
-          <p className="flex flex-row items-center">Round &nbsp;</p>
-          {selectedRound ? selectedRound : 1}
-          {Number(selectedRound) === Number(vaultState?.currentRoundId)
-            ? " (Live)"
-            : ""}
+          <p className="flex flex-row items-center">
+            {roundHeaderFormatter(
+              selectedRound.toString(),
+              vaultState?.currentRoundId.toString(),
+              conn,
+            )}
+          </p>
           <div className="flex items-center ">
             {!roundNavIsOpen ? (
               <ArrowDownIcon
@@ -113,7 +136,11 @@ const RoundPerformanceChart = () => {
           </div>
         </Hoverable>
         <div className="flex flex-row items-center gap-4">
-          <Hoverable dataId="chartPreviousRound" onClick={decrementRound} className="chart-previous-round">
+          <Hoverable
+            dataId="chartPreviousRound"
+            onClick={decrementRound}
+            className="chart-previous-round"
+          >
             <ArrowLeftIcon
               stroke={
                 !selectedRound || selectedRound === 1
@@ -163,7 +190,7 @@ const RoundPerformanceChart = () => {
             <History
               className={classNames(
                 "w-5 h-5 mr-2 cursor-pointer",
-                isExpandedView ? "text-primary" : "text-greyscale"
+                isExpandedView ? "text-primary" : "text-greyscale",
               )}
             />
           </Hoverable>
@@ -199,7 +226,7 @@ const RoundPerformanceChart = () => {
                   setRoundNavIsOpen(false);
                 }}
               >
-                Round {index + 1}
+                {`Round ${index + 1}${conn === "demo" ? ` (${getDemoRoundId(index + 1)})` : ""}`}
                 {index + 1 === Number(vaultState?.currentRoundId)
                   ? " (Live)"
                   : ""}
