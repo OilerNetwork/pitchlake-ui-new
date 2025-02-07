@@ -126,7 +126,7 @@ describe("RoundPerformanceChart", () => {
     // Assert
     expect(screen.getByRole("img", { name: "chart" })).toBeInTheDocument();
     expect(screen.getByText(/Round/)).toBeInTheDocument();
-    expect(screen.getByText("3")).toBeInTheDocument();
+    expect(screen.getByText("Round 3")).toBeInTheDocument();
   });
 
   it("handles expanded view toggle", () => {

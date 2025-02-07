@@ -100,9 +100,9 @@ export const Vault = () => {
       </div>
       <div className="mt-6 flex flex-row">
         {<PanelLeft userType={isProviderView ? "lp" : "ob"} />}
-       {/* { <ChartProvider>
-         { <RoundPerformanceChart />}
-        </ChartProvider>} */}
+        <ChartProvider>
+          <RoundPerformanceChart />
+        </ChartProvider>
 
         <div className="w-full ml-6 max-w-[350px] flex flex-col max-h-[834px]">
           <div

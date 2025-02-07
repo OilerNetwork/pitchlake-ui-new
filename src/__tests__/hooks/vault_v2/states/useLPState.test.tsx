@@ -26,14 +26,16 @@ describe("useLPState", () => {
 
   // Mock context setup helper
   const mockContext = (config: {
-    conn: "rpc" | "ws" | "mock";
+    conn: "rpc" | "ws" | "mock" | "demo";
     wsState?: LiquidityProviderStateType;
     mockState?: LiquidityProviderStateType;
+    vaultAddress?: string;
   }) => {
     (useNewContext as jest.Mock).mockReturnValue({
       conn: config.conn,
       wsData: { wsLiquidityProviderState: config.wsState },
-      mockData: { lpState: config.mockState }
+      mockData: { lpState: config.mockState },
+      vaultAddress: config.vaultAddress || "0x123"
     });
   };
 
@@ -45,6 +47,18 @@ describe("useLPState", () => {
     it("returns RPC state when connection is RPC", () => {
       // Setup
       mockContext({ conn: "rpc" });
+      (useLPStateRPC as jest.Mock).mockReturnValue(mockLPState);
+
+      // Execute
+      const { result } = renderHook(() => useLPState());
+
+      // Verify
+      expect(result.current).toEqual(mockLPState);
+    });
+
+    it("returns RPC state when connection is demo", () => {
+      // Setup
+      mockContext({ conn: "demo" });
       (useLPStateRPC as jest.Mock).mockReturnValue(mockLPState);
 
       // Execute
@@ -101,9 +115,15 @@ describe("useLPState", () => {
       mockContext({ conn: "mock", wsState, mockState });
       rerender();
       expect(result.current).toEqual(mockState);
+
+      // Test demo connection
+      mockContext({ conn: "demo", wsState, mockState });
+      (useLPStateRPC as jest.Mock).mockReturnValue(mockLPState);
+      rerender();
+      expect(result.current).toEqual(mockLPState);
     });
 
-    it("maintains memoized state when data source updates without connection change", () => {
+    it("updates state when data source changes", () => {
       // Setup initial state
       const initialState = { ...mockLPState };
       const updatedState = { ...mockLPState, lockedBalance: "600000" };
@@ -115,15 +135,15 @@ describe("useLPState", () => {
       const { result, rerender } = renderHook(() => useLPState());
       expect(result.current).toEqual(initialState);
 
-      // Update data source without connection change
+      // Update data source
       (useLPStateRPC as jest.Mock).mockReturnValue(updatedState);
       rerender();
-      expect(result.current).toEqual(initialState); // Should maintain memoized state
+      expect(result.current).toEqual(updatedState);
 
-      // Change connection to verify memoization breaks
+      // Change connection to verify state updates
       mockContext({ conn: "ws" });
       rerender();
-      expect(result.current).toBeUndefined(); // State should reset with new connection
+      expect(result.current).toBeUndefined();
     });
   });
 }); 

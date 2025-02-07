@@ -2,12 +2,12 @@ import React from "react";
 import { render } from "@testing-library/react";
 import { ReactNode } from "react";
 import { HelpProvider } from "@/context/HelpProvider";
-import { useNewContext } from "@/context/NewProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Mock the new context
 jest.mock("@/context/NewProvider", () => ({
   useNewContext: jest.fn().mockReturnValue({
-    conn: "ws",
+    conn: "rpc",
     wsData: {
       wsOptionBuyerStates: [],
       wsRoundStates: [{
@@ -28,8 +28,20 @@ interface TestWrapperProps {
   children: ReactNode;
 }
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
 export const TestWrapper: React.FC<TestWrapperProps> = ({ children }) => {
-  return <HelpProvider>{children}</HelpProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <HelpProvider>{children}</HelpProvider>
+    </QueryClientProvider>
+  );
 };
 
 export const renderWithProviders = (ui: ReactNode) => {
@@ -38,7 +50,7 @@ export const renderWithProviders = (ui: ReactNode) => {
 
 // Add tests for the wrapper itself
 describe("TestWrapper", () => {
-  it("provides help context to children", () => {
+  it("provides required contexts to children", () => {
     const { container } = render(
       <TestWrapper>
         <div>Test Child</div>

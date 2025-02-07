@@ -161,7 +161,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
       border: "border-[#CC455E]",
     },
   };
-  const roundState = selectedRoundState?.roundState.toString() || "Loading";
+  const roundState = selectedRoundState?.roundState || "Loading";
   const styles = stateStyles[roundState] || stateStyles.Default;
 
   const roundIdFormatter = (roundId: string, conn: string): string => {

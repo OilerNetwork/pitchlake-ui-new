@@ -48,6 +48,30 @@ jest.mock("../../../components/BaseComponents/MobileScreen", () => ({
 
 jest.mock("@starknet-react/core", () => ({
   useNetwork: jest.fn(),
+  useContractRead: () => ({
+    data: "1000000000000000000",
+    isError: false,
+    isLoading: false,
+  }),
+  useProvider: () => ({
+    provider: {
+      getBlock: jest.fn(),
+    },
+  }),
+  useAccount: () => ({
+    account: {
+      address: "0x123"
+    }
+  }),
+  useContract: () => ({
+    data: null,
+  }),
+}));
+
+jest.mock("@/context/ChartProvider", () => ({
+  ChartProvider: ({ children }: { children: React.ReactNode }) => (
+    <div className="chart-provider">{children}</div>
+  ),
 }));
 
 describe("Vault Component", () => {

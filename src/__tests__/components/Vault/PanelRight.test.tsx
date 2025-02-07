@@ -51,7 +51,7 @@ jest.mock("@/hooks/vault_v2/states/useRoundState", () => ({
 jest.mock("@/context/NewProvider", () => ({
   __esModule: true,
   useNewContext: jest.fn().mockReturnValue({
-    conn: "ws",
+    conn: "rpc",
     wsData: {
       wsOptionBuyerStates: [],
     },
