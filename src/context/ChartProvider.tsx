@@ -135,49 +135,49 @@ export const ChartProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [historicGasData, fossilGasData, feeHistory]);
 
   /// DEMO ///
-  const demoNow = conn === "demo" ? useDemoTime(true) : undefined;
+  //const demoNow = useDemoTime(true, conn === "demo");
 
-  const { gasData } = useMemo(() => {
-    if (conn === "ws" || conn === "rpc") {
-      return {
-        gasData: getTWAPs(combinedGasData, xMin, roundDuration),
-      };
-    }
-    /// DEMO ///
-    else {
-      if (!demoNow) return { gasData: [] };
-      const demoRoundData: DemoRoundDataType = getDemoRoundData(selectedRound);
-      const roundStart = Number(demoRoundData.deploymentDate);
-      const demoXMax = Number(demoRoundData.optionSettleDate);
-      const demoData = demoGasData.filter((d) => d.timestamp <= demoXMax);
+  //const { gasData } = useMemo(() => {
+  //  if (conn === "ws" || conn === "rpc") {
+  //    return {
+  //      gasData: getTWAPs(combinedGasData, xMin, roundDuration),
+  //    };
+  //  }
+  //  /// DEMO ///
+  //  else {
+  //    if (!demoNow) return { gasData: [] };
+  //    const demoRoundData: DemoRoundDataType = getDemoRoundData(selectedRound);
+  //    const roundStart = Number(demoRoundData.deploymentDate);
+  //    const demoXMax = Number(demoRoundData.optionSettleDate);
+  //    const demoData = demoGasData.filter((d) => d.timestamp <= demoXMax);
 
-      const roundDuration = demoXMax - Number(demoRoundData.deploymentDate);
+  //    const roundDuration = demoXMax - Number(demoRoundData.deploymentDate);
 
-      const demoXMin = isExpandedView
-        ? roundStart - 4 * roundDuration
-        : roundStart;
+  //    const demoXMin = isExpandedView
+  //      ? roundStart - 4 * roundDuration
+  //      : roundStart;
 
-      const allDemoGasData = getTWAPs(demoData, demoXMin, roundDuration);
+  //    const allDemoGasData = getTWAPs(demoData, demoXMin, roundDuration);
 
-      const scaledDemoNow = scaleInRange(
-        demoNow,
-        [xMin, xMax],
-        [demoXMin, demoXMax],
-      );
+  //    const scaledDemoNow = scaleInRange(
+  //      demoNow,
+  //      [xMin, xMax],
+  //      [demoXMin, demoXMax],
+  //    );
 
-      const filteredDemoData = allDemoGasData.filter(
-        (d) => d.timestamp <= scaledDemoNow,
-      );
+  //    const filteredDemoData = allDemoGasData.filter(
+  //      (d) => d.timestamp <= scaledDemoNow,
+  //    );
 
-      if (
-        filteredDemoData[filteredDemoData.length - 1]?.timestamp + 12 <=
-        demoXMax
-      )
-        filteredDemoData.push({ timestamp: demoXMax });
+  //    if (
+  //      filteredDemoData[filteredDemoData.length - 1]?.timestamp + 12 <=
+  //      demoXMax
+  //    )
+  //      filteredDemoData.push({ timestamp: demoXMax });
 
-      return { gasData: filteredDemoData };
-    }
-  }, [combinedGasData, selectedRound, demoNow]); // @NOTE: selectedRound & demoNow are only a deps for "demo", is there a better way ?
+  //    return { gasData: filteredDemoData };
+  //  }
+  //}, [combinedGasData, selectedRound, demoNow]); // @NOTE: selectedRound & demoNow are only a deps for "demo", is there a better way ?
 
   return (
     <ChartContext.Provider
