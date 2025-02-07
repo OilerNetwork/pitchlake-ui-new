@@ -248,4 +248,41 @@ describe("GasPriceChart", () => {
 
     expect(container.querySelector(".gas-price-chart-container")).toBeInTheDocument();
   });
+
+  it("handles loading state when data is being fetched", () => {
+    (useChart as jest.Mock).mockReturnValue({
+      gasData: [],
+      isLoading: true
+    });
+
+    const { container } = renderWithProviders(
+      <GasPriceChart 
+        activeLines={{
+          TWAP: true,
+          BASEFEE: true,
+        }}
+      />
+    );
+
+    expect(container.querySelector(".gas-price-chart-loading")).toBeInTheDocument();
+  });
+
+  it("handles error state when data fetch fails", () => {
+    (useChart as jest.Mock).mockReturnValue({
+      gasData: [],
+      isLoading: false,
+      error: new Error("Failed to fetch data")
+    });
+
+    const { container } = renderWithProviders(
+      <GasPriceChart 
+        activeLines={{
+          TWAP: true,
+          BASEFEE: true,
+        }}
+      />
+    );
+
+    expect(container.querySelector(".gas-price-chart-error")).toBeInTheDocument();
+  });
 }); 

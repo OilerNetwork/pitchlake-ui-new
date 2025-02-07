@@ -131,7 +131,7 @@ const RoundPerformanceChart = () => {
               } `}
             />
           </Hoverable>
-          <Hoverable dataId="chartNextRound" onClick={incrementRound}>
+          <Hoverable dataId="chartNextRound" onClick={incrementRound} className="chart-next-round">
             <ArrowRightIcon
               stroke={
                 !selectedRound ||

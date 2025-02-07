@@ -63,14 +63,16 @@ const HistoryItem: React.FC<{
           dataId="openUpdateBidPanel"
           className="edit-button bg-[#262626] p-2 rounded-lg cursor-pointer"
         >
-          <SquarePen
+          <button
+            className="edit-button"
+            aria-label="edit bid"
             onClick={() => {
               setBidToEdit({ item });
-              setIsTabsHidden(!isTabsHidden);
+              setIsTabsHidden(true);
             }}
-            size={20}
-            className="text-[#E2E2E2]"
-          />
+          >
+            <SquarePen size={20} className="text-[#E2E2E2]" />
+          </button>
         </Hoverable>
       )}
     </div>
