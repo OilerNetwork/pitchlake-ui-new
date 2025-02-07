@@ -15,6 +15,7 @@ import { UiProvider } from "@/context/UiProvider";
 import { Blur } from "@/components/BaseComponents/Blur";
 import NewProvider from "@/context/NewProvider";
 import TimeContextProvider from "@/context/TimeProvider";
+import QueryProvider from "@/components/Providers/queryProvider";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -35,6 +36,7 @@ export default function RootLayout({
   return (
     <html className={`${montserrat.variable}`} lang="en">
       <body className="flex flex-col min-h-[100vh] text-white">
+        <QueryProvider>
         <StarknetProvider>
           <TimeContextProvider>
             <TransactionProvider>
@@ -56,6 +58,7 @@ export default function RootLayout({
             </TransactionProvider>
           </TimeContextProvider>
         </StarknetProvider>
+        </QueryProvider>
       </body>
     </html>
   );

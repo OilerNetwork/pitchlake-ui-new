@@ -22,7 +22,7 @@ describe("useTimestamps", () => {
     address: mockAddress,
     abi: optionRoundABI,
     args: [],
-    blockIdentifier: BlockTag.PENDING,
+    
   };
 
   beforeEach(() => {
@@ -111,14 +111,5 @@ describe("useTimestamps", () => {
       expect(calls[3][0].watch).toBe(true); // optionSettleDate - always true
     });
 
-    it("uses BlockTag.PENDING for all contract reads", () => {
-      renderHook(() => useTimestamps(mockAddress));
-
-      const calls = (useContractRead as jest.Mock).mock.calls;
-      
-      calls.forEach(call => {
-        expect(call[0].blockIdentifier).toBe(BlockTag.PENDING);
-      });
-    });
   });
 }); 

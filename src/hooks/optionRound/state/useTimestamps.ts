@@ -14,14 +14,14 @@ const useTimestamps = (
 
   const { data: deploymentDate } = useContractRead({
     ...contractData,
-    blockIdentifier:BlockTag.PENDING,
+    
     functionName: "get_deployment_date",
     args: [],
     watch: true,
   });
   const { data: auctionStartDate } = useContractRead({
     ...contractData,
-    blockIdentifier:BlockTag.PENDING,
+    
     watch,
     functionName: "get_auction_start_date",
     args: [],
@@ -29,7 +29,7 @@ const useTimestamps = (
 
   const { data: auctionEndDate } = useContractRead({
     ...contractData,
-    blockIdentifier:BlockTag.PENDING,
+    
     functionName: "get_auction_end_date",
     args: [],
     watch: true,
@@ -37,7 +37,7 @@ const useTimestamps = (
 
   const { data: optionSettleDate } = useContractRead({
     ...contractData,
-    blockIdentifier:BlockTag.PENDING,
+    
     functionName: "get_option_settlement_date",
     args: [],
     watch: true,

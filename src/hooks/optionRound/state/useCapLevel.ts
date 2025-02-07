@@ -10,7 +10,7 @@ const useCapLevel = (address: string) => {
 
   const { data: capLevel } = useContractRead({
     ...contractData,
-blockIdentifier:BlockTag.PENDING,
+
     functionName: "get_cap_level",
     args:[],
     watch: true,

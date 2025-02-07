@@ -36,6 +36,7 @@ export default function Header() {
   const { timestamp, mockTimeForward } = useTimeContext();
   const { vaultState } = useVaultState();
   const lpState = useLPState();
+  console.log("lpStateUnlocked", lpState?.unlockedBalance);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownChainOpen, setIsDropdownChainOpen] = useState(false);
   const isDropdownOpenRef = useRef(isDropdownOpen);
@@ -160,13 +161,11 @@ export default function Header() {
         chain = "0x534e5f4a554e4f5f53455155454e434552";
     }
     if (!chain) {
-      console.log("FAILED");
       return Error("Chain not found");
     }
     // await switchChainAsync({
     //   chainId: chain,
     // });
-    console.log("CHAIN SWITCHED");
     return;
   };
   const copyToClipboard = (text: string) => {

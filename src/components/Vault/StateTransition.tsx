@@ -87,7 +87,6 @@ const StateTransition = ({
         });
 
         const data = await response.json();
-        console.log("Fossil response:", data);
 
         if (!response.ok) {
           setFossilStatus({ status: "Error", error: data.error });

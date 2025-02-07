@@ -45,10 +45,6 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
   const { auctionStartDate, auctionEndDate, optionSettleDate } = useTimestamps(
     currentRoundAddress ? currentRoundAddress : ""
   );
-  console.log("auctionStartDate", auctionStartDate)
-  console.log("auctionEndDate", auctionEndDate)
-  console.log("optionSettleDate", optionSettleDate)
-  console.log("roundState", roundState)
   const timeUntilText =
     roundState === "Open"
       ? "AUCTION STARTS"
