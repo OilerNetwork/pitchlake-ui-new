@@ -1,12 +1,10 @@
 "use client";
-import WrongNetworkScreen from "@/__tests__/components/BaseComponents/WrongNetworkScreen";
+import WrongNetworkScreen from "@/components/WrongNetworkScreen";
 import MobileScreen from "@/components/BaseComponents/MobileScreen";
 import VaultCard from "@/components/VaultCard/VaultCard";
-import { useUiContext } from "@/context/UiProvider";
 import useWebSocketHome from "@/hooks/websocket/useWebSocketHome";
 import useIsMobile from "@/hooks/window/useIsMobile";
 import { useNetwork } from "@starknet-react/core";
-import { useEffect } from "react";
 
 export default function Home() {
   const { vaults: wsVaults } = useWebSocketHome();

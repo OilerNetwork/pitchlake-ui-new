@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { ChevronDownIcon } from "lucide-react";
-import { CheckIcon, GlobeIcon } from "@/components/Icons";
+import {  ChevronDownIcon } from "lucide-react";
+import {  CheckIcon, GlobeIcon } from "@/components/Icons";
 import logo_full from "@/../public/logo_full.svg";
 import braavosIcon from "@/../public/braavos.svg";
 import argent from "@/../public/argent.svg";
@@ -228,7 +228,7 @@ export default function Header() {
           >
             {
               <button
-                className="w-[150px] h-[44px] flex flex-row min-w-16 border-[1px] border-[#454545] text-white text-sm px-2 text-white py-3 rounded-md items-center"
+                className="w-[150px] h-[44px] flex flex-row min-w-16 border-[1px] border-[#454545] text-sm px-2 text-white py-3 rounded-md items-center"
                 onClick={() => {
                   setIsDropdownChainOpen(true);
                 }}

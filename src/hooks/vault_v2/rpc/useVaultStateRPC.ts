@@ -1,29 +1,28 @@
-import { useAccount, useContractRead } from "@starknet-react/core";
+import { useContractRead } from "@starknet-react/core";
 import { optionRoundABI, vaultABI } from "@/lib/abi";
 import { VaultStateType } from "@/lib/types";
 import { stringToHex } from "@/lib/utils";
 import { useMemo } from "react";
-import useTimestamps from "@/hooks/optionRound/state/useTimestamps";
 import { useNewContext } from "@/context/NewProvider";
 import { BlockTag } from "starknet";
-const useVaultStateRPC = () => {
-  const { conn, vaultAddress: address, selectedRound } = useNewContext();
+
+const useVaultStateRPC = ({
+  vaultAddress,
+  selectedRound,
+}: {
+  vaultAddress?: string;
+  selectedRound?: number;
+}) => {
   const contractData = useMemo(() => {
-    console.log("RENRENCONDAT");
     return {
       abi: vaultABI,
-      address:
-        conn === "rpc" || conn === "demo"
-          ? (address as `0x${string}`)
-          : undefined,
+      address: vaultAddress as `0x${string}`,
     };
-  }, [address, conn]);
+  }, [vaultAddress]);
 
-  console.log("RENRENCONVAUHOO");
   //Read States
 
   //States without a param
-
   const { data: alpha } = useContractRead({
     ...contractData,
     blockIdentifier: BlockTag.PENDING,
@@ -61,10 +60,10 @@ const useVaultStateRPC = () => {
   });
   const { data: lockedBalance } = useContractRead({
     ...contractData,
-    blockIdentifier: BlockTag.PENDING,
     functionName: "get_vault_locked_balance",
     args: [],
     watch: true,
+    blockIdentifier: BlockTag.PENDING,
   });
   const { data: unlockedBalance } = useContractRead({
     ...contractData,
@@ -98,13 +97,13 @@ const useVaultStateRPC = () => {
 
   const { data: deploymentDate } = useContractRead({
     ...contractData,
+    address: round1Address?.toString(),
     blockIdentifier: BlockTag.PENDING,
     abi: optionRoundABI,
     functionName: "get_deployment_date",
     args: [],
     watch: true,
   });
-
   const { data: selectedRoundAddress } = useContractRead({
     ...contractData,
     blockIdentifier: BlockTag.PENDING,
@@ -115,23 +114,31 @@ const useVaultStateRPC = () => {
         : undefined,
     watch: true,
   });
-
-  const usableString = useMemo(() => {
+  const { data: currentRoundAddress } = useContractRead({
+    ...contractData,
+    blockIdentifier: BlockTag.PENDING,
+    functionName: "get_round_address",
+    args: currentRoundId ? [currentRoundId?.toString()] : [],
+    watch: true,
+  });
+  const usableStringSelectedRoundAddress = useMemo(() => {
     return stringToHex(selectedRoundAddress?.toString());
   }, [selectedRoundAddress]);
+  const usableStringCurrentRoundAddress = useMemo(() => {
+    return stringToHex(currentRoundAddress?.toString());
+  }, [currentRoundAddress]);
 
   const k = useMemo(
     () => (strikeLevel ? Number(strikeLevel.toString()) : 0),
-    [strikeLevel],
+    [strikeLevel]
   );
   const vaultType = useMemo(
     () => (k > 0 ? "OTM" : k == 0 ? "ATM" : "ITM"),
-    [k],
+    [k]
   );
-
   return {
     vaultState: {
-      address,
+      address: vaultAddress,
       alpha: alpha ? alpha.toString() : 0,
       strikeLevel: strikeLevel ? strikeLevel.toString() : 0,
       ethAddress: ethAddress ? stringToHex(ethAddress?.toString()) : "",
@@ -145,9 +152,9 @@ const useVaultStateRPC = () => {
       queuedBps: queuedBps ? queuedBps.toString() : 0,
       vaultType,
       deploymentDate: deploymentDate ? deploymentDate.toString() : 0,
-      currentRoundAddress: usableString,
+      currentRoundAddress: usableStringCurrentRoundAddress,
     } as VaultStateType,
-    selectedRoundAddress: usableString,
+    selectedRoundAddress: usableStringSelectedRoundAddress,
   };
 };
 

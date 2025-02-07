@@ -19,6 +19,7 @@ import { FormattedBlockData } from "@/app/api/getFossilGasData/route";
 import { useNewContext } from "@/context/NewProvider";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useChart from "@/hooks/chart/useChartData";
 import { getDemoRoundId } from "@/lib/demo/utils";
 import demoRoundData from "@/lib/demo/demo-round-data.json";
 
@@ -35,8 +36,10 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
   const selectedRoundState = useRoundState(vaultState?.address);
 
   // Chart context
-  const { gasData, isExpandedView, setIsExpandedView, xMax, xMin } =
+  const { isExpandedView, setIsExpandedView, xMax, xMin } =
     useChartContext();
+  const { gasData } =
+    useChart();
 
   // Help context
   const { setContent, setHeader, isHoveringHelpBox } = useHelpContext();

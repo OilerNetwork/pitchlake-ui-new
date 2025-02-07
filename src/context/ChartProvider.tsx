@@ -13,7 +13,6 @@ import { useDemoTime } from "@/lib/demo/useDemoTime";
 import { scaleInRange } from "@/lib/utils";
 
 interface ChartContextProps {
-  gasData: FormattedBlockData[];
   isExpandedView: boolean;
   setIsExpandedView: (b: boolean) => void;
   xMax: number;
@@ -176,7 +175,7 @@ export const ChartProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <ChartContext.Provider
-      value={{ gasData, isExpandedView, setIsExpandedView, xMax, xMin }}
+      value={{ isExpandedView, setIsExpandedView, xMax, xMin }}
     >
       {children}
     </ChartContext.Provider>

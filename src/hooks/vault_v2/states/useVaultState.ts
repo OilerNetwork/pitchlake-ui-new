@@ -2,22 +2,15 @@ import useVaultStateRPC from "../rpc/useVaultStateRPC";
 import { useNewContext } from "@/context/NewProvider";
 import { useEffect, useMemo } from "react";
 
-const useVaultState = () => {
-  const {
-    conn,
-    selectedRound,
-    setSelectedRound,
-    vaultAddress,
-    wsData,
-    mockData,
-  } = useNewContext();
+const useVaultState = (address?: string) => {
+  const { conn, selectedRound, vaultAddress, setSelectedRound, wsData, mockData } =
+    useNewContext();
 
   const {
     vaultState: vaultStateRPC,
     selectedRoundAddress: selectedRoundAddressRPC,
-  } = useVaultStateRPC();
+  } = useVaultStateRPC({vaultAddress:address ?? vaultAddress,selectedRound});
 
-  console.log("R2D@");
   const vaultState = useMemo(() => {
     return conn === "rpc" || conn === "demo"
       ? vaultStateRPC
