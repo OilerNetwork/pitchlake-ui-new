@@ -5,127 +5,172 @@ import { HelpProvider } from "@/context/HelpProvider";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import { useContractRead } from "@starknet-react/core";
 
-// Mock starknet-react
+// Group all mocks together
+const mockData = {
+  vaultState: {
+    currentRoundId: "5",
+    address: "0x123",
+    alpha: "1000",
+    strikeLevel: "0",
+    lockedBalance: "1000000000000000000",
+    unlockedBalance: "2000000000000000000",
+    stashedBalance: "0",
+    queuedBps: "0",
+    roundAddress: "0x123",
+    deploymentDate: "1234567890",
+  },
+  optionRoundState: {
+    address: "0x123",
+    alpha: "1000",
+    strikeLevel: "0",
+    ethAddress: "0x456",
+    fossilClientAddress: "0x789",
+    currentRoundId: "1",
+    lockedBalance: "1000000000000000000",
+    unlockedBalance: "2000000000000000000",
+    stashedBalance: "0",
+    queuedBps: "0",
+    roundAddress: "0x123",
+    deploymentDate: "1234567890",
+  }
+};
+
+// Group all mock implementations
+const mockImplementations = {
+  starknetReact: {
+    useContractRead: jest.fn(),
+    useAccount: () => ({ account: { address: "0x123" } }),
+    useContract: () => ({ contract: null }),
+    useProvider: () => ({ provider: null }),
+  },
+  useRoundState: jest.fn(),
+  useNewContext: jest.fn(() => ({
+    conn: "mock",
+    vaultAddress: "0x123",
+    selectedRound: 0,
+    setSelectedRound: jest.fn(),
+    wsData: {
+      wsVaultState: mockData.vaultState,
+      wsOptionRoundStates: [mockData.optionRoundState],
+      wsOptionBuyerStates: []
+    },
+    mockData: {
+      vaultState: mockData.vaultState,
+      optionRoundStates: [mockData.optionRoundState],
+      optionBuyerStates: []
+    }
+  }))
+};
+
+// Mock external dependencies
 jest.mock("@starknet-react/core", () => ({
   __esModule: true,
-  useContractRead: jest.fn(),
-  useAccount: () => ({ account: { address: "0x123" } }),
-  useContract: () => ({ contract: null }),
-  useProvider: () => ({ provider: null }),
+  useContractRead: () => mockImplementations.starknetReact.useContractRead(),
+  useAccount: () => mockImplementations.starknetReact.useAccount(),
+  useContract: () => mockImplementations.starknetReact.useContract(),
+  useProvider: () => mockImplementations.starknetReact.useProvider(),
 }));
 
-// Mock the hooks
 jest.mock("@/hooks/vault_v2/states/useRoundState", () => ({
   __esModule: true,
-  default: jest.fn(),
+  default: () => mockImplementations.useRoundState(),
 }));
 
-// Mock the sub-components
+jest.mock("@/context/NewProvider", () => ({
+  useNewContext: () => mockImplementations.useNewContext(),
+}));
+
+// Mock sub-components with descriptive test IDs
 jest.mock("@/components/Vault/VaultActions/Tabs/Provider/Withdraw/WithdrawLiquidity", () => ({
   __esModule: true,
-  default: () => <div data-testid="withdraw-liquidity">WithdrawLiquidity</div>,
+  default: () => <div data-testid="withdraw-liquidity-component">WithdrawLiquidity</div>,
 }));
 
 jest.mock("@/components/Vault/VaultActions/Tabs/Provider/Withdraw/QueueWithdrawal", () => ({
   __esModule: true,
-  default: () => <div data-testid="queue-withdrawal">QueueWithdrawal</div>,
+  default: () => <div data-testid="queue-withdrawal-component">QueueWithdrawal</div>,
 }));
 
 jest.mock("@/components/Vault/VaultActions/Tabs/Provider/Withdraw/WithdrawStash", () => ({
   __esModule: true,
-  default: () => <div data-testid="withdraw-stash">WithdrawStash</div>,
+  default: () => <div data-testid="withdraw-stash-component">WithdrawStash</div>,
 }));
 
-const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return (
-    <HelpProvider>
-      {children}
-    </HelpProvider>
-  );
-};
+// Reusable test wrapper
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <HelpProvider>{children}</HelpProvider>
+);
 
 describe("Withdraw Component", () => {
   const mockShowConfirmation = jest.fn();
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (useContractRead as jest.Mock).mockReturnValue({
+  // Reusable setup function
+  const setup = (roundState: string) => {
+    mockImplementations.useRoundState.mockReturnValue({ roundState });
+    mockImplementations.starknetReact.useContractRead.mockReturnValue({
       data: "1000",
       isLoading: false,
       error: null,
     });
-  });
 
-  it("renders correct tabs based on round state", () => {
-    // Test Auctioning state
-    (useRoundState as jest.Mock).mockReturnValue({
-      roundState: "Auctioning",
-    });
-
-    const { rerender } = render(
+    return render(
       <TestWrapper>
         <Withdraw showConfirmation={mockShowConfirmation} />
       </TestWrapper>
     );
-    expect(screen.getByText("Liquidity")).toBeInTheDocument();
-    expect(screen.getByText("Queue")).toBeInTheDocument();
-    expect(screen.getByText("Collect")).toBeInTheDocument();
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("renders correct tabs based on round state", () => {
+    // Test Auctioning state
+    const { rerender } = setup("Auctioning");
+
+    // Use semantic queries
+    expect(screen.getByRole("button", { name: "Liquidity" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Queue" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Collect" })).toBeInTheDocument();
 
     // Test Settled state
-    (useRoundState as jest.Mock).mockReturnValue({
-      roundState: "Settled",
-    });
+    mockImplementations.useRoundState.mockReturnValue({ roundState: "Settled" });
     rerender(
       <TestWrapper>
         <Withdraw showConfirmation={mockShowConfirmation} />
       </TestWrapper>
     );
-    expect(screen.getByText("Liquidity")).toBeInTheDocument();
-    expect(screen.getByText("Collect")).toBeInTheDocument();
-    expect(screen.queryByText("Queue")).not.toBeInTheDocument();
+
+    expect(screen.getByRole("button", { name: "Liquidity" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Collect" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Queue" })).not.toBeInTheDocument();
   });
 
   it("shows correct component when switching tabs", () => {
-    (useRoundState as jest.Mock).mockReturnValue({
-      roundState: "Auctioning",
-    });
-
-    render(
-      <TestWrapper>
-        <Withdraw showConfirmation={mockShowConfirmation} />
-      </TestWrapper>
-    );
+    setup("Auctioning");
 
     // Default tab (Liquidity)
-    expect(screen.getByTestId("withdraw-liquidity")).toBeInTheDocument();
+    expect(screen.getByTestId("withdraw-liquidity-component")).toBeInTheDocument();
 
     // Switch to Queue tab
-    fireEvent.click(screen.getByText("Queue"));
-    expect(screen.getByTestId("queue-withdrawal")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Queue" }));
+    expect(screen.getByTestId("queue-withdrawal-component")).toBeInTheDocument();
 
     // Switch to Collect tab
-    fireEvent.click(screen.getByText("Collect"));
-    expect(screen.getByTestId("withdraw-stash")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Collect" }));
+    expect(screen.getByTestId("withdraw-stash-component")).toBeInTheDocument();
   });
 
   it("maintains correct tab visibility based on round state", () => {
-    (useRoundState as jest.Mock).mockReturnValue({
-      roundState: "Settled",
-    });
-
-    render(
-      <TestWrapper>
-        <Withdraw showConfirmation={mockShowConfirmation} />
-      </TestWrapper>
-    );
+    setup("Settled");
 
     // Queue tab and its content should not be visible
-    expect(screen.queryByText("Queue")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("queue-withdrawal")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Queue" })).not.toBeInTheDocument();
+    expect(screen.queryByTestId("queue-withdrawal-component")).not.toBeInTheDocument();
 
     // Other tabs should be visible
-    expect(screen.getByTestId("withdraw-liquidity")).toBeInTheDocument();
-    fireEvent.click(screen.getByText("Collect"));
-    expect(screen.getByTestId("withdraw-stash")).toBeInTheDocument();
+    expect(screen.getByTestId("withdraw-liquidity-component")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Collect" }));
+    expect(screen.getByTestId("withdraw-stash-component")).toBeInTheDocument();
   });
 }); 
