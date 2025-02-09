@@ -25,6 +25,22 @@ export type ApprovalArgs = {
   spender: string;
 };
 
+export type U256 = {
+  low: string | number | bigint;
+  high: string | number | bigint;
+};
+
+export type L1Data = {
+  twap: U256;
+  volatility: number | string;
+  reserve_price: U256;
+};
+
+export type FossilCallbackArgs = {
+  l1_data: L1Data;
+  timestamp: number | string;
+};
+
 export type TransactionResult = {
   transaction_hash: string;
 };
@@ -159,9 +175,9 @@ export type WebSocketData = {
   wsOptionRoundStates: OptionRoundStateType[];
   wsLiquidityProviderState: LiquidityProviderStateType | undefined;
   wsOptionBuyerStates: OptionBuyerStateType[];
-}
+};
 
-export type MockData =  {
+export type MockData = {
   vaultState: VaultStateType;
   lpState: LiquidityProviderStateType;
   vaultActions: VaultActionsType;
@@ -169,7 +185,7 @@ export type MockData =  {
   optionRoundActions: OptionRoundActionsType;
   optionBuyerStates: OptionBuyerStateType[];
   roundActions: OptionRoundActionsType;
-}
+};
 
 export type OptionRoundActionsType = {
   placeBid: (placeBids: PlaceBidArgs) => Promise<void>;
