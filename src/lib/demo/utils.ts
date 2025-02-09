@@ -1,4 +1,4 @@
-import demoRoundData from "@/lib/demo/demo-round-data.json"; // Ensure `raw` is correctly imported
+import demoRoundData from "@/lib/demo/demo-round-data.json";
 
 export interface DemoRoundDataType {
   roundId: number;
@@ -9,9 +9,12 @@ export interface DemoRoundDataType {
   auctionStartDate: string;
   auctionEndDate: string;
   optionSettleDate: string;
+  settlementPrice: string;
+  reservePrice: string;
+  volatility: string;
 }
 
-export function getDemoRoundData(roundId: number): DemoRoundDataType {
+export function getDemoRoundData(roundId: number | string): DemoRoundDataType {
   // Get the normalized round ID
   const demoRoundId: number = getDemoRoundId(roundId);
 
@@ -25,7 +28,7 @@ export function getDemoRoundData(roundId: number): DemoRoundDataType {
   return roundData;
 }
 
-export function getDemoRoundId(roundId: number): number {
-  const id = roundId >= 1 ? roundId : 1;
-  return ((id - 1) % 4) + 1; // Cycles through 1-4
+export function getDemoRoundId(roundId: number | string): number {
+  const id = Number(roundId) >= 1 ? Number(roundId) : 1;
+  return ((id - 1) % 5) + 1; // Cycles through 1-5
 }

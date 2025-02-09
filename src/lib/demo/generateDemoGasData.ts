@@ -5,7 +5,7 @@ function generateDemoData(): {
 }[] {
   const genesisTimestamp = 1735705623 + 1800;
   const startBlock = 21527387;
-  const numberOfBlocks = 500;
+  const numberOfBlocks = 600;
   const blockTime = 12;
 
   let currentBasefee = 10;
