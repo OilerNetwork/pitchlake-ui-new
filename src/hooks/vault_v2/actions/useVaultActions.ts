@@ -1,8 +1,4 @@
-import {
-  useAccount,
-  useContract,
-  useProvider,
-} from "@starknet-react/core";
+import { useAccount, useContract, useProvider } from "@starknet-react/core";
 import { vaultABI } from "@/lib/abi";
 import {
   DepositArgs,
@@ -16,7 +12,7 @@ import { useCallback, useMemo } from "react";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useNewContext } from "@/context/NewProvider";
 const useVaultActions = () => {
-  const {vaultAddress} = useNewContext()
+  const { vaultAddress } = useNewContext();
   const { setPendingTx } = useTransactionContext();
   const { account } = useAccount();
   const { provider } = useProvider();
@@ -113,6 +109,7 @@ const useVaultActions = () => {
       console.log(error);
     }
   }, [callContract]);
+
   //State Transition
 
   return {

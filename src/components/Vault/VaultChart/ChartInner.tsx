@@ -36,10 +36,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
   const selectedRoundState = useRoundState(vaultState?.address);
 
   // Chart context
-  const { isExpandedView, setIsExpandedView, xMax, xMin } =
-    useChartContext();
-  const { gasData } =
-    useChart();
+  const { isExpandedView, setIsExpandedView, xMax, xMin } = useChartContext();
+  const { gasData } = useChart();
 
   // Help context
   const { setContent, setHeader, isHoveringHelpBox } = useHelpContext();
@@ -50,7 +48,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
 
     const toRound =
       conn === "demo" ? getDemoRoundId(selectedRound) : Number(selectedRound);
-    const fromRound = !isExpandedView ? toRound : toRound > 3 ? toRound - 3 : 1;
+    const fromRound = !isExpandedView ? toRound : toRound > 4 ? toRound - 4 : 1;
 
     return { fromRound, toRound };
   }, [selectedRound, isExpandedView]);
