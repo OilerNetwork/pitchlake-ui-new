@@ -19,6 +19,7 @@ import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import { getDemoRoundId } from "@/lib/demo/utils";
 import { useNewContext } from "@/context/NewProvider";
+import StateTransition2 from "./StateTransition2";
 
 // @NOTE: Replace this with difference between latest fossil block timestamp & now
 // - create a useLatestFossilBlockTimestamp hook
@@ -690,11 +691,18 @@ const PanelLeft = ({ userType }: { userType: string }) => {
               <RemainingTimeElement />
             </div>
           </div>
-          <StateTransition
-            isPanelOpen={isPanelOpen}
-            setModalState={setModalState}
-            fossilDelay={FOSSIL_DELAY}
-          />
+          {conn === "demo" ? (
+            <StateTransition2
+              isPanelOpen={isPanelOpen}
+              setModalState={setModalState}
+            />
+          ) : (
+            <StateTransition
+              isPanelOpen={isPanelOpen}
+              setModalState={setModalState}
+              fossilDelay={FOSSIL_DELAY}
+            />
+          )}
         </div>
       </div>
       {modalState.show && (
