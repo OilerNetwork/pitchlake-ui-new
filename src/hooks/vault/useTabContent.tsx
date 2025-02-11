@@ -1,14 +1,8 @@
 import React, { useMemo } from "react";
 import {
-  VaultUserRole,
-  RoundState,
   ProviderTabs,
   BuyerTabs,
   CommonTabs,
-  VaultStateType,
-  LiquidityProviderStateType,
-  VaultActionsType,
-  OptionRoundActionsType,
   OptionRoundStateType,
 } from "@/lib/types";
 import DepositContent from "@/components/Vault/VaultActions/Tabs/Provider/Deposit";
@@ -32,7 +26,6 @@ export const useTabContent = (
   setBidToEdit: (bid: any) => void,
 ) => {
   const { pendingTx } = useTransactionContext();
-  const env = process.env.NEXT_PUBLIC_ENVIRONMENT;
 
   // @NOTE: For now we are hiding this panel, eventually we need to show it in WS mode and possibly RPC mode as well
   //const commonTabs = env === "ws" || env === "rpc" ? [] : [CommonTabs.MyInfo];
