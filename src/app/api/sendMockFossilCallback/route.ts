@@ -12,7 +12,7 @@ export interface DemoFossilCallParams {
   toTimestamp: string;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<Response> {
   // Parse the request body
   const body = await request.json();
   const params: DemoFossilCallParams = body;
@@ -64,11 +64,13 @@ export async function POST(request: Request) {
 
   // Send the mocked callback
   try {
-    const tx = await vaultContract.invoke("fossil_client_callback", [
-      args.l1_data,
-      args.timestamp,
-    ]);
-    return NextResponse.json(tx.transaction_hash, { status: 200 });
+    const nonce = await account.getNonce();
+    const tx = await vaultContract.invoke(
+      "fossil_client_callback",
+      [args.l1_data, args.timestamp],
+      { nonce },
+    );
+    return NextResponse.json({ tx_hash: tx.transaction_hash }, { status: 200 });
   } catch (error) {
     console.error("Error sending Fossil request:", error);
     return NextResponse.json(

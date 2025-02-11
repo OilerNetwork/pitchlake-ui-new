@@ -22,7 +22,7 @@ const StateTransition2 = ({
   const selectedRoundState = useRoundState(selectedRoundAddress);
   const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
-  const demoNow = useDemoTime(true, true, 10_000);
+  const demoNow = useDemoTime(true, true, 3_000);
 
   const {
     isDisabled,
@@ -75,6 +75,16 @@ const StateTransition2 = ({
           },
           body: JSON.stringify(body),
         });
+
+        if (!response.ok) {
+          alert("Txn failed to send, try again in a couple seconds");
+          throw new Error(
+            `Failed to send mocked Fossil request from client side: ${response.status}`,
+          );
+        } else {
+          const resp = await response.json();
+          alert("Txn sent: " + resp.tx_hash);
+        }
       } catch (error) {
         console.error(
           "Failed to send mocked Fossil request from client side",
