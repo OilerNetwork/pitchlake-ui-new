@@ -7,11 +7,21 @@ import {
   WithdrawLiquidityArgs,
   QueueArgs,
   CollectArgs,
+  PlaceBidArgs,
+  Bid,
+  RefundBidsArgs,
+  UpdateBidArgs,
+  MintOptionsArgs,
+  ExerciseOptionsArgs,
 } from "@/lib/types";
 import { useState } from "react";
 import useMockOptionRounds from "./useMockOptionRounds";
 
-const useMockVault = (selectedRound: number, timestamp:number,address?: string) => {
+const useMockVault = (
+  selectedRound: number,
+  timestamp: number,
+  address?: string,
+) => {
   const { address: accountAddress } = useAccount();
   //Read States
   const [vaultState, setVaultState] = useState<VaultStateType>({
@@ -28,7 +38,7 @@ const useMockVault = (selectedRound: number, timestamp:number,address?: string) 
     strikeLevel: "-1111",
     now: "0",
     deploymentDate: "1",
-    currentRoundAddress:"",
+    currentRoundAddress: "",
   });
   //States without a param
 
@@ -41,8 +51,8 @@ const useMockVault = (selectedRound: number, timestamp:number,address?: string) 
     queuedBps: "1234",
   });
 
-  const { rounds, setRounds, buyerStates, setBuyerStates, roundActions } =
-    useMockOptionRounds(selectedRound);
+  const { rounds, setRounds, buyerStates, setBuyerStates } =
+    useMockOptionRounds();
 
   // Function to update a specific field in the LP state
   const currentRoundAddress = "";
@@ -108,13 +118,10 @@ const useMockVault = (selectedRound: number, timestamp:number,address?: string) 
           payoutPerOption: "",
           vaultAddress: "",
           reservePrice: "2000000000",
-          deploymentDate:timestamp.toString(),
-          auctionStartDate:
-            200000 + timestamp,
-          auctionEndDate:
-            400000 + timestamp,
-          optionSettleDate:
-            600000 + timestamp,
+          deploymentDate: timestamp.toString(),
+          auctionStartDate: 200000 + timestamp,
+          auctionEndDate: 400000 + timestamp,
+          optionSettleDate: 600000 + timestamp,
           soldLiquidity: "",
           unsoldLiquidity: "",
           optionSold: "",
@@ -150,6 +157,59 @@ const useMockVault = (selectedRound: number, timestamp:number,address?: string) 
     });
   };
 
+  const demoFossilCallback = async () => {
+    await settleOptionRound();
+  };
+
+  const placeBid = async (placeBidArgs: PlaceBidArgs) => {
+    setBuyerStates((prevState) => {
+      const newState = [...prevState];
+      const buyerStateIndex = newState.findIndex(
+        (state) => state.address === (address ?? "0xbuyer"),
+      );
+
+      if (buyerStateIndex === -1) {
+        return prevState;
+      }
+
+      const newBid: Bid = {
+        bidId: "3",
+        address: address ?? "",
+        roundAddress: rounds[selectedRound - 1].address ?? "",
+        treeNonce: "2",
+        amount: placeBidArgs.amount,
+        price: placeBidArgs.price,
+      };
+
+      // Initialize bids array if it doesn't exist
+      if (!newState[buyerStateIndex].bids) {
+        newState[buyerStateIndex].bids = [];
+      }
+
+      newState[buyerStateIndex].bids = [
+        ...(newState[buyerStateIndex].bids || []),
+        newBid,
+      ];
+      return newState;
+    });
+  };
+
+  const refundUnusedBids = async (refundBidsArgs: RefundBidsArgs) => {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  };
+
+  const updateBid = async (updateBidArgs: UpdateBidArgs) => {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  };
+
+  const mintOptions = async (mintOptionsArgs: MintOptionsArgs) => {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  };
+
+  const exerciseOptions = async (exerciseOptionsArgs: ExerciseOptionsArgs) => {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  };
+
   const vaultActions: VaultActionsType = {
     // User actions
     depositLiquidity,
@@ -159,6 +219,12 @@ const useMockVault = (selectedRound: number, timestamp:number,address?: string) 
     startAuction,
     endAuction,
     settleOptionRound,
+    demoFossilCallback,
+    placeBid,
+    updateBid,
+    mintOptions,
+    refundUnusedBids,
+    exerciseOptions,
   };
 
   return {
@@ -167,9 +233,7 @@ const useMockVault = (selectedRound: number, timestamp:number,address?: string) 
     currentRoundAddress,
     vaultActions,
     optionRoundStates: rounds,
-    optionRoundActions: roundActions,
     optionBuyerStates: buyerStates,
-    roundActions: roundActions,
   };
 };
 

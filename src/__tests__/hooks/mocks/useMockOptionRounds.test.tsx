@@ -10,7 +10,6 @@ jest.mock("@starknet-react/core", () => ({
 
 describe("useMockOptionRounds", () => {
   const mockAddress = "0x123";
-  const mockSelectedRound = 1;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -24,7 +23,7 @@ describe("useMockOptionRounds", () => {
   });
 
   it("initializes with correct initial states", () => {
-    const { result } = renderHook(() => useMockOptionRounds(mockSelectedRound));
+    const { result } = renderHook(() => useMockOptionRounds());
 
     // Check rounds state
     expect(result.current.rounds).toHaveLength(1);
@@ -57,79 +56,18 @@ describe("useMockOptionRounds", () => {
     });
   });
 
-  it("provides round actions", () => {
-    const { result } = renderHook(() => useMockOptionRounds(mockSelectedRound));
-
-    expect(result.current.roundActions).toHaveProperty("placeBid");
-    expect(result.current.roundActions).toHaveProperty("refundUnusedBids");
-    expect(result.current.roundActions).toHaveProperty("updateBid");
-    expect(result.current.roundActions).toHaveProperty("tokenizeOptions");
-    expect(result.current.roundActions).toHaveProperty("exerciseOptions");
-  });
-
-  it("handles place bid action", async () => {
-    const { result } = renderHook(() => useMockOptionRounds(mockSelectedRound));
-
-    await act(async () => {
-      await result.current.roundActions.placeBid({
-        amount: BigInt(1000),
-        price: BigInt(2000),
-      });
-    });
-
-    // Verify bid was added
-    expect(result.current.buyerStates[0].bids).toBeDefined();
-  });
-
-  it("handles refund unused bids action", async () => {
-    const { result } = renderHook(() => useMockOptionRounds(mockSelectedRound));
-
-    await act(async () => {
-      await result.current.roundActions.refundUnusedBids({
-        optionBuyer: mockAddress,
-      });
-    });
-  });
-
-  it("handles update bid action", async () => {
-    const { result } = renderHook(() => useMockOptionRounds(mockSelectedRound));
-
-    await act(async () => {
-      await result.current.roundActions.updateBid({
-        bidId: "1",
-        priceIncrease: BigInt(2000),
-      });
-    });
-  });
-
-  it("handles tokenize options action", async () => {
-    const { result } = renderHook(() => useMockOptionRounds(mockSelectedRound));
-
-    await act(async () => {
-      await result.current.roundActions.tokenizeOptions();
-    });
-  });
-
-  it("handles exercise options action", async () => {
-    const { result } = renderHook(() => useMockOptionRounds(mockSelectedRound));
-
-    await act(async () => {
-      await result.current.roundActions.exerciseOptions();
-    });
-  });
-
   it("uses default address when not provided", () => {
     (useAccount as jest.Mock).mockReturnValue({
       address: undefined,
     });
 
-    const { result } = renderHook(() => useMockOptionRounds(mockSelectedRound));
+    const { result } = renderHook(() => useMockOptionRounds());
 
     expect(result.current.buyerStates[0].address).toBe("0xbuyer");
   });
 
   it("allows updating rounds state", () => {
-    const { result } = renderHook(() => useMockOptionRounds(mockSelectedRound));
+    const { result } = renderHook(() => useMockOptionRounds());
 
     const newRound = {
       ...result.current.rounds[0],
@@ -144,7 +82,7 @@ describe("useMockOptionRounds", () => {
   });
 
   it("allows updating buyer states", () => {
-    const { result } = renderHook(() => useMockOptionRounds(mockSelectedRound));
+    const { result } = renderHook(() => useMockOptionRounds());
 
     const newBuyerState = {
       ...result.current.buyerStates[0],
@@ -157,4 +95,5 @@ describe("useMockOptionRounds", () => {
 
     expect(result.current.buyerStates[0].mintableOptions).toBe(20);
   });
-}); 
+});
+

@@ -63,13 +63,12 @@ describe("useMockVault", () => {
       setRounds: jest.fn(),
       buyerStates: mockBuyerStates,
       setBuyerStates: jest.fn(),
-      roundActions: {},
     });
   });
 
   it("initializes with correct initial states", () => {
     const { result } = renderHook(() =>
-      useMockVault(mockSelectedRound, mockTimestamp, mockAddress)
+      useMockVault(mockSelectedRound, mockTimestamp, mockAddress),
     );
 
     expect(result.current.vaultState).toEqual({
@@ -100,7 +99,7 @@ describe("useMockVault", () => {
 
   it("provides mock vault actions", () => {
     const { result } = renderHook(() =>
-      useMockVault(mockSelectedRound, mockTimestamp, mockAddress)
+      useMockVault(mockSelectedRound, mockTimestamp, mockAddress),
     );
 
     expect(result.current.vaultActions).toHaveProperty("depositLiquidity");
@@ -110,6 +109,11 @@ describe("useMockVault", () => {
     expect(result.current.vaultActions).toHaveProperty("startAuction");
     expect(result.current.vaultActions).toHaveProperty("endAuction");
     expect(result.current.vaultActions).toHaveProperty("settleOptionRound");
+    expect(result.current.vaultActions).toHaveProperty("placeBid");
+    expect(result.current.vaultActions).toHaveProperty("refundUnusedBids");
+    expect(result.current.vaultActions).toHaveProperty("updateBid");
+    expect(result.current.vaultActions).toHaveProperty("mintOptions");
+    expect(result.current.vaultActions).toHaveProperty("exerciseOptions");
   });
 
   it("handles auction state transitions", async () => {
@@ -119,11 +123,11 @@ describe("useMockVault", () => {
       setRounds: mockSetRounds,
       buyerStates: mockBuyerStates,
       setBuyerStates: jest.fn(),
-      roundActions: {},
+      //roundActions: {},
     });
 
     const { result } = renderHook(() =>
-      useMockVault(mockSelectedRound, mockTimestamp, mockAddress)
+      useMockVault(mockSelectedRound, mockTimestamp, mockAddress),
     );
 
     // Start auction
@@ -147,11 +151,11 @@ describe("useMockVault", () => {
       setRounds: mockSetRounds,
       buyerStates: mockBuyerStates,
       setBuyerStates: mockSetBuyerStates,
-      roundActions: {},
+      //roundActions: {},
     });
 
     const { result } = renderHook(() =>
-      useMockVault(mockSelectedRound, mockTimestamp, mockAddress)
+      useMockVault(mockSelectedRound, mockTimestamp, mockAddress),
     );
 
     await act(async () => {
@@ -164,7 +168,7 @@ describe("useMockVault", () => {
 
   it("handles deposit liquidity action", async () => {
     const { result } = renderHook(() =>
-      useMockVault(mockSelectedRound, mockTimestamp, mockAddress)
+      useMockVault(mockSelectedRound, mockTimestamp, mockAddress),
     );
 
     await act(async () => {
@@ -177,7 +181,7 @@ describe("useMockVault", () => {
 
   it("handles withdraw liquidity action", async () => {
     const { result } = renderHook(() =>
-      useMockVault(mockSelectedRound, mockTimestamp, mockAddress)
+      useMockVault(mockSelectedRound, mockTimestamp, mockAddress),
     );
 
     await act(async () => {
@@ -189,7 +193,7 @@ describe("useMockVault", () => {
 
   it("handles withdraw stash action", async () => {
     const { result } = renderHook(() =>
-      useMockVault(mockSelectedRound, mockTimestamp, mockAddress)
+      useMockVault(mockSelectedRound, mockTimestamp, mockAddress),
     );
 
     await act(async () => {
@@ -201,7 +205,7 @@ describe("useMockVault", () => {
 
   it("handles queue withdrawal action", async () => {
     const { result } = renderHook(() =>
-      useMockVault(mockSelectedRound, mockTimestamp, mockAddress)
+      useMockVault(mockSelectedRound, mockTimestamp, mockAddress),
     );
 
     await act(async () => {
@@ -211,21 +215,86 @@ describe("useMockVault", () => {
     });
   });
 
+  it("handles place bid action", async () => {
+    const { result } = renderHook(() =>
+      useMockVault(mockSelectedRound, mockTimestamp, mockAddress),
+    );
+    const { result: result2 } = renderHook(() => useMockOptionRounds());
+
+    await act(async () => {
+      await result.current.vaultActions.placeBid({
+        amount: BigInt(1000),
+        price: BigInt(2000),
+      });
+    });
+
+    // Verify bid was added
+    expect(result2.current.buyerStates[0].bids).toBeDefined();
+  });
+
+  it("handles refund unused bids action", async () => {
+    const { result } = renderHook(() =>
+      useMockVault(mockSelectedRound, mockTimestamp, mockAddress),
+    );
+
+    await act(async () => {
+      await result.current.vaultActions.refundUnusedBids({
+        optionBuyer: mockAddress,
+        roundAddress: "0x1",
+      });
+    });
+  });
+
+  it("handles update bid action", async () => {
+    const { result } = renderHook(() =>
+      useMockVault(mockSelectedRound, mockTimestamp, mockAddress),
+    );
+
+    await act(async () => {
+      await result.current.vaultActions.updateBid({
+        bidId: "1",
+        priceIncrease: BigInt(2000),
+      });
+    });
+  });
+
+  it("handles tokenize options action", async () => {
+    const { result } = renderHook(() =>
+      useMockVault(mockSelectedRound, mockTimestamp, mockAddress),
+    );
+
+    await act(async () => {
+      await result.current.vaultActions.mintOptions({ roundAddress: "0x1" });
+    });
+  });
+
+  it("handles exercise options action", async () => {
+    const { result } = renderHook(() =>
+      useMockVault(mockSelectedRound, mockTimestamp, mockAddress),
+    );
+
+    await act(async () => {
+      await result.current.vaultActions.exerciseOptions({
+        roundAddress: "0x1",
+      });
+    });
+  });
+
   it("uses default address when not provided", () => {
     const { result } = renderHook(() =>
-      useMockVault(mockSelectedRound, mockTimestamp)
+      useMockVault(mockSelectedRound, mockTimestamp),
     );
 
     expect(result.current.vaultState.address).toBe("0x1");
   });
 
-  it("exposes option round states and actions", () => {
+  it("exposes option round states", () => {
     const { result } = renderHook(() =>
-      useMockVault(mockSelectedRound, mockTimestamp, mockAddress)
+      useMockVault(mockSelectedRound, mockTimestamp, mockAddress),
     );
 
     expect(result.current.optionRoundStates).toBe(mockRounds);
     expect(result.current.optionBuyerStates).toBe(mockBuyerStates);
-    expect(result.current.optionRoundActions).toEqual({});
   });
-}); 
+});
+
