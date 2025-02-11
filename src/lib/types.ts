@@ -1,3 +1,4 @@
+import { DemoFossilCallParams } from "@/app/api/sendMockFossilCallback/route";
 import { Account, CairoCustomEnum } from "starknet";
 
 export type FossilParams = {
@@ -23,6 +24,22 @@ export type CollectArgs = { account: string };
 export type ApprovalArgs = {
   amount: number | bigint;
   spender: string;
+};
+
+export type U256 = {
+  low: string | number | bigint;
+  high: string | number | bigint;
+};
+
+export type L1Data = {
+  twap: U256;
+  volatility: number | string;
+  reserve_price: U256;
+};
+
+export type FossilCallbackArgs = {
+  l1_data: L1Data;
+  timestamp: number | string;
 };
 
 export type TransactionResult = {
@@ -83,13 +100,30 @@ export type OptionBuyerStateType = {
 };
 
 export type VaultActionsType = {
+  // LP
   depositLiquidity: (depositArgs: DepositArgs) => Promise<void>;
   withdrawLiquidity: (withdrawArgs: WithdrawLiquidityArgs) => Promise<void>;
   withdrawStash: (collectArgs: CollectArgs) => Promise<void>;
   queueWithdrawal: (queueArgs: QueueArgs) => Promise<void>;
+  // OB
+  placeBid: (placeBids: PlaceBidArgs) => Promise<void>;
+  updateBid: (updateBid: UpdateBidArgs) => Promise<void>;
+  refundUnusedBids: (refundBids: RefundBidsArgs) => Promise<void>;
+  mintOptions: (mintOptions: MintOptionsArgs) => Promise<void>;
+  exerciseOptions: (exerciseOptions: ExerciseOptionsArgs) => Promise<void>;
+  // STATE TRANSITION
   startAuction: () => Promise<void>;
   endAuction: () => Promise<void>;
   settleOptionRound: () => Promise<void>;
+  demoFossilCallback: (fossilArgs: DemoFossilCallParams) => Promise<boolean>;
+  sendFossilRequest: (fossilRequest: SendFossiLRequestParams) => Promise<void>;
+};
+
+export type SendFossiLRequestParams = {
+  targetTimestamp: number;
+  roundDuration: number;
+  clientAddress: string;
+  vaultAddress: string;
 };
 
 export type OptionRoundStateType = {
@@ -118,7 +152,6 @@ export type OptionRoundStateType = {
   treeNonce: bigint | number | string;
   performanceLP: string;
   performanceOB: string;
-  //queuedLiquidity?: bigint | number | string;
 };
 
 export type Bid = {
@@ -159,39 +192,37 @@ export type WebSocketData = {
   wsOptionRoundStates: OptionRoundStateType[];
   wsLiquidityProviderState: LiquidityProviderStateType | undefined;
   wsOptionBuyerStates: OptionBuyerStateType[];
-}
+};
 
-export type MockData =  {
+export type MockData = {
   vaultState: VaultStateType;
   lpState: LiquidityProviderStateType;
   vaultActions: VaultActionsType;
   optionRoundStates: OptionRoundStateType[];
-  optionRoundActions: OptionRoundActionsType;
   optionBuyerStates: OptionBuyerStateType[];
-  roundActions: OptionRoundActionsType;
-}
-
-export type OptionRoundActionsType = {
-  placeBid: (placeBids: PlaceBidArgs) => Promise<void>;
-  updateBid: (updateBid: UpdateBidArgs) => Promise<void>;
-  refundUnusedBids: (refundBids: RefundBidsArgs) => Promise<void>;
-  tokenizeOptions: () => Promise<void>;
-  exerciseOptions: () => Promise<void>;
 };
 
-export type UpdateBidArgs = {
-  bidId: string;
-  priceIncrease: number | bigint;
-};
 export type PlaceBidArgs = {
   amount: number | bigint;
   price: number | bigint;
 };
+export type UpdateBidArgs = {
+  bidId: string;
+  priceIncrease: number | bigint;
+};
+export type MintOptionsArgs = {
+  roundAddress: string;
+};
 export type RefundableBidsArgs = {
+  roundAddress: string;
   optionBuyer: string;
 };
 export type RefundBidsArgs = {
+  roundAddress: string;
   optionBuyer: string;
+};
+export type ExerciseOptionsArgs = {
+  roundAddress: string;
 };
 
 export interface InfoItemProps {

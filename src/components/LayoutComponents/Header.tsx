@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
-import {  ChevronDownIcon } from "lucide-react";
-import {  CheckIcon, GlobeIcon } from "@/components/Icons";
+import { ChevronDownIcon } from "lucide-react";
+import { CheckIcon, GlobeIcon } from "@/components/Icons";
 import logo_full from "@/../public/logo_full.svg";
 import braavosIcon from "@/../public/braavos.svg";
 import argent from "@/../public/argent.svg";
@@ -36,7 +36,6 @@ export default function Header() {
   const { timestamp, mockTimeForward } = useTimeContext();
   const { vaultState } = useVaultState();
   const lpState = useLPState();
-  console.log("lpStateUnlocked", lpState?.unlockedBalance);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownChainOpen, setIsDropdownChainOpen] = useState(false);
   const isDropdownOpenRef = useRef(isDropdownOpen);

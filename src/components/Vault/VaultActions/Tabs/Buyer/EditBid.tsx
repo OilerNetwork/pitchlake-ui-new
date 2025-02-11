@@ -1,18 +1,15 @@
 import React, { useState, useMemo, ReactNode, useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEthereum } from "@fortawesome/free-brands-svg-icons";
 import InputField from "@/components/Vault/Utils/InputField";
-import { LayerStackIcon } from "@/components/Icons";
+import { EthereumIcon, LayerStackIcon } from "@/components/Icons";
 import { formatUnits, parseUnits, formatEther } from "ethers";
 import { num, Call } from "starknet";
 import useERC20 from "@/hooks/erc20/useERC20";
 import { useAccount } from "@starknet-react/core";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import { useProvider } from "@starknet-react/core";
 import { useContractWrite, useContract } from "@starknet-react/core";
-import { erc20ABI, optionRoundABI } from "@/lib/abi";
+import { erc20ABI, vaultABI } from "@/lib/abi";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import { formatNumber } from "@/lib/utils";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
@@ -53,8 +50,8 @@ const EditModal: React.FC<EditModalProps> = ({
   const oldAmount = num.toBigInt(bid.amount);
   const oldPriceWei = num.toBigInt(bid.price);
   const oldPriceGwei = formatUnits(oldPriceWei, "gwei");
-  const {vaultState,selectedRoundAddress} = useVaultState()
-  const selectedRoundState = useRoundState(selectedRoundAddress)
+  const { vaultState, selectedRoundAddress } = useVaultState();
+  const selectedRoundState = useRoundState(selectedRoundAddress);
   const [state, setState] = useState({
     newPriceGwei: localStorage.getItem(LOCAL_STORAGE_KEY) || "",
     isButtonDisabled: true,
@@ -66,17 +63,18 @@ const EditModal: React.FC<EditModalProps> = ({
   );
 
   const [needsApproving, setNeedsApproving] = useState<string>("0");
-  // Option Round Contract
-  const { contract: optionRoundContractRaw } = useContract({
-    abi: optionRoundABI,
-    address: selectedRoundState?.address as `0x${string}`,
+  // Vault Contract
+  const { contract: vaultContractRaw } = useContract({
+    abi: vaultABI,
+    address: vaultState?.address as `0x${string}`,
   });
-  const optionRoundContract = useMemo(() => {
-    if (!optionRoundContractRaw) return;
-    const typedContract = optionRoundContractRaw.typedv2(optionRoundABI);
+  const vaultContract = useMemo(() => {
+    if (!vaultContractRaw) return;
+    const typedContract = vaultContractRaw.typedv2(vaultABI);
     if (account) typedContract.connect(account);
     return typedContract;
-  }, [optionRoundContractRaw, account]);
+  }, [vaultContractRaw, account]);
+
   // ETH Contract
   const { contract: ethContractRaw } = useContract({
     abi: erc20ABI,
@@ -113,7 +111,7 @@ const EditModal: React.FC<EditModalProps> = ({
     if (
       !account ||
       !selectedRoundState?.address ||
-      !optionRoundContract ||
+      !vaultContract ||
       !ethContract ||
       priceIncreaseWei <= 0
     ) {
@@ -126,7 +124,8 @@ const EditModal: React.FC<EditModalProps> = ({
       selectedRoundState.address.toString(),
       num.toBigInt(totalCostWei),
     );
-    const editBidCall = optionRoundContract.populateTransaction.update_bid(
+
+    const editBidCall = vaultContract.populateTransaction.update_bid(
       bidId,
       priceIncreaseWei,
     );
@@ -146,7 +145,7 @@ const EditModal: React.FC<EditModalProps> = ({
     account,
     balance,
     allowance,
-    optionRoundContract,
+    vaultContract,
     ethContract,
     bidId,
   ]);
@@ -241,7 +240,10 @@ const EditModal: React.FC<EditModalProps> = ({
 
       <div className="flex flex-col h-full">
         <div className="flex-grow space-y-6 pt-2 px-4">
-          <Hoverable dataId="inputUpdateBidAmount" className="edit-bid-current-amount">
+          <Hoverable
+            dataId="inputUpdateBidAmount"
+            className="edit-bid-current-amount"
+          >
             <InputField
               type="number"
               value={""}
@@ -259,7 +261,10 @@ const EditModal: React.FC<EditModalProps> = ({
               }
             />
           </Hoverable>
-          <Hoverable dataId="inputUpdateBidPrice" className="edit-bid-new-price">
+          <Hoverable
+            dataId="inputUpdateBidPrice"
+            className="edit-bid-new-price"
+          >
             <InputField
               type="number"
               value={state.newPriceGwei}
@@ -268,10 +273,7 @@ const EditModal: React.FC<EditModalProps> = ({
               onChange={handlePriceChange}
               placeholder={`e.g. ${oldPriceGwei}`}
               icon={
-                <FontAwesomeIcon
-                  icon={faEthereum}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
-                />
+                <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
               }
               error={state.error}
             />

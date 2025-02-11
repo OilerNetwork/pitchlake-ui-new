@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useMemo } from "react";
 import { formatEther } from "ethers";
 import { ExerciseOptionsIcon } from "@/components/Icons";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
@@ -8,9 +8,10 @@ import { useTransactionContext } from "@/context/TransactionProvider";
 import useERC20 from "@/hooks/erc20/useERC20";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
-import useOptionRoundActions from "@/hooks/vault_v2/actions/useOptionRoundActions";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import useOBState from "@/hooks/vault_v2/states/useOBState";
+import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
+import { useNewContext } from "@/context/NewProvider";
 
 interface ExerciseProps {
   showConfirmation: (
@@ -21,29 +22,44 @@ interface ExerciseProps {
 }
 
 const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
+  const { conn } = useNewContext();
   const { address, account } = useAccount();
-  const {
-    selectedRoundAddress
-  } = useVaultState()
-  const selectedRoundState = useRoundState(selectedRoundAddress)
-  const selectedRoundBuyerState = useOBState(selectedRoundAddress)
-  const roundActions = useOptionRoundActions(selectedRoundAddress);
+  const { selectedRoundAddress } = useVaultState();
+  const selectedRoundState = useRoundState(selectedRoundAddress);
+  const selectedRoundBuyerState = useOBState(selectedRoundAddress);
+  const vaultActions = useVaultActions();
   const { pendingTx } = useTransactionContext();
-
   const { balance } = useERC20(selectedRoundState?.address as `0x${string}`);
-  const totalOptions =
-    selectedRoundBuyerState?.mintableOptions &&
-    selectedRoundBuyerState.hasMinted === false
-      ? BigInt(selectedRoundBuyerState.mintableOptions.toString()) +
-        BigInt(balance)
-      : BigInt(balance);
+
+  const totalOptions = useMemo(() => {
+    let total = BigInt(0);
+    if (!selectedRoundBuyerState) return total;
+
+    total += BigInt(balance);
+
+    if (
+      conn !== "ws" ||
+      (conn === "ws" && selectedRoundBuyerState.hasMinted === false)
+    ) {
+      total += BigInt(selectedRoundBuyerState.mintableOptions);
+    }
+    return total;
+  }, [
+    selectedRoundBuyerState?.mintableOptions,
+    selectedRoundBuyerState?.hasMinted,
+    selectedRoundState?.payoutPerOption,
+  ]);
+
   const payoutBalanceWei = selectedRoundState?.payoutPerOption
     ? totalOptions * BigInt(selectedRoundState?.payoutPerOption.toString())
     : "0";
   const payoutBalanceEth = formatEther(payoutBalanceWei);
 
   const handleExerciseOptions = async (): Promise<void> => {
-    address && (await roundActions?.exerciseOptions());
+    address &&
+      (await vaultActions?.exerciseOptions({
+        roundAddress: selectedRoundAddress ? selectedRoundAddress : "0x0",
+      }));
   };
 
   const handleSubmit = () => {

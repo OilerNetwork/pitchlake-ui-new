@@ -1,16 +1,8 @@
 import { useState } from "react";
-import {
-  OptionBuyerStateType,
-  OptionRoundActionsType,
-  OptionRoundStateType,
-  PlaceBidArgs,
-  RefundBidsArgs,
-  UpdateBidArgs,
-} from "@/lib/types";
-import { Bid } from "@/lib/types";
+import { OptionBuyerStateType, OptionRoundStateType } from "@/lib/types";
 import { useAccount } from "@starknet-react/core";
 
-const useMockOptionRounds = (selectedRound: number) => {
+const useMockOptionRounds = () => {
   const { address } = useAccount();
   const date = Date.now();
   const [rounds, setRounds] = useState<OptionRoundStateType[]>(
@@ -60,65 +52,11 @@ const useMockOptionRounds = (selectedRound: number) => {
     },
   ]);
 
-  // Function to place a bid
-  const placeBid = async (placeBidArgs: PlaceBidArgs) => {
-    setBuyerStates((prevState) => {
-      const newState = [...prevState];
-      const buyerStateIndex = newState.findIndex(state => state.address === (address ?? "0xbuyer"));
-      
-      if (buyerStateIndex === -1) {
-        return prevState;
-      }
-
-      const newBid: Bid = {
-        bidId: "3",
-        address: address ?? "",
-        roundAddress: rounds[selectedRound-1].address ?? "",
-        treeNonce: "2",
-        amount: placeBidArgs.amount,
-        price: placeBidArgs.price,
-      };
-      
-      // Initialize bids array if it doesn't exist
-      if (!newState[buyerStateIndex].bids) {
-        newState[buyerStateIndex].bids = [];
-      }
-      
-      newState[buyerStateIndex].bids = [...(newState[buyerStateIndex].bids || []), newBid];
-      return newState;
-    });
-  };
-
-  const refundUnusedBids = async (refundBidsArgs: RefundBidsArgs) => {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-  };
-
-  const updateBid = async (updateBidArgs: UpdateBidArgs) => {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-  };
-
-  const tokenizeOptions = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-  };
-
-  const exerciseOptions = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-  };
-
-  const roundActions: OptionRoundActionsType = {
-    placeBid,
-    refundUnusedBids,
-    updateBid,
-    tokenizeOptions,
-    exerciseOptions,
-  };
-
   return {
     rounds,
     setRounds,
     buyerStates,
     setBuyerStates,
-    roundActions,
   };
 };
 

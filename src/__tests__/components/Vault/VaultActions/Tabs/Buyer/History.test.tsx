@@ -6,7 +6,7 @@ import { useTransactionContext } from "@/context/TransactionProvider";
 import { useHelpContext } from "@/context/HelpProvider";
 import { formatUnits } from "ethers";
 import useOptionBuyerStateRPC from "@/hooks/vault_v2/rpc/useOptionBuyerStateRPC";
-import useOptionRoundActions from "@/hooks/vault_v2/actions/useOptionRoundActions";
+import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
 import { useNewContext } from "@/context/NewProvider";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
@@ -25,7 +25,7 @@ jest.mock("@/context/TransactionProvider");
 jest.mock("@/context/HelpProvider");
 jest.mock("@/context/NewProvider");
 jest.mock("@/hooks/vault_v2/rpc/useOptionBuyerStateRPC");
-jest.mock("@/hooks/vault_v2/actions/useOptionRoundActions");
+jest.mock("@/hooks/vault_v2/actions/useVaultActions");
 jest.mock("@/hooks/vault_v2/states/useRoundState");
 jest.mock("@/hooks/vault_v2/states/useVaultState");
 jest.mock("ethers");
@@ -69,25 +69,29 @@ const mockConfig = {
       vaultAddress: "0x123",
       setSelectedRound: jest.fn(),
       wsData: {
-        wsOptionRoundStates: [{
-          address: "0x456",
-          state: "Auctioning"
-        }]
+        wsOptionRoundStates: [
+          {
+            address: "0x456",
+            state: "Auctioning",
+          },
+        ],
       },
       mockData: {
         vaultState: {},
-        optionRoundStates: [{
-          address: "0x456",
-          state: "Auctioning"
-        }]
-      }
+        optionRoundStates: [
+          {
+            address: "0x456",
+            state: "Auctioning",
+          },
+        ],
+      },
     },
     roundState: {
-      roundState: "Auctioning"
+      roundState: "Auctioning",
     },
     vaultState: {
-      selectedRoundAddress: "0x456"
-    }
+      selectedRoundAddress: "0x456",
+    },
   },
   utils: {
     formatUnits: (value: string | number | bigint, unit: string) => {
@@ -98,17 +102,21 @@ const mockConfig = {
         return (Number(value) / 1e18).toString();
       }
       return value.toString();
-    }
-  }
+    },
+  },
 };
 
 // Configure mocks
 (useExplorer as jest.Mock).mockReturnValue(mockConfig.hooks.explorer);
-(useTransactionContext as jest.Mock).mockReturnValue(mockConfig.hooks.transaction);
+(useTransactionContext as jest.Mock).mockReturnValue(
+  mockConfig.hooks.transaction,
+);
 (useHelpContext as jest.Mock).mockReturnValue(mockConfig.hooks.help);
 (useNewContext as jest.Mock).mockReturnValue(mockConfig.hooks.newContext);
-(useOptionBuyerStateRPC as jest.Mock).mockReturnValue(mockConfig.hooks.optionBuyer);
-(useOptionRoundActions as jest.Mock).mockReturnValue(mockConfig.hooks.optionRound);
+(useOptionBuyerStateRPC as jest.Mock).mockReturnValue(
+  mockConfig.hooks.optionBuyer,
+);
+(useVaultActions as jest.Mock).mockReturnValue(mockConfig.hooks.optionRound);
 (useRoundState as jest.Mock).mockReturnValue(mockConfig.hooks.roundState);
 (useVaultState as jest.Mock).mockReturnValue(mockConfig.hooks.vaultState);
 (formatUnits as jest.Mock).mockImplementation(mockConfig.utils.formatUnits);
@@ -116,10 +124,8 @@ const mockConfig = {
 const renderWithProviders = (ui: React.ReactElement) => {
   return render(
     <div data-testid="help-provider">
-      <div data-testid="transaction-provider">
-        {ui}
-      </div>
-    </div>
+      <div data-testid="transaction-provider">{ui}</div>
+    </div>,
   );
 };
 
@@ -161,8 +167,9 @@ describe("History Component", () => {
   });
 
   it("shows edit button only when roundState is Auctioning", () => {
-    const useRoundState = require("@/hooks/vault_v2/states/useRoundState").default;
-    
+    const useRoundState =
+      require("@/hooks/vault_v2/states/useRoundState").default;
+
     // With Auctioning state
     useRoundState.mockReturnValue({ roundState: "Auctioning" });
     renderWithProviders(
@@ -192,12 +199,15 @@ describe("History Component", () => {
       />,
     );
 
-    const settledButtons = screen.queryAllByRole("button", { name: /edit bid/i });
+    const settledButtons = screen.queryAllByRole("button", {
+      name: /edit bid/i,
+    });
     expect(settledButtons).toHaveLength(0);
   });
 
   it("calls setBidToEdit and setIsTabsHidden when edit button is clicked", () => {
-    const useRoundState = require("@/hooks/vault_v2/states/useRoundState").default;
+    const useRoundState =
+      require("@/hooks/vault_v2/states/useRoundState").default;
     useRoundState.mockReturnValue({ roundState: "Auctioning" });
 
     renderWithProviders(
@@ -230,7 +240,9 @@ describe("History Component", () => {
       />,
     );
 
-    expect(screen.queryByRole("button", { name: /edit bid/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /edit bid/i }),
+    ).not.toBeInTheDocument();
     expect(screen.queryByText(/options at/)).not.toBeInTheDocument();
   });
 
@@ -258,4 +270,3 @@ describe("History Component", () => {
     );
   });
 });
-

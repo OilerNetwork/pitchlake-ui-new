@@ -4,7 +4,7 @@ export const useDemoTime = (
   active: boolean,
   isEnabled: boolean,
   intervalMS = 15000,
-): number => {
+): { demoNow: number } => {
   const [demoNow, setDemoNow] = useState<number>(
     isEnabled ? new Date().getTime() / 1000 : 0,
   );
@@ -20,5 +20,5 @@ export const useDemoTime = (
   }, [active, isEnabled, intervalMS]);
 
   // Ensure a valid return value
-  return isEnabled ? Number(demoNow?.toFixed(0)) : 0;
+  return { demoNow: isEnabled ? Number(demoNow?.toFixed(0)) : 0 };
 };

@@ -5,7 +5,7 @@ import { useAccount } from "@starknet-react/core";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useOBState from "@/hooks/vault_v2/states/useOBState";
-import useOptionRoundActions from "@/hooks/vault_v2/actions/useOptionRoundActions";
+import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
 import { useNewContext } from "@/context/NewProvider";
 import { useHelpContext } from "@/context/HelpProvider";
 
@@ -25,46 +25,46 @@ const mockConfig = {
       connected: {
         address: "0x123",
         account: { address: "0x123" },
-        status: "connected"
+        status: "connected",
       },
       disconnected: {
         account: null,
-        status: "disconnected"
-      }
+        status: "disconnected",
+      },
     },
     transaction: {
       idle: {
         pendingTx: false,
-        setModalState: jest.fn()
+        setModalState: jest.fn(),
       },
       pending: {
         pendingTx: true,
-        setModalState: jest.fn()
-      }
+        setModalState: jest.fn(),
+      },
     },
     vaultState: {
       default: {
         selectedRoundAddress: "0x456",
         roundState: "Auctioning",
-        isLoading: false
-      }
+        isLoading: false,
+      },
     },
     optionBuyerState: {
       withBalance: {
         refundableOptions: "1000000000000000000",
         hasMinted: false,
-        isLoading: false
+        isLoading: false,
       },
       withoutBalance: {
         refundableOptions: "0",
         hasMinted: false,
-        isLoading: false
+        isLoading: false,
       },
       minted: {
         refundableOptions: "0",
         hasMinted: true,
-        isLoading: false
-      }
+        isLoading: false,
+      },
     },
     context: {
       rpc: {
@@ -74,9 +74,9 @@ const mockConfig = {
           vaultState: {
             currentRoundId: "5",
             address: "0x123",
-            roundState: "Auctioning"
-          }
-        }
+            roundState: "Auctioning",
+          },
+        },
       },
       ws: {
         conn: "ws",
@@ -84,12 +84,12 @@ const mockConfig = {
           wsVaultState: {
             currentRoundId: "5",
             address: "0x123",
-            roundState: "Auctioning"
-          }
-        }
-      }
-    }
-  }
+            roundState: "Auctioning",
+          },
+        },
+      },
+    },
+  },
 };
 
 // Mock all hooks
@@ -103,13 +103,17 @@ jest.mock("@starknet-react/core", () => ({
 jest.mock("@/context/TransactionProvider", () => ({
   __esModule: true,
   useTransactionContext: jest.fn(),
-  default: ({ children }: { children: React.ReactNode }) => <div data-testid="transaction-provider">{children}</div>,
+  default: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="transaction-provider">{children}</div>
+  ),
 }));
 
 jest.mock("@/context/HelpProvider", () => ({
   __esModule: true,
   useHelpContext: jest.fn(),
-  HelpProvider: ({ children }: { children: React.ReactNode }) => <div data-testid="help-provider">{children}</div>,
+  HelpProvider: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="help-provider">{children}</div>
+  ),
 }));
 
 jest.mock("@/context/NewProvider", () => ({
@@ -127,7 +131,7 @@ jest.mock("@/hooks/vault_v2/states/useOBState", () => ({
   default: jest.fn(),
 }));
 
-jest.mock("@/hooks/vault_v2/actions/useOptionRoundActions", () => ({
+jest.mock("@/hooks/vault_v2/actions/useVaultActions", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
@@ -139,11 +143,22 @@ const setupTest = (overrides = {}) => {
 
   // Default setup
   (useAccount as jest.Mock).mockReturnValue(mockConfig.hooks.account.connected);
-  (useVaultState as jest.Mock).mockReturnValue(mockConfig.hooks.vaultState.default);
-  (useOBState as jest.Mock).mockReturnValue(mockConfig.hooks.optionBuyerState.withBalance);
-  (useOptionRoundActions as jest.Mock).mockReturnValue({ refundUnusedBids: mockRefundUnusedBids });
-  (useTransactionContext as jest.Mock).mockReturnValue(mockConfig.hooks.transaction.idle);
-  (useHelpContext as jest.Mock).mockReturnValue({ setHelpContent: jest.fn(), clearHelpContent: jest.fn() });
+  (useVaultState as jest.Mock).mockReturnValue(
+    mockConfig.hooks.vaultState.default,
+  );
+  (useOBState as jest.Mock).mockReturnValue(
+    mockConfig.hooks.optionBuyerState.withBalance,
+  );
+  (useVaultActions as jest.Mock).mockReturnValue({
+    refundUnusedBids: mockRefundUnusedBids,
+  });
+  (useTransactionContext as jest.Mock).mockReturnValue(
+    mockConfig.hooks.transaction.idle,
+  );
+  (useHelpContext as jest.Mock).mockReturnValue({
+    setHelpContent: jest.fn(),
+    clearHelpContent: jest.fn(),
+  });
   (useNewContext as jest.Mock).mockReturnValue(mockConfig.hooks.context.rpc);
 
   // Apply any overrides
@@ -152,10 +167,10 @@ const setupTest = (overrides = {}) => {
       useAccount,
       useVaultState,
       useOBState,
-      useOptionRoundActions,
+      useVaultActions,
       useTransactionContext,
       useHelpContext,
-      useNewContext
+      useNewContext,
     }[key];
     if (mockFn) {
       (mockFn as jest.Mock).mockReturnValue(value);
@@ -165,17 +180,16 @@ const setupTest = (overrides = {}) => {
   return {
     mockShowConfirmation,
     mockRefundUnusedBids,
-    render: () => renderWithProviders(<Refund showConfirmation={mockShowConfirmation} />)
+    render: () =>
+      renderWithProviders(<Refund showConfirmation={mockShowConfirmation} />),
   };
 };
 
 const renderWithProviders = (ui: React.ReactElement) => {
   return render(
     <div data-testid="help-provider">
-      <div data-testid="transaction-provider">
-        {ui}
-      </div>
-    </div>
+      <div data-testid="transaction-provider">{ui}</div>
+    </div>,
   );
 };
 
@@ -204,7 +218,7 @@ describe("Refund Component", () => {
   describe("Button States", () => {
     it("disables button when account is not connected", () => {
       const { render } = setupTest({
-        useAccount: mockConfig.hooks.account.disconnected
+        useAccount: mockConfig.hooks.account.disconnected,
       });
       render();
 
@@ -213,7 +227,7 @@ describe("Refund Component", () => {
 
     it("disables button when transaction is pending", () => {
       const { render } = setupTest({
-        useTransactionContext: mockConfig.hooks.transaction.pending
+        useTransactionContext: mockConfig.hooks.transaction.pending,
       });
       render();
 
@@ -222,7 +236,7 @@ describe("Refund Component", () => {
 
     it("disables button when refundable balance is 0", () => {
       const { render } = setupTest({
-        useOBState: mockConfig.hooks.optionBuyerState.withoutBalance
+        useOBState: mockConfig.hooks.optionBuyerState.withoutBalance,
       });
       render();
 
@@ -231,7 +245,7 @@ describe("Refund Component", () => {
 
     it("disables button when options have been minted", () => {
       const { render } = setupTest({
-        useOBState: mockConfig.hooks.optionBuyerState.minted
+        useOBState: mockConfig.hooks.optionBuyerState.minted,
       });
       render();
 
@@ -249,12 +263,13 @@ describe("Refund Component", () => {
       expect(mockShowConfirmation).toHaveBeenCalledWith(
         "Refund",
         expect.anything(),
-        expect.any(Function)
+        expect.any(Function),
       );
     });
 
     it("calls refundUnusedBids when confirmation is confirmed", async () => {
-      const { render, mockShowConfirmation, mockRefundUnusedBids } = setupTest();
+      const { render, mockShowConfirmation, mockRefundUnusedBids } =
+        setupTest();
       render();
 
       fireEvent.click(screen.getByRole("button", { name: /Refund/i }));
@@ -262,7 +277,8 @@ describe("Refund Component", () => {
       await onConfirm();
 
       expect(mockRefundUnusedBids).toHaveBeenCalledWith({
-        optionBuyer: mockConfig.addresses.user
+        optionBuyer: mockConfig.addresses.user,
+        roundAddress: mockConfig.addresses.selectedRound,
       });
     });
   });

@@ -26,6 +26,8 @@ export { default as CollectEthIcon } from "./CollectEthIcon";
 export { default as GlobeIcon } from "./GlobeIcon";
 export { default as HoverIcon } from "./HoverIcon";
 export { default as QuestionCircleIcon } from "./QuestionCircleIcon";
+export { default as EthereumIcon } from "./EthereumIcon";
+export { default as PersonIcon } from "./PersonIcon";
 
 // To create a new tailwind compatible icon component, create a new file in pitchlake-ui/public/icons/ using other icons as a template.
 // Export the icon here to make it available to other components.

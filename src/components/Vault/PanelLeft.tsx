@@ -13,12 +13,12 @@ import {
 } from "lucide-react";
 import { useExplorer } from "@starknet-react/core";
 import { BalanceTooltip } from "@/components/BaseComponents/Tooltip";
-import StateTransition from "@/components/Vault/StateTransition";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import { getDemoRoundId } from "@/lib/demo/utils";
 import { useNewContext } from "@/context/NewProvider";
+import NewStateTransition from "./NewStateTransition";
 
 // @NOTE: Replace this with difference between latest fossil block timestamp & now
 // - create a useLatestFossilBlockTimestamp hook
@@ -690,11 +690,25 @@ const PanelLeft = ({ userType }: { userType: string }) => {
               <RemainingTimeElement />
             </div>
           </div>
-          <StateTransition
+          <NewStateTransition
             isPanelOpen={isPanelOpen}
             setModalState={setModalState}
             fossilDelay={FOSSIL_DELAY}
           />
+          {
+            //   conn === "demo" ? (
+            //   <DemoStateTransition
+            //     isPanelOpen={isPanelOpen}
+            //     setModalState={setModalState}
+            //   />
+            // ) : (
+            //   <StateTransition
+            //     isPanelOpen={isPanelOpen}
+            //     setModalState={setModalState}
+            //     fossilDelay={FOSSIL_DELAY}
+            //   />
+            // )
+          }
         </div>
       </div>
       {modalState.show && (

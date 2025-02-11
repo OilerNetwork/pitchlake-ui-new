@@ -2,15 +2,14 @@ import React, { ReactNode, useEffect } from "react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
 import { useAccount } from "@starknet-react/core";
 import { RepeatEthIcon } from "@/components/Icons";
-import { formatNumber, formatNumberText } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils";
 import { num } from "starknet";
 import { formatEther } from "ethers";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
-import useOptionRoundActions from "@/hooks/vault_v2/actions/useOptionRoundActions";
 import useOBState from "@/hooks/vault_v2/states/useOBState";
-import useRoundState from "@/hooks/vault_v2/states/useRoundState";
+import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
 
 interface RefundProps {
   showConfirmation: (
@@ -22,9 +21,9 @@ interface RefundProps {
 
 const Refund: React.FC<RefundProps> = ({ showConfirmation }) => {
   const { address, account } = useAccount();
-  const {selectedRoundAddress} = useVaultState()
-  const selectedRoundBuyerState = useOBState(selectedRoundAddress)
-  const roundActions = useOptionRoundActions(selectedRoundAddress);
+  const { selectedRoundAddress } = useVaultState();
+  const selectedRoundBuyerState = useOBState(selectedRoundAddress);
+  const vaultActions = useVaultActions();
   const { pendingTx } = useTransactionContext();
 
   const refundBalanceWei = selectedRoundBuyerState?.refundableOptions
@@ -38,7 +37,11 @@ const Refund: React.FC<RefundProps> = ({ showConfirmation }) => {
   const refundBalanceEth = formatEther(num.toBigInt(refundBalanceWei));
 
   const handleRefundBid = async (): Promise<void> => {
-    address && (await roundActions?.refundUnusedBids({ optionBuyer: address }));
+    address &&
+      (await vaultActions?.refundUnusedBids({
+        roundAddress: selectedRoundAddress ? selectedRoundAddress : "0x0",
+        optionBuyer: address,
+      }));
   };
 
   const handleSubmit = () => {

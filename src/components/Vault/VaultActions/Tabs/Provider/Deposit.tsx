@@ -3,11 +3,9 @@ import { useAccount } from "@starknet-react/core";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { parseEther, formatEther } from "ethers";
 import InputField from "@/components/Vault/Utils/InputField";
-import { User } from "lucide-react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
 import ButtonTabs from "../ButtonTabs";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEthereum } from "@fortawesome/free-brands-svg-icons";
+import { EthereumIcon, PersonIcon } from "@/components/Icons";
 import { num, Call } from "starknet";
 import { useContractWrite, useContract } from "@starknet-react/core";
 import { erc20ABI, vaultABI } from "@/lib/abi";
@@ -37,8 +35,8 @@ interface DepositState {
 }
 
 const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
-  const {vaultState} = useVaultState()
-  const lpState = useLPState()
+  const { vaultState } = useVaultState();
+  const lpState = useLPState();
   //  console.log("check_", lpState?.unlockedBalance);
   const [state, setState] = useState<DepositState>({
     amount: "",
@@ -238,7 +236,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
               }
               placeholder="Depositor's Address"
               icon={
-                <User className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
+                <PersonIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
               }
               error={state.isBeneficiaryOk}
             />
@@ -261,10 +259,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
             placeholder="e.g. 5.0"
             error={state.isAmountOk}
             icon={
-              <FontAwesomeIcon
-                icon={faEthereum}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pr-2"
-              />
+              <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
             }
           />
         </Hoverable>

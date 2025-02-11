@@ -11,13 +11,15 @@ export default function Home() {
   const { chain } = useNetwork();
   // @NOTE filtering done in this order to maintain correct ordering (until proper vault sorting is implemented)
   const vaults =
-    process.env.NEXT_PUBLIC_ENVIRONMENT === "ws"
-      ? [
-          "0x2e0f81a9f5179c2be73cabeb92e8a6e526add4bab32e4855aa5522690c78217",
-          "0x7edaf2d262f347619f24eaa11cdc7ae125e373843d5248368887fea4aa8ee7d",
-          "0x19809922504ef98d98a406d12b2a67205a10294d3bf38f047e40239ce04c949",
-        ].filter((addr) => wsVaults?.includes(addr))
-      : process.env.NEXT_PUBLIC_VAULT_ADDRESSES?.split(",");
+    process.env.NEXT_PUBLIC_ENVIRONMENT === "demo"
+      ? ["0x0677ead18a571524525eb1d5fbb18431efe869f07d700f03aa66ad0abb5de01d"]
+      : process.env.NEXT_PUBLIC_ENVIRONMENT === "ws"
+        ? [
+            "0x2e0f81a9f5179c2be73cabeb92e8a6e526add4bab32e4855aa5522690c78217",
+            "0x7edaf2d262f347619f24eaa11cdc7ae125e373843d5248368887fea4aa8ee7d",
+            "0x19809922504ef98d98a406d12b2a67205a10294d3bf38f047e40239ce04c949",
+          ].filter((addr) => wsVaults?.includes(addr))
+        : process.env.NEXT_PUBLIC_VAULT_ADDRESSES?.split(",");
 
   const { isMobile } = useIsMobile();
 

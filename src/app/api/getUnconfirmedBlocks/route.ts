@@ -20,7 +20,7 @@ const MAX_UNCONFIRMED_BLOCKS = 100;
 export async function POST() {
   const provider = new AlchemyProvider(
     "homestead",
-    "-3ljeHjAl2sJGTskdbpEHA7KTawd15iG",
+    process.env.ALCHEMY_API_KEY,
   );
 
   try {
