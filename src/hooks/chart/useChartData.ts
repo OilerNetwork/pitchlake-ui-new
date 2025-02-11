@@ -60,11 +60,11 @@ export const useChart = () => {
 
     if (fossilGasData.length === 0) {
       fossilGasData.push({ timestamp: xMin }, { timestamp: xMax });
-    } else if (fossilGasData.length >= 1) {
-      const lastFossilBlockTimestamp =
-        fossilGasData[fossilGasData.length - 1].timestamp;
+    } else if (fossilGasData.length > 2) {
+      const cutoff =
+        Math.max(fossilGasData[fossilGasData.length - 2].timestamp, xMin) - 30;
       filteredFeeHistory = filteredFeeHistory.filter((block) => {
-        return block.timestamp >= lastFossilBlockTimestamp;
+        return block.timestamp >= cutoff;
       });
     }
 
