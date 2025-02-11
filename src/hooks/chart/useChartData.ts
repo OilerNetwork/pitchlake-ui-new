@@ -58,7 +58,7 @@ export const useChart = () => {
     } else if (fossilGasData.length >= 1) {
       const lastFossilBlockTimestamp =
         fossilGasData[fossilGasData.length - 1].timestamp;
-      filteredFeeHistory = feeHistory.filter((block) => {
+      filteredFeeHistory = filteredFeeHistory.filter((block) => {
         return block.timestamp >= lastFossilBlockTimestamp;
       });
     }
@@ -141,4 +141,3 @@ export const useChart = () => {
 };
 
 export default useChart;
-
