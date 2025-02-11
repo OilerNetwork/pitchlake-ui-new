@@ -13,16 +13,13 @@ const useLPState = () => {
   const lpStateWS = wsData.wsLiquidityProviderState;
   const lpStateMock = mockData.lpState;
 
-  console.log("lpStateRPC", lpStateRPC);
-  console.log("lpStateWS", lpStateWS);
-  console.log("lpStateMock", lpStateMock);
   const lpState =
     conn === "mock"
       ? lpStateMock
       : conn === "rpc" || conn === "demo"
-      ? lpStateRPC
-      : lpStateWS;
-  console.log("lpStateFull", lpState);
+        ? lpStateRPC
+        : lpStateWS;
+
   return lpState;
 };
 
