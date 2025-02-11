@@ -37,12 +37,12 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
 
     total += BigInt(balance);
 
-    if (conn === "ws" && selectedRoundBuyerState.hasMinted === false) {
-      total += BigInt(selectedRoundBuyerState.mintableOptions);
-    } else {
+    if (
+      conn !== "ws" ||
+      (conn === "ws" && selectedRoundBuyerState.hasMinted === false)
+    ) {
       total += BigInt(selectedRoundBuyerState.mintableOptions);
     }
-
     return total;
   }, [
     selectedRoundBuyerState?.mintableOptions,
