@@ -19,7 +19,12 @@ export default function Home() {
             "0x7edaf2d262f347619f24eaa11cdc7ae125e373843d5248368887fea4aa8ee7d",
             "0x19809922504ef98d98a406d12b2a67205a10294d3bf38f047e40239ce04c949",
           ].filter((addr) => wsVaults?.includes(addr))
-        : process.env.NEXT_PUBLIC_VAULT_ADDRESSES?.split(",");
+        : [
+            "0x07b0110e7230a20881e57804d68e640777f4b55b487321556682e550f93fec7c",
+            "0x056c4bc4a501faab243c924638922ea08d07f3c2959371c4475a7d598f66d08f",
+            "0x04f9996f98fc454ec733715787a9ac4bb771bf9dea608fc3f6ff37606f1f88c3",
+          ];
+  //process.env.NEXT_PUBLIC_VAULT_ADDRESSES?.split(",");
 
   const { isMobile } = useIsMobile();
 
