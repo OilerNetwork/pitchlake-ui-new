@@ -24,7 +24,7 @@ const NewStateTransition = ({
   const selectedRoundState = useRoundState(selectedRoundAddress);
   const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
-  const demoNow = useDemoTime(true, true, 3_000);
+  const { demoNow } = useDemoTime(true, true, 3_000);
   const { conn } = useNewContext();
 
   const [expectedNextState, setExpectedNextState] = useState<string | null>(
@@ -35,7 +35,7 @@ const NewStateTransition = ({
     isDisabled,
     roundState,
   }: { isDisabled: boolean; roundState: string } = useMemo(() => {
-    if (!account || !selectedRoundState || !demoNow)
+    if (!selectedRoundState || !demoNow)
       return { isDisabled: true, roundState: "Settled" };
 
     if (pendingTx) return { isDisabled: true, roundState: "Pending" };
@@ -49,6 +49,8 @@ const NewStateTransition = ({
 
     const { roundState, auctionStartDate, auctionEndDate, optionSettleDate } =
       selectedRoundState;
+
+    if (!account) return { isDisabled: true, roundState };
 
     // Exit early if round settled
     if (roundState === "Settled") return { isDisabled: true, roundState };

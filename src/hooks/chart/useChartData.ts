@@ -93,7 +93,7 @@ export const useChart = () => {
   }, [historicGasData, fossilGasData, feeHistory]);
 
   /// DEMO ///
-  const demoNow = useDemoTime(true, conn === "demo");
+  const { demoNow } = useDemoTime(true, conn === "demo");
 
   const { gasData } = useMemo(() => {
     if (conn === "ws" || conn === "rpc") {
