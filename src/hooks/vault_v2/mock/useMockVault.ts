@@ -13,11 +13,13 @@ import {
   UpdateBidArgs,
   MintOptionsArgs,
   ExerciseOptionsArgs,
+  SendFossiLRequestParams,
 } from "@/lib/types";
 import { useMemo, useState } from "react";
 import useMockOptionRounds from "./useMockOptionRounds";
 import { useTimeContext } from "@/context/TimeProvider";
 import { useNewContext } from "@/context/NewProvider";
+import { DemoFossilCallParams } from "@/app/api/sendMockFossilCallback/route";
 const useMockVault = ({ address }: { address?: string }) => {
   const { address: accountAddress } = useAccount();
   const { timestamp } = useTimeContext();
@@ -198,9 +200,16 @@ const useMockVault = ({ address }: { address?: string }) => {
     });
   };
 
-  const demoFossilCallback = async () => {
+  const demoFossilCallback = async (
+    fossilArgs: DemoFossilCallParams,
+  ): Promise<boolean> => {
     await settleOptionRound();
+    return true;
   };
+
+  const sendFossilRequest = async (
+    fossilRequest: SendFossiLRequestParams,
+  ): Promise<void> => {};
 
   const vaultActions: VaultActionsType = {
     // User actions
@@ -217,6 +226,7 @@ const useMockVault = ({ address }: { address?: string }) => {
     mintOptions,
     exerciseOptions,
     demoFossilCallback,
+    sendFossilRequest,
   };
 
   const selectedRoundAddress = useMemo(() => {
