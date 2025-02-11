@@ -58,14 +58,11 @@ const useVaultActions = () => {
           | MintOptionsArgs
           | ExerciseOptionsArgs,
       ) => {
-        if (!typedContract) return;
+        if (!typedContract || !provider || !account) return;
         let argsData;
         if (args) argsData = Object.values(args).map((value) => value);
         let data;
-        const nonce =
-          provider && account
-            ? await provider.getNonceForAddress(account.address)
-            : "0";
+        const nonce = await provider?.getNonceForAddress(account?.address);
         if (argsData) {
           data = await typedContract?.[functionName](...argsData, {
             nonce,

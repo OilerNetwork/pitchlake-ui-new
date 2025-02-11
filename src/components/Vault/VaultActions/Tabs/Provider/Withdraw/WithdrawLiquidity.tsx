@@ -2,14 +2,13 @@ import React, { useState, useEffect, ReactNode } from "react";
 import InputField from "@/components/Vault/Utils/InputField";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
 import { formatEther, parseEther } from "ethers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEthereum } from "@fortawesome/free-brands-svg-icons";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useAccount } from "@starknet-react/core";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import { formatNumber } from "@/lib/utils";
 import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
 import useLPState from "@/hooks/vault_v2/states/useLPState";
+import { EthereumIcon } from "@/components/Icons";
 
 interface WithdrawLiquidityProps {
   showConfirmation: (
@@ -24,8 +23,8 @@ const LOCAL_STORAGE_KEY = "withdrawAmount";
 const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
   showConfirmation,
 }) => {
-  const lpState = useLPState()
-  const vaultActions = useVaultActions()
+  const lpState = useLPState();
+  const vaultActions = useVaultActions();
   const [state, setState] = useState({
     amount: localStorage.getItem(LOCAL_STORAGE_KEY) || "",
     isAmountOk: "",
@@ -134,10 +133,7 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
           }}
           placeholder="e.g. 5.0"
           icon={
-            <FontAwesomeIcon
-              icon={faEthereum}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pr-2"
-            />
+            <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
           }
           error={state.isAmountOk}
         />

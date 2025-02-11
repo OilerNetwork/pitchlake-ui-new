@@ -2,8 +2,6 @@ import React, { useState, ReactNode, useMemo, useEffect } from "react";
 import InputField from "@/components/Vault/Utils/InputField";
 import { Layers3 } from "lucide-react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEthereum } from "@fortawesome/free-brands-svg-icons";
 import { formatUnits, parseUnits, formatEther } from "ethers";
 import { useAccount, useContractWrite } from "@starknet-react/core";
 import useERC20 from "@/hooks/erc20/useERC20";
@@ -16,6 +14,7 @@ import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import { useTimeContext } from "@/context/TimeProvider";
+import { EthereumIcon } from "@/components/Icons";
 
 interface PlaceBidProps {
   showConfirmation: (
@@ -283,10 +282,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
             onChange={handlePriceChange}
             placeholder="e.g. 0.3"
             icon={
-              <FontAwesomeIcon
-                icon={faEthereum}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pr-2"
-              />
+              <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
             }
             error={state.isPriceOk}
           />

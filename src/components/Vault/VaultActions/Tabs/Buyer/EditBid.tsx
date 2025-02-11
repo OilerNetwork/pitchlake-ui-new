@@ -1,10 +1,8 @@
 import React, { useState, useMemo, ReactNode, useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEthereum } from "@fortawesome/free-brands-svg-icons";
 import InputField from "@/components/Vault/Utils/InputField";
-import { LayerStackIcon } from "@/components/Icons";
+import { EthereumIcon, LayerStackIcon } from "@/components/Icons";
 import { formatUnits, parseUnits, formatEther } from "ethers";
 import { num, Call } from "starknet";
 import useERC20 from "@/hooks/erc20/useERC20";
@@ -275,10 +273,7 @@ const EditModal: React.FC<EditModalProps> = ({
               onChange={handlePriceChange}
               placeholder={`e.g. ${oldPriceGwei}`}
               icon={
-                <FontAwesomeIcon
-                  icon={faEthereum}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
-                />
+                <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
               }
               error={state.error}
             />
