@@ -12,13 +12,15 @@ import {
   RefundBidsArgs,
   MintOptionsArgs,
   ExerciseOptionsArgs,
+  SendFossiLRequestParams,
 } from "@/lib/types";
 import { useCallback, useMemo } from "react";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useNewContext } from "@/context/NewProvider";
 import { DemoFossilCallParams } from "@/app/api/sendMockFossilCallback/route";
+import { getTargetTimestampForRound } from "@/lib/utils";
 const useVaultActions = () => {
-  const { vaultAddress } = useNewContext();
+  const { vaultAddress, conn } = useNewContext();
   const { setPendingTx } = useTransactionContext();
   const { account } = useAccount();
   const { provider } = useProvider();
@@ -56,7 +58,8 @@ const useVaultActions = () => {
           | UpdateBidArgs
           | RefundBidsArgs
           | MintOptionsArgs
-          | ExerciseOptionsArgs,
+          | ExerciseOptionsArgs
+          | SendFossiLRequestParams,
       ) => {
         if (!typedContract || !provider || !account) return;
         let argsData;
@@ -119,7 +122,10 @@ const useVaultActions = () => {
   }, [callContract]);
 
   const demoFossilCallback = useCallback(
-    async ({ roundId, toTimestamp }: DemoFossilCallParams) => {
+    async ({
+      roundId,
+      toTimestamp,
+    }: DemoFossilCallParams): Promise<boolean> => {
       const body: DemoFossilCallParams = {
         vaultAddress: vaultAddress ? vaultAddress : "0x0",
         roundId,
@@ -137,21 +143,52 @@ const useVaultActions = () => {
 
         if (!response.ok) {
           alert("Txn failed to send, try again in a couple seconds");
-          throw new Error(
-            `Failed to send mocked Fossil request from client side: ${response.status}`,
-          );
+          return false;
         } else {
-          const resp = await response.json();
-          alert("Txn sent: " + resp.tx_hash);
+          return true;
         }
       } catch (error) {
         console.error(
           "Failed to send mocked Fossil request from client side",
           error,
         );
+        return false;
       }
     },
     [callContract],
+  );
+
+  const sendFossilRequest = useCallback(
+    async ({
+      targetTimestamp,
+      roundDuration,
+      clientAddress,
+      vaultAddress,
+    }: SendFossiLRequestParams) => {
+      if (conn === "ws" || conn === "rpc") {
+        const response = await fetch("/api/sendFossilRequest", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            targetTimestamp,
+            roundDuration,
+            clientAddress,
+            vaultAddress,
+          }),
+        });
+
+        if (!response.ok) {
+          //       alert("Request failed to send, try again in a couple seconds");
+          //       throw new Error(`Failed to send request to Fossil request`);
+        } else {
+          //       const data = await response.json();
+          //       alert("Request sent! " + JSON.stringify(data));
+        }
+      }
+    },
+    [],
   );
 
   // @NOTE: rm and consider adding demo_fossil_callback to actions
@@ -209,6 +246,7 @@ const useVaultActions = () => {
     startAuction,
     endAuction,
     demoFossilCallback,
+    sendFossilRequest,
     settleOptionRound,
     placeBid,
     updateBid,
