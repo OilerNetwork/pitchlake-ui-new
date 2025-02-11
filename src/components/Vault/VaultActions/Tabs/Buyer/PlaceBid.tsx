@@ -11,7 +11,7 @@ import { num, Call } from "starknet";
 import { formatNumber, formatNumberText } from "@/lib/utils";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useContract } from "@starknet-react/core";
-import { erc20ABI, optionRoundABI } from "@/lib/abi";
+import { erc20ABI, vaultABI } from "@/lib/abi";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
@@ -29,8 +29,8 @@ const LOCAL_STORAGE_KEY1 = "bidAmount";
 const LOCAL_STORAGE_KEY2 = "bidPriceGwei";
 
 const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
-  const {vaultState,selectedRoundAddress} = useVaultState()
-  const selectedRoundState = useRoundState(selectedRoundAddress)
+  const { vaultState, selectedRoundAddress } = useVaultState();
+  const selectedRoundState = useRoundState(selectedRoundAddress);
   const [state, setState] = useState({
     bidAmount: localStorage.getItem(LOCAL_STORAGE_KEY1) || "",
     bidPrice: localStorage.getItem(LOCAL_STORAGE_KEY2) || "",
@@ -49,17 +49,17 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
   );
   const [needsApproving, setNeedsApproving] = useState<string>("0");
 
-  // Option Round Contract
-  const { contract: optionRoundContractRaw } = useContract({
-    abi: optionRoundABI,
-    address: selectedRoundState?.address as `0x${string}`,
+  // Vault Contract
+  const { contract: vaultContractRaw } = useContract({
+    abi: vaultABI,
+    address: vaultState?.address as `0x${string}`,
   });
-  const optionRoundContract = useMemo(() => {
-    if (!optionRoundContractRaw) return;
-    const typedContract = optionRoundContractRaw.typedv2(optionRoundABI);
+  const vaultContract = useMemo(() => {
+    if (!vaultContractRaw) return;
+    const typedContract = vaultContractRaw.typedv2(vaultABI);
     if (account) typedContract.connect(account);
     return typedContract;
-  }, [optionRoundContractRaw, account]);
+  }, [vaultContractRaw, account]);
 
   // ETH Contract
   const { contract: ethContractRaw } = useContract({
@@ -83,7 +83,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
     if (
       !account ||
       !selectedRoundState?.address ||
-      !optionRoundContract ||
+      !vaultContract ||
       !ethContract ||
       !state.bidPrice ||
       !state.bidAmount ||
@@ -101,16 +101,12 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
       selectedRoundState.address.toString(),
       num.toBigInt(totalWei),
     );
-    const bidCall = optionRoundContract.populateTransaction.place_bid(
+    const bidCall = vaultContract.populateTransaction.place_bid(
       BigInt(state.bidAmount),
       parseUnits(state.bidPrice, "gwei"),
     );
 
-    if (
-      approveCall &&
-      BigInt(allowance) < BigInt(needsApproving)
-      // && totalWei < BigInt(balance)
-    )
+    if (approveCall && BigInt(allowance) < BigInt(needsApproving))
       calls.push(approveCall);
     if (bidCall) calls.push(bidCall);
 

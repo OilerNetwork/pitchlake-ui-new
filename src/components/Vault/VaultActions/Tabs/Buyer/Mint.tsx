@@ -7,8 +7,7 @@ import { useTransactionContext } from "@/context/TransactionProvider";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useOBState from "@/hooks/vault_v2/states/useOBState";
-import useRoundState from "@/hooks/vault_v2/states/useRoundState";
-import useOptionRoundActions from "@/hooks/vault_v2/actions/useOptionRoundActions";
+import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
 
 interface MintProps {
   showConfirmation: (
@@ -19,16 +18,17 @@ interface MintProps {
 }
 
 const Mint: React.FC<MintProps> = ({ showConfirmation }) => {
-
-  const {selectedRoundAddress} = useVaultState()  
-  const selectedRoundState = useRoundState(selectedRoundAddress)
-  const selectedRoundBuyerState = useOBState(selectedRoundAddress)
-  const roundActions = useOptionRoundActions(selectedRoundAddress);
+  const { selectedRoundAddress } = useVaultState();
+  const selectedRoundBuyerState = useOBState(selectedRoundAddress);
+  const vaultActions = useVaultActions();
   const { address, account } = useAccount();
   const { pendingTx } = useTransactionContext();
 
   const handleMintOptions = async (): Promise<void> => {
-    address && (await roundActions?.tokenizeOptions());
+    address &&
+      (await vaultActions?.mintOptions({
+        roundAddress: selectedRoundAddress ? selectedRoundAddress : "0x0",
+      }));
   };
 
   const handleSubmit = () => {

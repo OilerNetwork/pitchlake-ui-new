@@ -8,9 +8,9 @@ import { useTransactionContext } from "@/context/TransactionProvider";
 import useERC20 from "@/hooks/erc20/useERC20";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
-import useOptionRoundActions from "@/hooks/vault_v2/actions/useOptionRoundActions";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import useOBState from "@/hooks/vault_v2/states/useOBState";
+import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
 
 interface ExerciseProps {
   showConfirmation: (
@@ -22,12 +22,10 @@ interface ExerciseProps {
 
 const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
   const { address, account } = useAccount();
-  const {
-    selectedRoundAddress
-  } = useVaultState()
-  const selectedRoundState = useRoundState(selectedRoundAddress)
-  const selectedRoundBuyerState = useOBState(selectedRoundAddress)
-  const roundActions = useOptionRoundActions(selectedRoundAddress);
+  const { selectedRoundAddress } = useVaultState();
+  const selectedRoundState = useRoundState(selectedRoundAddress);
+  const selectedRoundBuyerState = useOBState(selectedRoundAddress);
+  const vaultActions = useVaultActions();
   const { pendingTx } = useTransactionContext();
 
   const { balance } = useERC20(selectedRoundState?.address as `0x${string}`);
@@ -43,7 +41,10 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
   const payoutBalanceEth = formatEther(payoutBalanceWei);
 
   const handleExerciseOptions = async (): Promise<void> => {
-    address && (await roundActions?.exerciseOptions());
+    address &&
+      (await vaultActions?.exerciseOptions({
+        roundAddress: selectedRoundAddress ? selectedRoundAddress : "0x0",
+      }));
   };
 
   const handleSubmit = () => {
