@@ -61,17 +61,17 @@ const HistoryItem: React.FC<{
       {roundState === "Auctioning" && (
         <Hoverable
           dataId="openUpdateBidPanel"
-          className="edit-button bg-[#262626] p-2 rounded-lg cursor-pointer"
+          className="edit-button flex flex-row items-center justify-center bg-[#0D0D0D] border border-[1px] border-[#262626] p-2 rounded-lg cursor-pointer w-[40px] h-[40px]"
         >
           <button
-            className="edit-button"
+            className="edit-button flex flex-row items-center justify-center "
             aria-label="edit bid"
             onClick={() => {
               setBidToEdit({ item });
               setIsTabsHidden(true);
             }}
           >
-            <SquarePen size={20} className="text-[#E2E2E2]" />
+            <SquarePen size={20} className="text-[#E2E2E2]" stroke="#F5EBB8" />
           </button>
         </Hoverable>
       )}
@@ -88,8 +88,8 @@ const History: React.FC<HistoryProps> = ({
 }) => {
   const explorer = useExplorer();
   const { pendingTx } = useTransactionContext();
-  const {selectedRoundAddress} = useVaultState()
-  const selectedRoundState = useRoundState(selectedRoundAddress)
+  const { selectedRoundAddress } = useVaultState();
+  const selectedRoundState = useRoundState(selectedRoundAddress);
 
   const [modalState, setModalState] = useState<{
     show: boolean;
