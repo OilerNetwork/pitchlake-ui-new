@@ -10,7 +10,7 @@ import { useDemoTime } from "@/lib/demo/useDemoTime";
 import { DemoFossilCallParams } from "@/app/api/sendMockFossilCallback/route";
 
 // Will only be for demo in near future, cron job will take care of this otherwise
-const StateTransition2 = ({
+const DemoStateTransition = ({
   isPanelOpen,
   setModalState,
 }: {
@@ -59,40 +59,11 @@ const StateTransition2 = ({
     } else if (roundState === "Auctioning") {
       await vaultActions.endAuction();
     } else if (roundState === "Running") {
-      const vaultAddress = vaultState.address;
-
-      const body: DemoFossilCallParams = {
-        vaultAddress,
+      await vaultActions.demoFossilCallback({
+        vaultAddress: vaultState.address,
         roundId: selectedRoundState.roundId.toString(),
         toTimestamp: selectedRoundState.optionSettleDate.toString(),
-      };
-
-      try {
-        const response = await fetch("/api/sendMockFossilCallback", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(body),
-        });
-
-        if (!response.ok) {
-          alert("Txn failed to send, try again in a couple seconds");
-          throw new Error(
-            `Failed to send mocked Fossil request from client side: ${response.status}`,
-          );
-        } else {
-          const resp = await response.json();
-          alert("Txn sent: " + resp.tx_hash);
-        }
-      } catch (error) {
-        console.error(
-          "Failed to send mocked Fossil request from client side",
-          error,
-        );
-      }
-
-      //      await vaultActions.settleOptionRound();
+      });
     }
 
     setModalState((prev: any) => ({
@@ -168,4 +139,4 @@ const StateTransition2 = ({
   );
 };
 
-export default StateTransition2;
+export default DemoStateTransition;
