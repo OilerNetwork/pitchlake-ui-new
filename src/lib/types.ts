@@ -115,7 +115,15 @@ export type VaultActionsType = {
   startAuction: () => Promise<void>;
   endAuction: () => Promise<void>;
   settleOptionRound: () => Promise<void>;
-  demoFossilCallback: (fossilArgs: DemoFossilCallParams) => Promise<void>;
+  demoFossilCallback: (fossilArgs: DemoFossilCallParams) => Promise<boolean>;
+  sendFossilRequest: (fossilRequest: SendFossiLRequestParams) => Promise<void>;
+};
+
+export type SendFossiLRequestParams = {
+  targetTimestamp: number;
+  roundDuration: number;
+  clientAddress: string;
+  vaultAddress: string;
 };
 
 export type OptionRoundStateType = {
