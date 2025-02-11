@@ -4,11 +4,14 @@ import Exercise from "@/components/Vault/VaultActions/Tabs/Buyer/Exercise";
 import { useAccount } from "@starknet-react/core";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import useERC20 from "@/hooks/erc20/useERC20";
-import { TestWrapper, renderWithProviders } from "../../../../../utils/TestWrapper";
+import {
+  TestWrapper,
+  renderWithProviders,
+} from "../../../../../utils/TestWrapper";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import useOBState from "@/hooks/vault_v2/states/useOBState";
-import useOptionRoundActions from "@/hooks/vault_v2/actions/useOptionRoundActions";
+import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
 import { HelpProvider } from "@/context/HelpProvider";
 
 // Mock the new context
@@ -17,12 +20,14 @@ jest.mock("@/context/NewProvider", () => ({
     conn: "rpc",
     wsData: {
       wsOptionBuyerStates: [],
-      wsRoundStates: [{
-        roundId: "1",
-        startTimestamp: "1000",
-        duration: "1000",
-        roundState: "Open",
-      }],
+      wsRoundStates: [
+        {
+          roundId: "1",
+          startTimestamp: "1000",
+          duration: "1000",
+          roundState: "Open",
+        },
+      ],
     },
     mockData: {
       optionBuyerStates: [],
@@ -58,7 +63,7 @@ jest.mock("@/hooks/vault_v2/states/useRoundState", () => jest.fn());
 
 jest.mock("@/hooks/vault_v2/states/useOBState", () => jest.fn());
 
-jest.mock("@/hooks/vault_v2/actions/useOptionRoundActions", () => jest.fn());
+jest.mock("@/hooks/vault_v2/actions/useVaultActions", () => jest.fn());
 
 jest.mock("@/lang/en/help.json", () => ({
   exerciseButton: {
@@ -72,11 +77,7 @@ describe("Exercise Component", () => {
   const mockExerciseOptions = jest.fn();
 
   const renderWithProviders = (ui: React.ReactElement) => {
-    return render(
-      <HelpProvider>
-        {ui}
-      </HelpProvider>
-    );
+    return render(<HelpProvider>{ui}</HelpProvider>);
   };
 
   beforeEach(() => {
@@ -109,14 +110,14 @@ describe("Exercise Component", () => {
       balance: "100",
     });
 
-    (useOptionRoundActions as jest.Mock).mockReturnValue({
+    (useVaultActions as jest.Mock).mockReturnValue({
       exerciseOptions: mockExerciseOptions,
     });
   });
 
   it("renders with initial state", () => {
     renderWithProviders(<Exercise showConfirmation={mockShowConfirmation} />);
-    
+
     const content = screen.getByText(/You currently have/i);
     expect(content).toBeInTheDocument();
     expect(content).toHaveTextContent(/200/);
@@ -135,7 +136,7 @@ describe("Exercise Component", () => {
     expect(mockShowConfirmation).toHaveBeenCalledWith(
       "Exercise",
       expect.anything(),
-      expect.any(Function)
+      expect.any(Function),
     );
   });
 
@@ -146,7 +147,9 @@ describe("Exercise Component", () => {
       account: null,
     });
 
-    const { unmount } = renderWithProviders(<Exercise showConfirmation={mockShowConfirmation} />);
+    const { unmount } = renderWithProviders(
+      <Exercise showConfirmation={mockShowConfirmation} />,
+    );
     expect(screen.getByRole("button", { name: "Exercise Now" })).toBeDisabled();
     unmount();
 
@@ -159,7 +162,9 @@ describe("Exercise Component", () => {
       pendingTx: true,
     });
 
-    const { unmount: unmount2 } = renderWithProviders(<Exercise showConfirmation={mockShowConfirmation} />);
+    const { unmount: unmount2 } = renderWithProviders(
+      <Exercise showConfirmation={mockShowConfirmation} />,
+    );
     expect(screen.getByRole("button", { name: "Exercise Now" })).toBeDisabled();
     unmount2();
 
@@ -178,4 +183,5 @@ describe("Exercise Component", () => {
     renderWithProviders(<Exercise showConfirmation={mockShowConfirmation} />);
     expect(screen.getByRole("button", { name: "Exercise Now" })).toBeDisabled();
   });
-}); 
+});
+

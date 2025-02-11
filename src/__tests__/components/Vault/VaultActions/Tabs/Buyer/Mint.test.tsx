@@ -2,13 +2,12 @@ import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import Mint from "@/components/Vault/VaultActions/Tabs/Buyer/Mint";
 import { TestWrapper } from "../../../../../utils/TestWrapper";
-import useOptionRoundActions from "@/hooks/vault_v2/actions/useOptionRoundActions";
+import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
 import useOptionBuyerStateRPC from "@/hooks/vault_v2/rpc/useOptionBuyerStateRPC";
 import useOBState from "@/hooks/vault_v2/states/useOBState";
-import { useAccount } from "@starknet-react/core";
 
 // Mock the hooks
-jest.mock("@/hooks/vault_v2/actions/useOptionRoundActions", () => ({
+jest.mock("@/hooks/vault_v2/actions/useVaultActions", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
@@ -45,27 +44,29 @@ jest.mock("@/context/NewProvider", () => ({
         roundAddress: "0x123",
         deploymentDate: "1234567890",
       },
-      wsOptionRoundStates: [{
-        address: "0x123",
-        alpha: "1000",
-        strikeLevel: "0",
-        ethAddress: "0x456",
-        fossilClientAddress: "0x789",
-        currentRoundId: "1",
-        lockedBalance: "1000000000000000000",
-        unlockedBalance: "2000000000000000000",
-        stashedBalance: "0",
-        queuedBps: "0",
-        roundAddress: "0x123",
-        deploymentDate: "1234567890",
-      }],
-      wsOptionBuyerStates: []
+      wsOptionRoundStates: [
+        {
+          address: "0x123",
+          alpha: "1000",
+          strikeLevel: "0",
+          ethAddress: "0x456",
+          fossilClientAddress: "0x789",
+          currentRoundId: "1",
+          lockedBalance: "1000000000000000000",
+          unlockedBalance: "2000000000000000000",
+          stashedBalance: "0",
+          queuedBps: "0",
+          roundAddress: "0x123",
+          deploymentDate: "1234567890",
+        },
+      ],
+      wsOptionBuyerStates: [],
     },
     mockData: {
       optionRoundStates: [],
-      optionBuyerStates: []
-    }
-  })
+      optionBuyerStates: [],
+    },
+  }),
 }));
 
 type ContractFunctionName =
@@ -84,34 +85,38 @@ type ContractFunctionName =
 jest.mock("@starknet-react/core", () => ({
   useAccount: jest.fn().mockReturnValue({
     account: "0x123",
-    address: "0x123"
+    address: "0x123",
   }),
   useContract: jest.fn(() => ({
     contract: {
       typedv2: jest.fn().mockReturnValue({
         connect: jest.fn(),
         withdraw: jest.fn().mockResolvedValue({
-          transaction_hash: "0x123"
-        })
-      })
-    }
+          transaction_hash: "0x123",
+        }),
+      }),
+    },
   })),
-  useContractRead: jest.fn().mockImplementation(({ functionName }: { functionName: ContractFunctionName }) => {
-    const mockData: Record<ContractFunctionName, { data: string }> = {
-      get_alpha: { data: "1000" },
-      get_strike_level: { data: "0" },
-      get_eth_address: { data: "0x123" },
-      get_fossil_client_address: { data: "0x456" },
-      get_current_round_id: { data: "1" },
-      get_vault_locked_balance: { data: "1000" },
-      get_vault_unlocked_balance: { data: "2000" },
-      get_vault_stashed_balance: { data: "500" },
-      get_vault_queued_bps: { data: "100" },
-      get_round_address: { data: "0x789" },
-      get_deployment_date: { data: "1000000" }
-    };
-    return mockData[functionName] || { data: undefined };
-  })
+  useContractRead: jest
+    .fn()
+    .mockImplementation(
+      ({ functionName }: { functionName: ContractFunctionName }) => {
+        const mockData: Record<ContractFunctionName, { data: string }> = {
+          get_alpha: { data: "1000" },
+          get_strike_level: { data: "0" },
+          get_eth_address: { data: "0x123" },
+          get_fossil_client_address: { data: "0x456" },
+          get_current_round_id: { data: "1" },
+          get_vault_locked_balance: { data: "1000" },
+          get_vault_unlocked_balance: { data: "2000" },
+          get_vault_stashed_balance: { data: "500" },
+          get_vault_queued_bps: { data: "100" },
+          get_round_address: { data: "0x789" },
+          get_deployment_date: { data: "1000000" },
+        };
+        return mockData[functionName] || { data: undefined };
+      },
+    ),
 }));
 
 // Mock the Icons component
@@ -121,7 +126,9 @@ jest.mock("@/components/Icons", () => ({
 
 describe("Mint Component", () => {
   const mockShowConfirmation = jest.fn();
-  const mockTokenizeOptions = jest.fn().mockImplementation(() => Promise.resolve());
+  const mockTokenizeOptions = jest
+    .fn()
+    .mockImplementation(() => Promise.resolve());
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -131,8 +138,8 @@ describe("Mint Component", () => {
     (useOBState as jest.Mock).mockReturnValue({
       mintableOptions: "1000",
     });
-    (useOptionRoundActions as jest.Mock).mockReturnValue({
-      tokenizeOptions: mockTokenizeOptions,
+    (useVaultActions as jest.Mock).mockReturnValue({
+      mintOptions: mockTokenizeOptions,
     });
   });
 
@@ -140,21 +147,21 @@ describe("Mint Component", () => {
     render(
       <TestWrapper>
         <Mint showConfirmation={mockShowConfirmation} />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
     // Check initial render
     expect(screen.getByTestId("mint-icon")).toBeInTheDocument();
     expect(screen.getByText("1,000")).toBeInTheDocument();
-    
+
     // Initiate mint
     fireEvent.click(screen.getByRole("button", { name: "Mint Now" }));
-    
+
     // Verify confirmation modal was shown
     expect(mockShowConfirmation).toHaveBeenCalledWith(
       "Mint",
       expect.anything(),
-      expect.any(Function)
+      expect.any(Function),
     );
 
     // Complete mint flow
@@ -162,7 +169,8 @@ describe("Mint Component", () => {
     await act(async () => {
       await onConfirm();
     });
-    
+
     expect(mockTokenizeOptions).toHaveBeenCalled();
   });
-}); 
+});
+
