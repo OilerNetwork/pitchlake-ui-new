@@ -9,7 +9,12 @@ import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import { useChartContext } from "@/context/ChartProvider";
 import { useNewContext } from "@/context/NewProvider";
 import { useDemoTime } from "@/lib/demo/useDemoTime";
-import { DemoRoundDataType, getDemoRoundData } from "@/lib/demo/utils";
+import {
+  DemoFossilCallbackDataType,
+  DemoRoundDataType,
+  getDemoFossilCallbackData,
+  getDemoRoundData,
+} from "@/lib/demo/utils";
 import demoGasData from "@/lib/demo/demo-gas-data.json";
 
 export const useChart = () => {
@@ -104,7 +109,8 @@ export const useChart = () => {
     /// DEMO ///
     else {
       if (!demoNow) return { gasData: [] };
-      const demoRoundData: DemoRoundDataType = getDemoRoundData(selectedRound);
+      const demoRoundData: DemoFossilCallbackDataType =
+        getDemoFossilCallbackData(selectedRound);
       const roundStart = Number(demoRoundData.deploymentDate);
       const demoXMax = Number(demoRoundData.optionSettleDate);
       const demoData = demoGasData.filter((d) => d.timestamp <= demoXMax);

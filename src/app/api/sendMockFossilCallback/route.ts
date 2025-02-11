@@ -1,7 +1,7 @@
 "use server";
 
 import { NextResponse } from "next/server";
-import { getDemoRoundData } from "@/lib/demo/utils";
+import { getDemoFossilCallbackData, getDemoRoundData } from "@/lib/demo/utils";
 import { Account, CairoUint256, Contract, Provider } from "starknet";
 import { vaultABI } from "@/lib/abi";
 import { FossilCallbackArgs, L1Data } from "@/lib/types";
@@ -50,12 +50,11 @@ export async function POST(request: Request): Promise<Response> {
   const vaultContract = new Contract(vaultABI, vaultAddress, account);
 
   // Mock the fossil client callback
-  const { settlementPrice, volatility, reservePrice } =
-    getDemoRoundData(roundId);
+  const { twap, volatility, reservePrice } = getDemoFossilCallbackData(roundId);
 
   const args: FossilCallbackArgs = {
     l1_data: {
-      twap: { low: settlementPrice, high: 0 },
+      twap: { low: twap, high: 0 },
       volatility,
       reserve_price: { low: reservePrice, high: 0 },
     },
