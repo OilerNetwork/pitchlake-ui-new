@@ -198,6 +198,10 @@ const useMockVault = ({ address }: { address?: string }) => {
     });
   };
 
+  const demoFossilCallback = async () => {
+    await settleOptionRound();
+  };
+
   const vaultActions: VaultActionsType = {
     // User actions
     depositLiquidity,
@@ -212,6 +216,7 @@ const useMockVault = ({ address }: { address?: string }) => {
     refundUnusedBids,
     mintOptions,
     exerciseOptions,
+    demoFossilCallback,
   };
 
   const selectedRoundAddress = useMemo(() => {

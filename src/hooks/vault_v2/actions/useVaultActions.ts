@@ -7,10 +7,16 @@ import {
   WithdrawLiquidityArgs,
   QueueArgs,
   CollectArgs,
+  PlaceBidArgs,
+  UpdateBidArgs,
+  RefundBidsArgs,
+  MintOptionsArgs,
+  ExerciseOptionsArgs,
 } from "@/lib/types";
 import { useCallback, useMemo } from "react";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useNewContext } from "@/context/NewProvider";
+import { DemoFossilCallParams } from "@/app/api/sendMockFossilCallback/route";
 const useVaultActions = () => {
   const { vaultAddress } = useNewContext();
   const { setPendingTx } = useTransactionContext();
@@ -41,7 +47,16 @@ const useVaultActions = () => {
   const callContract = useCallback(
     (functionName: string) =>
       async (
-        args?: DepositArgs | WithdrawLiquidityArgs | QueueArgs | CollectArgs,
+        args?:
+          | DepositArgs
+          | WithdrawLiquidityArgs
+          | QueueArgs
+          | CollectArgs
+          | PlaceBidArgs
+          | UpdateBidArgs
+          | RefundBidsArgs
+          | MintOptionsArgs
+          | ExerciseOptionsArgs,
       ) => {
         if (!typedContract) return;
         let argsData;
@@ -65,6 +80,8 @@ const useVaultActions = () => {
       },
     [typedContract, account, provider, setPendingTx],
   );
+
+  /// LP
 
   const depositLiquidity = useCallback(
     async (depositArgs: DepositArgs) => {
@@ -94,6 +111,8 @@ const useVaultActions = () => {
     [callContract],
   );
 
+  // STATE TRANSITIONS
+
   const startAuction = useCallback(async () => {
     await callContract("start_auction")();
   }, [callContract]);
@@ -102,6 +121,43 @@ const useVaultActions = () => {
     await callContract("end_auction")();
   }, [callContract]);
 
+  const demoFossilCallback = useCallback(
+    async ({ roundId, toTimestamp }: DemoFossilCallParams) => {
+      const body: DemoFossilCallParams = {
+        vaultAddress: vaultAddress ? vaultAddress : "0x0",
+        roundId,
+        toTimestamp,
+      };
+
+      try {
+        const response = await fetch("/api/sendMockFossilCallback", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+
+        if (!response.ok) {
+          alert("Txn failed to send, try again in a couple seconds");
+          throw new Error(
+            `Failed to send mocked Fossil request from client side: ${response.status}`,
+          );
+        } else {
+          const resp = await response.json();
+          alert("Txn sent: " + resp.tx_hash);
+        }
+      } catch (error) {
+        console.error(
+          "Failed to send mocked Fossil request from client side",
+          error,
+        );
+      }
+    },
+    [callContract],
+  );
+
+  // @NOTE: rm and consider adding demo_fossil_callback to actions
   const settleOptionRound = useCallback(async () => {
     try {
       await callContract("settle_round")();
@@ -109,6 +165,42 @@ const useVaultActions = () => {
       console.log(error);
     }
   }, [callContract]);
+
+  // OB
+  const placeBid = useCallback(
+    async (args: PlaceBidArgs) => {
+      await callContract("place_bid")(args);
+    },
+    [callContract],
+  );
+
+  const updateBid = useCallback(
+    async (args: UpdateBidArgs) => {
+      await callContract("update_bid")(args);
+    },
+    [callContract],
+  );
+
+  const refundUnusedBids = useCallback(
+    async (args: RefundBidsArgs) => {
+      await callContract("refund_unused_bids")(args);
+    },
+    [callContract],
+  );
+
+  const mintOptions = useCallback(
+    async (args: MintOptionsArgs) => {
+      await callContract("mint_options")(args);
+    },
+    [callContract],
+  );
+
+  const exerciseOptions = useCallback(
+    async (args: ExerciseOptionsArgs) => {
+      await callContract("exercise_options")(args);
+    },
+    [callContract],
+  );
 
   //State Transition
 
@@ -119,7 +211,13 @@ const useVaultActions = () => {
     queueWithdrawal,
     startAuction,
     endAuction,
+    demoFossilCallback,
     settleOptionRound,
+    placeBid,
+    updateBid,
+    refundUnusedBids,
+    mintOptions,
+    exerciseOptions,
   } as VaultActionsType;
 };
 

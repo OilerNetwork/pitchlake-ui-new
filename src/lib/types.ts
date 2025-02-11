@@ -1,3 +1,4 @@
+import { DemoFossilCallParams } from "@/app/api/sendMockFossilCallback/route";
 import { Account, CairoCustomEnum } from "starknet";
 
 export type FossilParams = {
@@ -114,6 +115,7 @@ export type VaultActionsType = {
   startAuction: () => Promise<void>;
   endAuction: () => Promise<void>;
   settleOptionRound: () => Promise<void>;
+  demoFossilCallback: (fossilArgs: DemoFossilCallParams) => Promise<void>;
 };
 
 export type OptionRoundStateType = {
