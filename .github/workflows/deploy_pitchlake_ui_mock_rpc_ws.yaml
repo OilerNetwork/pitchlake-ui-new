@@ -43,34 +43,9 @@ permissions:
   contents: write
 
 jobs:
-  checkout_and_create_password:
+  deploy_mock:
     runs-on: ubuntu-latest
     environment: staging
-    # outputs:
-    #   image_uri: ${{ steps.build-image.outputs.image_uri }}
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # - name: Check if Docker is installed
-      #   run: |
-      #     if ! command -v docker &> /dev/null
-      #     then
-      #       sudo apt-get update
-      #       sudo apt-get install -y docker.io
-      #       sudo apt-get install -y docker-compose
-      #     fi
-
-      - name: Install Apache2-utils (for htpasswd)
-        run: sudo apt-get install -y apache2-utils
-
-      - name: Create htpasswd file
-        run: htpasswd -bc .htpasswd pitchlake ${{ secrets.APPLICATION_PASSWORD }}
-
-  deploy_mock:
-    needs: checkout_and_create_password
-    runs-on: ubuntu-latest
     outputs:
       image_uri: ${{ steps.build-image-mock.outputs.image_uri }}
     
@@ -86,6 +61,12 @@ jobs:
             sudo apt-get install -y docker.io
             sudo apt-get install -y docker-compose
           fi
+
+      - name: Install Apache2-utils (for htpasswd)
+        run: sudo apt-get install -y apache2-utils
+  
+      - name: Create htpasswd file
+        run: htpasswd -bc .htpasswd pitchlake ${{ secrets.APPLICATION_PASSWORD }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -150,8 +131,8 @@ jobs:
           wait-for-service-stability: true
 
   deploy_rpc:
-    needs: checkout_and_create_password
     runs-on: ubuntu-latest
+    environment: staging
     outputs:
       image_uri: ${{ steps.build-image-rpc.outputs.image_uri }}
     
@@ -167,6 +148,12 @@ jobs:
             sudo apt-get install -y docker.io
             sudo apt-get install -y docker-compose
           fi
+
+      - name: Install Apache2-utils (for htpasswd)
+        run: sudo apt-get install -y apache2-utils
+  
+      - name: Create htpasswd file
+        run: htpasswd -bc .htpasswd pitchlake ${{ secrets.APPLICATION_PASSWORD }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -229,15 +216,15 @@ jobs:
           wait-for-service-stability: true
 
   deploy_ws:
-    needs: checkout_and_create_password
     runs-on: ubuntu-latest
+    environment: staging
     outputs:
       image_uri: ${{ steps.build-image-ws.outputs.image_uri }}
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: Check if Docker is installed
         run: |
           if ! command -v docker &> /dev/null
@@ -246,7 +233,13 @@ jobs:
             sudo apt-get install -y docker.io
             sudo apt-get install -y docker-compose
           fi
-          
+
+      - name: Install Apache2-utils (for htpasswd)
+        run: sudo apt-get install -y apache2-utils
+  
+      - name: Create htpasswd file
+        run: htpasswd -bc .htpasswd pitchlake ${{ secrets.APPLICATION_PASSWORD }}          
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
