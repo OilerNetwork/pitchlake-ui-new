@@ -272,7 +272,10 @@ jobs:
           docker push $IMAGE_URI
 
       - name: Download task definition
+        env:
+          TASK_NAME_WS: ${{ env.TASK_NAME_WS }}
         run: |
+          echo "TASK_NAME_WS=$TASK_NAME_WS"
           aws ecs describe-task-definition --task-definition ${{ env.TASK_NAME_WS }} --query taskDefinition > task-definition-ws.json
 
       - name: Log task definition
