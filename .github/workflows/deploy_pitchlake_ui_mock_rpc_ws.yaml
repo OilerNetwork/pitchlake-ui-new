@@ -43,7 +43,7 @@ permissions:
   contents: write
 
 jobs:
-  checkout_login:
+  checkout_and_create_password:
     runs-on: ubuntu-latest
     environment: staging
     outputs:
@@ -68,18 +68,18 @@ jobs:
       - name: Create htpasswd file
         run: htpasswd -bc .htpasswd pitchlake ${{ secrets.APPLICATION_PASSWORD }}
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::654654236251:role/terraform-20241003185909187100000001
-          role-session-name: Github
-          aws-region: ${{ env.AWS_REGION }}
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     role-to-assume: arn:aws:iam::654654236251:role/terraform-20241003185909187100000001
+      #     role-session-name: Github
+      #     aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: "true"
+      # - name: Login to Amazon ECR
+      #   id: login-ecr
+      #   uses: aws-actions/amazon-ecr-login@v2
+      #   with:
+      #     mask-password: "true"
 
       # - name: Build, tag, and push image to Amazon ECR
       #   id: build-image
@@ -110,7 +110,7 @@ jobs:
       #     docker push $IMAGE_URI
 
   deploy_mock:
-    needs: checkout_login
+    needs: checkout_and_create_password
     runs-on: ubuntu-latest
     
     steps:
@@ -120,6 +120,12 @@ jobs:
           role-to-assume: arn:aws:iam::654654236251:role/terraform-20241003185909187100000001
           role-session-name: Github
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: "true"
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
@@ -171,7 +177,7 @@ jobs:
           wait-for-service-stability: true
 
   deploy_rpc:
-    needs: checkout_login
+    needs: checkout_and_create_password
     runs-on: ubuntu-latest
     
     steps:
@@ -181,6 +187,12 @@ jobs:
           role-to-assume: arn:aws:iam::654654236251:role/terraform-20241003185909187100000001
           role-session-name: Github
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: "true"
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
@@ -230,7 +242,7 @@ jobs:
           wait-for-service-stability: true
 
   deploy_ws:
-    needs: checkout_login
+    needs: checkout_and_create_password
     runs-on: ubuntu-latest
     
     steps:
@@ -240,6 +252,12 @@ jobs:
           role-to-assume: arn:aws:iam::654654236251:role/terraform-20241003185909187100000001
           role-session-name: Github
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: "true"
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
