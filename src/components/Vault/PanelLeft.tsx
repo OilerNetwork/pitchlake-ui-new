@@ -700,7 +700,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                     dataId="leftPanelRoundPayout"
                     className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
                   >
-                    <p className="text-[#BFBFBF]">Payout</p>
+                    <p className="text-[#BFBFBF]">Payout Per Option</p>
                     <p>
                       {selectedRoundState?.payoutPerOption &&
                         Number(
