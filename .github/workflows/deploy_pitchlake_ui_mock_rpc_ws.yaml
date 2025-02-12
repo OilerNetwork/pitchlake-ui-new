@@ -103,7 +103,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
         run: |
-          IMAGE_TAG=pitchlake-ui-${{ github.sha }}
+          IMAGE_TAG=pitchlake-ui-mock-${{ github.sha }}
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
           docker buildx build \
@@ -181,7 +181,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
         run: |
-          IMAGE_TAG=pitchlake-ui-${{ github.sha }}
+          IMAGE_TAG=pitchlake-ui-rpc-${{ github.sha }}
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
           docker buildx build \
@@ -257,7 +257,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
         run: |
-          IMAGE_TAG=pitchlake-ui-${{ github.sha }}
+          IMAGE_TAG=pitchlake-ui-ws-${{ github.sha }}
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
           docker buildx build \
