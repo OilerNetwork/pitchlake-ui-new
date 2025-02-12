@@ -120,7 +120,7 @@ jobs:
         with:
           task-definition: task-definition-mock.json
           container-name: ${{ env.CONTAINER_NAME_MOCK }}
-          image: ${{ needs.build_and_push.outputs.image_uri }}
+          image: ${{ needs.deploy_mock.outputs.image_uri }}
 
       - name: Deploy Mock service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
@@ -205,7 +205,7 @@ jobs:
         with:
           task-definition: task-definition-rpc.json
           container-name: ${{ env.CONTAINER_NAME_RPC }}
-          image: ${{ needs.build_and_push.outputs.image_uri }}
+          image: ${{ needs.deploy_rpc.outputs.image_uri }}
 
       - name: Deploy RPC service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
@@ -290,7 +290,7 @@ jobs:
         with:
           task-definition: task-definition-ws.json
           container-name: ${{ env.CONTAINER_NAME_WS }}
-          image: ${{ needs.build_and_push.outputs.image_uri }}
+          image: ${{ needs.deploy_ws.outputs.image_uri }}
 
       - name: Deploy WS service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
