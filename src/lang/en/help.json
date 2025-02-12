@@ -115,6 +115,10 @@
     "header": "Cap Level",
     "text": "The max percentage above the strike this round will payout."
   },
+  "leftPanelRoundMaxPayout": {
+    "header": "Max Payout",
+    "text": "The maximum payout per option, not including the price paid for each option."
+  },
   "leftPanelRoundStrikePrice": {
     "header": "Strike Price",
     "text": "The basefee TWAP that determines if the options can be exercised upon settlement."
