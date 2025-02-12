@@ -75,6 +75,9 @@ jobs:
       image_uri: ${{ steps.build-image-mock.outputs.image_uri }}
     
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Check if Docker is installed
         run: |
           if ! command -v docker &> /dev/null
@@ -153,6 +156,9 @@ jobs:
       image_uri: ${{ steps.build-image-rpc.outputs.image_uri }}
     
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Check if Docker is installed
         run: |
           if ! command -v docker &> /dev/null
@@ -229,6 +235,9 @@ jobs:
       image_uri: ${{ steps.build-image-ws.outputs.image_uri }}
     
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
       - name: Check if Docker is installed
         run: |
           if ! command -v docker &> /dev/null
