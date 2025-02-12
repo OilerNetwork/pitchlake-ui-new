@@ -122,7 +122,7 @@ jobs:
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          task-definition: ${{ steps.task-def-mock.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE_MOCK }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
@@ -204,7 +204,7 @@ jobs:
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          task-definition: ${{ steps.task-def-rpc.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE_RPC }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
@@ -286,7 +286,7 @@ jobs:
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          task-definition: ${{ steps.task-def-ws.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE_WS }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
