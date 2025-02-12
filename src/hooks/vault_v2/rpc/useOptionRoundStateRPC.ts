@@ -9,229 +9,194 @@ const useOptionRoundStateRPC = (conn: string, address: string | undefined) => {
   const contractData = useMemo(() => {
     if (conn === "mock") return { abi: optionRoundABI, address: undefined };
     else return { abi: optionRoundABI, address: address as `0x${string}` };
-  }, [conn,address]);
+  }, [conn, address]);
   //Read States
 
-  const {data:vaultAddress} = useContractRead({
+  const { data: vaultAddress } = useContractRead({
     ...contractData,
 
     functionName: "get_vault_address",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:roundId} = useContractRead({ 
+  });
+  const { data: roundId } = useContractRead({
     ...contractData,
 
     functionName: "get_round_id",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:roundState} = useContractRead({ 
+  });
+  const { data: roundState } = useContractRead({
     ...contractData,
 
     functionName: "get_state",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:deploymentDate} = useContractRead({ 
+  });
+  const { data: deploymentDate } = useContractRead({
     ...contractData,
 
     functionName: "get_deployment_date",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:auctionStartDate} = useContractRead({ 
+  });
+  const { data: auctionStartDate } = useContractRead({
     ...contractData,
 
     functionName: "get_auction_start_date",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:auctionEndDate} = useContractRead({ 
+  });
+  const { data: auctionEndDate } = useContractRead({
     ...contractData,
 
     functionName: "get_auction_end_date",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:optionSettleDate} = useContractRead({ 
+  });
+  const { data: optionSettleDate } = useContractRead({
     ...contractData,
 
-      functionName: "get_option_settlement_date",
-    args:[],
+    functionName: "get_option_settlement_date",
+    args: [],
     watch: true,
-    
-  })
-  const {data:treeNonce} = useContractRead({ 
+  });
+  const { data: treeNonce } = useContractRead({
     ...contractData,
 
     functionName: "get_bid_tree_nonce",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:startingLiquidity} = useContractRead({ 
+  });
+  const { data: startingLiquidity } = useContractRead({
     ...contractData,
 
     functionName: "get_starting_liquidity",
-    args:[],
+    args: [],
     watch: true,
-    
-    })
-  const {data:soldLiquidity} = useContractRead({ 
+  });
+  const { data: soldLiquidity } = useContractRead({
     ...contractData,
 
     functionName: "get_sold_liquidity",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:unsoldLiquidity} = useContractRead({ 
+  });
+  const { data: unsoldLiquidity } = useContractRead({
     ...contractData,
 
     functionName: "get_unsold_liquidity",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:reservePrice} = useContractRead({ 
+  });
+  const { data: reservePrice } = useContractRead({
     ...contractData,
 
     functionName: "get_reserve_price",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:strikePrice} = useContractRead({ 
+  });
+  const { data: strikePrice } = useContractRead({
     ...contractData,
 
     functionName: "get_strike_price",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:capLevel} = useContractRead({ 
+  });
+  const { data: capLevel } = useContractRead({
     ...contractData,
 
     functionName: "get_cap_level",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:availableOptions} = useContractRead({ 
+  });
+  const { data: availableOptions } = useContractRead({
     ...contractData,
 
     functionName: "get_options_available",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:optionsSold} = useContractRead({ 
+  });
+  const { data: optionsSold } = useContractRead({
     ...contractData,
 
     functionName: "get_options_sold",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:clearingPrice} = useContractRead({ 
+  });
+  const { data: clearingPrice } = useContractRead({
     ...contractData,
 
     functionName: "get_clearing_price",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:premiums} = useContractRead({ 
+  });
+  const { data: premiums } = useContractRead({
     ...contractData,
 
     functionName: "get_total_premium",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:totalPayout} = useContractRead({ 
+  });
+  const { data: totalPayout } = useContractRead({
     ...contractData,
 
     functionName: "get_total_payout",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-  const {data:settlementPrice} = useContractRead({ 
+  });
+  const { data: settlementPrice } = useContractRead({
     ...contractData,
 
     functionName: "get_settlement_price",
-    args:[],
+    args: [],
     watch: true,
-    
-  })
-
+  });
 
   const performanceLP = useMemo(() => {
-    if(soldLiquidity && premiums && totalPayout){ 
-      return getPerformanceLP(
-        soldLiquidity.toString(),
-        premiums.toString(),
-        totalPayout.toString()
-      );
-    }
-    return "0";
+    return getPerformanceLP(soldLiquidity, premiums, totalPayout);
   }, [soldLiquidity, premiums, totalPayout]);
 
   const performanceOB = useMemo(() => {
-    if(premiums && totalPayout){
-      return getPerformanceOB(
-        premiums.toString(),
-        totalPayout.toString()
-      );
-    }
-    return "0";
+    return getPerformanceOB(premiums, totalPayout);
   }, [premiums, totalPayout]);
 
   return {
-      address,
-      vaultAddress: vaultAddress ? vaultAddress.toString() : "",
-      roundId: roundId ? roundId.toString() : 0,
-      roundState: roundState
-        ? (roundState as unknown as CairoCustomEnum).activeVariant()
-        : "",
-      deploymentDate: deploymentDate ? deploymentDate.toString() : "0",
-      auctionStartDate: auctionStartDate ? auctionStartDate.toString() : "0",
-      auctionEndDate: auctionEndDate ? auctionEndDate.toString() : "0",
-      optionSettleDate: optionSettleDate ? optionSettleDate.toString() : "0",
-      startingLiquidity: startingLiquidity ? startingLiquidity.toString() : 0,
-      soldLiquidity: soldLiquidity ? soldLiquidity.toString() : 0,
-      unsoldLiquidity: unsoldLiquidity ? unsoldLiquidity.toString() : 0,
-      reservePrice: reservePrice ? reservePrice.toString() : 0,
-      strikePrice: strikePrice ? strikePrice.toString() : 0,
-      capLevel: capLevel ? capLevel.toString() : 0,
-      availableOptions: availableOptions ? availableOptions.toString() : 0,
-      optionsSold: optionsSold ? optionsSold.toString() : 0,
-      clearingPrice: clearingPrice ? clearingPrice.toString() : 0,
-      premiums: premiums ? premiums.toString() : 0,
-      settlementPrice: settlementPrice ? settlementPrice.toString() : 0,
-      totalPayout: totalPayout ? totalPayout.toString() : 0,
-      payoutPerOption: totalPayout
-        ? optionsSold
-          ? num.toBigInt(num.toBigInt(optionsSold.toString())) > 0
-            ? num.toBigInt(num.toBigInt(totalPayout.toString())) /
-              num.toBigInt(num.toBigInt(optionsSold.toString()))
-            : 0
+    address,
+    vaultAddress: vaultAddress ? vaultAddress.toString() : "",
+    roundId: roundId ? roundId.toString() : 0,
+    roundState: roundState
+      ? (roundState as unknown as CairoCustomEnum).activeVariant()
+      : "",
+    deploymentDate: deploymentDate ? deploymentDate.toString() : "0",
+    auctionStartDate: auctionStartDate ? auctionStartDate.toString() : "0",
+    auctionEndDate: auctionEndDate ? auctionEndDate.toString() : "0",
+    optionSettleDate: optionSettleDate ? optionSettleDate.toString() : "0",
+    startingLiquidity: startingLiquidity ? startingLiquidity.toString() : "0",
+    soldLiquidity: soldLiquidity ? soldLiquidity.toString() : "0",
+    unsoldLiquidity: unsoldLiquidity ? unsoldLiquidity.toString() : "0",
+    reservePrice: reservePrice ? reservePrice.toString() : "0",
+    strikePrice: strikePrice ? strikePrice.toString() : "0",
+    capLevel: capLevel ? capLevel.toString() : 0,
+    availableOptions: availableOptions ? availableOptions.toString() : 0,
+    optionsSold: optionsSold ? optionsSold.toString() : 0,
+    clearingPrice: clearingPrice ? clearingPrice.toString() : 0,
+    premiums: premiums ? premiums.toString() : 0,
+    settlementPrice: settlementPrice ? settlementPrice.toString() : 0,
+    totalPayout: totalPayout ? totalPayout.toString() : 0,
+    payoutPerOption: totalPayout
+      ? optionsSold
+        ? num.toBigInt(num.toBigInt(optionsSold.toString())) > 0
+          ? num.toBigInt(num.toBigInt(totalPayout.toString())) /
+            num.toBigInt(num.toBigInt(optionsSold.toString()))
           : 0
-        : 0, // replace ?
-      treeNonce: treeNonce ? treeNonce.toString() : 0,
-      performanceLP,
-      performanceOB,
-      //queuedLiquidity: 0, //Add queuedLiquidity (is on vault not round)
-    } as OptionRoundStateType
-
+        : 0
+      : 0, // replace ?
+    treeNonce: treeNonce ? treeNonce.toString() : 0,
+    performanceLP: performanceLP,
+    performanceOB,
+    //queuedLiquidity: 0, //Add queuedLiquidity (is on vault not round)
+  } as OptionRoundStateType;
 };
 
 export default useOptionRoundStateRPC;
