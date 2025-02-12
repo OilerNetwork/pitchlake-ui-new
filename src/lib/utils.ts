@@ -1,8 +1,9 @@
 import { poseidonHashSingle } from "@scure/starknet";
 import { bytesToNumberBE } from "@noble/curves/abstract/utils";
 import { OptionRoundStateType, FossilParams } from "@/lib/types";
-import { num } from "starknet";
+import { num, Result } from "starknet";
 import { FormattedBlockData } from "@/app/api/getFossilGasData/route";
+import { formatUnits } from "ethers";
 
 export const createJobRequestParams = (
   targetTimestamp: number,
@@ -106,35 +107,45 @@ export const getDurationForRound = (
 };
 
 export const getPerformanceLP = (
-  soldLiquidity: bigint | string | number,
-  premiums: bigint | string | number,
-  totalPayout: bigint | string | number,
+  _soldLiquidity: bigint | string | number | undefined | Result,
+  _premiums: bigint | string | number | undefined | Result,
+  _totalPayout: bigint | string | number | undefined | Result,
 ) => {
-  const soldLiq = soldLiquidity ? BigInt(soldLiquidity.toString()) : BigInt(0);
-  const prem = premiums ? BigInt(premiums.toString()) : BigInt(0);
-  const payout = totalPayout ? BigInt(totalPayout.toString()) : BigInt(0);
+  const soldLiquidity = _soldLiquidity
+    ? Number(formatUnits(_soldLiquidity.toString(), "gwei"))
+    : 0;
+  const premiums = _premiums
+    ? Number(formatUnits(_premiums.toString(), "gwei"))
+    : 0;
+  const totalPayout = _totalPayout
+    ? Number(formatUnits(_totalPayout.toString(), "gwei"))
+    : 0;
 
-  if (soldLiq === BigInt(0)) return 0;
+  if (soldLiquidity === 0) return 0;
 
-  const gainLoss = Number(prem) - Number(payout);
-  const percentage = (gainLoss / Number(soldLiq.toString())) * 100.0;
+  const gainLoss = premiums - totalPayout;
+  const percentage = (gainLoss / soldLiquidity) * 100.0;
 
   const sign = percentage > 0 ? "+" : "";
   return `${sign}${percentage.toFixed(2)}`;
 };
 
 export const getPerformanceOB = (
-  premiums: bigint | string | number,
-  totalPayout: bigint | string | number,
+  _premiums: bigint | string | number | undefined | Result,
+  _totalPayout: bigint | string | number | undefined | Result,
 ) => {
-  const prem: number = premiums ? Number(premiums) : 0;
-  const payout: number = totalPayout ? Number(totalPayout) : 0;
+  const premiums = _premiums
+    ? Number(formatUnits(_premiums.toString(), "gwei"))
+    : 0;
+  const totalPayout = _totalPayout
+    ? Number(formatUnits(_totalPayout.toString(), "gwei"))
+    : 0;
 
-  if (prem === 0) {
+  if (premiums === 0) {
     return 0;
   } else {
-    const remainingLiq = payout - prem;
-    const percentage = 100 * (remainingLiq / prem);
+    const remainingLiq = totalPayout - premiums;
+    const percentage = 100 * (remainingLiq / premiums);
 
     const sign = percentage > 0 ? "+" : "";
     return `${sign}${percentage.toFixed(2)}`;
