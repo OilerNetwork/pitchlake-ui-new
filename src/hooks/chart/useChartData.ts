@@ -11,14 +11,11 @@ import { useNewContext } from "@/context/NewProvider";
 import { useDemoTime } from "@/lib/demo/useDemoTime";
 import {
   DemoFossilCallbackDataType,
-  DemoRoundDataType,
   getDemoFossilCallbackData,
-  getDemoRoundData,
 } from "@/lib/demo/utils";
 import demoGasData from "@/lib/demo/demo-gas-data.json";
 
-export const useChart = () => {
-  //const [isExpandedView, setIsExpandedView] = useState<boolean>(false);
+export const useChartData = () => {
   const { conn, selectedRound } = useNewContext();
   const { selectedRoundAddress } = useVaultState();
   const selectedRoundState = useRoundState(selectedRoundAddress);
@@ -58,11 +55,18 @@ export const useChart = () => {
       return block.timestamp <= xMax + 30;
     });
 
+    // Set bounds if there is no fossil data
     if (fossilGasData.length === 0) {
       fossilGasData.push({ timestamp: xMin }, { timestamp: xMax });
-    } else if (fossilGasData.length > 2) {
+    }
+    // If there is fossil data, remove all unconfirmed blocks if timestamp < last fossil block
+    else {
       const cutoff =
-        Math.max(fossilGasData[fossilGasData.length - 2].timestamp, xMin) - 30;
+        Math.max(
+          fossilGasData[fossilGasData.length - (conn === "demo" ? 1 : 2)]
+            .timestamp,
+          xMin,
+        ) - 30;
       filteredFeeHistory = filteredFeeHistory.filter((block) => {
         return block.timestamp >= cutoff;
       });
@@ -146,4 +150,4 @@ export const useChart = () => {
   return { gasData };
 };
 
-export default useChart;
+export default useChartData;

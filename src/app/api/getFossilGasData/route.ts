@@ -4,8 +4,6 @@ import { NextResponse } from "next/server";
 import { formatUnits } from "ethers";
 import { Pool } from "pg";
 
-const MAX_RETURN_BLOCKS = 100;
-
 interface RawBlockData {
   block_number?: number;
   base_fee_per_gas?: string;
