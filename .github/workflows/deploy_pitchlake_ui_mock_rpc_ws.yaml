@@ -273,7 +273,7 @@ jobs:
 
       - name: Download task definition
         run: |
-          aws ecs describe-task-definition --task-definition ${{ env.TASK_NAME }} --query taskDefinition > task-definition-ws.json
+          aws ecs describe-task-definition --task-definition ${{ env.TASK_NAME_WS }} --query taskDefinition > task-definition-ws.json
 
       - name: Log task definition
         run: cat task-definition-ws.json
