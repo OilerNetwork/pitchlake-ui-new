@@ -179,44 +179,44 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
     return { verticalSegments: segments, roundAreas: areas };
   }, [isExpandedView, historicalData, parsedData, fromRound, toRound]);
 
-  // Hover logic
-  const isInChartRef = useRef(false);
-  const hoverTimer = useRef<NodeJS.Timeout | null>(null);
-  const clearHoverTimer = () => {
-    if (hoverTimer.current) {
-      clearTimeout(hoverTimer.current);
-      hoverTimer.current = null;
-    }
-  };
+  //// Hover logic //
+  //const isInChartRef = useRef(false);
+  //const hoverTimer = useRef<NodeJS.Timeout | null>(null);
+  //const clearHoverTimer = () => {
+  //  if (hoverTimer.current) {
+  //    clearTimeout(hoverTimer.current);
+  //    hoverTimer.current = null;
+  //  }
+  //};
 
-  const handleMouseMove = useCallback(
-    (state: any) => {
-      if (!state?.chartX || !state?.chartY || isHoveringHelpBox) return;
+  //const handleMouseMove = useCallback(
+  //  (state: any) => {
+  //    if (!state?.chartX || !state?.chartY || isHoveringHelpBox) return;
 
-      // In chart
-      isInChartRef.current = true;
+  //    // In chart
+  //    isInChartRef.current = true;
 
-      // Clear previous timer
-      if (hoverTimer.current) {
-        clearTimeout(hoverTimer.current);
-      }
+  //    // Clear previous timer
+  //    if (hoverTimer.current) {
+  //      clearTimeout(hoverTimer.current);
+  //    }
 
-      hoverTimer.current = setTimeout(() => {
-        if (isInChartRef.current && !isHoveringHelpBox) {
-          setContent(
-            `Hovering at chart coords: ${state.chartX}, ${state.chartY}`,
-          );
-          setHeader(null);
-        }
-      }, HOVER_DELAY);
-    },
-    [isHoveringHelpBox, setContent],
-  );
+  //    hoverTimer.current = setTimeout(() => {
+  //      if (isInChartRef.current && !isHoveringHelpBox) {
+  //        setContent(
+  //          `Hovering at chart coords: ${state.chartX}, ${state.chartY}`,
+  //        );
+  //        setHeader(null);
+  //      }
+  //    }, HOVER_DELAY);
+  //  },
+  //  [isHoveringHelpBox, setContent],
+  //);
 
-  const handleMouseLeave = useCallback(() => {
-    isInChartRef.current = false;
-    clearHoverTimer();
-  }, [clearHoverTimer]);
+  //const handleMouseLeave = useCallback(() => {
+  //  isInChartRef.current = false;
+  //  clearHoverTimer();
+  //}, [clearHoverTimer]);
 
   // Compute the maximum Y value based on active lines
   const { yMax, yTicks } = useMemo((): { yMax: number; yTicks: number[] } => {
@@ -301,9 +301,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
       return { xTicks: _xTicks, xTickLabels: _xTickLabels };
     }
 
-    const sortedData = [...parsedData].sort(
-      (a, b) => a.timestamp - b.timestamp,
-    );
+    const defaultTickFormat = { label: null };
+
     const filteredRounds = historicalData.rounds.filter(
       (round: any) => round.roundId >= fromRound && round.roundId <= toRound,
     );
@@ -315,8 +314,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
 
       const midpoint = (Number(start) + Number(end)) / 2;
       if (
-        midpoint >= sortedData[1]?.timestamp &&
-        midpoint <= sortedData[sortedData.length - 1]?.timestamp
+        midpoint >= parsedData[1]?.timestamp &&
+        midpoint <= parsedData[parsedData.length - 1]?.timestamp
       ) {
         _xTickLabels[midpoint] = {
           label: `Round ${round.roundId}`,
@@ -332,9 +331,9 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
     const maxTimestamp = Math.max(...timestamps);
 
     _xTicks.push(minTimestamp);
-    _xTickLabels[minTimestamp] = { label: null }; // Will format in custom tick
+    _xTickLabels[minTimestamp] = defaultTickFormat;
     _xTicks.push(maxTimestamp);
-    _xTickLabels[maxTimestamp] = { label: null }; // Will format in custom tick
+    _xTickLabels[maxTimestamp] = defaultTickFormat;
 
     // Ensure ticks are sorted
     _xTicks.sort((a, b) => a - b);
@@ -352,15 +351,18 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
     let color = "#AAA"; // Default color for timestamps
     const tickInfo = xTickLabels[value];
 
+    // xTick is a round ID label
     if (tickInfo && tickInfo.label) {
-      // It's a round ID
       label = tickInfo.label || "";
+
       if (tickInfo.roundId === selectedRound) {
         color = "#ADA478"; // Color for selected round
       } else {
         color = "#524f44"; // color for other rounds
       }
-    } else {
+    }
+    // xTick is a timestamp label
+    else {
       // Format the timestamp
       const date = new Date(value * 1000);
       const range =
@@ -416,8 +418,8 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
         margin={{ left: -20 }}
         data={parsedData}
         syncId="roundChart"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        //        onMouseMove={handleMouseMove}
+        //        onMouseLeave={handleMouseLeave}
       >
         <defs>
           <linearGradient id="capLevelGradient" x1="0" y1="0" x2="0" y2="1">
@@ -617,11 +619,21 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
               stroke={
                 activeLines.CAP_LEVEL
                   ? "none"
-                  : area.roundId === selectedRound
+                  : area.roundId ===
+                      (conn === "demo"
+                        ? getDemoRoundId(selectedRound)
+                        : selectedRound)
                     ? "#ADA478"
                     : "#524F44"
               }
-              fillOpacity={area.roundId === selectedRound ? 0.07 : 0.03}
+              fillOpacity={
+                area.roundId ===
+                (conn === "demo"
+                  ? getDemoRoundId(selectedRound)
+                  : selectedRound)
+                  ? 0.07
+                  : 0.03
+              }
               strokeWidth={2}
               onClick={() => {
                 setIsExpandedView(false);
