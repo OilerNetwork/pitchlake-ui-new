@@ -53,14 +53,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check if Docker is installed
-        run: |
-          if ! command -v docker &> /dev/null
-          then
-            sudo apt-get update
-            sudo apt-get install -y docker.io
-            sudo apt-get install -y docker-compose
-          fi
+      # - name: Check if Docker is installed
+      #   run: |
+      #     if ! command -v docker &> /dev/null
+      #     then
+      #       sudo apt-get update
+      #       sudo apt-get install -y docker.io
+      #       sudo apt-get install -y docker-compose
+      #     fi
 
       - name: Install Apache2-utils (for htpasswd)
         run: sudo apt-get install -y apache2-utils
@@ -75,14 +75,14 @@ jobs:
       image_uri: ${{ steps.build-image-mock.outputs.image_uri }}
     
     steps:
-      # - name: Check if Docker is installed
-      #   run: |
-      #     if ! command -v docker &> /dev/null
-      #     then
-      #       sudo apt-get update
-      #       sudo apt-get install -y docker.io
-      #       sudo apt-get install -y docker-compose
-      #     fi
+      - name: Check if Docker is installed
+        run: |
+          if ! command -v docker &> /dev/null
+          then
+            sudo apt-get update
+            sudo apt-get install -y docker.io
+            sudo apt-get install -y docker-compose
+          fi
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -153,14 +153,14 @@ jobs:
       image_uri: ${{ steps.build-image-rpc.outputs.image_uri }}
     
     steps:
-      # - name: Check if Docker is installed
-      #   run: |
-      #     if ! command -v docker &> /dev/null
-      #     then
-      #       sudo apt-get update
-      #       sudo apt-get install -y docker.io
-      #       sudo apt-get install -y docker-compose
-      #     fi
+      - name: Check if Docker is installed
+        run: |
+          if ! command -v docker &> /dev/null
+          then
+            sudo apt-get update
+            sudo apt-get install -y docker.io
+            sudo apt-get install -y docker-compose
+          fi
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -229,14 +229,14 @@ jobs:
       image_uri: ${{ steps.build-image-ws.outputs.image_uri }}
     
     steps:
-      # - name: Check if Docker is installed
-      #   run: |
-      #     if ! command -v docker &> /dev/null
-      #     then
-      #       sudo apt-get update
-      #       sudo apt-get install -y docker.io
-      #       sudo apt-get install -y docker-compose
-      #     fi
+      - name: Check if Docker is installed
+        run: |
+          if ! command -v docker &> /dev/null
+          then
+            sudo apt-get update
+            sudo apt-get install -y docker.io
+            sudo apt-get install -y docker-compose
+          fi
           
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
