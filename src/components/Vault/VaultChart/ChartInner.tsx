@@ -279,10 +279,10 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
     const step = _yMax / 4;
     const _yTicks = [
       0,
-      parseInt(step.toFixed(1)),
-      parseInt((step * 2).toFixed(1)),
-      parseInt((step * 3).toFixed(1)),
-      parseInt(_yMax.toFixed(1)),
+      Number(step.toFixed(1)),
+      Number((step * 2).toFixed(1)),
+      Number((step * 3).toFixed(1)),
+      Number(_yMax.toFixed(1)),
     ];
 
     return { yMax: _yMax, yTicks: _yTicks };
