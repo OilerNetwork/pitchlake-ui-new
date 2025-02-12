@@ -46,8 +46,8 @@ jobs:
   deploy_mock:
     runs-on: ubuntu-latest
     environment: staging
-    outputs:
-      image_uri: ${{ steps.build-image-mock.outputs.image_uri }}
+    # outputs:
+    #   image_uri: ${{ steps.build-image-mock.outputs.image_uri }}
     
     steps:
       - name: Checkout repository
@@ -87,7 +87,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
         run: |
-          IMAGE_TAG=pitchlake-ui-mock-${{ github.sha }}
+          IMAGE_TAG=pitchlake-ui-${{ github.sha }}
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
           docker buildx build \
@@ -120,7 +120,7 @@ jobs:
         with:
           task-definition: task-definition-mock.json
           container-name: ${{ env.CONTAINER_NAME_MOCK }}
-          image: ${{ needs.deploy_mock.outputs.image_uri }}
+          image: ${{ env.IMAGE_URI }}
 
       - name: Deploy Mock service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
@@ -133,8 +133,8 @@ jobs:
   deploy_rpc:
     runs-on: ubuntu-latest
     environment: staging
-    outputs:
-      image_uri: ${{ steps.build-image-rpc.outputs.image_uri }}
+    # outputs:
+    #   image_uri: ${{ steps.build-image-rpc.outputs.image_uri }}
     
     steps:
       - name: Checkout repository
@@ -174,7 +174,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
         run: |
-          IMAGE_TAG=pitchlake-ui-rpc-${{ github.sha }}
+          IMAGE_TAG=pitchlake-ui-${{ github.sha }}
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
           docker buildx build \
@@ -205,7 +205,7 @@ jobs:
         with:
           task-definition: task-definition-rpc.json
           container-name: ${{ env.CONTAINER_NAME_RPC }}
-          image: ${{ needs.deploy_rpc.outputs.image_uri }}
+          image: ${{ env.IMAGE_URI }}
 
       - name: Deploy RPC service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
@@ -218,8 +218,8 @@ jobs:
   deploy_ws:
     runs-on: ubuntu-latest
     environment: staging
-    outputs:
-      image_uri: ${{ steps.build-image-ws.outputs.image_uri }}
+    # outputs:
+    #   image_uri: ${{ steps.build-image-ws.outputs.image_uri }}
     
     steps:
       - name: Checkout repository
@@ -259,7 +259,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
         run: |
-          IMAGE_TAG=pitchlake-ui-ws-${{ github.sha }}
+          IMAGE_TAG=pitchlake-ui-${{ github.sha }}
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
           docker buildx build \
@@ -290,7 +290,7 @@ jobs:
         with:
           task-definition: task-definition-ws.json
           container-name: ${{ env.CONTAINER_NAME_WS }}
-          image: ${{ needs.deploy_ws.outputs.image_uri }}
+          image: ${{ env.IMAGE_URI }}
 
       - name: Deploy WS service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
