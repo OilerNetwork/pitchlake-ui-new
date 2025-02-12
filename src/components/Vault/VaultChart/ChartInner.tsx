@@ -394,70 +394,6 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
     return value.toFixed(1);
   }, []);
 
-  // Custom Tooltip Component
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const date = new Date(Number(label) * 1000);
-      const dateString = date.toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
-
-      // Create a map to keep track of unique dataKeys
-      const uniqueData = new Map<string, any>();
-      payload.forEach((entry: any) => {
-        if (!uniqueData.has(entry.name)) {
-          uniqueData.set(entry.name, entry);
-        }
-      });
-
-      return (
-        <div className="bg-[#1E1E1E] p-4 rounded-lg shadow-lg">
-          <p className="text-white text-sm mb-2">{dateString}</p>
-          <div className="space-y-2">
-            {Array.from(uniqueData.values()).map((entry: any, index: any) => (
-              <div className="space-y-2" key={index}>
-                {entry?.name === "basefee" ? (
-                  <div className="flex items-center">
-                    <div
-                      className="w-4 h-4 rounded-full mr-2 flex flex-col"
-                      style={{ backgroundColor: entry?.color }}
-                    ></div>
-                    <p className="text-white text-sm">PENDING BLOCK</p>
-                  </div>
-                ) : (
-                  <></>
-                )}
-
-                <div className="flex items-center">
-                  <div
-                    className="w-4 h-4 rounded-full mr-2 flex flex-col"
-                    style={{ backgroundColor: entry?.color }}
-                  ></div>
-                  <p className="text-white text-sm">
-                    {entry?.name?.includes("Basefee")
-                      ? "BASEFEE"
-                      : entry?.name?.includes("Twap")
-                        ? "TWAP"
-                        : entry?.name.replace("_", " ")}
-                    {": "}
-                    {entry?.value !== undefined
-                      ? Number(entry?.value).toFixed(2)
-                      : "N/A"}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
-
   // Handle Loading State
   if (!parsedData || parsedData.length === 0) {
     return (
@@ -699,6 +635,70 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
       </ComposedChart>
     </ResponsiveContainer>
   );
+};
+
+// Custom Tooltip Component
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const date = new Date(Number(label) * 1000);
+    const dateString = date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    // Create a map to keep track of unique dataKeys
+    const uniqueData = new Map<string, any>();
+    payload.forEach((entry: any) => {
+      if (!uniqueData.has(entry.name)) {
+        uniqueData.set(entry.name, entry);
+      }
+    });
+
+    return (
+      <div className="bg-[#1E1E1E] p-4 rounded-lg shadow-lg">
+        <p className="text-white text-sm mb-2">{dateString}</p>
+        <div className="space-y-2">
+          {Array.from(uniqueData.values()).map((entry: any, index: any) => (
+            <div className="space-y-2" key={index}>
+              {entry?.name === "basefee" ? (
+                <div className="flex items-center">
+                  <div
+                    className="w-4 h-4 rounded-full mr-2 flex flex-col"
+                    style={{ backgroundColor: entry?.color }}
+                  ></div>
+                  <p className="text-white text-sm">PENDING BLOCK</p>
+                </div>
+              ) : (
+                <></>
+              )}
+
+              <div className="flex items-center">
+                <div
+                  className="w-4 h-4 rounded-full mr-2 flex flex-col"
+                  style={{ backgroundColor: entry?.color }}
+                ></div>
+                <p className="text-white text-sm">
+                  {entry?.name?.includes("Basefee")
+                    ? "BASEFEE"
+                    : entry?.name?.includes("Twap")
+                      ? "TWAP"
+                      : entry?.name.replace("_", " ")}
+                  {": "}
+                  {entry?.value !== undefined
+                    ? Number(entry?.value).toFixed(2)
+                    : "N/A"}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return null;
 };
 
 export default GasPriceChart;
