@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - develop
-      - fix/ci
 
 env:
   AWS_REGION: eu-central-1
@@ -12,7 +11,7 @@ env:
   ECS_SERVICE_MOCK: pitchlake-ui-mock-app
   CONTAINER_NAME_MOCK: pitchlake-ui-mock
   TASK_NAME_MOCK: pitchlake-ui-mock-app
-  NEXT_PUBLIC_ENVIRONMENT_MOCK: ${{vars.ENVIRONMENT_MOCK}}
+  NEXT_PUBLIC_ENVIRONMENT_MOCK: ${{vars.ENVIRONMENT_DEMO}}
   DEMO_ACCOUNT_ADDRESS: ${{secrets.DEMO_ACCOUNT_ADDRESS}}
   DEMO_PRIVATE_KEY: ${{secrets.DEMO_PRIVATE_KEY}}
   # RPC service configuration
