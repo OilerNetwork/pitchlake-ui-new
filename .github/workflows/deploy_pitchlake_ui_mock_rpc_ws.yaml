@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - develop
+      - feat/deploy_mock
 
 env:
   AWS_REGION: eu-central-1
@@ -71,6 +72,12 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: "true"
+
+      - name: Install Apache2-utils (for htpasswd)
+        run: sudo apt-get install -y apache2-utils
+
+      - name: Create htpasswd file
+        run: htpasswd -bc .htpasswd yokai-agent ${{ secrets.APPLICATION_PASSWORD }}
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image-mock
@@ -156,6 +163,12 @@ jobs:
         with:
           mask-password: "true"
 
+      - name: Install Apache2-utils (for htpasswd)
+        run: sudo apt-get install -y apache2-utils
+
+      - name: Create htpasswd file
+        run: htpasswd -bc .htpasswd yokai-agent ${{ secrets.APPLICATION_PASSWORD }}
+
       - name: Build, tag, and push image to Amazon ECR
         id: build-image-rpc
         env:
@@ -237,6 +250,12 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
         with:
           mask-password: "true"
+
+      - name: Install Apache2-utils (for htpasswd)
+        run: sudo apt-get install -y apache2-utils
+  
+      - name: Create htpasswd file
+        run: htpasswd -bc .htpasswd yokai-agent ${{ secrets.APPLICATION_PASSWORD }}
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image-ws
