@@ -111,6 +111,14 @@
     "header": "Round performance",
     "text": "The [LP | OB] performance for this round."
   },
+  "leftPanelRoundPerf_LP": {
+    "header": "Round performance",
+    "text": "The round's performance as a liquidity provider."
+  },
+  "leftPanelRoundPerf_OB": {
+    "header": "Round performance",
+    "text": "The round's performance as an option buyer."
+  },
   "leftPanelRoundCapLevel": {
     "header": "Cap Level",
     "text": "The max percentage above the strike this round will payout."
@@ -121,7 +129,7 @@
   },
   "leftPanelRoundStrikePrice": {
     "header": "Strike Price",
-    "text": "The basefee TWAP that determines if the options can be exercised upon settlement."
+    "text": "The basefee TWAP that determines if the options may be exercised upon settlement."
   },
   "leftPanelRoundReservePrice": {
     "header": "Reserve Price",
@@ -151,29 +159,29 @@
     "header": "Run Time",
     "text": "How much time remains before the round's state can transition."
   },
-  "leftPanelRoundTime_Open_past": {
-    "header": "Auction Not Started Yet",
-    "text": "The transaction to start the auction has not been made yet."
-  },
   "leftPanelRoundTime_Open_future": {
-    "header": "Auction Cannot Start Yet",
-    "text": "The transaction to start the auction cannot be made yet."
+    "header": "Round Open",
+    "text": "This round is Open, liquidity providers are free to deposit and withdraw from their unlocked positions. Once the auction starts, the unlocked liquidity will become locked."
   },
-  "leftPanelRoundTime_Auctioning_past": {
-    "header": "Auction Not Ended Yet",
-    "text": "The transaction to end the auction has not been made yet."
+  "leftPanelRoundTime_Open_past": {
+    "header": "Auction Starting",
+    "text": "The transaction to start the auction is pending."
   },
   "leftPanelRoundTime_Auctioning_future": {
-    "header": "Auction Cannot End Yet",
-    "text": "The transaction to end the auction cannot be made yet."
+    "header": "Round Auctioning",
+    "text": "This round is Auctioning, option buyers may now place bids for the options. Once the auction ends, premiums collected from the bidders are distributed to liquidity providers, and any left over funds may be refunded by the bidders."
+  },
+  "leftPanelRoundTime_Auctioning_past": {
+    "header": "Auction Ending",
+    "text": "The transaction to end the auction is pending."
+  },
+  "leftPanelRoundTime_Running_future": {
+    "header": "Round Running",
+    "text": "This round is Running, option buyers are free to mint and trade their options. Once the round settles, option holders may exercise (burn) their options in exchange for their payout."
   },
   "leftPanelRoundTime_Running_past": {
     "header": "Round Not Settled Yet",
-    "text": "The transaction to settle the round has not been made yet."
-  },
-  "leftPanelRoundTime_Running_future": {
-    "header": "Round Cannot Settle Yet",
-    "text": "The transaction to settle the round cannot be made yet."
+    "text": "The round is currently being settled. This process may take up to an hour while neccessary data are calculated, proven, and verified."
   },
   "leftPanelRoundTime_Settled_past": {
     "header": "Round Settled",
