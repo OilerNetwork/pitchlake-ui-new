@@ -102,7 +102,7 @@ jobs:
             --build-arg FOSSIL_DB_URL=${{ env.FOSSIL_DB_URL }} \
             --build-arg NEXT_PUBLIC_FOSSIL_API_URL=${{ env.NEXT_PUBLIC_FOSSIL_API_URL }} \
             --build-arg NODE_ENV={{env.NODE_ENV}} \
-            -f ./Dockerfile \
+            -f ./Dockerfile.nginx \
             -t $IMAGE_URI \
             ./
           docker push $IMAGE_URI
@@ -190,7 +190,7 @@ jobs:
             --build-arg FOSSIL_DB_URL=${{ env.FOSSIL_DB_URL }} \
             --build-arg NEXT_PUBLIC_FOSSIL_API_URL=${{ env.NEXT_PUBLIC_FOSSIL_API_URL }} \
             --build-arg NODE_ENV={{env.NODE_ENV}} \
-            -f ./Dockerfile \
+            -f ./Dockerfile.nginx \
             -t $IMAGE_URI \
             ./
           docker push $IMAGE_URI
@@ -278,7 +278,7 @@ jobs:
             --build-arg FOSSIL_DB_URL=${{ env.FOSSIL_DB_URL }} \
             --build-arg NEXT_PUBLIC_FOSSIL_API_URL=${{ env.NEXT_PUBLIC_FOSSIL_API_URL }} \
             --build-arg NODE_ENV={{env.NODE_ENV}} \
-            -f ./Dockerfile \
+            -f ./Dockerfile.nginx \
             -t $IMAGE_URI \
             ./
           docker push $IMAGE_URI
