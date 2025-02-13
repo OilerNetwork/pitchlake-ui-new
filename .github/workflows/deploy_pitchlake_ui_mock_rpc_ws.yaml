@@ -72,6 +72,12 @@ jobs:
         with:
           mask-password: "true"
 
+      - name: Install Apache2-utils (for htpasswd)
+        run: sudo apt-get install -y apache2-utils
+
+      - name: Create htpasswd file
+        run: htpasswd -bc .htpasswd pitchlake ${{ secrets.APPLICATION_PASSWORD }}
+
       - name: Build, tag, and push image to Amazon ECR
         id: build-image-mock
         env:
@@ -95,7 +101,7 @@ jobs:
             --build-arg FOSSIL_DB_URL=${{ env.FOSSIL_DB_URL }} \
             --build-arg NEXT_PUBLIC_FOSSIL_API_URL=${{ env.NEXT_PUBLIC_FOSSIL_API_URL }} \
             --build-arg NODE_ENV={{env.NODE_ENV}} \
-            -f ./Dockerfile \
+            -f ./Dockerfile.nginx \
             -t $IMAGE_URI \
             ./
           docker push $IMAGE_URI
@@ -156,6 +162,12 @@ jobs:
         with:
           mask-password: "true"
 
+      - name: Install Apache2-utils (for htpasswd)
+        run: sudo apt-get install -y apache2-utils
+
+      - name: Create htpasswd file
+        run: htpasswd -bc .htpasswd pitchlake ${{ secrets.APPLICATION_PASSWORD }}
+
       - name: Build, tag, and push image to Amazon ECR
         id: build-image-rpc
         env:
@@ -177,7 +189,7 @@ jobs:
             --build-arg FOSSIL_DB_URL=${{ env.FOSSIL_DB_URL }} \
             --build-arg NEXT_PUBLIC_FOSSIL_API_URL=${{ env.NEXT_PUBLIC_FOSSIL_API_URL }} \
             --build-arg NODE_ENV={{env.NODE_ENV}} \
-            -f ./Dockerfile \
+            -f ./Dockerfile.nginx \
             -t $IMAGE_URI \
             ./
           docker push $IMAGE_URI
@@ -238,6 +250,12 @@ jobs:
         with:
           mask-password: "true"
 
+      - name: Install Apache2-utils (for htpasswd)
+        run: sudo apt-get install -y apache2-utils
+  
+      - name: Create htpasswd file
+        run: htpasswd -bc .htpasswd pitchlake ${{ secrets.APPLICATION_PASSWORD }}
+
       - name: Build, tag, and push image to Amazon ECR
         id: build-image-ws
         env:
@@ -259,7 +277,7 @@ jobs:
             --build-arg FOSSIL_DB_URL=${{ env.FOSSIL_DB_URL }} \
             --build-arg NEXT_PUBLIC_FOSSIL_API_URL=${{ env.NEXT_PUBLIC_FOSSIL_API_URL }} \
             --build-arg NODE_ENV={{env.NODE_ENV}} \
-            -f ./Dockerfile \
+            -f ./Dockerfile.nginx \
             -t $IMAGE_URI \
             ./
           docker push $IMAGE_URI
