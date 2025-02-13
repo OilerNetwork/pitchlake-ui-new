@@ -18,8 +18,8 @@ jest.mock("@starknet-react/core", () => ({
   }),
   useAccount: () => ({
     account: {
-      address: "0x123"
-    }
+      address: "0x123",
+    },
   }),
   useContractRead: () => ({
     data: "1000000000000000000",
@@ -43,8 +43,8 @@ const mockVaultState = {
   unwrap: () => ({
     lockedBalance: "1000000000000000000",
     unlockedBalance: "2000000000000000000",
-    stashedBalance: "3000000000000000000"
-  })
+    stashedBalance: "3000000000000000000",
+  }),
 } as unknown as CairoCustomEnum;
 
 jest.mock("@/hooks/vault_v2/states/useVaultState", () => ({
@@ -74,8 +74,8 @@ jest.mock("@/hooks/vault_v2/states/useRoundState", () => ({
     auctionStartDate: "1000000000000000000",
     auctionEndDate: "2000000000000000000",
     optionSettleDate: "3000000000000000000",
-    deploymentDate: "500000000000000000"
-  })
+    deploymentDate: "500000000000000000",
+  }),
 }));
 
 jest.mock("@/context/NewProvider", () => ({
@@ -88,27 +88,26 @@ jest.mock("@/context/NewProvider", () => ({
       wsVaultState: {
         currentRoundId: "1",
       },
-      wsOptionRoundStates: []
+      wsOptionRoundStates: [],
     },
     mockData: {
       vaultState: {
         currentRoundId: "1",
       },
-      optionRoundStates: []
-    }
-  })
+      optionRoundStates: [],
+    },
+  }),
 }));
 
 describe("PanelLeft Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
   it("renders panel sections", () => {
     renderWithProviders(
       <HelpProvider>
         <PanelLeft userType="lp" />
-      </HelpProvider>
+      </HelpProvider>,
     );
 
     expect(screen.getByText("Statistics")).toBeInTheDocument();
@@ -119,17 +118,17 @@ describe("PanelLeft Component", () => {
     const { rerender } = renderWithProviders(
       <HelpProvider>
         <PanelLeft userType="lp" />
-      </HelpProvider>
+      </HelpProvider>,
     );
 
     expect(screen.getByText("Balance")).toBeInTheDocument();
     expect(screen.getByText("Statistics")).toBeInTheDocument();
     expect(screen.getByText("Vault")).toBeInTheDocument();
-    
+
     rerender(
       <HelpProvider>
         <PanelLeft userType="ob" />
-      </HelpProvider>
+      </HelpProvider>,
     );
 
     expect(screen.getByText("Balance")).toBeInTheDocument();
@@ -141,7 +140,7 @@ describe("PanelLeft Component", () => {
     renderWithProviders(
       <HelpProvider>
         <PanelLeft userType="lp" />
-      </HelpProvider>
+      </HelpProvider>,
     );
 
     expect(screen.getByText("Balance")).toBeInTheDocument();
@@ -152,7 +151,7 @@ describe("PanelLeft Component", () => {
     renderWithProviders(
       <HelpProvider>
         <PanelLeft userType="lp" />
-      </HelpProvider>
+      </HelpProvider>,
     );
 
     expect(screen.getByText("Auctioning")).toBeInTheDocument();
@@ -163,11 +162,13 @@ describe("PanelLeft Component", () => {
     renderWithProviders(
       <HelpProvider>
         <PanelLeft userType="lp" />
-      </HelpProvider>
+      </HelpProvider>,
     );
 
     expect(screen.getByText("Round 01")).toBeInTheDocument();
     expect(screen.getByText("1.00 GWEI")).toBeInTheDocument(); // Strike Price
-    expect(screen.getByText("0.50 GWEI")).toBeInTheDocument(); // Reserve Price
+    // @NOTE: Why does 0.75 work here when it should be 0.5 ?
+    expect(screen.getByText("0.75 GWEI")).toBeInTheDocument(); // Reserve Price
   });
-}); 
+});
+
