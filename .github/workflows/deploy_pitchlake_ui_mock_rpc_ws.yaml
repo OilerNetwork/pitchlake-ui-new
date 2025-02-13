@@ -90,7 +90,7 @@ jobs:
           docker buildx build \
             --platform=linux/amd64 \
             --build-arg PORT=${{ env.PORT }} \
-            --build-arg NEXT_PUBLIC_VAULT_ADDRESSES=${{ env.NEXT_PUBLIC_VAULT_ADDRESSES_NEW }} \
+            --build-arg NEXT_PUBLIC_VAULT_ADDRESSES=${{ env.NEXT_PUBLIC_VAULT_ADDRESSES }} \
             --build-arg NEXT_PUBLIC_ENVIRONMENT=${{ env.NEXT_PUBLIC_ENVIRONMENT_MOCK }} \
             --build-arg DEMO_ACCOUNT_ADDRESS=${{ env.DEMO_ACCOUNT_ADDRESS }} \
             --build-arg DEMO_PRIVATE_KEY=${{ env.DEMO_PRIVATE_KEY }} \
@@ -180,7 +180,7 @@ jobs:
           docker buildx build \
             --platform=linux/amd64 \
             --build-arg PORT=${{ env.PORT }} \
-            --build-arg NEXT_PUBLIC_VAULT_ADDRESSES=${{ env.NEXT_PUBLIC_VAULT_ADDRESSES_NEW }} \
+            --build-arg NEXT_PUBLIC_VAULT_ADDRESSES=${{ env.NEXT_PUBLIC_VAULT_ADDRESSES }} \
             --build-arg NEXT_PUBLIC_ENVIRONMENT=${{ env.NEXT_PUBLIC_ENVIRONMENT_RPC }} \
             --build-arg NEXT_PUBLIC_RPC_URL_MAINNET=${{ env.NEXT_PUBLIC_RPC_URL_MAINNET }} \
             --build-arg NEXT_PUBLIC_RPC_URL_SEPOLIA=${{ env.NEXT_PUBLIC_RPC_URL_SEPOLIA }} \
@@ -268,7 +268,7 @@ jobs:
           docker buildx build \
             --platform=linux/amd64 \
             --build-arg PORT=${{ env.PORT }} \
-            --build-arg NEXT_PUBLIC_VAULT_ADDRESSES=${{ env.NEXT_PUBLIC_VAULT_ADDRESSES_NEW }} \
+            --build-arg NEXT_PUBLIC_VAULT_ADDRESSES=${{ env.NEXT_PUBLIC_VAULT_ADDRESSES }} \
             --build-arg NEXT_PUBLIC_ENVIRONMENT=${{ env.NEXT_PUBLIC_ENVIRONMENT_WS }} \
             --build-arg NEXT_PUBLIC_RPC_URL_MAINNET=${{ env.NEXT_PUBLIC_RPC_URL_MAINNET }} \
             --build-arg NEXT_PUBLIC_RPC_URL_SEPOLIA=${{ env.NEXT_PUBLIC_RPC_URL_SEPOLIA }} \
