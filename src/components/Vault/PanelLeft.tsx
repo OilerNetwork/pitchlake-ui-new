@@ -20,10 +20,8 @@ import { getDemoRoundId } from "@/lib/demo/utils";
 import { useNewContext } from "@/context/NewProvider";
 import NewStateTransition from "./NewStateTransition";
 
-// @NOTE: Replace this with difference between latest fossil block timestamp & now
-// - create a useLatestFossilBlockTimestamp hook
-const FOSSIL_DELAY =
-  process.env.NEXT_PUBLIC_FOSSIL_USE_MOCK_PRICING_DATA === "true" ? 0 : 15 * 60;
+//const FOSSIL_DELAY =
+//  process.env.NEXT_PUBLIC_FOSSIL_USE_MOCK_PRICING_DATA === "true" ? 0 : 15 * 60;
 
 const PanelLeft = ({ userType }: { userType: string }) => {
   const { conn } = useNewContext();
@@ -77,16 +75,28 @@ const PanelLeft = ({ userType }: { userType: string }) => {
     let targetTimestamp: number | null = null;
     let key = "past";
 
+    //const table: any = {
+    //  Open: {
+    //    future: "Auction Starts In",
+    //    past: "Auction Could Start",
+    //  },
+    //  Auctioning: {
+    //    future: "Auction Ends In",
+    //    past: "Auction Could End",
+    //  },
+    //  Running: { future: "Round Settles In", past: "Round Could Settle" },
+    //  Settled: { past: "Round Settled" },
+    //};
     const table: any = {
       Open: {
         future: "Auction Starts In",
-        past: "Auction Could Start",
+        past: "Auction Starting...",
       },
       Auctioning: {
         future: "Auction Ends In",
-        past: "Auction Could End",
+        past: "Auction Ending...",
       },
-      Running: { future: "Round Settles In", past: "Round Could Settle" },
+      Running: { future: "Round Settles In", past: "Round Settling..." },
       Settled: { past: "Round Settled" },
     };
 
@@ -98,8 +108,11 @@ const PanelLeft = ({ userType }: { userType: string }) => {
         targetTimestamp = Number(auctionEndDate);
         break;
       case "Running":
-        targetTimestamp = Number(optionSettleDate) + FOSSIL_DELAY;
-        if (conn === "demo") targetTimestamp -= FOSSIL_DELAY;
+        // @NOTE: Removing fossil delay becuase all can be classified as 'settling' with cron
+        //targetTimestamp = Number(optionSettleDate) + FOSSIL_DELAY;
+        //if (conn === "demo") targetTimestamp -= FOSSIL_DELAY;
+
+        targetTimestamp = Number(optionSettleDate);
         break;
       case "Settled":
         targetTimestamp = Number(optionSettleDate);
@@ -118,13 +131,15 @@ const PanelLeft = ({ userType }: { userType: string }) => {
       targetTimestamp.toString(),
     );
 
+    if (roundState === "Settled") return;
+
     return (
       <Hoverable
         dataId={`leftPanelRoundTime_${roundState}_${key}`}
         className="max-h-full flex flex-row justify-between items-center p-2 w-full"
       >
         <p className="text-[#BFBFBF]">{header}</p>
-        <p>{timeText}</p>
+        {key === "future" && <p>{timeText}</p>}
       </Hoverable>
     );
   };
@@ -529,13 +544,13 @@ const PanelLeft = ({ userType }: { userType: string }) => {
               </Hoverable>
               {roundState === "Settled" && (
                 <Hoverable
-                  dataId="leftPanelRoundPerf"
+                  dataId={`leftPanelRoundPerf_${userType.toUpperCase()}`}
                   className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
                 >
                   <p className="text-[#BFBFBF]">Round Perf.</p>
                   <p>
                     {selectedRoundState
-                      ? userType == "lp"
+                      ? userType === "lp"
                         ? selectedRoundState.performanceLP
                         : selectedRoundState.performanceOB
                       : 0}
@@ -582,9 +597,13 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                   className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
                 >
                   <p className="text-[#BFBFBF]">Capped Payout</p>
-                  <p>{maxPayout ? `${maxPayout} GWEI` : "Loading..."}</p>
+                  <p>
+                    {maxPayout && maxPayout !== "0"
+                      ? `${maxPayout} GWEI`
+                      : "Loading..."}
+                  </p>
                 </Hoverable>
-              )}{" "}
+              )}
               {roundState == "Auctioning" && (
                 <>
                   <Hoverable
@@ -602,65 +621,47 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                       )}
                     </p>
                   </Hoverable>
-                  <Hoverable
-                    dataId="leftPanelRoundReservePrice"
-                    className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
-                  >
-                    <p className="text-[#BFBFBF] font-regular text-[14px]">
-                      Reserve Price
-                    </p>
-                    <p>
-                      {selectedRoundState?.reservePrice &&
-                        Number(
-                          formatUnits(
-                            selectedRoundState.reservePrice.toString(),
-                            "gwei",
-                          ),
-                        ).toFixed(2)}{" "}
-                      GWEI
-                    </p>
-                  </Hoverable>
                 </>
+              )}
+              {selectedRoundState?.clearingPrice?.toString() !== "0" ? (
+                <Hoverable
+                  dataId="leftPanelRoundClearingPrice"
+                  className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
+                >
+                  <p className="text-[#BFBFBF]">Clearing Price</p>
+                  <p>
+                    {selectedRoundState?.clearingPrice &&
+                      Number(
+                        formatUnits(
+                          selectedRoundState.clearingPrice.toString(),
+                          "gwei",
+                        ),
+                      ).toFixed(2)}{" "}
+                    GWEI
+                  </p>
+                </Hoverable>
+              ) : (
+                <Hoverable
+                  dataId="leftPanelRoundReservePrice"
+                  className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
+                >
+                  <p className="text-[#BFBFBF] font-regular text-[14px]">
+                    Reserve Price
+                  </p>
+                  <p>
+                    {selectedRoundState?.reservePrice &&
+                      Number(
+                        formatUnits(
+                          selectedRoundState.reservePrice.toString(),
+                          "gwei",
+                        ),
+                      ).toFixed(2)}{" "}
+                    GWEI
+                  </p>
+                </Hoverable>
               )}
               {(roundState === "Running" || roundState === "Settled") && (
                 <>
-                  {selectedRoundState?.clearingPrice?.toString() !== "0" ? (
-                    <Hoverable
-                      dataId="leftPanelRoundClearingPrice"
-                      className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
-                    >
-                      <p className="text-[#BFBFBF]">Clearing Price</p>
-                      <p>
-                        {selectedRoundState?.clearingPrice &&
-                          Number(
-                            formatUnits(
-                              selectedRoundState.clearingPrice.toString(),
-                              "gwei",
-                            ),
-                          ).toFixed(2)}{" "}
-                        GWEI
-                      </p>
-                    </Hoverable>
-                  ) : (
-                    <Hoverable
-                      dataId="leftPanelRoundReservePrice"
-                      className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
-                    >
-                      <p className="text-[#BFBFBF] font-regular text-[14px]">
-                        Reserve Price
-                      </p>
-                      <p>
-                        {selectedRoundState?.reservePrice &&
-                          Number(
-                            formatUnits(
-                              selectedRoundState.reservePrice.toString(),
-                              "gwei",
-                            ),
-                          ).toFixed(2)}{" "}
-                        GWEI
-                      </p>
-                    </Hoverable>
-                  )}
                   <Hoverable
                     dataId="leftPanelRoundOptionsSold"
                     className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
@@ -720,7 +721,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
           <NewStateTransition
             isPanelOpen={isPanelOpen}
             setModalState={setModalState}
-            fossilDelay={FOSSIL_DELAY}
+            //fossilDelay={FOSSIL_DELAY}
           />
           {
             //   conn === "demo" ? (

@@ -13,11 +13,11 @@ import { useNewContext } from "@/context/NewProvider";
 const NewStateTransition = ({
   isPanelOpen,
   setModalState,
-  fossilDelay,
+  //fossilDelay,
 }: {
   isPanelOpen: boolean;
   setModalState: any;
-  fossilDelay: number;
+  //fossilDelay: number;
 }) => {
   const { vaultState, selectedRoundAddress } = useVaultState();
   const vaultActions = useVaultActions();
@@ -62,7 +62,7 @@ const NewStateTransition = ({
         : roundState === "Auctioning"
           ? auctionEndDate
           : conn !== "demo"
-            ? Number(optionSettleDate) + fossilDelay
+            ? Number(optionSettleDate) + 0 // fossilDelay
             : optionSettleDate;
 
     if (Number(demoNow) < Number(targetTimestamp))
