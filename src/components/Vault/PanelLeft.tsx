@@ -582,9 +582,13 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                   className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
                 >
                   <p className="text-[#BFBFBF]">Capped Payout</p>
-                  <p>{maxPayout ? `${maxPayout} GWEI` : "Loading..."}</p>
+                  <p>
+                    {maxPayout && maxPayout !== "0"
+                      ? `${maxPayout} GWEI`
+                      : "Loading..."}
+                  </p>
                 </Hoverable>
-              )}{" "}
+              )}
               {roundState == "Auctioning" && (
                 <>
                   <Hoverable
@@ -602,65 +606,47 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                       )}
                     </p>
                   </Hoverable>
-                  <Hoverable
-                    dataId="leftPanelRoundReservePrice"
-                    className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
-                  >
-                    <p className="text-[#BFBFBF] font-regular text-[14px]">
-                      Reserve Price
-                    </p>
-                    <p>
-                      {selectedRoundState?.reservePrice &&
-                        Number(
-                          formatUnits(
-                            selectedRoundState.reservePrice.toString(),
-                            "gwei",
-                          ),
-                        ).toFixed(2)}{" "}
-                      GWEI
-                    </p>
-                  </Hoverable>
                 </>
+              )}
+              {selectedRoundState?.clearingPrice?.toString() !== "0" ? (
+                <Hoverable
+                  dataId="leftPanelRoundClearingPrice"
+                  className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
+                >
+                  <p className="text-[#BFBFBF]">Clearing Price</p>
+                  <p>
+                    {selectedRoundState?.clearingPrice &&
+                      Number(
+                        formatUnits(
+                          selectedRoundState.clearingPrice.toString(),
+                          "gwei",
+                        ),
+                      ).toFixed(2)}{" "}
+                    GWEI
+                  </p>
+                </Hoverable>
+              ) : (
+                <Hoverable
+                  dataId="leftPanelRoundReservePrice"
+                  className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
+                >
+                  <p className="text-[#BFBFBF] font-regular text-[14px]">
+                    Reserve Price
+                  </p>
+                  <p>
+                    {selectedRoundState?.reservePrice &&
+                      Number(
+                        formatUnits(
+                          selectedRoundState.reservePrice.toString(),
+                          "gwei",
+                        ),
+                      ).toFixed(2)}{" "}
+                    GWEI
+                  </p>
+                </Hoverable>
               )}
               {(roundState === "Running" || roundState === "Settled") && (
                 <>
-                  {selectedRoundState?.clearingPrice?.toString() !== "0" ? (
-                    <Hoverable
-                      dataId="leftPanelRoundClearingPrice"
-                      className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
-                    >
-                      <p className="text-[#BFBFBF]">Clearing Price</p>
-                      <p>
-                        {selectedRoundState?.clearingPrice &&
-                          Number(
-                            formatUnits(
-                              selectedRoundState.clearingPrice.toString(),
-                              "gwei",
-                            ),
-                          ).toFixed(2)}{" "}
-                        GWEI
-                      </p>
-                    </Hoverable>
-                  ) : (
-                    <Hoverable
-                      dataId="leftPanelRoundReservePrice"
-                      className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
-                    >
-                      <p className="text-[#BFBFBF] font-regular text-[14px]">
-                        Reserve Price
-                      </p>
-                      <p>
-                        {selectedRoundState?.reservePrice &&
-                          Number(
-                            formatUnits(
-                              selectedRoundState.reservePrice.toString(),
-                              "gwei",
-                            ),
-                          ).toFixed(2)}{" "}
-                        GWEI
-                      </p>
-                    </Hoverable>
-                  )}
                   <Hoverable
                     dataId="leftPanelRoundOptionsSold"
                     className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
