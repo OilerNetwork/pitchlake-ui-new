@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useCallback } from "react";
+import React, { useMemo, useCallback } from "react";
 import {
   ComposedChart,
   Area,
@@ -33,7 +33,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
   // Protocol context
   const { conn, selectedRound } = useNewContext();
   const { vaultState } = useVaultState();
-  const selectedRoundState = useRoundState(vaultState?.address);
+  const selectedRoundState = useRoundState(vaultState?.currentRoundAddress);
 
   // Chart context
   const { isExpandedView, setIsExpandedView, xMax, xMin } = useChartContext();
