@@ -181,7 +181,6 @@ const EditModal: React.FC<EditModalProps> = ({
   const handleMulticall = async () => {
     const data = await writeAsync();
     setPendingTx(data?.transaction_hash);
-    //setState((prevState) => ({ ...prevState, newPriceGwei: "" }));
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     onClose();
   };
