@@ -43,7 +43,6 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
     vaultState?.ethAddress as `0x${string}`,
     selectedRoundState?.address,
   );
-  //const [needsApproving, setNeedsApproving] = useState<string>("0");
 
   // Vault Contract
   const { contract: vaultContractRaw } = useContract({

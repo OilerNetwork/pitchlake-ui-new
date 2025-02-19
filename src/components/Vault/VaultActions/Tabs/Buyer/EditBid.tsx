@@ -54,16 +54,12 @@ const EditModal: React.FC<EditModalProps> = ({
   const selectedRoundState = useRoundState(selectedRoundAddress);
   const [state, setState] = useState({
     newPriceGwei: localStorage.getItem(LOCAL_STORAGE_KEY) || "",
-    //isButtonDisabled: true,
-    //error: "",
   });
   const { allowance, balance } = useERC20(
     vaultState?.ethAddress as `0x${string}`,
     selectedRoundState?.address,
   );
 
-  //const [needsApproving, setNeedsApproving] = useState<string>("0");
-  // Vault Contract
   const { contract: vaultContractRaw } = useContract({
     abi: vaultABI,
     address: vaultState?.address as `0x${string}`,

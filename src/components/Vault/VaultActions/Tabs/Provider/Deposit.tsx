@@ -163,44 +163,6 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
     }
   }, []);
 
-  //useEffect(() => {
-  // Check amount
-  //let amountReason = "";
-  //if (!account) {
-  //  amountReason = "Connect account";
-  //} else if (state.amount == "") {
-  //  //amountReason = "Enter amount";
-  //} else if (Number(state.amount) < 0) {
-  //  amountReason = "Amount must be positive";
-  //} else if (Number(state.amount) === 0) {
-  //  amountReason = "Amount must be greater than 0";
-  //} else if (parseEther(state.amount) > balance) {
-  //  amountReason = `Exceeds balance (${parseFloat(formatEther(balance.toString())).toFixed(4)} ETH)`;
-  //}
-  //// Check beneficiary
-  //let beneficiaryReason = "";
-  //if (state.isDepositAsBeneficiary) {
-  //  if (state.beneficiaryAddress == "") {
-  //    beneficiaryReason = "Enter address";
-  //  } else if (!isValidHex64(state.beneficiaryAddress)) {
-  //    beneficiaryReason = "Invalid address";
-  //  }
-  //}
-  //const isButtonDisabled = (): boolean => {
-  //  //if (!account) return true;
-  //  if (pendingTx) return true;
-  //  if (amountReason !== "" || state.amount === "") return true;
-  //  if (beneficiaryReason !== "") return true;
-  //  return false;
-  //};
-  //setState((prevState) => ({
-  //  ...prevState,
-  //  isButtonDisabled: isButtonDisabled(),
-  //  isAmountOk: amountReason,
-  //  isBeneficiaryOk: beneficiaryReason,
-  //}));
-  //}, [state.amount, state.isBeneficiaryOk, state.beneficiaryAddress, balance]);
-
   const amountReason: string = useMemo(() => {
     if (!account) return "Connect account";
     else if (state.amount == "") {
