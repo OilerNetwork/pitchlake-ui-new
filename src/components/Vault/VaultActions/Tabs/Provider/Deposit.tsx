@@ -140,10 +140,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
               {shortenString(state.beneficiaryAddress)}
             </span>
           </>
-        )}{" "}
-        {
-          // into this round
-        }
+        )}
       </>,
       async () => {
         await handleMulticall();
