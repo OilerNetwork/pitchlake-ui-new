@@ -1,4 +1,4 @@
-import React, { ReactNode, useMemo } from "react";
+import React, { ReactNode, useEffect, useMemo } from "react";
 import { formatEther } from "ethers";
 import { ExerciseOptionsIcon } from "@/components/Icons";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
@@ -35,20 +35,28 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
     let total = BigInt(0);
     if (!selectedRoundBuyerState) return total;
 
-    total += BigInt(balance);
-
-    if (
-      conn !== "ws" ||
-      (conn === "ws" && selectedRoundBuyerState.hasMinted === false)
-    ) {
-      total += BigInt(selectedRoundBuyerState.mintableOptions);
+    // In RPC mode, we include the mintable option balance from the contrct getter (will be 0 post-mint)
+    if (conn !== "ws") {
+      if (balance) total += BigInt(balance);
+      if (selectedRoundBuyerState.mintableOptions)
+        total += BigInt(selectedRoundBuyerState?.mintableOptions);
     }
+    // In WS mode, `mintableOptions` keeps the value of of the mintable options pre-mint, and uses a `hasMinted` flag
+    else if (
+      selectedRoundBuyerState.hasMinted === false &&
+      selectedRoundBuyerState.mintableOptions
+    )
+      total += BigInt(selectedRoundBuyerState.mintableOptions);
+
     return total;
   }, [
     selectedRoundBuyerState?.mintableOptions,
     selectedRoundBuyerState?.hasMinted,
+    selectedRoundBuyerState?.erc20Balance,
     selectedRoundState?.payoutPerOption,
+    balance,
   ]);
+  console.log("totalOptions", totalOptions);
 
   const payoutBalanceWei = selectedRoundState?.payoutPerOption
     ? totalOptions * BigInt(selectedRoundState?.payoutPerOption.toString())

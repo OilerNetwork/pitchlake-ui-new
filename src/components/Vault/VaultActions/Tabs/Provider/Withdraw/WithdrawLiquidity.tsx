@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ReactNode } from "react";
+import React, { useState, useEffect, ReactNode, useMemo } from "react";
 import InputField from "@/components/Vault/Utils/InputField";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
 import { formatEther, parseEther } from "ethers";
@@ -10,6 +10,8 @@ import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
 import useLPState from "@/hooks/vault_v2/states/useLPState";
 import { EthereumIcon } from "@/components/Icons";
 
+const LOCAL_STORAGE_KEY = "withdrawAmount";
+
 interface WithdrawLiquidityProps {
   showConfirmation: (
     modalHeader: string,
@@ -18,8 +20,6 @@ interface WithdrawLiquidityProps {
   ) => void;
 }
 
-const LOCAL_STORAGE_KEY = "withdrawAmount";
-
 const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
   showConfirmation,
 }) => {
@@ -27,7 +27,6 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
   const vaultActions = useVaultActions();
   const [state, setState] = useState({
     amount: localStorage.getItem(LOCAL_STORAGE_KEY) || "",
-    isAmountOk: "",
   });
   const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
@@ -56,62 +55,27 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
     );
   };
 
-  const isWithdrawDisabled = (): boolean => {
-    if (!account) return true;
-    if (pendingTx) return true;
-    if (Number(state.amount) <= Number(0)) return true;
-
-    // No more than unlocked balance
-    let unlockedBalance = lpState?.unlockedBalance
-      ? lpState.unlockedBalance
-        ? parseFloat(
-            Number(formatEther(lpState.unlockedBalance.toString())).toString(),
-          )
-        : 0.0
-      : 0.0;
-
-    if (Number(state.amount) > unlockedBalance) {
-      return true;
-    }
-
-    return false;
-  };
-
   useEffect(() => {
-    // Check amount
-    let amountReason = "";
-    if (!account) {
-      amountReason = "Connect account";
-    } else if (state.amount == "") {
-    } else if (Number(state.amount) < 0) {
-      amountReason = "Amount must be positive";
-    } else if (Number(state.amount) == 0) {
-      amountReason = "Amount must be greater than 0";
-    } else if (
-      parseEther(state.amount) > BigInt(lpState?.unlockedBalance || "0")
-    ) {
-      amountReason = `Exceeds balance (${parseFloat(
-        formatEther(lpState?.unlockedBalance?.toString() || "0"),
-      )} ETH)`;
-    }
-
-    const isButtonDisabled = (): boolean => {
-      //if (!account) return true;
-      //if (!state.amount) return true;
-      //if (!lpState?.unlockedBalance) return true;
-      if (pendingTx) return true;
-      if (amountReason !== "") return true;
-      return false;
-    };
-
-    setState((prevState) => ({
-      ...prevState,
-      isButtonDisabled: isButtonDisabled(),
-      isAmountOk: amountReason,
-    }));
-
     localStorage.setItem(LOCAL_STORAGE_KEY, state.amount);
+  }, [state.amount]);
+
+  const amountReason: string = useMemo(() => {
+    if (!account) return "Connect account";
+    else if (state.amount == "") {
+      return "";
+    } else if (Number(state.amount) <= 0)
+      return "Amount must be greater than 0";
+    else if (parseEther(state.amount) > BigInt(lpState?.unlockedBalance || "0"))
+      return `Exceeds balance (${parseFloat(
+        formatEther(lpState?.unlockedBalance?.toString() || "0"),
+      ).toFixed(5)} ETH)`;
+    else return "";
   }, [state.amount, lpState?.unlockedBalance, account]);
+
+  const isButtonDisabled = useMemo(() => {
+    if (pendingTx || amountReason !== "" || state.amount === "") return true;
+    return false;
+  }, [pendingTx, amountReason, state.amount]);
 
   return (
     <>
@@ -130,12 +94,13 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
               : value;
 
             updateState({ amount: formattedValue });
+            localStorage?.setItem(LOCAL_STORAGE_KEY, e.target.value);
           }}
           placeholder="e.g. 5.0"
           icon={
             <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
           }
-          error={state.isAmountOk}
+          error={amountReason}
         />
       </Hoverable>
       <div className="flex flex-col h-[full] mt-[auto]">
@@ -159,7 +124,7 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
         >
           <ActionButton
             onClick={handleSubmit}
-            disabled={isWithdrawDisabled()}
+            disabled={isButtonDisabled}
             text="Withdraw"
           />
         </Hoverable>
