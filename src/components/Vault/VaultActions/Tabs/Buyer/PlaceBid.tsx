@@ -2,7 +2,7 @@ import React, { useState, ReactNode, useMemo, useEffect } from "react";
 import InputField from "@/components/Vault/Utils/InputField";
 import { Layers3 } from "lucide-react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
-import { formatUnits, parseUnits, formatEther } from "ethers";
+import { formatUnits, parseUnits, formatEther, parseEther } from "ethers";
 import { useAccount, useContractWrite } from "@starknet-react/core";
 import useERC20 from "@/hooks/erc20/useERC20";
 import { num, Call } from "starknet";
@@ -16,6 +16,9 @@ import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import { useTimeContext } from "@/context/TimeProvider";
 import { EthereumIcon } from "@/components/Icons";
 
+const LOCAL_STORAGE_KEY1 = "bidAmount";
+const LOCAL_STORAGE_KEY2 = "bidPriceGwei";
+
 interface PlaceBidProps {
   showConfirmation: (
     modalHeader: string,
@@ -24,18 +27,12 @@ interface PlaceBidProps {
   ) => void;
 }
 
-const LOCAL_STORAGE_KEY1 = "bidAmount";
-const LOCAL_STORAGE_KEY2 = "bidPriceGwei";
-
 const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
   const { vaultState, selectedRoundAddress } = useVaultState();
   const selectedRoundState = useRoundState(selectedRoundAddress);
   const [state, setState] = useState({
     bidAmount: localStorage.getItem(LOCAL_STORAGE_KEY1) || "",
     bidPrice: localStorage.getItem(LOCAL_STORAGE_KEY2) || "",
-    isButtonDisabled: true,
-    isAmountOk: "",
-    isPriceOk: "",
   });
 
   const { account } = useAccount();
@@ -46,7 +43,6 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
     vaultState?.ethAddress as `0x${string}`,
     selectedRoundState?.address,
   );
-  const [needsApproving, setNeedsApproving] = useState<string>("0");
 
   // Vault Contract
   const { contract: vaultContractRaw } = useContract({
@@ -75,6 +71,18 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
   const updateState = (updates: Partial<typeof state>) => {
     setState((prevState) => ({ ...prevState, ...updates }));
   };
+
+  const needsApproving = useMemo(() => {
+    const priceWei = num.toBigInt(
+      parseUnits(state.bidPrice ? state.bidPrice : "0", "gwei"),
+    );
+    const amount = num.toBigInt(state.bidAmount ? state.bidAmount : "0");
+    const totalWei = priceWei * amount;
+
+    if (num.toBigInt(allowance) < num.toBigInt(totalWei))
+      return totalWei.toString();
+    else return "0";
+  }, [state.bidPrice, state.bidAmount, allowance]);
 
   // Approve and Bid Multicall
   const calls: Call[] = useMemo(() => {
@@ -163,7 +171,6 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
     if (/^\d*$/.test(value)) {
       updateState({ bidAmount: value });
     }
-    localStorage.setItem(LOCAL_STORAGE_KEY1, value);
   };
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -172,7 +179,6 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
       ? value.slice(0, value.indexOf(".") + 10)
       : value;
     updateState({ bidPrice: formattedValue });
-    localStorage.setItem(LOCAL_STORAGE_KEY2, value);
   };
 
   const bidPriceWei = parseUnits(state.bidPrice ? state.bidPrice : "0", "gwei");
@@ -181,78 +187,61 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
   const bidAmount = state.bidAmount ? state.bidAmount : "0";
   const bidTotalEth = Number(bidPriceEth) * Number(bidAmount);
 
-  useEffect(() => {
-    // Check amount
-    let amountReason = "";
-    if (timestamp > Number(selectedRoundState?.auctionEndDate)) {
-      amountReason = "Auction ended";
-    } else if (!account) {
-      amountReason = "Connect account";
-    } else if (state.bidAmount == "") {
-      // amountReason = "Enter amount";
-    } else if (Number(state.bidAmount) < 0) {
-      amountReason = "Amount must be positive";
-    } else if (Number(state.bidAmount) == 0) {
-      amountReason = "Amount must be greater than 0";
-    } else if (
-      BigInt(state.bidAmount) >
-      BigInt(selectedRoundState?.availableOptions?.toString() || "0")
-    ) {
-      amountReason = "Amount is more than total available";
-    }
-
-    // Check price
-    let priceReason = "";
-    const reservePriceGwei = formatUnits(
-      selectedRoundState ? selectedRoundState.reservePrice : 0,
-      "gwei",
-    );
-    if (timestamp > Number(selectedRoundState?.auctionEndDate)) {
-      priceReason = "Auction ended";
-    } else if (!account) {
-      priceReason = "Connect account";
-    } else if (state.bidPrice == "") {
-      // priceReason = "Enter price";
-    } else if (Number(state.bidPrice) < 0) {
-      priceReason = "Price must be positive";
-    } else if (Number(state.bidPrice) < Number(reservePriceGwei)) {
-      priceReason = "Price must be at least the reserve price";
-    }
-
-    const isButtonDisabled = (): boolean => {
-      if (pendingTx) return true;
-      if (priceReason !== "" || amountReason !== "") return true;
-      if (!state.bidAmount || !state.bidPrice) return true;
-      return false;
-    };
-
-    setState((prevState) => ({
-      ...prevState,
-      isButtonDisabled: isButtonDisabled(),
-      isAmountOk: amountReason,
-      isPriceOk: priceReason,
-    }));
-
-    const priceWei = num.toBigInt(
-      parseUnits(state.bidPrice ? state.bidPrice : "0", "gwei"),
-    );
-    const amount = num.toBigInt(state.bidAmount ? state.bidAmount : "0");
-    const totalWei = priceWei * amount;
-
-    setNeedsApproving(
-      num.toBigInt(allowance) < num.toBigInt(totalWei)
-        ? totalWei.toString()
-        : "0",
-    );
+  const amountReason: string = useMemo(() => {
+    if (!account) return "Connect account";
+    else if (timestamp > Number(selectedRoundState?.auctionEndDate))
+      return "Auction ended";
+    else if (state.bidAmount == "") return "";
+    else if (Number(state.bidAmount) <= 0)
+      return "Amount must be greater than 0";
+    else return "";
   }, [
     account,
     timestamp,
+    selectedRoundState?.auctionEndDate,
     state.bidAmount,
-    state.bidPrice,
-    allowance,
-    selectedRoundState?.availableOptions,
-    selectedRoundState?.reservePrice,
+    balance,
   ]);
+
+  const priceReason: string = useMemo(() => {
+    const reservePriceWei = selectedRoundState?.reservePrice
+      ? selectedRoundState.reservePrice
+      : 0;
+    const reservePriceGwei = formatUnits(reservePriceWei, "gwei");
+    if (!account) return "Connect account";
+    else if (timestamp > Number(selectedRoundState?.auctionEndDate))
+      return "Auction ended";
+    else if (state.bidPrice == "") return "";
+    else if (Number(state.bidPrice) < Number(reservePriceGwei))
+      return `Price must be at least the reserve price (${Number(reservePriceGwei).toFixed(5)} GWEI)`;
+    else if (BigInt(BigInt(bidPriceWei) * BigInt(bidAmount)) > BigInt(balance))
+      return `Exceeds balance (${parseFloat(
+        formatEther(balance || "0"),
+      ).toFixed(5)} ETH)`;
+    else return "";
+  }, [
+    account,
+    timestamp,
+    selectedRoundState?.auctionEndDate,
+    selectedRoundState?.reservePrice,
+    state.bidPrice,
+    balance,
+  ]);
+
+  const isButtonDisabled: boolean = useMemo(() => {
+    if (pendingTx) return true;
+    if (priceReason !== "" || amountReason !== "") return true;
+    if (!state.bidAmount || !state.bidPrice) return true;
+    return false;
+  }, [pendingTx, priceReason, amountReason, state.bidAmount, state.bidPrice]);
+
+  useEffect(() => {
+    localStorage?.setItem(LOCAL_STORAGE_KEY1, state.bidAmount);
+  }, [state.bidAmount]);
+
+  useEffect(() => {
+    localStorage?.setItem(LOCAL_STORAGE_KEY2, state.bidPrice);
+  }, [state.bidPrice]);
 
   return (
     <div className="flex flex-col h-full">
@@ -271,7 +260,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 stroke-[1px]"
               />
             }
-            error={state.isAmountOk}
+            error={amountReason}
           />
         </Hoverable>
         <Hoverable dataId="inputBidPrice">
@@ -284,7 +273,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
             icon={
               <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
             }
-            error={state.isPriceOk}
+            error={priceReason}
           />
         </Hoverable>
       </div>
@@ -309,7 +298,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
         >
           <ActionButton
             onClick={handleSubmitForMulticall}
-            disabled={state.isButtonDisabled}
+            disabled={isButtonDisabled}
             text="Place Bid"
           />
         </Hoverable>

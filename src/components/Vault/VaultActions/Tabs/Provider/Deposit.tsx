@@ -14,6 +14,9 @@ import { shortenString, isValidHex64, formatNumber } from "@/lib/utils";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useLPState from "@/hooks/vault_v2/states/useLPState";
+
+const LOCAL_STORAGE_KEY = "depositAmountWei";
+
 interface DepositProps {
   showConfirmation: (
     modalHeader: string,
@@ -22,38 +25,23 @@ interface DepositProps {
   ) => void;
 }
 
-const LOCAL_STORAGE_KEY = "depositAmountWei";
-
 interface DepositState {
   amount: string;
   isDepositAsBeneficiary: boolean;
   beneficiaryAddress: string;
   activeWithdrawTab: "For Me" | "For Someone Else";
-  isButtonDisabled: boolean;
-  isAmountOk: string;
-  isBeneficiaryOk: string;
 }
 
 const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   const { vaultState } = useVaultState();
   const lpState = useLPState();
-  //  console.log("check_", lpState?.unlockedBalance);
   const [state, setState] = useState<DepositState>({
     amount: "",
     isDepositAsBeneficiary: false,
     beneficiaryAddress: "",
     activeWithdrawTab: "For Me",
-    isButtonDisabled: true,
-    isAmountOk: "",
-    isBeneficiaryOk: "",
   });
 
-  useEffect(() => {
-    const amount = localStorage?.getItem(LOCAL_STORAGE_KEY);
-    if (amount) {
-      setState((prevState) => ({ ...prevState, amount }));
-    }
-  }, []);
   const { account } = useAccount();
   const { pendingTx, setPendingTx } = useTransactionContext();
   const { allowance, balance } = useERC20(
@@ -93,11 +81,11 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   const calls: Call[] = useMemo(() => {
     const calls: Call[] = [];
     if (
-      !vaultState ||
-      !state?.amount ||
+      !account ||
       !ethContract ||
       !vaultContract ||
-      !account ||
+      !vaultState ||
+      !state?.amount ||
       (state.isDepositAsBeneficiary &&
         !isValidHex64(state.beneficiaryAddress)) ||
       !isValidHex64(account?.address) ||
@@ -152,10 +140,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
               {shortenString(state.beneficiaryAddress)}
             </span>
           </>
-        )}{" "}
-        {
-          // into this round
-        }
+        )}
       </>,
       async () => {
         await handleMulticall();
@@ -172,45 +157,46 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   };
 
   useEffect(() => {
-    // Check amount
-    let amountReason = "";
-    if (!account) {
-      amountReason = "Connect account";
-    } else if (state.amount == "") {
-      //amountReason = "Enter amount";
-    } else if (Number(state.amount) < 0) {
-      amountReason = "Amount must be positive";
-    } else if (Number(state.amount) === 0) {
-      amountReason = "Amount must be greater than 0";
-    } else if (parseEther(state.amount) > balance) {
-      amountReason = `Exceeds balance (${parseFloat(formatEther(balance.toString())).toFixed(4)} ETH)`;
+    const amount = localStorage?.getItem(LOCAL_STORAGE_KEY);
+    if (amount) {
+      setState((prevState) => ({ ...prevState, amount }));
     }
+  }, []);
 
+  const amountReason: string = useMemo(() => {
+    if (!account) return "Connect account";
+    else if (state.amount == "") {
+      return "";
+    } else if (Number(state.amount) <= 0)
+      return "Amount must be greater than 0";
+    else if (parseEther(state.amount) > balance)
+      return `Exceeds balance (${parseFloat(formatEther(balance.toString())).toFixed(5)} ETH)`;
+    else return "";
+    //amountReason = "Enter amount";
+  }, [state.amount, balance, account]);
+
+  const beneficiaryReason: string = useMemo(() => {
+    if (!account) return "Connect account";
     // Check beneficiary
-    let beneficiaryReason = "";
-    if (state.isDepositAsBeneficiary) {
-      if (state.beneficiaryAddress == "") {
-        beneficiaryReason = "Enter address";
-      } else if (!isValidHex64(state.beneficiaryAddress)) {
-        beneficiaryReason = "Invalid address";
-      }
+    else if (state.isDepositAsBeneficiary) {
+      if (state.beneficiaryAddress == "") return "Enter address";
+      else if (!isValidHex64(state.beneficiaryAddress))
+        return "Invalid address";
+      return "";
     }
+    return "";
+  }, [state.beneficiaryAddress, state.isDepositAsBeneficiary]);
 
-    const isButtonDisabled = (): boolean => {
-      //if (!account) return true;
-      if (pendingTx) return true;
-      if (amountReason !== "" || state.amount === "") return true;
-      if (beneficiaryReason !== "") return true;
-      return false;
-    };
+  const isButtonDisabled = useMemo(() => {
+    if (pendingTx) return true;
+    if (amountReason !== "" || state.amount === "") return true;
+    if (beneficiaryReason !== "") return true;
+    return false;
+  }, [pendingTx, amountReason, beneficiaryReason, state.amount]);
 
-    setState((prevState) => ({
-      ...prevState,
-      isButtonDisabled: isButtonDisabled(),
-      isAmountOk: amountReason,
-      isBeneficiaryOk: beneficiaryReason,
-    }));
-  }, [state.amount, state.isBeneficiaryOk, state.beneficiaryAddress, balance]);
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, state.amount);
+  }, [state.amount]);
 
   return (
     <div className="flex flex-col h-full">
@@ -238,7 +224,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
               icon={
                 <PersonIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
               }
-              error={state.isBeneficiaryOk}
+              error={beneficiaryReason}
             />
           </Hoverable>
         )}
@@ -254,10 +240,9 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
                   e.target.value.indexOf(".") + 19,
                 ),
               });
-              localStorage?.setItem(LOCAL_STORAGE_KEY, e.target.value);
             }}
             placeholder="e.g. 5.0"
-            error={state.isAmountOk}
+            error={amountReason}
             icon={
               <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
             }
@@ -290,7 +275,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
         >
           <ActionButton
             onClick={handleSubmitForMulticall}
-            disabled={state.isButtonDisabled}
+            disabled={isButtonDisabled}
             text={pendingTx ? "Pending" : "Deposit"}
           />
         </Hoverable>

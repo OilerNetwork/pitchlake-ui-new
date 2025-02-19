@@ -16,6 +16,8 @@ import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import { useTimeContext } from "@/context/TimeProvider";
 
+const LOCAL_STORAGE_KEY = "editBidPriceGwei";
+
 interface EditModalProps {
   onConfirm: () => void;
   onClose: () => void;
@@ -30,8 +32,6 @@ interface EditModalProps {
 function stringGweiToWei(gwei: string): bigint {
   return parseUnits(gwei ? gwei : "0", "gwei");
 }
-
-const LOCAL_STORAGE_KEY = "editBidPriceGwei";
 
 const EditModal: React.FC<EditModalProps> = ({
   onConfirm,
@@ -54,16 +54,12 @@ const EditModal: React.FC<EditModalProps> = ({
   const selectedRoundState = useRoundState(selectedRoundAddress);
   const [state, setState] = useState({
     newPriceGwei: localStorage.getItem(LOCAL_STORAGE_KEY) || "",
-    isButtonDisabled: true,
-    error: "",
   });
   const { allowance, balance } = useERC20(
     vaultState?.ethAddress as `0x${string}`,
     selectedRoundState?.address,
   );
 
-  const [needsApproving, setNeedsApproving] = useState<string>("0");
-  // Vault Contract
   const { contract: vaultContractRaw } = useContract({
     abi: vaultABI,
     address: vaultState?.address as `0x${string}`,
@@ -104,6 +100,13 @@ const EditModal: React.FC<EditModalProps> = ({
   const totalNewCostEth = useMemo((): string => {
     return formatUnits(totalNewCostWei, "ether");
   }, [totalNewCostWei]);
+
+  const needsApproving = useMemo(() => {
+    const cost = num.toBigInt(totalNewCostWei);
+
+    if (num.toBigInt(allowance) < num.toBigInt(cost)) return cost.toString();
+    return "0";
+  }, [allowance, totalNewCostWei]);
 
   // Approve and Bid Multicall
   const calls: Call[] = useMemo(() => {
@@ -174,7 +177,6 @@ const EditModal: React.FC<EditModalProps> = ({
   const handleMulticall = async () => {
     const data = await writeAsync();
     setPendingTx(data?.transaction_hash);
-    setState((prevState) => ({ ...prevState, newPriceGwei: "" }));
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     onClose();
   };
@@ -185,44 +187,40 @@ const EditModal: React.FC<EditModalProps> = ({
       ? value.slice(0, value.indexOf(".") + 10)
       : value;
     updateState({ newPriceGwei: formattedValue });
-    localStorage.setItem(LOCAL_STORAGE_KEY, formattedValue);
   };
 
-  useEffect(() => {
-    let error = "";
-    const newPriceGwei = state.newPriceGwei;
-    if (timestamp > Number(selectedRoundState?.auctionEndDate)) {
-      error = "Auction ended";
-    } else if (!account) {
-      error = "Connect account";
-    } else if (!state.newPriceGwei) {
-      // error = "Enter price";
-    } else if (parseFloat(newPriceGwei) <= parseFloat(oldPriceGwei)) {
-      error = "Bid price must increase";
-    }
-
-    const isButtonDisabled = (): boolean => {
-      if (pendingTx) return true;
-      if (error !== "") return true;
-      if (!state.newPriceGwei) return true;
-      return false;
-    };
-
-    const cost = num.toBigInt(totalNewCostWei);
-
-    updateState({ error, isButtonDisabled: isButtonDisabled() });
-    setNeedsApproving(
-      num.toBigInt(allowance) < num.toBigInt(cost) ? cost.toString() : "0",
-    );
+  const priceReason: string = useMemo(() => {
+    if (!account) return "Connect account";
+    else if (timestamp > Number(selectedRoundState?.auctionEndDate))
+      return "Auction ended";
+    else if (!state.newPriceGwei) return "";
+    else if (parseFloat(state.newPriceGwei) <= parseFloat(oldPriceGwei))
+      return "Bid price must increase";
+    else if (totalNewCostWei > balance)
+      return `Exceeds balance (${parseFloat(
+        formatEther(balance || "0"),
+      ).toFixed(5)} ETH)`;
+    else return "";
   }, [
+    account,
     timestamp,
+    selectedRoundState?.auctionEndDate,
     state.newPriceGwei,
     oldPriceGwei,
-    account,
-    allowance,
-    selectedRoundState?.address,
-    pendingTx,
+    totalNewCostWei,
+    balance,
   ]);
+
+  const isButtonDisabled: boolean = useMemo(() => {
+    if (pendingTx) return true;
+    if (priceReason !== "") return true;
+    if (!state.newPriceGwei) return true;
+    return false;
+  }, [pendingTx, priceReason, state.newPriceGwei]);
+
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, state.newPriceGwei);
+  }, [state.newPriceGwei]);
 
   return (
     <div className="bg-[#121212] border border-[#262626] rounded-xl p-0 w-full flex flex-col h-full edit-bid-modal">
@@ -275,7 +273,7 @@ const EditModal: React.FC<EditModalProps> = ({
               icon={
                 <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
               }
-              error={state.error}
+              error={priceReason}
             />
           </Hoverable>
         </div>
@@ -304,7 +302,7 @@ const EditModal: React.FC<EditModalProps> = ({
         >
           <ActionButton
             onClick={handleSubmitForMulticall}
-            disabled={state.isButtonDisabled}
+            disabled={isButtonDisabled}
             text="Edit Bid"
           />
         </Hoverable>
