@@ -52,7 +52,6 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
   }, [
     selectedRoundBuyerState?.mintableOptions,
     selectedRoundBuyerState?.hasMinted,
-    selectedRoundBuyerState?.erc20Balance,
     selectedRoundState?.payoutPerOption,
     balance,
   ]);
