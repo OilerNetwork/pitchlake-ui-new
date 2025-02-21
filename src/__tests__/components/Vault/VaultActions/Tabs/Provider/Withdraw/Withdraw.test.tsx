@@ -32,7 +32,7 @@ const mockData = {
     queuedBps: "0",
     roundAddress: "0x123",
     deploymentDate: "1234567890",
-  }
+  },
 };
 
 // Group all mock implementations
@@ -52,14 +52,14 @@ const mockImplementations = {
     wsData: {
       wsVaultState: mockData.vaultState,
       wsOptionRoundStates: [mockData.optionRoundState],
-      wsOptionBuyerStates: []
+      wsOptionBuyerStates: [],
     },
     mockData: {
       vaultState: mockData.vaultState,
       optionRoundStates: [mockData.optionRoundState],
-      optionBuyerStates: []
-    }
-  }))
+      optionBuyerStates: [],
+    },
+  })),
 };
 
 // Mock external dependencies
@@ -81,20 +81,35 @@ jest.mock("@/context/NewProvider", () => ({
 }));
 
 // Mock sub-components with descriptive test IDs
-jest.mock("@/components/Vault/VaultActions/Tabs/Provider/Withdraw/WithdrawLiquidity", () => ({
-  __esModule: true,
-  default: () => <div data-testid="withdraw-liquidity-component">WithdrawLiquidity</div>,
-}));
+jest.mock(
+  "@/components/Vault/VaultActions/Tabs/Provider/Withdraw/WithdrawLiquidity",
+  () => ({
+    __esModule: true,
+    default: () => (
+      <div data-testid="withdraw-liquidity-component">WithdrawLiquidity</div>
+    ),
+  }),
+);
 
-jest.mock("@/components/Vault/VaultActions/Tabs/Provider/Withdraw/QueueWithdrawal", () => ({
-  __esModule: true,
-  default: () => <div data-testid="queue-withdrawal-component">QueueWithdrawal</div>,
-}));
+jest.mock(
+  "@/components/Vault/VaultActions/Tabs/Provider/Withdraw/QueueWithdrawal",
+  () => ({
+    __esModule: true,
+    default: () => (
+      <div data-testid="queue-withdrawal-component">QueueWithdrawal</div>
+    ),
+  }),
+);
 
-jest.mock("@/components/Vault/VaultActions/Tabs/Provider/Withdraw/WithdrawStash", () => ({
-  __esModule: true,
-  default: () => <div data-testid="withdraw-stash-component">WithdrawStash</div>,
-}));
+jest.mock(
+  "@/components/Vault/VaultActions/Tabs/Provider/Withdraw/WithdrawStash",
+  () => ({
+    __esModule: true,
+    default: () => (
+      <div data-testid="withdraw-stash-component">WithdrawStash</div>
+    ),
+  }),
+);
 
 // Reusable test wrapper
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -116,7 +131,7 @@ describe("Withdraw Component", () => {
     return render(
       <TestWrapper>
         <Withdraw showConfirmation={mockShowConfirmation} />
-      </TestWrapper>
+      </TestWrapper>,
     );
   };
 
@@ -129,35 +144,47 @@ describe("Withdraw Component", () => {
     const { rerender } = setup("Auctioning");
 
     // Use semantic queries
-    expect(screen.getByRole("button", { name: "Liquidity" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Queue" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Collect" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Unlocked" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Locked" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Stashed" })).toBeInTheDocument();
 
     // Test Settled state
-    mockImplementations.useRoundState.mockReturnValue({ roundState: "Settled" });
+    mockImplementations.useRoundState.mockReturnValue({
+      roundState: "Settled",
+    });
     rerender(
       <TestWrapper>
         <Withdraw showConfirmation={mockShowConfirmation} />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
-    expect(screen.getByRole("button", { name: "Liquidity" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Collect" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Queue" })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Unlocked" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Stashed" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Locked" }),
+    ).not.toBeInTheDocument();
   });
 
   it("shows correct component when switching tabs", () => {
     setup("Auctioning");
 
     // Default tab (Liquidity)
-    expect(screen.getByTestId("withdraw-liquidity-component")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("withdraw-liquidity-component"),
+    ).toBeInTheDocument();
 
     // Switch to Queue tab
-    fireEvent.click(screen.getByRole("button", { name: "Queue" }));
-    expect(screen.getByTestId("queue-withdrawal-component")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Locked" }));
+    expect(
+      screen.getByTestId("queue-withdrawal-component"),
+    ).toBeInTheDocument();
 
     // Switch to Collect tab
-    fireEvent.click(screen.getByRole("button", { name: "Collect" }));
+    fireEvent.click(screen.getByRole("button", { name: "Stashed" }));
     expect(screen.getByTestId("withdraw-stash-component")).toBeInTheDocument();
   });
 
@@ -165,12 +192,19 @@ describe("Withdraw Component", () => {
     setup("Settled");
 
     // Queue tab and its content should not be visible
-    expect(screen.queryByRole("button", { name: "Queue" })).not.toBeInTheDocument();
-    expect(screen.queryByTestId("queue-withdrawal-component")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Locked" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("queue-withdrawal-component"),
+    ).not.toBeInTheDocument();
 
     // Other tabs should be visible
-    expect(screen.getByTestId("withdraw-liquidity-component")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Collect" }));
+    expect(
+      screen.getByTestId("withdraw-liquidity-component"),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Stashed" }));
     expect(screen.getByTestId("withdraw-stash-component")).toBeInTheDocument();
   });
-}); 
+});
+

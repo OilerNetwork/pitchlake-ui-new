@@ -191,7 +191,9 @@ describe("EditBid Component", () => {
     const { priceInput, editButton } = setupTest();
     fireEvent.change(priceInput, { target: { value: "2" } });
 
-    expect(screen.getByText("Auction ended")).toBeInTheDocument();
+    expect(
+      screen.getByText("Auction period is over; transaction pending..."),
+    ).toBeInTheDocument();
     expect(editButton).toBeDisabled();
   });
 
@@ -224,4 +226,3 @@ describe("EditBid Component", () => {
     );
   });
 });
-
