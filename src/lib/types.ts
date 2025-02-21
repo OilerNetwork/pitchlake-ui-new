@@ -257,9 +257,9 @@ export enum BuyerTabs {
 }
 
 export enum WithdrawSubTabs {
-  Liquidity = "Liquidity",
-  Queue = "Queue",
-  Collect = "Collect",
+  Unlocked = "Unlocked",
+  Locked = "Locked",
+  Stashed = "Stashed",
 }
 
 // Define a type for the user role

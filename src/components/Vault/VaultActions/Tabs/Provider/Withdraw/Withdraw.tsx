@@ -16,10 +16,10 @@ interface WithdrawProps {
 }
 
 const Withdraw: React.FC<WithdrawProps> = ({ showConfirmation }) => {
-  const {selectedRoundAddress} = useVaultState()  
-  const selectedRoundState = useRoundState(selectedRoundAddress)
+  const { selectedRoundAddress } = useVaultState();
+  const selectedRoundState = useRoundState(selectedRoundAddress);
   const [state, setState] = useState({
-    activeWithdrawTab: "Liquidity" as WithdrawSubTabs,
+    activeWithdrawTab: "Unlocked" as WithdrawSubTabs,
   });
 
   const updateState = (updates: Partial<typeof state>) => {
@@ -33,8 +33,8 @@ const Withdraw: React.FC<WithdrawProps> = ({ showConfirmation }) => {
           tabs={
             selectedRoundState?.roundState.toString() === "Auctioning" ||
             selectedRoundState?.roundState.toString() === "Running"
-              ? ["Liquidity", "Queue", "Collect"]
-              : ["Liquidity", "Collect"]
+              ? ["Unlocked", "Locked", "Stashed"]
+              : ["Unlocked", "Stashed"]
           }
           activeTab={state.activeWithdrawTab}
           setActiveTab={(tab) =>
@@ -43,16 +43,16 @@ const Withdraw: React.FC<WithdrawProps> = ({ showConfirmation }) => {
         />
       </div>
       <div className="h-full flex flex-col">
-        {state.activeWithdrawTab === "Liquidity" && (
+        {state.activeWithdrawTab === "Unlocked" && (
           <WithdrawLiquidity showConfirmation={showConfirmation} />
         )}
 
         {(selectedRoundState?.roundState === "Auctioning" ||
           selectedRoundState?.roundState === "Running") &&
-          state.activeWithdrawTab === "Queue" && (
+          state.activeWithdrawTab === "Locked" && (
             <QueueWithdrawal showConfirmation={showConfirmation} />
           )}
-        {state.activeWithdrawTab === "Collect" && (
+        {state.activeWithdrawTab === "Stashed" && (
           <WithdrawStash showConfirmation={showConfirmation} />
         )}
       </div>
