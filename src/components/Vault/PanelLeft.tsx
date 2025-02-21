@@ -380,7 +380,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
                 }
                 <Hoverable
                   dataId="leftPanelVaultBalance"
-                  className="flex flex-row justify-between p-2 w-full z-50"
+                  className="flex flex-row justify-between p-2 w-full"
                 >
                   <p className="text-[#BFBFBF] font-regular">Balance</p>
                   <div className="flex flex-row items-center gap-1 overflow-visable">
