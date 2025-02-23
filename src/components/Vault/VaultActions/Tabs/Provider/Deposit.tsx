@@ -189,7 +189,8 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
 
   const isButtonDisabled = useMemo(() => {
     if (pendingTx) return true;
-    if (amountReason !== "" || state.amount === "") return true;
+    if (amountReason !== "") return true;
+    if (state.amount === "") return true;
     if (beneficiaryReason !== "") return true;
     return false;
   }, [pendingTx, amountReason, beneficiaryReason, state.amount]);
