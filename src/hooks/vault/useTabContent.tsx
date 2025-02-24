@@ -26,6 +26,7 @@ export const useTabContent = (
   setBidToEdit: (bid: any) => void,
 ) => {
   const { pendingTx } = useTransactionContext();
+  const timestamp = new Date().getTime() / 1000;
 
   // @NOTE: For now we are hiding this panel, eventually we need to show it in WS mode and possibly RPC mode as well
   //const commonTabs = env === "ws" || env === "rpc" ? [] : [CommonTabs.MyInfo];
@@ -38,7 +39,10 @@ export const useTabContent = (
         case "Open":
           return [];
         case "Auctioning":
-          return [BuyerTabs.PlaceBid, BuyerTabs.History, ...commonTabs];
+          // Hides bidding action while awaiting end_auction txn
+          if (timestamp > Number(selectedRoundState?.auctionEndDate))
+            return [BuyerTabs.History, ...commonTabs];
+          else return [BuyerTabs.PlaceBid, BuyerTabs.History, ...commonTabs];
         case "Running":
           return [
             BuyerTabs.Mint,
@@ -57,7 +61,7 @@ export const useTabContent = (
           return [];
       }
     }
-  }, [userType, selectedRoundState?.roundState]);
+  }, [userType, selectedRoundState?.roundState, timestamp]);
 
   const tabContent = useMemo(() => {
     switch (activeTab) {
