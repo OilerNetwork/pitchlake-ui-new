@@ -61,10 +61,8 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
 
   const amountReason: string = useMemo(() => {
     if (!account) return "Connect account";
-    else if (state.amount == "") {
-      return "";
-    } else if (Number(state.amount) <= 0)
-      return "Amount must be greater than 0";
+    else if (state.amount == "") return "";
+    else if (Number(state.amount) <= 0) return "Amount must be greater than 0";
     else if (parseEther(state.amount) > BigInt(lpState?.unlockedBalance || "0"))
       return `Exceeds balance (${parseFloat(
         formatEther(lpState?.unlockedBalance?.toString() || "0"),
@@ -77,14 +75,21 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
     return false;
   }, [pendingTx, amountReason, state.amount]);
 
+  useEffect(() => {
+    if (!account) {
+      setState((prevState) => ({ ...prevState, amount: "" }));
+      localStorage?.removeItem(LOCAL_STORAGE_KEY);
+    }
+  }, [account]);
+
   return (
     <>
       <div
-        className={`flex flex-row px-6 items-start ${lpState?.unlockedBalance == 0 ? "" : "gap-2"}`}
+        className={`flex flex-row px-6 items-start ${lpState?.unlockedBalance == 0 || !account ? "" : "gap-2"}`}
       >
         <Hoverable
           dataId="inputWithdrawalAmount"
-          className={`flex flex-col space-y-5 mb-[auto] ${lpState?.unlockedBalance == 0 ? "w-[100%]" : ""}`}
+          className={`flex flex-col space-y-5 mb-[auto] ${lpState?.unlockedBalance == 0 || !account ? "w-[100%]" : ""}`}
         >
           <InputField
             type="number"
@@ -104,9 +109,10 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
               <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
             }
             error={amountReason}
+            disabled={!account}
           />
         </Hoverable>
-        {lpState?.unlockedBalance == 0 ? null : (
+        {lpState?.unlockedBalance == 0 || !account ? null : (
           <Hoverable dataId="maxButton">
             <button
               className="mt-[22px] border border-[1.5px] border-[#454545] w-[56px] h-[44px] rounded-lg text-[#F5EBB8] hover-zoom-small"

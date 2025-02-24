@@ -61,12 +61,10 @@ const Refund: React.FC<RefundProps> = ({ showConfirmation }) => {
     if (!account) return true;
     if (pendingTx) return true;
     if (!selectedRoundBuyerState) return true;
-    if (Number(refundBalanceWei) === 0) return true;
+    if (refundBalanceWei.toString() === "0") return true;
 
     return false;
   };
-
-  useEffect(() => {}, [account]);
 
   return (
     <div className="flex flex-col h-full">

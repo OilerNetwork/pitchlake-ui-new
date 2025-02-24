@@ -55,7 +55,6 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
     selectedRoundState?.payoutPerOption,
     balance,
   ]);
-  console.log("totalOptions", totalOptions);
 
   const payoutBalanceWei = selectedRoundState?.payoutPerOption
     ? totalOptions * BigInt(selectedRoundState?.payoutPerOption.toString())
@@ -90,7 +89,7 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
     if (!account) return true;
     if (pendingTx) return true;
     if (!selectedRoundBuyerState) return true;
-    if (Number(payoutBalanceWei) === 0) return true;
+    if (payoutBalanceWei.toString() === "0") return true;
 
     return false;
   };

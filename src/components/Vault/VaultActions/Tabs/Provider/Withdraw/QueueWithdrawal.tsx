@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useAccount } from "@starknet-react/core";
@@ -16,21 +16,15 @@ interface WithdrawQueueProps {
   ) => void;
 }
 
+// "WITHDRAW" LOCKED
 const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
   showConfirmation,
 }) => {
-  const lpState = useLPState()
-  const vaultActions = useVaultActions()
+  const lpState = useLPState();
+  const vaultActions = useVaultActions();
   const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
-  const [state, setState] = React.useState({
-    percentage: "0",
-    //isButtonDisabled: true,
-  });
-
-  const updateState = (updates: Partial<typeof state>) => {
-    setState((prevState) => ({ ...prevState, ...updates }));
-  };
+  const [percentage, setPercentage] = React.useState("0");
 
   const bpsToPercentage = (bps: string) => {
     return ((100 * parseFloat(bps)) / 10_000).toFixed(0).toString();
@@ -42,17 +36,14 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const value = parseInt(e.target.value);
-    updateState({
-      percentage: value.toString(),
-      //isButtonDisabled: false
-    });
+    setPercentage(value.toString());
   };
 
   const isButtonDisabled = (): boolean => {
     if (!account) return true;
     if (pendingTx) return true;
     if (
-      state.percentage ===
+      percentage ===
       bpsToPercentage(lpState?.queuedBps ? lpState.queuedBps.toString() : "0")
     )
       return true;
@@ -62,7 +53,7 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
 
   const queueWithdrawal = async (): Promise<void> => {
     await vaultActions.queueWithdrawal({
-      bps: percentageToBps(state.percentage),
+      bps: percentageToBps(percentage),
     });
     // queue withdrawal from vaultActions
   };
@@ -78,25 +69,23 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
           )}
           %
         </span>{" "}
-        to{" "}
-        <span className="font-semibold text-[#fafafa]">
-          {state.percentage}%
-        </span>
+        to <span className="font-semibold text-[#fafafa]">{percentage}%</span>
       </>,
       queueWithdrawal,
     );
   };
 
-  React.useEffect(() => {
-    updateState({
-      percentage: bpsToPercentage(lpState?.queuedBps?.toString() || "0"),
-    });
+  useEffect(() => {
+    setPercentage(bpsToPercentage(lpState?.queuedBps?.toString() || "0"));
   }, [account, pendingTx, lpState?.queuedBps]);
 
   return (
     <div className="flex flex-col h-full">
       <Hoverable dataId="queueSlider" className="flex-grow px-6">
-        <label className="block text-sm font-medium text-gray-400 mb-2" htmlFor="percentage-slider">
+        <label
+          className="block text-sm font-medium text-gray-400 mb-2"
+          htmlFor="percentage-slider"
+        >
           Choose Percentage
         </label>
         <div className="flex items-center space-x-4">
@@ -106,7 +95,7 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
               type="range"
               min="0"
               max="100"
-              value={state.percentage}
+              value={percentage}
               onChange={handleSliderChange}
               className="w-full h-2 appearance-none bg-[#ADA478] rounded-full focus:outline-none
                 [&::-webkit-slider-thumb]:appearance-none
@@ -125,7 +114,7 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
           </div>
           <div className="border-[1px] border-[#595959] flex justify-center items-center h-[44px] w-[60px] bg-[#0A0A0A] rounded-lg">
             <span className="text-[14px] font-medium text-[#FAFAFA] text-center">
-              {state.percentage}%
+              {percentage}%
             </span>
           </div>
         </div>

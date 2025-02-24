@@ -39,10 +39,7 @@ export const useTabContent = (
         case "Open":
           return [];
         case "Auctioning":
-          // Hides bidding action while awaiting end_auction txn
-          if (timestamp > Number(selectedRoundState?.auctionEndDate))
-            return [BuyerTabs.History, ...commonTabs];
-          else return [BuyerTabs.PlaceBid, BuyerTabs.History, ...commonTabs];
+          return [BuyerTabs.PlaceBid, BuyerTabs.History, ...commonTabs];
         case "Running":
           return [
             BuyerTabs.Mint,

@@ -222,6 +222,16 @@ const EditModal: React.FC<EditModalProps> = ({
     localStorage.setItem(LOCAL_STORAGE_KEY, state.newPriceGwei);
   }, [state.newPriceGwei]);
 
+  useEffect(() => {
+    if (!account) {
+      setState((prevState) => ({
+        ...prevState,
+        newPriceGwei: "",
+      }));
+      localStorage?.removeItem(LOCAL_STORAGE_KEY);
+    }
+  }, [account]);
+
   return (
     <div className="bg-[#121212] border border-[#262626] rounded-xl p-0 w-full flex flex-col h-full edit-bid-modal">
       <div className="flex items-center p-4">
@@ -274,6 +284,7 @@ const EditModal: React.FC<EditModalProps> = ({
                 <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
               }
               error={priceReason}
+              disabled={!account}
             />
           </Hoverable>
         </div>

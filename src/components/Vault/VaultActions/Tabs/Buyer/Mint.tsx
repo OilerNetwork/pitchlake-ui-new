@@ -55,10 +55,7 @@ const Mint: React.FC<MintProps> = ({ showConfirmation }) => {
   const isButtonDisabled = (): boolean => {
     if (!account) return true;
     if (pendingTx) return true;
-    if (
-      !selectedRoundBuyerState?.mintableOptions ||
-      Number(selectedRoundBuyerState.mintableOptions) === 0
-    )
+    if (selectedRoundBuyerState?.mintableOptions?.toString() === "0")
       return true;
 
     return false;

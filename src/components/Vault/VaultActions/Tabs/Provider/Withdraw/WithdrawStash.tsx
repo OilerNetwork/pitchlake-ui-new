@@ -1,18 +1,15 @@
-import React, { useEffect, ReactNode } from "react";
+import React, { ReactNode, useMemo } from "react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
-import { formatEther, parseEther } from "ethers";
+import { formatEther } from "ethers";
 import { useAccount } from "@starknet-react/core";
 import { CollectEthIcon } from "@/components/Icons";
-import { num } from "starknet";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import { formatNumber } from "@/lib/utils";
 import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
 import useLPState from "@/hooks/vault_v2/states/useLPState";
-import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 
 interface WithdrawStashProps {
-  //withdrawStash: () => Promise<void>;
   showConfirmation: (
     modalHeader: string,
     action: ReactNode,
@@ -20,29 +17,16 @@ interface WithdrawStashProps {
   ) => void;
 }
 
-const WithdrawStash: React.FC<WithdrawStashProps> = ({
-  showConfirmation,
-  //withdrawStash,
-}) => {
-  const {vaultState} = useVaultState()
-  const lpState = useLPState()
-  const vaultActions = useVaultActions()
+const WithdrawStash: React.FC<WithdrawStashProps> = ({ showConfirmation }) => {
+  const lpState = useLPState();
+  const vaultActions = useVaultActions();
   const { account } = useAccount();
   const { pendingTx } = useTransactionContext();
-  const [state, setState] = React.useState({
-    isButtonDisabled: true,
-  });
-
-  const updateState = (updates: Partial<typeof state>) => {
-    setState((prevState) => ({ ...prevState, ...updates }));
-  };
 
   const withdrawStashedBalance = async (): Promise<void> => {
     await vaultActions.withdrawStash({
       account: account ? account.address : "",
     });
-
-    // withdrawStash from vaultActions
   };
 
   const handleSubmit = () => {
@@ -67,25 +51,10 @@ const WithdrawStash: React.FC<WithdrawStashProps> = ({
     );
   };
 
-  const isButtonDisabled = (): boolean => {
-    if (!account) return true;
-    if (pendingTx) return true;
-    if (
-      num.toBigInt(vaultState?.stashedBalance ? vaultState.stashedBalance : 0) >
-      0
-    ) {
-      return false;
-    }
-    return true;
-
-    //if (vaultState.stashedBalance) {
-    //  return false;
-    //}
-
-    //return false; // Button should be disabled is staked ETH is 0
-  };
-
-  useEffect(() => {}, [account]);
+  const isButtonDisabled = useMemo(() => {
+    if (!account || !lpState?.stashedBalance || pendingTx) return true;
+    return false;
+  }, [account, lpState?.stashedBalance, pendingTx]);
 
   return (
     <div className="flex flex-col h-full">
@@ -93,7 +62,11 @@ const WithdrawStash: React.FC<WithdrawStashProps> = ({
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-center">
             <div className="bg-[#1E1E1E] rounded-lg p-4">
-              <CollectEthIcon classname="w-16 h-16 mx-auto collect-eth-icon" stroke="" fill="" />
+              <CollectEthIcon
+                classname="w-16 h-16 mx-auto collect-eth-icon"
+                stroke=""
+                fill=""
+              />
             </div>
           </div>
           <p className="text-[#BFBFBF] text-center font-regular text-[14px] stash-balance-text">
@@ -117,7 +90,7 @@ const WithdrawStash: React.FC<WithdrawStashProps> = ({
         >
           <ActionButton
             onClick={handleSubmit}
-            disabled={isButtonDisabled()}
+            disabled={isButtonDisabled}
             text="Collect"
           />
         </Hoverable>
