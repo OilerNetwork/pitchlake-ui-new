@@ -34,7 +34,7 @@ export const Vault = () => {
   return (
     <div className="px-6 py-4 pt-[120px] bg-faded-black-alt flex-grow flex-box overflow-auto">
       <div className="flex flex-row-reverse text-primary">
-        <div className="flex flex-row rounded-md border-[1px] border-greyscale-800 h-[55px]">
+        <div className="flex flex-row rounded-md border-[1px] border-greyscale-800 h-[44px] w-[220px]">
           <Hoverable
             dataId="userToggleLP"
             className={`user-toggle-lp provider-tab flex flex-row items-center justify-center m-[1px] hover:cursor-pointer px-4 py-1 rounded-md text-[14px] w-[115px] ${
