@@ -190,7 +190,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
   const amountReason: string = useMemo(() => {
     if (!account) return "Connect account";
     else if (timestamp > Number(selectedRoundState?.auctionEndDate))
-      return "Auction ended";
+      return "Auction period is over; transaction pending...";
     else if (state.bidAmount == "") return "";
     else if (Number(state.bidAmount) <= 0)
       return "Amount must be greater than 0";
@@ -210,13 +210,13 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
     const reservePriceGwei = formatUnits(reservePriceWei, "gwei");
     if (!account) return "Connect account";
     else if (timestamp > Number(selectedRoundState?.auctionEndDate))
-      return "Auction ended";
+      return "Auction period is over; transaction pending...";
     else if (state.bidPrice == "") return "";
-    else if (Number(state.bidPrice) < Number(reservePriceGwei))
+    else if (BigInt(bidPriceWei) < BigInt(reservePriceWei))
       return `Price must be at least the reserve price (${Number(reservePriceGwei).toFixed(5)} GWEI)`;
     else if (BigInt(BigInt(bidPriceWei) * BigInt(bidAmount)) > BigInt(balance))
       return `Exceeds balance (${parseFloat(
-        formatEther(balance || "0"),
+        formatEther(balance.toString() || "0"),
       ).toFixed(5)} ETH)`;
     else return "";
   }, [
@@ -225,6 +225,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
     selectedRoundState?.auctionEndDate,
     selectedRoundState?.reservePrice,
     state.bidPrice,
+    state.bidAmount,
     balance,
   ]);
 

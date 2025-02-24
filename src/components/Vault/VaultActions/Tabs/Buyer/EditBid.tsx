@@ -192,13 +192,13 @@ const EditModal: React.FC<EditModalProps> = ({
   const priceReason: string = useMemo(() => {
     if (!account) return "Connect account";
     else if (timestamp > Number(selectedRoundState?.auctionEndDate))
-      return "Auction ended";
+      return "Auction period is over; transaction pending...";
     else if (!state.newPriceGwei) return "";
     else if (parseFloat(state.newPriceGwei) <= parseFloat(oldPriceGwei))
       return "Bid price must increase";
-    else if (totalNewCostWei > balance)
+    else if (BigInt(totalNewCostWei) > BigInt(balance))
       return `Exceeds balance (${parseFloat(
-        formatEther(balance || "0"),
+        formatEther(balance.toString() || "0"),
       ).toFixed(5)} ETH)`;
     else return "";
   }, [
