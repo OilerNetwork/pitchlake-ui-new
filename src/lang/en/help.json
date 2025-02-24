@@ -303,6 +303,10 @@
     "header": "Withdrawal Details",
     "text": "Enter the amount of ETH you want to withdraw."
   },
+  "maxButton": {
+    "header": "Withdraw Max",
+    "text": "To withdraw your entire unlocked balance."
+  },
   "withdrawButton": {
     "header": "Withdrawal Details",
     "text": "Withdrawals come from a user's unlocked balance."

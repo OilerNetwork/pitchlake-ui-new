@@ -25,7 +25,7 @@ const InputField: React.FC<InputFieldProps> = ({
   className,
   disabled,
 }) => (
-  <div className={`input-field-container ${className || ''}`}>
+  <div className={`input-field-container ${className || ""}`}>
     <label
       className="flex flex-row justify-between text-sm font-medium text-[#fafafa] text-[14px] mb-1"
       htmlFor={label}
@@ -36,6 +36,7 @@ const InputField: React.FC<InputFieldProps> = ({
     <div className="relative w-full">
       <input
         id={label}
+        onWheel={(e) => e.currentTarget.blur()}
         type={type}
         placeholder={placeholder}
         min={0}
@@ -45,12 +46,14 @@ const InputField: React.FC<InputFieldProps> = ({
         className={`input-field outline-none w-full bg-[#0A0A0A] border rounded-md p-2 pr-8 appearance-none flex flex-row justify-between
           [&::-webkit-outer-spin-button]:appearance-none
           [&::-webkit-inner-spin-button]:appearance-none
-          ${error ? "border-[#CC455E] text-[#CC455E]" : "border-gray-700 focus:blue-400 text-white"} 
+          ${error ? "border-[#CC455E] text-[#CC455E]" : "border-gray-700 focus:blue-400 text-white"}
           px-6`}
       />
       <div className="flex items-center pointer-events-none">{icon}</div>
     </div>
-    {error && <p className="mt-1 text-sm text-red-500 error-message">{error}</p>}
+    {error && (
+      <p className="mt-1 text-sm text-red-500 error-message">{error}</p>
+    )}
   </div>
 );
 
@@ -73,6 +76,7 @@ export const InputFieldExtra: React.FC<InputFieldProps> = ({
     <div className="relative w-full">
       <input
         type={type}
+        onWheel={(e) => e.currentTarget.blur()}
         placeholder={placeholder}
         min={0}
         value={value}

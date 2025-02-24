@@ -79,30 +79,45 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
 
   return (
     <>
-      <Hoverable
-        dataId="inputWithdrawalAmount"
-        className="flex flex-col space-y-5 px-6 mb-[auto]"
-      >
-        <InputField
-          type="number"
-          value={state.amount || ""}
-          label="Enter Amount"
-          onChange={(e) => {
-            const value = e.target.value;
-            const formattedValue = value.includes(".")
-              ? value.slice(0, value.indexOf(".") + 19)
-              : value;
+      <div className="flex flex-row w-[350px] px-6 gap-2 items-start">
+        <Hoverable
+          dataId="inputWithdrawalAmount"
+          className="flex flex-col space-y-5 mb-[auto]"
+        >
+          <InputField
+            type="number"
+            value={state.amount || ""}
+            label="Enter Amount"
+            onChange={(e) => {
+              const value = e.target.value;
+              const formattedValue = value.includes(".")
+                ? value.slice(0, value.indexOf(".") + 19)
+                : value;
 
-            updateState({ amount: formattedValue });
-            localStorage?.setItem(LOCAL_STORAGE_KEY, e.target.value);
-          }}
-          placeholder="e.g. 5.0"
-          icon={
-            <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
-          }
-          error={amountReason}
-        />
-      </Hoverable>
+              updateState({ amount: formattedValue });
+              localStorage?.setItem(LOCAL_STORAGE_KEY, e.target.value);
+            }}
+            placeholder="e.g. 5.0"
+            icon={
+              <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
+            }
+            error={amountReason}
+          />
+        </Hoverable>
+        <Hoverable dataId="maxButton">
+          <button
+            className="mt-[22px] border border-[1.5px] border-[#454545] w-[56px] h-[44px] rounded-lg text-[#F5EBB8] hover-zoom-small"
+            onClick={() => {
+              updateState({
+                amount: formatEther(lpState?.unlockedBalance || "0"),
+              });
+            }}
+          >
+            MAX
+          </button>
+        </Hoverable>
+      </div>
+
       <div className="flex flex-col h-[full] mt-[auto]">
         <Hoverable
           dataId="lpActionUnlockedBalance"
