@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { SquarePen } from "lucide-react";
 import { useExplorer, Explorer } from "@starknet-react/core";
 import { formatNumber, formatNumberText } from "@/lib/utils";
@@ -87,32 +87,18 @@ const History: React.FC<HistoryProps> = ({
   setBidToEdit,
 }) => {
   const explorer = useExplorer();
-  const { pendingTx } = useTransactionContext();
   const { selectedRoundAddress } = useVaultState();
   const selectedRoundState = useRoundState(selectedRoundAddress);
 
-  const [modalState, setModalState] = useState<{
-    show: boolean;
-    onConfirm: () => Promise<void>;
-  }>({
-    show: false,
-    onConfirm: async () => {},
-  });
-
-  const showEditModal = async (onConfirm: () => Promise<void>) => {
-    setModalState({
-      show: true,
-      onConfirm,
-    });
-  };
-  const hideEditModal = async (onConfirm: () => Promise<void>) => {
-    setModalState({
-      show: false,
-      onConfirm,
-    });
-  };
-
-  useEffect(() => {}, [items, pendingTx]);
+  if (items.length === 0) {
+    return (
+      <div className="py-4 px-4 h-full flex flex-row justify-center items-center">
+        <p className="text-[#fafafa] font-regular text-[14px] text-sm">
+          No bids
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="">

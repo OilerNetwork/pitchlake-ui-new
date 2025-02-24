@@ -31,8 +31,8 @@ const PanelRight: React.FC<VaultDetailsProps> = ({
   setIsEditOpen,
 }) => {
   const { selectedRoundAddress } = useVaultState();
-  const selectedRoundState = useRoundState(selectedRoundAddress)
-  const selectedRoundBuyerState = useOBState(selectedRoundAddress)
+  const selectedRoundState = useRoundState(selectedRoundAddress);
+  const selectedRoundBuyerState = useOBState(selectedRoundAddress);
   const [activeTab, setActiveTab] = useState<string>("");
   const { account } = useAccount();
   const [bidToEdit, setBidToEdit] = useState({});
@@ -64,22 +64,13 @@ const PanelRight: React.FC<VaultDetailsProps> = ({
   const { pendingTx, status } = useTransactionContext();
 
   useEffect(() => {
-    if (tabs.length > 0 && activeTab === "") {
+    if (tabs.length === 0) {
+    } else if (activeTab === "") {
+      setActiveTab(tabs[0]);
+    } else if (!tabs.includes(activeTab)) {
       setActiveTab(tabs[0]);
     }
-  }, [tabs, activeTab]);
-
-  useEffect(() => {
-    if (!(activeTab in tabs)) {
-      setActiveTab(tabs[0]);
-    }
-  }, [tabs, selectedRoundState?.roundState]);
-
-  useEffect(() => {}, [
-    selectedRoundBuyerState,
-    selectedRoundBuyerState?.bids,
-    account,
-  ]);
+  }, [tabs, activeTab, selectedRoundState?.roundState]);
 
   useEffect(() => {
     if (modalState.type === "pending") {
