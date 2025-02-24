@@ -79,10 +79,12 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
 
   return (
     <>
-      <div className="flex flex-row w-[350px] px-6 gap-2 items-start">
+      <div
+        className={`flex flex-row px-6 items-start ${lpState?.unlockedBalance == 0 ? "" : "gap-2"}`}
+      >
         <Hoverable
           dataId="inputWithdrawalAmount"
-          className="flex flex-col space-y-5 mb-[auto]"
+          className={`flex flex-col space-y-5 mb-[auto] ${lpState?.unlockedBalance == 0 ? "w-[100%]" : ""}`}
         >
           <InputField
             type="number"
@@ -104,18 +106,20 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
             error={amountReason}
           />
         </Hoverable>
-        <Hoverable dataId="maxButton">
-          <button
-            className="mt-[22px] border border-[1.5px] border-[#454545] w-[56px] h-[44px] rounded-lg text-[#F5EBB8] hover-zoom-small"
-            onClick={() => {
-              updateState({
-                amount: formatEther(lpState?.unlockedBalance || "0"),
-              });
-            }}
-          >
-            MAX
-          </button>
-        </Hoverable>
+        {lpState?.unlockedBalance == 0 ? null : (
+          <Hoverable dataId="maxButton">
+            <button
+              className="mt-[22px] border border-[1.5px] border-[#454545] w-[56px] h-[44px] rounded-lg text-[#F5EBB8] hover-zoom-small"
+              onClick={() => {
+                updateState({
+                  amount: formatEther(lpState?.unlockedBalance || "0"),
+                });
+              }}
+            >
+              MAX
+            </button>
+          </Hoverable>
+        )}
       </div>
 
       <div className="flex flex-col h-[full] mt-[auto]">

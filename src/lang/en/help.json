@@ -247,16 +247,16 @@
     "header": "Withdraw Tab",
     "text": "Remove liquidity from your unlocked balance."
   },
-  "actionTab_Liquidity": {
-    "header": "Withdraw Tab",
+  "actionTab_Unlocked": {
+    "header": "Withdraw Liquidity",
     "text": "Remove liquidity from your unlocked balance."
   },
-  "actionTab_Queue": {
-    "header": "Queue Withdrawal Tab",
+  "actionTab_Locked": {
+    "header": "Queue a Withdrawal",
     "text": "Queue a percentage of your locked balance to be stashed aside upon round settlement."
   },
-  "actionTab_Collect": {
-    "header": "Collect Stash Tab",
+  "actionTab_Stashed": {
+    "header": "Collect Stashed Liquidity",
     "text": "Collect your stashed balance."
   },
   "actionTab_Place Bid": {
