@@ -92,9 +92,15 @@ const History: React.FC<HistoryProps> = ({
 
   if (items.length === 0) {
     return (
-      <div className="py-4 px-4 h-full flex flex-row justify-center items-center">
+      <div className="py-4 px-4 h-full flex flex-col justify-center items-center">
+        <div className="w-[92px] h-[92px] rounded-2xl bg-icon-gradient border-[1px] border-greyscale-800 flex flex-row justify-center items-center mb-6 ">
+          <div className="bg-[#F5EBB8] rounded-full w-[48px] h-[48px] flex items-center justify-center border-[8px] border-[#524F44]">
+            <span className="text-black text-2xl font-bold">!</span>
+          </div>
+        </div>
+
         <p className="text-[#fafafa] font-regular text-[14px] text-sm">
-          No bids
+          You have not placed any bids.
         </p>
       </div>
     );
