@@ -14,7 +14,7 @@ import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import { useTimeContext } from "@/context/TimeProvider";
-import { EthereumIcon } from "@/components/Icons";
+import { EthereumIcon, HourglassIcon } from "@/components/Icons";
 
 const LOCAL_STORAGE_KEY1 = "bidAmount";
 const LOCAL_STORAGE_KEY2 = "bidPriceGwei";
@@ -244,68 +244,100 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
     localStorage?.setItem(LOCAL_STORAGE_KEY2, state.bidPrice);
   }, [state.bidPrice]);
 
-  return (
-    <div className="flex flex-col h-full">
-      <div className="flex-grow space-y-6 p-6">
-        <Hoverable dataId="inputBidAmount" className="place-bid-container">
-          <InputField
-            label="Enter Amount"
-            type="integer"
-            //value={state.bidAmount}
-            value={state.bidAmount}
-            onChange={handleAmountChange}
-            placeholder="e.g. 5000"
-            icon={
-              <Layers3
-                size="20px"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 stroke-[1px]"
-              />
-            }
-            error={amountReason}
-          />
-        </Hoverable>
-        <Hoverable dataId="inputBidPrice">
-          <InputField
-            label="Enter Price (GWEI)"
-            type="number"
-            value={state.bidPrice}
-            onChange={handlePriceChange}
-            placeholder="e.g. 0.3"
-            icon={
-              <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
-            }
-            error={priceReason}
-          />
-        </Hoverable>
+  useEffect(() => {
+    if (!account) {
+      setState((prevState) => ({
+        ...prevState,
+        bidAmount: "",
+        bidPrice: "",
+      }));
+      localStorage?.removeItem(LOCAL_STORAGE_KEY1);
+      localStorage?.removeItem(LOCAL_STORAGE_KEY2);
+    }
+  }, [account]);
+
+  if (timestamp > Number(selectedRoundState?.auctionEndDate)) {
+    return (
+      <div className="flex flex-col flex-grow items-center justify-center text-center p-6">
+        <div className="w-[92px] h-[92px] p-6 rounded-2xl bg-icon-gradient border-[1px] border-greyscale-800 flex flex-row justify-center items-center">
+          <HourglassIcon classname="" />
+        </div>
+        <p className="text-[16px] font-medium text-[#FAFAFA] text-center mt-4 mb-3">
+          Auction Ending
+        </p>
+        <p className="max-w-[290px] font-regular text-[14px] text-[#BFBFBF] pt-0">
+          No more bids can be placed.
+        </p>
       </div>
-      <Hoverable dataId="newBidSummary" className="flex flex-col h-[full]">
-        <div className="flex justify-between text-sm px-6 pb-1">
-          <span className="text-gray-400 place-bid-total">Total</span>
-          <span>{formatNumber(bidTotalEth)} ETH</span>
+    );
+  } else
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex-grow space-y-6 p-6">
+          <Hoverable dataId="inputBidAmount" className="place-bid-container">
+            <InputField
+              label="Enter Amount"
+              type="integer"
+              //value={state.bidAmount}
+              value={state.bidAmount}
+              onChange={handleAmountChange}
+              placeholder="e.g. 5000"
+              icon={
+                <Layers3
+                  size="20px"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 stroke-[1px]"
+                />
+              }
+              error={amountReason}
+              disabled={!account}
+            />
+          </Hoverable>
+          <Hoverable dataId="inputBidPrice">
+            <InputField
+              label="Enter Price (GWEI)"
+              type="number"
+              value={state.bidPrice}
+              onChange={handlePriceChange}
+              placeholder="e.g. 0.3"
+              icon={
+                <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
+              }
+              error={priceReason}
+              disabled={!account}
+            />
+          </Hoverable>
         </div>
-      </Hoverable>
-      <Hoverable dataId="placingBidBalance" className="flex flex-col h-[full]">
-        <div className="flex justify-between text-sm px-6 pb-6">
-          <span className="text-gray-400">Balance</span>
-          <span>
-            {formatNumber(parseFloat(formatEther(BigInt(balance))))} ETH
-          </span>
-        </div>
-      </Hoverable>
-      <div className="mt-auto">
+        <Hoverable dataId="newBidSummary" className="flex flex-col h-[full]">
+          <div className="flex justify-between text-sm px-6 pb-1">
+            <span className="text-gray-400 place-bid-total">Total</span>
+            <span>{formatNumber(bidTotalEth)} ETH</span>
+          </div>
+        </Hoverable>
         <Hoverable
-          dataId="placeBidButton"
-          className="place-bid-action-button px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
+          dataId="placingBidBalance"
+          className="flex flex-col h-[full]"
         >
-          <ActionButton
-            onClick={handleSubmitForMulticall}
-            disabled={isButtonDisabled}
-            text="Place Bid"
-          />
+          <div className="flex justify-between text-sm px-6 pb-6">
+            <span className="text-gray-400">Balance</span>
+            <span>
+              {formatNumber(parseFloat(formatEther(BigInt(balance))))} ETH
+            </span>
+          </div>
         </Hoverable>
+        <div className="mt-auto">
+          <Hoverable
+            dataId="placeBidButton"
+            className="place-bid-action-button px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
+          >
+            <ActionButton
+              onClick={handleSubmitForMulticall}
+              disabled={isButtonDisabled}
+              text="Place Bid"
+            />
+          </Hoverable>
+        </div>
       </div>
-    </div>
-  );
+    );
 };
 
 export default PlaceBid;
