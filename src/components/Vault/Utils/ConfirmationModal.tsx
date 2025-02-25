@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
 import { ChevronLeft } from "lucide-react";
+import { ExclamationIcon } from "@/components/Icons";
 
 interface ConfirmationModalProps {
   modalHeader: string;
@@ -26,12 +27,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         {modalHeader}
       </h2>
     </div>
-    <div className="flex-grow flex flex-col items-center justify-center confirmation-modal-content">
-      <div className="p-6 w-full">
-        <div className="bg-[#F5EBB8] rounded-full w-[48px] h-[48px] flex items-center justify-center mx-auto mb-6 border-[8px] border-[#524F44] confirmation-modal-icon">
-          <span className="text-black text-2xl font-bold">!</span>
-        </div>
-        <p className="text-center text-[#bfbfbf] font-regular text-[14px] text-sm mb-8 confirmation-modal-message">
+    <div className="flex-grow flex flex-row items-center justify-center confirmation-modal-content">
+      <div className="p-6 flex flex-col justify-center items-center space-y-6">
+        <ExclamationIcon />
+        <p className="text-center text-[#bfbfbf] font-regular text-[14px] text-sm confirmation-modal-message">
           Are you sure you want to {action}?
         </p>
       </div>

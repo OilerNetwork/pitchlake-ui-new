@@ -258,16 +258,16 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
 
   if (timestamp > Number(selectedRoundState?.auctionEndDate)) {
     return (
-      <div className="flex flex-col flex-grow items-center justify-center text-center p-6">
-        <div className="w-[92px] h-[92px] p-6 rounded-2xl bg-icon-gradient border-[1px] border-greyscale-800 flex flex-row justify-center items-center">
-          <HourglassIcon classname="" />
+      <div className="flex space-y-6 flex-col flex-grow items-center justify-center text-center p-6">
+        <HourglassIcon />
+        <div className="flex flex-col space-y-2">
+          <p className="text-[16px] font-medium text-[#FAFAFA] text-center">
+            Auction Ending
+          </p>
+          <p className="max-w-[290px] font-regular text-[14px] text-[#BFBFBF] pt-0">
+            No more bids can be placed.
+          </p>
         </div>
-        <p className="text-[16px] font-medium text-[#FAFAFA] text-center mt-4 mb-3">
-          Auction Ending
-        </p>
-        <p className="max-w-[290px] font-regular text-[14px] text-[#BFBFBF] pt-0">
-          No more bids can be placed.
-        </p>
       </div>
     );
   } else

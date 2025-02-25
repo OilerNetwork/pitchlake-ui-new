@@ -69,9 +69,7 @@ const Refund: React.FC<RefundProps> = ({ showConfirmation }) => {
   return (
     <div className="flex flex-col h-full">
       <div className="flex flex-col flex-grow space-y-6 items-center justify-center">
-        <div className="w-[92px] h-[92px] p-6 rounded-2xl bg-icon-gradient border-[1px] border-greyscale-800 flex flex-row justify-center items-center">
-          <RepeatEthIcon classname="refund-icon" />
-        </div>
+        <RepeatEthIcon classname="refund-icon rounded-2xl bg-icon-gradient border-[1px] border-greyscale-800 flex flex-row justify-center items-center" />
         <p className="text-center text-[#bfbfbf]">
           Your refundable balance is <br />
           <span className="font-semibold text-[#fafafa]">

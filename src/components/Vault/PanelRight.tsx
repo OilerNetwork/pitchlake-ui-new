@@ -192,9 +192,7 @@ const PanelRight: React.FC<VaultDetailsProps> = ({
 const NotStartedYet = () => {
   return (
     <div className="flex flex-col flex-grow items-center justify-center text-center p-6">
-      <div className="w-[92px] h-[92px] p-6 rounded-2xl bg-icon-gradient border-[1px] border-greyscale-800 flex flex-row justify-center items-center">
-        <HourglassIcon classname="" />
-      </div>
+      <HourglassIcon />
       <p className="text-[16px] font-medium text-[#FAFAFA] text-center mt-4 mb-3">
         Round In Process
       </p>
