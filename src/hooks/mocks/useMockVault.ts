@@ -168,7 +168,9 @@ const useMockVault = (
 
   const sendFossilRequest = async (
     fossilRequest: SendFossiLRequestParams,
-  ): Promise<void> => {};
+  ): Promise<string> => {
+    return "Ok";
+  };
 
   const placeBid = async (placeBidArgs: PlaceBidArgs) => {
     setBuyerStates((prevState) => {

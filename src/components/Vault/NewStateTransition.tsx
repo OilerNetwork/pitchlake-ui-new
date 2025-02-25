@@ -103,7 +103,7 @@ const NewStateTransition = ({
           result ? setExpectedNextState("Settled") : setExpectedNextState(null);
         } // Do standard fossil request
         else {
-          await vaultActions.sendFossilRequest({
+          const response = await vaultActions.sendFossilRequest({
             targetTimestamp: Number(selectedRoundState.optionSettleDate),
             vaultAddress: vaultState.address,
             clientAddress: vaultState.fossilClientAddress,
@@ -111,7 +111,8 @@ const NewStateTransition = ({
               Number(selectedRoundState.optionSettleDate) -
               Number(selectedRoundState.auctionEndDate),
           });
-          setExpectedNextState("Settled");
+          if (response === "Ok") setExpectedNextState("Settled");
+          else setExpectedNextState(null);
         }
       } catch (error) {
         console.error(error);

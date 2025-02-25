@@ -164,7 +164,9 @@ const useVaultActions = () => {
       roundDuration,
       clientAddress,
       vaultAddress,
-    }: SendFossiLRequestParams) => {
+    }: SendFossiLRequestParams): Promise<string> => {
+      const OK = Promise.resolve("Ok");
+      const NOT_OK = Promise.resolve("Not Ok");
       if (conn === "ws" || conn === "rpc") {
         const response = await fetch("/api/sendFossilRequest", {
           method: "POST",
@@ -179,14 +181,11 @@ const useVaultActions = () => {
           }),
         });
 
-        if (!response.ok) {
-          //       alert("Request failed to send, try again in a couple seconds");
-          //       throw new Error(`Failed to send request to Fossil request`);
-        } else {
-          //       const data = await response.json();
-          //       alert("Request sent! " + JSON.stringify(data));
-        }
+        if (response.ok) return OK;
+        //if ((await response.text()) === "Conflict") return NOT_OK;
+        return NOT_OK;
       }
+      return OK;
     },
     [],
   );

@@ -40,14 +40,17 @@ export async function POST(request: Request) {
       fossilRequest,
     );
 
-
     if (!resp.ok) {
-      console.error("Fossil request failed:", resp.statusText);
-      // Return error response to the client
-      return NextResponse.json(
-        { error: "Fossil request failed: " + resp.statusText },
-        { status: resp.status },
-      );
+      if ((await resp.text()) === "Conflict") {
+        return NextResponse.json({ data: "Conflict" });
+      } else {
+        console.error("Fossil request failed:", resp.statusText);
+        // Return error response to the client
+        return NextResponse.json(
+          { error: "Fossil request failed: " + resp.statusText },
+          { status: resp.status },
+        );
+      }
     }
 
     const data = await resp.json();
