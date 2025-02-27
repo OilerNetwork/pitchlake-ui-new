@@ -27,7 +27,7 @@ const InputField: React.FC<InputFieldProps> = ({
 }) => (
   <div className={`input-field-container ${className || ""}`}>
     <label
-      className="flex flex-row justify-between text-sm font-medium text-[#fafafa] text-[14px] mb-1"
+      className="flex flex-row justify-between text-sm font-medium text-[#fafafa] text-[14px] mb-2"
       htmlFor={label}
     >
       {label}

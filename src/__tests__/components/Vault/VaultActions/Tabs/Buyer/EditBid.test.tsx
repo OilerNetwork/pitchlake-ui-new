@@ -2,8 +2,6 @@ import React from "react";
 import { screen, fireEvent, waitFor } from "@testing-library/react";
 import EditBid from "@/components/Vault/VaultActions/Tabs/Buyer/EditBid";
 import { renderWithProviders } from "@/__tests__/utils/TestWrapper";
-import { useContract, useContractWrite } from "@starknet-react/core";
-import { num } from "starknet";
 
 // Mock utils
 jest.mock("ethers", () => ({
