@@ -29,6 +29,8 @@ export { default as QuestionCircleIcon } from "./QuestionCircleIcon";
 export { default as EthereumIcon } from "./EthereumIcon";
 export { default as PersonIcon } from "./PersonIcon";
 export { default as ExclamationIcon } from "./ExclamationIcon";
+export { default as TxSuccessIcon } from "./TxSuccessIcon";
+export { default as TxFailureIcon } from "./TxFailureIcon";
 
 // To create a new tailwind compatible icon component, create a new file in pitchlake-ui/public/icons/ using other icons as a template.
 // Export the icon here to make it available to other components.
