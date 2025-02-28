@@ -15,13 +15,16 @@ import {
   SendFossiLRequestParams,
 } from "@/lib/types";
 import { useCallback, useMemo } from "react";
-import { useTransactionContext } from "@/context/TransactionProvider";
+import {
+  ModalStateProps,
+  useTransactionContext,
+} from "@/context/TransactionProvider";
 import { useNewContext } from "@/context/NewProvider";
 import { DemoFossilCallParams } from "@/app/api/sendMockFossilCallback/route";
 import { getTargetTimestampForRound } from "@/lib/utils";
 const useVaultActions = () => {
   const { vaultAddress, conn } = useNewContext();
-  const { setPendingTx } = useTransactionContext();
+  const { setPendingTx, setModalState } = useTransactionContext();
   const { account } = useAccount();
   const { provider } = useProvider();
   const { contract } = useContract({
@@ -64,19 +67,25 @@ const useVaultActions = () => {
         if (!typedContract || !provider || !account) return;
         let argsData;
         if (args) argsData = Object.values(args).map((value) => value);
-        let data;
         const nonce = await provider?.getNonceForAddress(account?.address);
-        if (argsData) {
-          data = await typedContract?.[functionName](...argsData, {
-            nonce,
-          });
-        } else {
-          data = await typedContract?.[functionName]({ nonce });
+        try {
+          const data = (
+            argsData
+              ? await typedContract?.[functionName](...argsData, { nonce })
+              : await typedContract?.[functionName]({ nonce })
+          ) as TransactionResult;
+
+          setPendingTx(data.transaction_hash);
+
+          return data;
+        } catch (error) {
+          setModalState((prevState: ModalStateProps) => ({
+            ...prevState,
+            show: false,
+          }));
+
+          console.log("Error sending txn:", error);
         }
-        const typedData = data as TransactionResult;
-        setPendingTx(typedData.transaction_hash);
-        // const data = await writeAsync({ calls: [callData] });
-        return typedData;
       },
     [typedContract, account, provider, setPendingTx],
   );
@@ -84,29 +93,33 @@ const useVaultActions = () => {
   /// LP
 
   const depositLiquidity = useCallback(
-    async (depositArgs: DepositArgs) => {
-      await callContract("deposit")(depositArgs);
+    async (depositArgs: DepositArgs): Promise<string> => {
+      const reponse = await callContract("deposit")(depositArgs);
+      return reponse?.transaction_hash || "";
     },
     [callContract],
   );
 
   const withdrawLiquidity = useCallback(
-    async (withdrawArgs: WithdrawLiquidityArgs) => {
-      await callContract("withdraw")(withdrawArgs);
+    async (withdrawArgs: WithdrawLiquidityArgs): Promise<string> => {
+      const reponse = await callContract("withdraw")(withdrawArgs);
+      return reponse?.transaction_hash || "";
     },
     [callContract],
   );
 
   const withdrawStash = useCallback(
-    async (collectArgs: CollectArgs) => {
-      await callContract("withdraw_stash")(collectArgs);
+    async (collectArgs: CollectArgs): Promise<string> => {
+      const reponse = await callContract("withdraw_stash")(collectArgs);
+      return reponse?.transaction_hash || "";
     },
     [callContract],
   );
 
   const queueWithdrawal = useCallback(
-    async (queueArgs: QueueArgs) => {
-      await callContract("queue_withdrawal")(queueArgs);
+    async (queueArgs: QueueArgs): Promise<string> => {
+      const reponse = await callContract("queue_withdrawal")(queueArgs);
+      return reponse?.transaction_hash || "";
     },
     [callContract],
   );
@@ -201,36 +214,41 @@ const useVaultActions = () => {
 
   // OB
   const placeBid = useCallback(
-    async (args: PlaceBidArgs) => {
-      await callContract("place_bid")(args);
+    async (args: PlaceBidArgs): Promise<string> => {
+      const response = await callContract("place_bid")(args);
+      return response?.transaction_hash || "";
     },
     [callContract],
   );
 
   const updateBid = useCallback(
-    async (args: UpdateBidArgs) => {
-      await callContract("update_bid")(args);
+    async (args: UpdateBidArgs): Promise<string> => {
+      const response = await callContract("update_bid")(args);
+      return response?.transaction_hash || "";
     },
     [callContract],
   );
 
   const refundUnusedBids = useCallback(
-    async (args: RefundBidsArgs) => {
-      await callContract("refund_unused_bids")(args);
+    async (args: RefundBidsArgs): Promise<string> => {
+      const response = await callContract("refund_unused_bids")(args);
+      return response?.transaction_hash || "";
     },
     [callContract],
   );
 
   const mintOptions = useCallback(
-    async (args: MintOptionsArgs) => {
-      await callContract("mint_options")(args);
+    async (args: MintOptionsArgs): Promise<string> => {
+      const response = await callContract("mint_options")(args);
+      return response?.transaction_hash || "";
     },
     [callContract],
   );
 
   const exerciseOptions = useCallback(
-    async (args: ExerciseOptionsArgs) => {
-      await callContract("exercise_options")(args);
+    async (args: ExerciseOptionsArgs): Promise<string> => {
+      const response = await callContract("exercise_options")(args);
+      return response?.transaction_hash || "";
     },
     [callContract],
   );
