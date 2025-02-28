@@ -10,7 +10,7 @@ import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
 import useLPState from "@/hooks/vault_v2/states/useLPState";
 import { EthereumIcon } from "@/components/Icons";
 
-const LOCAL_STORAGE_KEY = "withdrawAmount";
+const WITHDRAW_AMOUNT_KEY = "withdrawAmount";
 
 interface WithdrawLiquidityProps {
   showConfirmation: (
@@ -23,21 +23,38 @@ interface WithdrawLiquidityProps {
 const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
   showConfirmation,
 }) => {
+  const { account } = useAccount();
+  const { pendingTx, setStatusModalProps } = useTransactionContext();
   const lpState = useLPState();
   const vaultActions = useVaultActions();
-  const [state, setState] = useState({
-    amount: localStorage.getItem(LOCAL_STORAGE_KEY) || "",
-  });
-  const { pendingTx } = useTransactionContext();
-  const { account } = useAccount();
 
-  const updateState = (updates: Partial<typeof state>) => {
-    setState((prevState: typeof state) => ({ ...prevState, ...updates }));
-  };
+  const [withdrawAmount, setWithdrawAmount] = useState("");
 
-  const liquidityWithdraw = async (): Promise<void> => {
-    await vaultActions.withdrawLiquidity({ amount: parseEther(state.amount) });
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
+  const amountReason: string = useMemo(() => {
+    if (!account) return "Connect account";
+    else if (withdrawAmount == "") return "";
+    else if (Number(withdrawAmount) <= 0)
+      return "Amount must be greater than 0";
+    else if (
+      parseEther(withdrawAmount) > BigInt(lpState?.unlockedBalance || "0")
+    )
+      return `Exceeds balance (${parseFloat(
+        formatEther(lpState?.unlockedBalance?.toString() || "0"),
+      ).toFixed(5)} ETH)`;
+    else return "";
+  }, [withdrawAmount, lpState?.unlockedBalance, account]);
+
+  const isButtonDisabled = useMemo(() => {
+    if (pendingTx || amountReason !== "" || withdrawAmount === "") return true;
+    return false;
+  }, [pendingTx, amountReason, withdrawAmount]);
+
+  const withdrawLiquidity = async (): Promise<string> => {
+    const hash = await vaultActions.withdrawLiquidity({
+      amount: parseEther(withdrawAmount),
+    });
+    localStorage.removeItem(WITHDRAW_AMOUNT_KEY);
+    return hash;
   };
 
   const handleSubmit = () => {
@@ -47,40 +64,53 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
         withdraw
         <br />
         <span className="font-semibold text-[#fafafa]">
-          {formatNumber(Number(state.amount))} ETH
+          {formatNumber(Number(withdrawAmount))} ETH
         </span>{" "}
         from your unlocked balance
       </>,
-      liquidityWithdraw,
+      async () => {
+        try {
+          const hash = await withdrawLiquidity();
+
+          setStatusModalProps({
+            txnHeader: "Withdraw Successful",
+            txnHash: hash,
+            txnOutcome: (
+              <>
+                You have successfully withdrawn{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumber(Number(withdrawAmount))} ETH
+                </span>{" "}
+                from your unlocked balance.
+              </>
+            ),
+          });
+          setWithdrawAmount("");
+        } catch (e) {
+          setStatusModalProps({
+            txnHeader: "Withdraw Failed",
+            txnHash: "",
+            txnOutcome: (
+              <>
+                Your withdraw of{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumber(Number(withdrawAmount))} ETH
+                </span>{" "}
+                failed.
+              </>
+            ),
+          });
+          console.error("Error sending withdraw txn: ", e);
+        }
+      },
     );
   };
 
+  // Load withdraw amount from local storage after initial render
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, state.amount);
-  }, [state.amount]);
-
-  const amountReason: string = useMemo(() => {
-    if (!account) return "Connect account";
-    else if (state.amount == "") return "";
-    else if (Number(state.amount) <= 0) return "Amount must be greater than 0";
-    else if (parseEther(state.amount) > BigInt(lpState?.unlockedBalance || "0"))
-      return `Exceeds balance (${parseFloat(
-        formatEther(lpState?.unlockedBalance?.toString() || "0"),
-      ).toFixed(5)} ETH)`;
-    else return "";
-  }, [state.amount, lpState?.unlockedBalance, account]);
-
-  const isButtonDisabled = useMemo(() => {
-    if (pendingTx || amountReason !== "" || state.amount === "") return true;
-    return false;
-  }, [pendingTx, amountReason, state.amount]);
-
-  useEffect(() => {
-    if (!account) {
-      setState((prevState) => ({ ...prevState, amount: "" }));
-      localStorage?.removeItem(LOCAL_STORAGE_KEY);
-    }
-  }, [account]);
+    const amount = localStorage?.getItem(WITHDRAW_AMOUNT_KEY);
+    if (amount) setWithdrawAmount(amount);
+  }, []);
 
   return (
     <>
@@ -93,7 +123,7 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
         >
           <InputField
             type="number"
-            value={state.amount || ""}
+            value={withdrawAmount || ""}
             label="Enter Amount"
             onChange={(e) => {
               const value = e.target.value;
@@ -101,8 +131,8 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
                 ? value.slice(0, value.indexOf(".") + 19)
                 : value;
 
-              updateState({ amount: formattedValue });
-              localStorage?.setItem(LOCAL_STORAGE_KEY, e.target.value);
+              setWithdrawAmount(formattedValue);
+              localStorage?.setItem(WITHDRAW_AMOUNT_KEY, formattedValue);
             }}
             placeholder="e.g. 5.0"
             icon={
@@ -113,13 +143,15 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
           />
         </Hoverable>
         {lpState?.unlockedBalance == 0 || !account ? null : (
-          <Hoverable dataId="maxButton">
+          <Hoverable dataId="maxButton" className="mt-[26px]">
             <button
-              className="mt-[22px] border border-[1.5px] border-[#454545] w-[56px] h-[44px] rounded-lg text-[#F5EBB8] hover-zoom-small"
+              className=" border border-[1.5px] border-[#454545] w-[56px] h-[44px] rounded-lg text-[#F5EBB8] hover-zoom-small"
               onClick={() => {
-                updateState({
-                  amount: formatEther(lpState?.unlockedBalance || "0"),
-                });
+                setWithdrawAmount(formatEther(lpState?.unlockedBalance || "0"));
+                localStorage?.setItem(
+                  WITHDRAW_AMOUNT_KEY,
+                  formatEther(lpState?.unlockedBalance || "0"),
+                );
               }}
             >
               MAX
@@ -145,7 +177,7 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
         </Hoverable>
         <Hoverable
           dataId="withdrawButton"
-          className="mt-[auto] flex justify-between text-sm border-t border-[#262626] p-6"
+          className="mt-auto flex justify-center text-sm border-t border-[#262626] p-6"
         >
           <ActionButton
             onClick={handleSubmit}
