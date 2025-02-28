@@ -53,8 +53,6 @@ export const useChartData = () => {
 
     // If there is fossil data, remove all unconfirmed blocks if timestamp < last fossil block
 
-    console.log("CHECK123confirmedGasDataLast", confirmedGasData[confirmedGasData.length-1]?.blockNumber);
-    console.log("CHECK123unconfirmedGasDataFirst", unconfirmedGasData[0]?.blockNumber);
     const allGasData: FormattedBlockData[] = [
       ...(confirmedGasData
         ? confirmedGasData.map(
@@ -82,8 +80,8 @@ export const useChartData = () => {
                 twap: d.twap/10**9,
                 unconfirmedBasefee: d.baseFee/10**9,
                 unconfirmedTwap: d.twap/10**9,
-                confirmedBasefee: index===0?d.baseFee/10**9:undefined,
-                confirmedTwap: index===0?d.twap/10**9:undefined,
+                confirmedBasefee: undefined,
+                confirmedTwap: undefined,
                 isUnconfirmed: true,
               } as FormattedBlockData)}
           )
