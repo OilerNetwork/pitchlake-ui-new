@@ -1,8 +1,8 @@
-import React, { ReactNode, useState, useEffect } from "react";
-import { TxFailureIcon } from "../Icons";
+import React from "react";
+import { TxFailureIcon } from "@/components/Icons";
 import { ChevronLeft } from "lucide-react";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import ActionButton from "../Vault/Utils/ActionButton";
+import ActionButton from "@/components/Vault/Utils/ActionButton";
 
 const TxnFailure = ({ onClose }: { onClose: () => void }) => {
   const { statusModalProps } = useTransactionContext();

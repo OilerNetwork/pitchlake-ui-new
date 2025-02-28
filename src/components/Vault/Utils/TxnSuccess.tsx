@@ -1,10 +1,10 @@
-import React, { ReactNode, useState, useEffect } from "react";
-import { TxSuccessIcon } from "../Icons";
+import React from "react";
+import { TxSuccessIcon } from "@/components/Icons";
 import { SquareArrowOutUpRight } from "lucide-react";
 import { ChevronLeft } from "lucide-react";
 import { useExplorer } from "@starknet-react/core";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import ActionButton from "../Vault/Utils/ActionButton";
+import ActionButton from "@/components/Vault/Utils/ActionButton";
 
 const TxnSuccess = ({ onClose }: { onClose: () => void }) => {
   const explorer = useExplorer();
