@@ -18,14 +18,15 @@ interface WithdrawStashProps {
 }
 
 const WithdrawStash: React.FC<WithdrawStashProps> = ({ showConfirmation }) => {
+  const { account } = useAccount();
+  const { pendingTx, setStatusModalProps } = useTransactionContext();
+
   const lpState = useLPState();
   const vaultActions = useVaultActions();
-  const { account } = useAccount();
-  const { pendingTx } = useTransactionContext();
 
-  const withdrawStashedBalance = async (): Promise<void> => {
-    await vaultActions.withdrawStash({
-      account: account ? account.address : "",
+  const withdrawStashedBalance = async (): Promise<string> => {
+    return await vaultActions.withdrawStash({
+      account: account?.address || "",
     });
   };
 
@@ -47,12 +48,62 @@ const WithdrawStash: React.FC<WithdrawStashProps> = ({ showConfirmation }) => {
           ETH
         </span>{" "}
       </>,
-      withdrawStashedBalance,
+      async () => {
+        try {
+          const hash = await withdrawStashedBalance();
+          setStatusModalProps({
+            txnHeader: "Stash Collection Successful",
+            txnHash: hash,
+            txnOutcome: (
+              <>
+                You have successfully collected your stashed balance of{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumber(
+                    Number(
+                      formatEther(
+                        lpState?.stashedBalance
+                          ? lpState.stashedBalance.toString()
+                          : "0",
+                      ),
+                    ),
+                  )}{" "}
+                  ETH
+                </span>
+                .
+              </>
+            ),
+          });
+        } catch (e) {
+          setStatusModalProps({
+            txnHeader: "Collect Stash Failed",
+            txnHash: "",
+            txnOutcome: (
+              <>
+                Your stash collection of{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumber(
+                    Number(
+                      formatEther(
+                        lpState?.stashedBalance
+                          ? lpState.stashedBalance.toString()
+                          : "0",
+                      ),
+                    ),
+                  )}{" "}
+                  ETH
+                </span>{" "}
+                failed.
+              </>
+            ),
+          });
+          console.error("Failed to collect stash:", e);
+        }
+      },
     );
   };
 
   const isButtonDisabled = useMemo(() => {
-    if (!account || !lpState?.stashedBalance || pendingTx) return true;
+    if (!account || pendingTx || !lpState?.stashedBalance) return true;
     return false;
   }, [account, lpState?.stashedBalance, pendingTx]);
 

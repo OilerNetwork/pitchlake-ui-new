@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect } from "react";
+import React, { ReactNode, useEffect, useMemo } from "react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useAccount } from "@starknet-react/core";
@@ -16,46 +16,42 @@ interface WithdrawQueueProps {
   ) => void;
 }
 
-// "WITHDRAW" LOCKED
+const bpsToPercentage = (bps: string) => {
+  return ((100 * parseFloat(bps)) / 10_000).toFixed(0).toString();
+};
+
+const percentageToBps = (percentage: string): number => {
+  return (10_000 * parseFloat(percentage)) / 100;
+};
+
 const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
   showConfirmation,
 }) => {
+  const { account } = useAccount();
+  const { pendingTx, setStatusModalProps } = useTransactionContext();
+
   const lpState = useLPState();
   const vaultActions = useVaultActions();
-  const { pendingTx } = useTransactionContext();
-  const { account } = useAccount();
+
   const [percentage, setPercentage] = React.useState("0");
-
-  const bpsToPercentage = (bps: string) => {
-    return ((100 * parseFloat(bps)) / 10_000).toFixed(0).toString();
-  };
-
-  const percentageToBps = (percentage: string): number => {
-    return (10_000 * parseFloat(percentage)) / 100;
-  };
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const value = parseInt(e.target.value);
     setPercentage(value.toString());
   };
 
-  const isButtonDisabled = (): boolean => {
-    if (!account) return true;
-    if (pendingTx) return true;
-    if (
-      percentage ===
-      bpsToPercentage(lpState?.queuedBps ? lpState.queuedBps.toString() : "0")
-    )
+  const isButtonDisabled = useMemo(() => {
+    if (!account || pendingTx) return true;
+    if (percentage === bpsToPercentage(lpState?.queuedBps.toString() || "0"))
       return true;
 
     return false;
-  };
+  }, [account, pendingTx, percentage, lpState?.queuedBps]);
 
-  const queueWithdrawal = async (): Promise<void> => {
-    await vaultActions.queueWithdrawal({
+  const queueWithdrawal = async (): Promise<string> => {
+    return await vaultActions.queueWithdrawal({
       bps: percentageToBps(percentage),
     });
-    // queue withdrawal from vaultActions
   };
 
   const handleSubmit = () => {
@@ -71,7 +67,40 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
         </span>{" "}
         to <span className="font-semibold text-[#fafafa]">{percentage}%</span>
       </>,
-      queueWithdrawal,
+      async () => {
+        try {
+          const hash = await queueWithdrawal();
+
+          setStatusModalProps({
+            txnHeader: "Withdraw Request Successful",
+            txnHash: hash,
+            txnOutcome: (
+              <>
+                You have successfully queued{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {percentage}%
+                </span>{" "}
+                of your locked position for stashing.
+              </>
+            ),
+          });
+        } catch (e) {
+          setStatusModalProps({
+            txnHeader: "Withdrawal Request Failed",
+            txnHash: "",
+            txnOutcome: (
+              <>
+                Your request to queue{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {percentage}%
+                </span>{" "}
+                of your locked position for withdrawal failed.
+              </>
+            ),
+          });
+          console.error("Error sending deposit txn: ", e);
+        }
+      },
     );
   };
 
@@ -83,7 +112,7 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
     <div className="flex flex-col h-full">
       <Hoverable dataId="queueSlider" className="flex-grow px-6">
         <label
-          className="block text-sm font-medium text-gray-400 mb-2"
+          className="block text-sm font-medium text-[#fafafa] mb-2"
           htmlFor="percentage-slider"
         >
           Choose Percentage
@@ -140,7 +169,7 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
         >
           <ActionButton
             onClick={handleSubmit}
-            disabled={isButtonDisabled()}
+            disabled={isButtonDisabled}
             text="Queue"
           />
         </Hoverable>
