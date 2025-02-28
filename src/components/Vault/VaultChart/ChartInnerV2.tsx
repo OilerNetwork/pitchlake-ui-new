@@ -12,18 +12,16 @@ import {
   Tooltip,
 } from "recharts";
 import { formatUnits } from "ethers";
-import { useHelpContext } from "@/context/HelpProvider";
 import { useHistoricalRoundParams } from "@/hooks/chart/useHistoricalRoundParams";
 import { useChartContext } from "@/context/ChartProvider";
 import { FormattedBlockData } from "@/app/api/getFossilGasData/route";
 import { useNewContext } from "@/context/NewProvider";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
-import useChart from "@/hooks/chart/useChartData";
+import useChart from "@/hooks/chart/useChartDatav2";
 import { getDemoRoundId } from "@/lib/demo/utils";
 import demoRoundData from "@/lib/demo/demo-round-data.json";
 
-const HOVER_DELAY = 888;
 
 interface GasPriceChartProps {
   activeLines: { [key: string]: boolean };
@@ -38,10 +36,9 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
   // Chart context
   const { isExpandedView, setIsExpandedView, xMax, xMin } = useChartContext();
   const { gasData } = useChart();
-
   // Help context
 
-  console.log("gasData", gasData);
+  console.log("GASDATA", gasData);
   // Strike and cap for all possibly displayed rounds
   const { fromRound, toRound } = useMemo(() => {
     if (!selectedRound) return { fromRound: 1, toRound: 1 };
