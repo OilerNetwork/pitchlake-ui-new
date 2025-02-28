@@ -32,14 +32,13 @@ interface DepositState {
 }
 
 const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
-  const { vaultState } = useVaultState();
   const { account } = useAccount();
+  const { vaultState } = useVaultState();
   const { pendingTx, setStatusModalProps } = useTransactionContext();
   const { allowance, balance } = useERC20(
     vaultState?.ethAddress as `0x${string}`,
     vaultState?.address,
   );
-
   const lpState = useLPState();
 
   const [state, setState] = useState<DepositState>({
@@ -53,6 +52,40 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
     setState((prevState) => ({ ...prevState, ...updates }));
   };
 
+  // Amount input error msg
+  const amountReason: string = useMemo(() => {
+    if (!account) return "Connect account";
+    else if (state.amount == "") {
+      return "";
+    } else if (Number(state.amount) <= 0)
+      return "Amount must be greater than 0";
+    else if (parseEther(state.amount) > balance)
+      return `Exceeds balance (${parseFloat(formatEther(balance.toString())).toFixed(5)} ETH)`;
+    else return "";
+  }, [state.amount, balance, account]);
+
+  // Beneficiary input error msg
+  const beneficiaryReason: string = useMemo(() => {
+    if (!account) return "Connect account";
+    else if (state.isDepositAsBeneficiary) {
+      const lookup = ["", "0", "0x"];
+
+      if (lookup.includes(state.beneficiaryAddress)) return "";
+      else if (!isValidHex64(state.beneficiaryAddress))
+        return "Invalid address";
+      return "";
+    }
+    return "";
+  }, [account, state.beneficiaryAddress, state.isDepositAsBeneficiary]);
+
+  // Disable button if any error msg
+  const isButtonDisabled = useMemo(() => {
+    if (pendingTx) return true;
+    if (amountReason !== "" || beneficiaryReason !== "") return true;
+    if (state.amount === "") return true;
+    return false;
+  }, [pendingTx, amountReason, beneficiaryReason, state.amount]);
+
   const { handleMulticall } = useDepositMulticall({
     accountAddress: account?.address,
     vaultAddress: vaultState?.address,
@@ -61,6 +94,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
     depositAmount: state.amount,
     isDepositAsBeneficiary: state.isDepositAsBeneficiary,
     beneficiaryAddress: state.beneficiaryAddress,
+    localStorageToRemove: [DEPOSIT_AMOUNT_KEY, DEPOSIT_BENEFICIARY_KEY],
   });
 
   // Send confirmation
@@ -100,7 +134,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
                 {state.isDepositAsBeneficiary ? (
                   <span className="font-semibold text-[#fafafa]">
                     {state.beneficiaryAddress?.slice(0, 6)}...
-                    {state.beneficiaryAddress?.slice(-4)}'s
+                    {state.beneficiaryAddress?.slice(-4)}&apos;s
                   </span>
                 ) : (
                   "your"
@@ -111,7 +145,6 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
           });
           setState((prevState) => ({ ...prevState, amount: "" }));
         } catch (e) {
-          console.error("Error sending deposit txn: ", e);
           setStatusModalProps({
             txnHeader: "Deposit Failed",
             txnHash: "",
@@ -125,65 +158,24 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
               </>
             ),
           });
+          console.error("Error sending deposit txn: ", e);
         }
       },
     );
   };
 
-  // Load amount & beneficiary address from local storage after initial render
+  // Load from local storage on mount
   useEffect(() => {
-    const amount = localStorage?.getItem(DEPOSIT_AMOUNT_KEY);
-    const beneficiaryAddress = localStorage?.getItem(DEPOSIT_BENEFICIARY_KEY);
-    if (amount) setState((prevState) => ({ ...prevState, amount }));
-    if (beneficiaryAddress)
-      setState((prevState) => ({ ...prevState, beneficiaryAddress }));
-  }, []);
-
-  // Amount input error msg
-  const amountReason: string = useMemo(() => {
-    if (!account) return "Connect account";
-    else if (state.amount == "") {
-      return "";
-    } else if (Number(state.amount) <= 0)
-      return "Amount must be greater than 0";
-    else if (parseEther(state.amount) > balance)
-      return `Exceeds balance (${parseFloat(formatEther(balance.toString())).toFixed(5)} ETH)`;
-    else return "";
-  }, [state.amount, balance, account]);
-
-  // Beneficiary input error msg
-  const beneficiaryReason: string = useMemo(() => {
-    if (!account) return "Connect account";
-    else if (state.isDepositAsBeneficiary) {
-      const lookup = ["", "0", "0x"];
-
-      if (lookup.includes(state.beneficiaryAddress)) return "";
-      else if (!isValidHex64(state.beneficiaryAddress))
-        return "Invalid address";
-      return "";
-    }
-    return "";
-  }, [account, state.beneficiaryAddress, state.isDepositAsBeneficiary]);
-
-  useEffect(() => {
-    if (!account) {
+    const amount = localStorage.getItem(DEPOSIT_AMOUNT_KEY);
+    const beneficiaryAddress = localStorage.getItem(DEPOSIT_BENEFICIARY_KEY);
+    if (amount || beneficiaryAddress) {
       setState((prevState) => ({
         ...prevState,
-        amount: "",
-        beneficiaryAddress: "",
+        amount: amount || "",
+        beneficiaryAddress: beneficiaryAddress || "",
       }));
-      localStorage?.removeItem(DEPOSIT_AMOUNT_KEY);
-      localStorage?.removeItem(DEPOSIT_BENEFICIARY_KEY);
     }
-  }, [account]);
-
-  // Disable button if any error msg
-  const isButtonDisabled = useMemo(() => {
-    if (pendingTx) return true;
-    if (amountReason !== "" || beneficiaryReason !== "") return true;
-    if (state.amount === "") return true;
-    return false;
-  }, [pendingTx, amountReason, beneficiaryReason, state.amount]);
+  }, []);
 
   return (
     <div className="flex flex-col h-full">
@@ -206,10 +198,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
               label="Enter Address"
               onChange={(e) => {
                 updateState({ beneficiaryAddress: e.target.value });
-                localStorage.setItem(
-                  DEPOSIT_BENEFICIARY_KEY,
-                  state.beneficiaryAddress,
-                );
+                localStorage.setItem(DEPOSIT_BENEFICIARY_KEY, e.target.value);
               }}
               placeholder="Depositor's Address"
               icon={
@@ -232,7 +221,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
                   e.target.value.indexOf(".") + 19,
                 ),
               });
-              localStorage.setItem(DEPOSIT_AMOUNT_KEY, state.amount);
+              localStorage.setItem(DEPOSIT_AMOUNT_KEY, e.target.value);
             }}
             placeholder="e.g. 5.0"
             error={amountReason}
