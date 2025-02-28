@@ -59,8 +59,8 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
     ethAddress: vaultState?.ethAddress,
     allowance: allowance,
     depositAmount: state.amount,
-    depositBeneficiary: state.beneficiaryAddress,
     isDepositAsBeneficiary: state.isDepositAsBeneficiary,
+    beneficiaryAddress: state.beneficiaryAddress,
   });
 
   // Send confirmation
