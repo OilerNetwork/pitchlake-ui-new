@@ -6,7 +6,7 @@ import Hoverable from "../BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
-import { useDemoTime } from "@/lib/demo/useDemoTime";
+import { useTimeContext } from "@/context/TimeProvider";
 import { useNewContext } from "@/context/NewProvider";
 
 // Will only be for demo in near future, cron job will take care of this otherwise
@@ -24,7 +24,7 @@ const NewStateTransition = ({
   const selectedRoundState = useRoundState(selectedRoundAddress);
   const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
-  const { demoNow } = useDemoTime(true, true, 3_000);
+  const { timestamp } = useTimeContext();
   const { conn } = useNewContext();
 
   const [expectedNextState, setExpectedNextState] = useState<string | null>(
@@ -35,7 +35,7 @@ const NewStateTransition = ({
     isDisabled,
     roundState,
   }: { isDisabled: boolean; roundState: string } = useMemo(() => {
-    if (!selectedRoundState || !demoNow)
+    if (!selectedRoundState || !timestamp)
       return { isDisabled: true, roundState: "Settled" };
 
     if (pendingTx) return { isDisabled: true, roundState: "Pending" };
@@ -65,11 +65,11 @@ const NewStateTransition = ({
             ? Number(optionSettleDate) + 0 // fossilDelay
             : optionSettleDate;
 
-    if (Number(demoNow) < Number(targetTimestamp))
+    if (Number(timestamp) < Number(targetTimestamp))
       return { isDisabled: true, roundState };
 
     return { isDisabled: false, roundState };
-  }, [account, pendingTx, selectedRoundState, demoNow, expectedNextState]);
+  }, [account, pendingTx, selectedRoundState, timestamp, expectedNextState]);
 
   const handleAction = useCallback(async () => {
     if (!account || !vaultState || !selectedRoundState) return;
