@@ -287,6 +287,10 @@
     "header": "My Unlocked Balance",
     "text": "Your current unlocked balance."
   },
+  "lpActionTotalOptionsBalance": {
+    "header": "My Total Options",
+    "text": "Your current option balance (minted & non-minted)."
+  },
   "inputDepositAmount": {
     "header": "Deposit Details",
     "text": "Enter the amount of ETH you want to deposit."
