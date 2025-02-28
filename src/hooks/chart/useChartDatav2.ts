@@ -53,7 +53,6 @@ export const useChartData = () => {
 
     // If there is fossil data, remove all unconfirmed blocks if timestamp < last fossil block
 
-    console.log()
     const allGasData: FormattedBlockData[] = [
       ...(confirmedGasData
         ? confirmedGasData.map(
@@ -67,14 +66,14 @@ export const useChartData = () => {
                 unconfirmedTwap: index===confirmedGasData.length-1?d.twap/10**9:undefined,
                 confirmedBasefee: d.baseFee/10**9,
                 confirmedTwap: d.twap/10**9,
-                isUnconfirmed: true,
+                isUnconfirmed: false,
               } as FormattedBlockData)
           )
         : []),
       ...(unconfirmedGasData
         ? unconfirmedGasData.map(
             (d, index) =>
-              ({
+             {  return ({
                 basefee: d.baseFee/10**9,
                 blockNumber: d.blockNumber,
                 timestamp: d.timestamp,
@@ -83,8 +82,8 @@ export const useChartData = () => {
                 unconfirmedTwap: d.twap/10**9,
                 confirmedBasefee: index===0?d.baseFee/10**9:undefined,
                 confirmedTwap: index===0?d.twap/10**9:undefined,
-                isUnconfirmed: false,
-              } as FormattedBlockData)
+                isUnconfirmed: true,
+              } as FormattedBlockData)}
           )
         : []),
     ];
@@ -111,7 +110,7 @@ export const useChartData = () => {
       combinedGasData: allGasData
         .sort((a, b) => a.timestamp - b.timestamp)
         .filter((d) => {
-          return d.timestamp <= xMax;
+          return d.timestamp <= xMax && d.timestamp >= xMin;
         }),
     };
   }, [confirmedGasData, unconfirmedGasData]);

@@ -285,6 +285,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
     return { yMax: _yMax, yTicks: _yTicks };
   }, [parsedData, activeLines]);
 
+  console.log("PARSED DATA", parsedData);
   // Compute X-axis ticks and labels based on view
   const { xTicks, xTickLabels } = useMemo(() => {
     let _xTicks: number[] = [];
