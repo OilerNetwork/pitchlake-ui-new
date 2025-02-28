@@ -53,6 +53,8 @@ export const useChartData = () => {
 
     // If there is fossil data, remove all unconfirmed blocks if timestamp < last fossil block
 
+    console.log("CHECK123confirmedGasDataLast", confirmedGasData[confirmedGasData.length-1]?.blockNumber);
+    console.log("CHECK123unconfirmedGasDataFirst", unconfirmedGasData[0]?.blockNumber);
     const allGasData: FormattedBlockData[] = [
       ...(confirmedGasData
         ? confirmedGasData.map(
