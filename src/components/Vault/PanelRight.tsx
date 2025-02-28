@@ -2,19 +2,16 @@ import React, { ReactNode, useState, useEffect, ReactElement } from "react";
 import Tabs from "./VaultActions/Tabs/Tabs";
 import { useTabContent } from "@/hooks/vault/useTabContent";
 import ConfirmationModal from "@/components/Vault/Utils/ConfirmationModal";
-import SuccessModal from "@/components/Vault/Utils/SuccessModal";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import EditModal from "@/components/Vault/VaultActions/Tabs/Buyer/EditBid";
 import { HourglassIcon } from "@/components/Icons";
-import { useAccount } from "@starknet-react/core";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
-import useOBState from "@/hooks/vault_v2/states/useOBState";
+import LoadingSpinner from "@/components/Vault/Utils/LoadingSpinner";
+import TxnSuccess from "@/components/Vault/Utils/TxnSuccess";
+import TxnFailure from "@/components/Vault/Utils/TxnFailure";
 
-interface VaultDetailsProps {
+interface RightPanelProps {
   userType: string;
-  isEditOpen: boolean;
-  setIsEditOpen: (open: boolean) => void;
 }
 
 interface TabContentProps {
@@ -23,45 +20,22 @@ interface TabContentProps {
     action: string,
     onConfirm: () => Promise<void>,
   ) => void;
+  setIsShowingTabs: (value: boolean) => void;
 }
 
-const PanelRight: React.FC<VaultDetailsProps> = ({
-  userType,
-  isEditOpen,
-  setIsEditOpen,
-}) => {
+const PanelRight: React.FC<RightPanelProps> = ({ userType }) => {
+  const { pendingTx, modalState, setModalState } = useTransactionContext();
   const { selectedRoundAddress } = useVaultState();
   const selectedRoundState = useRoundState(selectedRoundAddress);
-  const selectedRoundBuyerState = useOBState(selectedRoundAddress);
+
   const [activeTab, setActiveTab] = useState<string>("");
-  const { account } = useAccount();
-  const [bidToEdit, setBidToEdit] = useState({});
-  const [modalState, setModalState] = useState<{
-    show: boolean;
-    type: "confirmation" | "pending" | "success" | "failure";
-    modalHeader: string;
-    action: ReactNode;
-    onConfirm: () => Promise<void>;
-  }>({
-    show: false,
-    type: "confirmation",
-    modalHeader: "",
-    action: "",
-    onConfirm: async () => {},
-  });
-  const userBids = selectedRoundBuyerState ? selectedRoundBuyerState.bids : [];
+  const [isShowingTabs, setIsShowingTabs] = useState<boolean>(true);
 
   const { tabs, tabContent } = useTabContent(
     userType,
     activeTab,
     selectedRoundState,
-    isEditOpen,
-    bidToEdit,
-    userBids,
-    setIsEditOpen,
-    setBidToEdit,
   );
-  const { pendingTx, status } = useTransactionContext();
 
   useEffect(() => {
     if (tabs.length === 0) {
@@ -71,22 +45,6 @@ const PanelRight: React.FC<VaultDetailsProps> = ({
       setActiveTab(tabs[0]);
     }
   }, [tabs, activeTab, selectedRoundState?.roundState]);
-
-  useEffect(() => {
-    if (modalState.type === "pending") {
-      if (!pendingTx && status === "success") {
-        setModalState((prevState) => ({ ...prevState, type: "success" }));
-      } else if (!pendingTx && status === "error") {
-        setModalState((prevState) => ({ ...prevState, type: "failure" }));
-      } else if (!pendingTx && !status) {
-        setModalState((prevState) => ({ ...prevState, type: "success" }));
-      }
-    }
-  }, [pendingTx, modalState.type, status]);
-  const handleTabChange = (tab: string) => {
-    setIsEditOpen(false);
-    setActiveTab(tab);
-  };
 
   const showConfirmation = (
     modalHeader: string,
@@ -100,7 +58,6 @@ const PanelRight: React.FC<VaultDetailsProps> = ({
       action,
       onConfirm,
     });
-    setIsEditOpen(false);
   };
 
   const hideModal = () => {
@@ -119,74 +76,75 @@ const PanelRight: React.FC<VaultDetailsProps> = ({
   };
 
   const renderTabContent = () => {
-    tabContent;
     if (!tabContent) {
       return null;
     }
     return React.isValidElement(tabContent)
       ? React.cloneElement(tabContent as ReactElement<TabContentProps>, {
           showConfirmation,
+          setIsShowingTabs,
         })
       : tabContent;
   };
 
-  if (isEditOpen) {
-    return (
-      <EditModal
-        //modalHeader={`${modalState.modalHeader} Confirmation`}
-        //action={modalState.action}
-        onConfirm={() => setIsEditOpen(true)}
-        onClose={() => setIsEditOpen(false)}
-        showConfirmation={showConfirmation}
-        bidToEdit={bidToEdit}
-      />
-    );
-  }
+  useEffect(() => {
+    setIsShowingTabs(true);
+  }, [activeTab]);
 
   if (modalState.show) {
-    if (modalState.type === "confirmation") {
-      return (
-        <ConfirmationModal
-          modalHeader={`${modalState.modalHeader} Confirmation`}
-          action={modalState.action}
-          onConfirm={handleConfirm}
-          onClose={hideModal}
-        />
-      );
-    } else if (modalState.type === "pending") {
-    } else if (modalState.type === "success") {
-      return (
-        <SuccessModal
-          activeTab={`${modalState.modalHeader} Successful`}
-          action={modalState.action}
-          onClose={hideModal}
-        />
-      );
-    } else if (modalState.type === "failure") {
+    switch (modalState.type) {
+      case "confirmation":
+        return (
+          <ConfirmationModal
+            modalHeader={`${modalState.modalHeader} Confirmation`}
+            action={modalState.action}
+            onConfirm={handleConfirm}
+            onClose={hideModal}
+          />
+        );
+      case "pending":
+        if (pendingTx) return <LoadingSpinner />;
+      case "success":
+        return (
+          <TxnSuccess
+            onClose={() => {
+              hideModal();
+            }}
+          />
+        );
+      case "failure":
+        return (
+          <TxnFailure
+            onClose={() => {
+              hideModal();
+            }}
+          />
+        );
     }
   }
 
-  if (!isEditOpen) {
-    return (
-      <div className="bg-[#121212] border border-[#262626] rounded-lg w-full flex flex-col h-full justify-center">
-        {tabs.length > 0 ? (
-          <>
+  return (
+    <div className="bg-[#121212] border border-[#262626] rounded-lg w-full flex flex-col h-full justify-center">
+      {tabs.length > 0 ? (
+        <>
+          {isShowingTabs && (
             <Tabs
               tabs={tabs}
               activeTab={activeTab}
-              setActiveTab={handleTabChange}
+              setActiveTab={(tab: string) => {
+                setActiveTab(tab);
+              }}
             />
-            <div className="flex flex-col flex-grow h-[max]">
-              {renderTabContent()}
-            </div>
-          </>
-        ) : (
-          <NotStartedYet />
-          //<div className="text-white">Round hasn&apos;t started yet</div>
-        )}
-      </div>
-    );
-  }
+          )}
+          <div className="flex flex-col flex-grow h-[max]">
+            {renderTabContent()}
+          </div>
+        </>
+      ) : (
+        <NotStartedYet />
+      )}
+    </div>
+  );
 };
 
 const NotStartedYet = () => {
@@ -203,5 +161,19 @@ const NotStartedYet = () => {
     </div>
   );
 };
+
+//const NoAccount = () => {
+//  return (
+//    <div className="flex flex-col flex-grow items-center justify-center text-center p-6">
+//      <ExclamationIcon />
+//      <p className="text-[16px] font-medium text-[#FAFAFA] text-center mt-4 mb-3">
+//        No Account
+//      </p>
+//      <p className="max-w-[290px] font-regular text-[14px] text-[#BFBFBF] pt-0">
+//        Connect an account.
+//      </p>
+//    </div>
+//  );
+//};
 
 export default PanelRight;
