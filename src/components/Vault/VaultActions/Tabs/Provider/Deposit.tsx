@@ -6,7 +6,8 @@ import ActionButton from "@/components/Vault/Utils/ActionButton";
 import ButtonTabs from "../ButtonTabs";
 import { EthereumIcon, PersonIcon } from "@/components/Icons";
 import { useAccount } from "@starknet-react/core";
-import useERC20 from "@/hooks/erc20/useERC20";
+import useErc20Balance from "@/hooks/erc20/useErc20Balance";
+import useErc20Allowance from "@/hooks/erc20/useErc20Allowance";
 import { shortenString, isValidHex64, formatNumber } from "@/lib/utils";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
@@ -35,7 +36,8 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   const { account } = useAccount();
   const { vaultState } = useVaultState();
   const { pendingTx, setStatusModalProps } = useTransactionContext();
-  const { allowance, balance } = useERC20(
+  const { balance } = useErc20Balance(vaultState?.ethAddress as `0x${string}`);
+  const { allowance } = useErc20Allowance(
     vaultState?.ethAddress as `0x${string}`,
     vaultState?.address,
   );

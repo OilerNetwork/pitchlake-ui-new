@@ -15,7 +15,7 @@ import ProfileDropdown from "../BaseComponents/ProfileDropdown";
 import { useRouter, usePathname } from "next/navigation";
 import { constants } from "starknet";
 import { formatEther } from "ethers";
-import useERC20 from "@/hooks/erc20/useERC20";
+import useErc20Balance from "@/hooks/erc20/useErc20Balance";
 import { LoginIcon } from "../Icons";
 import useIsMobile from "@/hooks/window/useIsMobile";
 import { Chain } from "@starknet-react/chains";
@@ -51,9 +51,8 @@ export default function Header() {
   const { chains, chain } = useNetwork();
   //console.log("CHAINS", chains);
   const { account } = useAccount();
-  const { balance } = useERC20(
+  const { balance } = useErc20Balance(
     "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-    vaultState?.address,
   );
 
   const balanceData = useMemo(() => {
