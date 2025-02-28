@@ -16,7 +16,6 @@ const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, setActiveTab }) => {
               activeTab === tab ? "text-[#F5EBB8]" : "text-gray-400"
             }`}
             onClick={() => {
-              console.log("asdfasdf", tab, activeTab);
               setActiveTab(tab);
             }}
           >
