@@ -18,7 +18,6 @@ import { ChartProvider } from "@/context/ChartProvider";
 
 export const Vault = () => {
   const [isProviderView, setIsProviderView] = useState(true);
-  const [isEditOpen, setIsEditOpen] = useState(false);
   const { isMobile } = useIsMobile();
   const { isHelpBoxOpen } = useHelpContext();
   const { chain } = useNetwork();
@@ -42,7 +41,6 @@ export const Vault = () => {
             }`}
             onClick={() => {
               setIsProviderView(true);
-              setIsEditOpen(false);
             }}
           >
             <CoinStackedIcon
@@ -64,7 +62,6 @@ export const Vault = () => {
             }`}
             onClick={() => {
               setIsProviderView(false);
-              //setIsEditOpen(false);
             }}
           >
             <AuctionIcon
@@ -111,11 +108,7 @@ export const Vault = () => {
               ${isHelpBoxOpen ? "h-[60%]" : "h-[100%]"} transition-all duration-300
             `}
           >
-            <PanelRight
-              userType={isProviderView ? "lp" : "ob"}
-              isEditOpen={isEditOpen}
-              setIsEditOpen={setIsEditOpen}
-            />
+            <PanelRight userType={isProviderView ? "lp" : "ob"} />
           </div>
           {isHelpBoxOpen && (
             <div className="mt-6">
