@@ -18,10 +18,7 @@ import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import { getDemoRoundId } from "@/lib/demo/utils";
 import { useNewContext } from "@/context/NewProvider";
-import NewStateTransition from "./NewStateTransition";
-
-//const FOSSIL_DELAY =
-//  process.env.NEXT_PUBLIC_FOSSIL_USE_MOCK_PRICING_DATA === "true" ? 0 : 15 * 60;
+import DemoStateTransition from "./DemoStateTransition";
 
 const PanelLeft = ({ userType }: { userType: string }) => {
   const { conn } = useNewContext();
@@ -75,18 +72,6 @@ const PanelLeft = ({ userType }: { userType: string }) => {
     let targetTimestamp: number | null = null;
     let key = "past";
 
-    //const table: any = {
-    //  Open: {
-    //    future: "Auction Starts In",
-    //    past: "Auction Could Start",
-    //  },
-    //  Auctioning: {
-    //    future: "Auction Ends In",
-    //    past: "Auction Could End",
-    //  },
-    //  Running: { future: "Round Settles In", past: "Round Could Settle" },
-    //  Settled: { past: "Round Settled" },
-    //};
     const table: any = {
       Open: {
         future: "Auction Starts In",
@@ -718,23 +703,12 @@ const PanelLeft = ({ userType }: { userType: string }) => {
               <RemainingTimeElement />
             </div>
           </div>
-          <NewStateTransition
-            isPanelOpen={isPanelOpen}
-            setModalState={setModalState}
-            //fossilDelay={FOSSIL_DELAY}
-          />
           {
-            //   conn === "demo" ? (
-            //   <DemoStateTransition
-            //     isPanelOpen={isPanelOpen}
-            //     setModalState={setModalState}
-            //   />
-            // ) : (
-            //   <StateTransition
-            //     isPanelOpen={isPanelOpen}
-            //     setModalState={setModalState}
-            //     fossilDelay={FOSSIL_DELAY}
-            //   />
+            //  conn === "demo" && (
+            <DemoStateTransition
+              isPanelOpen={isPanelOpen}
+              setModalState={setModalState}
+            />
             // )
           }
         </div>
