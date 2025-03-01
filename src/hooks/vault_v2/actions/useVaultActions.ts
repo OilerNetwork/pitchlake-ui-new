@@ -68,24 +68,15 @@ const useVaultActions = () => {
         let argsData;
         if (args) argsData = Object.values(args).map((value) => value);
         const nonce = await provider?.getNonceForAddress(account?.address);
-        try {
-          const data = (
-            argsData
-              ? await typedContract?.[functionName](...argsData, { nonce })
-              : await typedContract?.[functionName]({ nonce })
-          ) as TransactionResult;
+        const data = (
+          argsData
+            ? await typedContract?.[functionName](...argsData, { nonce })
+            : await typedContract?.[functionName]({ nonce })
+        ) as TransactionResult;
 
-          setPendingTx(data.transaction_hash);
+        setPendingTx(data.transaction_hash);
 
-          return data;
-        } catch (error) {
-          setModalState((prevState: ModalStateProps) => ({
-            ...prevState,
-            show: false,
-          }));
-
-          console.log("Error sending txn:", error);
-        }
+        return data;
       },
     [typedContract, account, provider, setPendingTx],
   );
