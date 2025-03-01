@@ -1,23 +1,22 @@
-import React, { useState, ReactNode, useMemo, useEffect } from "react";
+import React, { useState, ReactNode, useMemo } from "react";
 import InputField from "@/components/Vault/Utils/InputField";
 import { Layers3 } from "lucide-react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
-import { formatUnits, parseUnits, formatEther, parseEther } from "ethers";
-import { useAccount, useContractWrite } from "@starknet-react/core";
-import useERC20 from "@/hooks/erc20/useERC20";
-import { num, Call } from "starknet";
+import { formatUnits, parseUnits, formatEther } from "ethers";
+import { useAccount } from "@starknet-react/core";
+import useErc20Balance from "@/hooks/erc20/useErc20Balance";
+import useErc20Allowance from "@/hooks/erc20/useErc20Allowance";
 import { formatNumber, formatNumberText } from "@/lib/utils";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import { useContract } from "@starknet-react/core";
-import { erc20ABI, vaultABI } from "@/lib/abi";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import { useTimeContext } from "@/context/TimeProvider";
 import { EthereumIcon, HourglassIcon } from "@/components/Icons";
+import usePlaceBidMulticall from "@/hooks/txn/usePlaceBidMulticall";
 
-const LOCAL_STORAGE_KEY1 = "bidAmount";
-const LOCAL_STORAGE_KEY2 = "bidPriceGwei";
+const PLACE_BID_AMOUNT = "placeBidAmount";
+const PLACE_BID_PRICE = "placeBidPrice";
 
 interface PlaceBidProps {
   showConfirmation: (
@@ -28,106 +27,26 @@ interface PlaceBidProps {
 }
 
 const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
-  const { vaultState, selectedRoundAddress } = useVaultState();
-  const selectedRoundState = useRoundState(selectedRoundAddress);
-  const [state, setState] = useState({
-    bidAmount: localStorage.getItem(LOCAL_STORAGE_KEY1) || "",
-    bidPrice: localStorage.getItem(LOCAL_STORAGE_KEY2) || "",
-  });
-
   const { account } = useAccount();
-  const { pendingTx, setPendingTx } = useTransactionContext();
   const { timestamp } = useTimeContext();
+  const { vaultState, selectedRoundAddress } = useVaultState();
+  const { pendingTx, setStatusModalProps } = useTransactionContext();
 
-  const { allowance, balance } = useERC20(
+  const selectedRoundState = useRoundState(selectedRoundAddress);
+  const { balance } = useErc20Balance(vaultState?.ethAddress as `0x${string}`);
+  const { allowance } = useErc20Allowance(
     vaultState?.ethAddress as `0x${string}`,
     selectedRoundState?.address,
   );
 
-  // Vault Contract
-  const { contract: vaultContractRaw } = useContract({
-    abi: vaultABI,
-    address: vaultState?.address as `0x${string}`,
+  const [state, setState] = useState({
+    bidAmount: localStorage.getItem(PLACE_BID_AMOUNT) || "",
+    bidPrice: localStorage.getItem(PLACE_BID_PRICE) || "",
   });
-  const vaultContract = useMemo(() => {
-    if (!vaultContractRaw) return;
-    const typedContract = vaultContractRaw.typedv2(vaultABI);
-    if (account) typedContract.connect(account);
-    return typedContract;
-  }, [vaultContractRaw, account]);
-
-  // ETH Contract
-  const { contract: ethContractRaw } = useContract({
-    abi: erc20ABI,
-    address: vaultState?.ethAddress as `0x${string}`,
-  });
-  const ethContract = useMemo(() => {
-    if (!ethContractRaw) return;
-    const typedContract = ethContractRaw.typedv2(erc20ABI);
-    if (account) typedContract.connect(account);
-    return typedContract;
-  }, [ethContractRaw, account]);
 
   const updateState = (updates: Partial<typeof state>) => {
     setState((prevState) => ({ ...prevState, ...updates }));
   };
-
-  const needsApproving = useMemo(() => {
-    const priceWei = num.toBigInt(
-      parseUnits(state.bidPrice ? state.bidPrice : "0", "gwei"),
-    );
-    const amount = num.toBigInt(state.bidAmount ? state.bidAmount : "0");
-    const totalWei = priceWei * amount;
-
-    if (num.toBigInt(allowance) < num.toBigInt(totalWei))
-      return totalWei.toString();
-    else return "0";
-  }, [state.bidPrice, state.bidAmount, allowance]);
-
-  // Approve and Bid Multicall
-  const calls: Call[] = useMemo(() => {
-    const calls: Call[] = [];
-    if (
-      !account ||
-      !selectedRoundState?.address ||
-      !vaultContract ||
-      !ethContract ||
-      !state.bidPrice ||
-      !state.bidAmount ||
-      Number(state.bidAmount) <= 0 ||
-      Number(state.bidPrice) <= 0
-    ) {
-      return calls;
-    }
-
-    const priceWei = num.toBigInt(parseUnits(state.bidPrice, "gwei"));
-    const amount = num.toBigInt(state.bidAmount);
-    const totalWei = priceWei * amount;
-
-    const approveCall = ethContract.populateTransaction.approve(
-      selectedRoundState.address.toString(),
-      num.toBigInt(totalWei),
-    );
-    const bidCall = vaultContract.populateTransaction.place_bid(
-      BigInt(state.bidAmount),
-      parseUnits(state.bidPrice, "gwei"),
-    );
-
-    if (approveCall && BigInt(allowance) < BigInt(needsApproving))
-      calls.push(approveCall);
-    if (bidCall) calls.push(bidCall);
-
-    return calls;
-  }, [
-    state.bidPrice,
-    state.bidAmount,
-    selectedRoundState?.address,
-    account,
-    balance,
-    allowance,
-    needsApproving,
-  ]);
-  const { writeAsync } = useContractWrite({ calls });
 
   // Send confirmation
   const handleSubmitForMulticall = () => {
@@ -152,25 +71,78 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
         ?
       </>,
       async () => {
-        await handleMulticall();
-        setState((prevState) => ({ ...prevState, bidAmount: "" }));
+        try {
+          const hash = await handleMulticall();
+
+          setStatusModalProps({
+            txnHeader: "Bid Successful",
+            txnHash: hash,
+            txnOutcome: (
+              <>
+                Your bid of{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {bidPriceGwei} GWEI{" "}
+                </span>{" "}
+                per{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumberText(Number(bidAmount))} options
+                </span>
+                , totaling{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumber(bidTotalEth)} ETH
+                </span>{" "}
+                was successful.
+              </>
+            ),
+          });
+
+          setState((prevState) => ({ ...prevState, bidAmount: "" }));
+        } catch (e) {
+          setStatusModalProps({
+            txnHeader: "Bid Failed",
+            txnHash: "",
+            txnOutcome: (
+              <>
+                Your bid of{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {bidPriceGwei} GWEI
+                </span>{" "}
+                per{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumberText(Number(bidAmount))} options
+                </span>
+                , totaling{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumber(bidTotalEth)} ETH
+                </span>{" "}
+                failed.
+              </>
+            ),
+          });
+
+          console.error("Error placing bid: ", e);
+        }
       },
     );
   };
 
-  // Open wallet
-  const handleMulticall = async () => {
-    const data = await writeAsync();
-    setPendingTx(data?.transaction_hash);
-    localStorage.removeItem(LOCAL_STORAGE_KEY1);
-    localStorage.removeItem(LOCAL_STORAGE_KEY2);
-  };
+  const { handleMulticall } = usePlaceBidMulticall({
+    accountAddress: account?.address,
+    vaultAddress: vaultState?.address,
+    roundAddress: selectedRoundState?.address,
+    ethAddress: vaultState?.ethAddress,
+    allowance,
+    bidAmount: state.bidAmount,
+    bidPrice: state.bidPrice,
+    localStorageToRemove: [PLACE_BID_AMOUNT, PLACE_BID_PRICE],
+  });
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     if (/^\d*$/.test(value)) {
       updateState({ bidAmount: value });
     }
+    localStorage?.setItem(PLACE_BID_AMOUNT, value);
   };
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -179,6 +151,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
       ? value.slice(0, value.indexOf(".") + 10)
       : value;
     updateState({ bidPrice: formattedValue });
+    localStorage?.setItem(PLACE_BID_PRICE, formattedValue);
   };
 
   const bidPriceWei = parseUnits(state.bidPrice ? state.bidPrice : "0", "gwei");
@@ -236,26 +209,6 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
     return false;
   }, [pendingTx, priceReason, amountReason, state.bidAmount, state.bidPrice]);
 
-  useEffect(() => {
-    localStorage?.setItem(LOCAL_STORAGE_KEY1, state.bidAmount);
-  }, [state.bidAmount]);
-
-  useEffect(() => {
-    localStorage?.setItem(LOCAL_STORAGE_KEY2, state.bidPrice);
-  }, [state.bidPrice]);
-
-  useEffect(() => {
-    if (!account) {
-      setState((prevState) => ({
-        ...prevState,
-        bidAmount: "",
-        bidPrice: "",
-      }));
-      localStorage?.removeItem(LOCAL_STORAGE_KEY1);
-      localStorage?.removeItem(LOCAL_STORAGE_KEY2);
-    }
-  }, [account]);
-
   if (timestamp > Number(selectedRoundState?.auctionEndDate)) {
     return (
       <div className="flex space-y-6 flex-col flex-grow items-center justify-center text-center p-6">
@@ -278,7 +231,6 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
             <InputField
               label="Enter Amount"
               type="integer"
-              //value={state.bidAmount}
               value={state.bidAmount}
               onChange={handleAmountChange}
               placeholder="e.g. 5000"

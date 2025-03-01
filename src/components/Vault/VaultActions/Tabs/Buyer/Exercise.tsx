@@ -5,7 +5,7 @@ import ActionButton from "@/components/Vault/Utils/ActionButton";
 import { useAccount } from "@starknet-react/core";
 import { formatNumber, formatNumberText } from "@/lib/utils";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import useERC20 from "@/hooks/erc20/useERC20";
+import useErc20Balance from "@/hooks/erc20/useErc20Balance";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
@@ -23,13 +23,16 @@ interface ExerciseProps {
 
 const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
   const { conn } = useNewContext();
-  const { address, account } = useAccount();
+  const { account } = useAccount();
   const { selectedRoundAddress } = useVaultState();
   const selectedRoundState = useRoundState(selectedRoundAddress);
   const selectedRoundBuyerState = useOBState(selectedRoundAddress);
   const vaultActions = useVaultActions();
-  const { pendingTx } = useTransactionContext();
-  const { balance } = useERC20(selectedRoundState?.address as `0x${string}`);
+  const { pendingTx, setStatusModalProps, updateStatusModalProps } =
+    useTransactionContext();
+  const { balance } = useErc20Balance(
+    selectedRoundState?.address as `0x${string}`,
+  );
 
   const totalOptions = useMemo(() => {
     let total = BigInt(0);
@@ -56,34 +59,14 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
     balance,
   ]);
 
-  const payoutBalanceWei = selectedRoundState?.payoutPerOption
-    ? totalOptions * BigInt(selectedRoundState?.payoutPerOption.toString())
-    : "0";
-  const payoutBalanceEth = formatEther(payoutBalanceWei);
+  const { payoutBalanceEth, payoutBalanceWei } = useMemo(() => {
+    const payoutBalanceWei = selectedRoundState?.payoutPerOption
+      ? totalOptions * BigInt(selectedRoundState?.payoutPerOption.toString())
+      : "0";
+    const payoutBalanceEth = formatEther(payoutBalanceWei);
 
-  const handleExerciseOptions = async (): Promise<void> => {
-    address &&
-      (await vaultActions?.exerciseOptions({
-        roundAddress: selectedRoundAddress ? selectedRoundAddress : "0x0",
-      }));
-  };
-
-  const handleSubmit = () => {
-    showConfirmation(
-      "Exercise",
-      <>
-        exercise{" "}
-        <span className="font-semibold text-[#fafafa]">
-          {formatNumberText(Number(totalOptions.toString()))}
-        </span>{" "}
-        options for{" "}
-        <span className="font-semibold text-[#fafafa]">
-          {formatNumber(Number(payoutBalanceEth))} ETH
-        </span>
-      </>,
-      handleExerciseOptions,
-    );
-  };
+    return { payoutBalanceEth, payoutBalanceWei };
+  }, [selectedRoundState?.payoutPerOption, totalOptions]);
 
   const isButtonDisabled = (): boolean => {
     if (!account) return true;
@@ -94,24 +77,93 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
     return false;
   };
 
+  const handleExerciseOptions = async (): Promise<string> => {
+    return (
+      (await vaultActions?.exerciseOptions({
+        roundAddress: selectedRoundAddress || "0x0",
+      })) || ""
+    );
+  };
+
+  const handleSubmit = () => {
+    showConfirmation(
+      "Exercise",
+      <>
+        exercise{" "}
+        <span className="font-semibold text-[#fafafa]">
+          {formatNumberText(Number(totalOptions.toString()))} options
+        </span>{" "}
+        for{" "}
+        <span className="font-semibold text-[#fafafa]">
+          {formatNumber(Number(payoutBalanceEth))} ETH
+        </span>
+      </>,
+      async () => {
+        try {
+          const hash = await handleExerciseOptions();
+          setStatusModalProps({
+            txnHeader: "Exercise Options Successful",
+            txnHash: "",
+            txnOutcome: (
+              <>
+                You have successfully exercised{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumberText(Number(totalOptions.toString()))} options
+                </span>{" "}
+                for{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumber(Number(payoutBalanceEth))} ETH
+                </span>{" "}
+                .
+              </>
+            ),
+          });
+          updateStatusModalProps({
+            txnHash: hash,
+          });
+        } catch (e) {
+          setStatusModalProps({
+            txnHeader: "Exercise Options Fail",
+            txnHash: "",
+            txnOutcome: (
+              <>
+                Exercising{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumberText(Number(totalOptions.toString()))} options
+                </span>{" "}
+                for{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumber(Number(payoutBalanceEth))} ETH
+                </span>{" "}
+                failed.
+              </>
+            ),
+          });
+
+          console.error("Error exercising options:", e);
+        }
+      },
+    );
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex flex-col flex-grow space-y-6 items-center justify-center">
         <ExerciseOptionsIcon
           classname={
-            "w-[92px] h-[92px] rounded-2xl bg-icon-gradient border-[1px] border-greyscale-800 flex flex-row justify-center items-center"
+            "mint-icon w-[90px] h-[90px] rounded-2xl bg-icon-gradient border-[1px] border-greyscale-800 flex flex-row justify-center items-center"
           }
         />
-        <p className="max-w-[290px] text-[#bfbfbf] text-center">
-          You currently have{" "}
-          <span className="font-semibold text-[#fafafa]">
+        <p className="font-regular text-[14px] max-w-[290px] text-[#bfbfbf] text-center">
+          You own{" "}
+          <span className=" font-regular text-[14px] font-semibold text-[#fafafa]">
             {totalOptions
               ? formatNumberText(Number(totalOptions.toString()))
               : 0}
           </span>{" "}
           options worth
           <br />{" "}
-          <span className="font-semibold text-[#fafafa]">
+          <span className=" font-regular text-[14px] font-semibold text-[#fafafa]">
             {" "}
             {formatNumber(Number(payoutBalanceEth))} ETH
           </span>
