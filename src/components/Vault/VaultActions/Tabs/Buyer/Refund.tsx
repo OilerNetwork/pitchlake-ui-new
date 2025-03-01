@@ -71,6 +71,7 @@ const Refund: React.FC<RefundProps> = ({ showConfirmation }) => {
         try {
           const hash = await handleRefundBid();
           setStatusModalProps({
+            version: "success",
             txnHeader: "Refund Successful",
             txnHash: "",
             txnOutcome: (
@@ -88,6 +89,7 @@ const Refund: React.FC<RefundProps> = ({ showConfirmation }) => {
           });
         } catch (e) {
           setStatusModalProps({
+            version: "failure",
             txnHeader: "Refund Successful",
             txnHash: "",
             txnOutcome: (

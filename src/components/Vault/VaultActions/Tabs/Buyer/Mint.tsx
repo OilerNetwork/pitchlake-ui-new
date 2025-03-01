@@ -80,6 +80,7 @@ const Mint: React.FC<MintProps> = ({ showConfirmation }) => {
         try {
           const hash = await handleMintOptions();
           setStatusModalProps({
+            version: "success",
             txnHeader: "Mint Options Successful",
             txnHash: "",
             txnOutcome: (
@@ -102,6 +103,7 @@ const Mint: React.FC<MintProps> = ({ showConfirmation }) => {
           console.log(4);
         } catch (e) {
           setStatusModalProps({
+            version: "failure",
             txnHeader: "Mint Options Failed",
             txnHash: "",
             txnOutcome: (

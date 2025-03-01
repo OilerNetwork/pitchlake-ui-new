@@ -75,6 +75,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
           const hash = await handleMulticall();
 
           setStatusModalProps({
+            version: "success",
             txnHeader: "Bid Successful",
             txnHash: hash,
             txnOutcome: (
@@ -99,6 +100,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
           setState((prevState) => ({ ...prevState, bidAmount: "" }));
         } catch (e) {
           setStatusModalProps({
+            version: "failure",
             txnHeader: "Bid Failed",
             txnHash: "",
             txnOutcome: (

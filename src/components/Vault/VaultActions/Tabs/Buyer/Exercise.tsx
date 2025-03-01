@@ -102,6 +102,7 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
         try {
           const hash = await handleExerciseOptions();
           setStatusModalProps({
+            version: "success",
             txnHeader: "Exercise Options Successful",
             txnHash: "",
             txnOutcome: (
@@ -123,6 +124,7 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
           });
         } catch (e) {
           setStatusModalProps({
+            version: "failure",
             txnHeader: "Exercise Options Fail",
             txnHash: "",
             txnOutcome: (

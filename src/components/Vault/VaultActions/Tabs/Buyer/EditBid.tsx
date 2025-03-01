@@ -111,6 +111,7 @@ const EditModal: React.FC<EditModalProps> = ({
           const hash = await handleMulticall();
 
           setStatusModalProps({
+            version: "success",
             txnHeader: "Edit Bid Successful",
             txnHash: "",
             txnOutcome: (
@@ -131,11 +132,12 @@ const EditModal: React.FC<EditModalProps> = ({
           //onClose();
         } catch (e) {
           setStatusModalProps({
+            version: "failure",
             txnHeader: "Edit Bid Failed",
             txnHash: "",
             txnOutcome: (
               <>
-                Your bid increase of
+                Your bid increase of{" "}
                 <span className="font-semibold text-[#fafafa]">
                   {formatNumber(Number(totalNewCostEth))} ETH
                 </span>{" "}

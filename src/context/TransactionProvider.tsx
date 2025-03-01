@@ -46,10 +46,8 @@ const TransactionProvider = ({ children }: { children: ReactNode }) => {
   const [pendingTx, setPendingTx] = useState<string | undefined>();
   const { status } = useWaitForTransaction({ hash: pendingTx });
 
-  //const [isStateTxn, setIsStateTxn] = useState<boolean>(false);
-  //const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-
   const [statusModalProps, setStatusModalProps] = useState<StatusModalProps>({
+    version: null,
     txnHeader: "",
     txnHash: "",
     txnOutcome: "",

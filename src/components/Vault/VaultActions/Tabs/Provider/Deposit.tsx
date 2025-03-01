@@ -35,7 +35,8 @@ interface DepositState {
 const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
   const { account } = useAccount();
   const { vaultState } = useVaultState();
-  const { pendingTx, setStatusModalProps } = useTransactionContext();
+  const { pendingTx, setStatusModalProps, setModalState } =
+    useTransactionContext();
   const { balance } = useErc20Balance(vaultState?.ethAddress as `0x${string}`);
   const { allowance } = useErc20Allowance(
     vaultState?.ethAddress as `0x${string}`,
@@ -124,6 +125,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
           const hash = await handleMulticall();
 
           setStatusModalProps({
+            version: "success",
             txnHeader: "Deposit Successful",
             txnHash: hash,
             txnOutcome: (
@@ -148,6 +150,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
           setState((prevState) => ({ ...prevState, amount: "" }));
         } catch (e) {
           setStatusModalProps({
+            version: "failure",
             txnHeader: "Deposit Failed",
             txnHash: "",
             txnOutcome: (

@@ -6,6 +6,7 @@ export interface StatusModalProps {
   txnHeader: string;
   txnOutcome: ReactNode | string;
   txnHash: string;
+  version: "success" | "failure" | "pending" | null;
 }
 
 export type FossilParams = {

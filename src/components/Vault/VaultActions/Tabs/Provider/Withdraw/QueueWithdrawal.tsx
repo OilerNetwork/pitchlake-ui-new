@@ -72,6 +72,7 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
           const hash = await queueWithdrawal();
 
           setStatusModalProps({
+            version: "success",
             txnHeader: "Withdraw Request Successful",
             txnHash: hash,
             txnOutcome: (
@@ -86,6 +87,7 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
           });
         } catch (e) {
           setStatusModalProps({
+            version: "failure",
             txnHeader: "Withdrawal Request Failed",
             txnHash: "",
             txnOutcome: (

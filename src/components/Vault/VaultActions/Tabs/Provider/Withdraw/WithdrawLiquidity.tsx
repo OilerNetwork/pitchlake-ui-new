@@ -73,6 +73,7 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
           const hash = await withdrawLiquidity();
 
           setStatusModalProps({
+            version: "success",
             txnHeader: "Withdraw Successful",
             txnHash: hash,
             txnOutcome: (
@@ -88,6 +89,7 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
           setWithdrawAmount("");
         } catch (e) {
           setStatusModalProps({
+            version: "failure",
             txnHeader: "Withdraw Failed",
             txnHash: "",
             txnOutcome: (

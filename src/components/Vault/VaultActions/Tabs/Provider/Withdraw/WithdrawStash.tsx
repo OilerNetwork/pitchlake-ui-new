@@ -52,6 +52,7 @@ const WithdrawStash: React.FC<WithdrawStashProps> = ({ showConfirmation }) => {
         try {
           const hash = await withdrawStashedBalance();
           setStatusModalProps({
+            version: "success",
             txnHeader: "Stash Collection Successful",
             txnHash: hash,
             txnOutcome: (
@@ -75,6 +76,7 @@ const WithdrawStash: React.FC<WithdrawStashProps> = ({ showConfirmation }) => {
           });
         } catch (e) {
           setStatusModalProps({
+            version: "failure",
             txnHeader: "Collect Stash Failed",
             txnHash: "",
             txnOutcome: (

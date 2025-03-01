@@ -1,19 +1,28 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { TxSuccessIcon } from "@/components/Icons";
 import { SquareArrowOutUpRight } from "lucide-react";
 import { ChevronLeft } from "lucide-react";
 import { useExplorer } from "@starknet-react/core";
-import { useTransactionContext } from "@/context/TransactionProvider";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
 
-const TxnSuccess = ({ onClose }: { onClose: () => void }) => {
+export interface TxnStatusModalProps {
+  txnHeader: string;
+  txnOutcome: ReactNode;
+  txnHash?: string;
+  onClose: () => void;
+}
+
+const TxnSuccess = ({
+  txnHeader,
+  txnOutcome,
+  txnHash,
+  onClose,
+}: TxnStatusModalProps) => {
   const explorer = useExplorer();
-  const { statusModalProps } = useTransactionContext();
-  const { txnHeader, txnOutcome, txnHash } = statusModalProps;
 
   return (
     <>
-      <div className="bg-[#121212] border border-[#262626] rounded-lg  w-full flex flex-col h-full confirmation-modal">
+      <div className="bg-[#121212] border border-[#262626] rounded-lg  w-full flex flex-col h-full success-modal">
         <div className="flex items-center mb-4 confirmation-modal-header p-6">
           <button
             onClick={onClose}
@@ -25,8 +34,8 @@ const TxnSuccess = ({ onClose }: { onClose: () => void }) => {
             {txnHeader}
           </h2>
         </div>
-        <div className="flex-grow flex flex-row items-center justify-center confirmation-modal-content">
-          <div className="p-6 flex flex-col justify-center items-center space-y-6">
+        <div className="flex-grow flex flex-row items-center justify-center success-modal-content">
+          <div className="success-modal-icon p-6 flex flex-col justify-center items-center space-y-6">
             <TxSuccessIcon />
             <p className="text-center text-[#bfbfbf] font-regular text-[14px] text-sm success-modal-message max-w-[236px]">
               {txnOutcome}
@@ -37,7 +46,7 @@ const TxnSuccess = ({ onClose }: { onClose: () => void }) => {
           <p className="whitespace-nowrap flex flex-row gap-1 pb-6">
             TXN ID:
             <a
-              href={explorer.transaction(txnHash)}
+              href={explorer.transaction(txnHash || "")}
               className="text-[#F5EBB8] flex flex-row items-center gap-1"
               target="_blank"
             >
@@ -46,7 +55,7 @@ const TxnSuccess = ({ onClose }: { onClose: () => void }) => {
             </a>
           </p>
         </div>
-        <div className="mt-auto flex justify-center text-sm p-6 border-t border-[#262626] success-modal-actions flex flex-row">
+        <div className="mt-auto flex justify-center text-sm p-6 border-t border-[#262626] success-modal-button flex flex-row">
           <ActionButton onClick={onClose} text="Got It" disabled={false} />
         </div>
       </div>

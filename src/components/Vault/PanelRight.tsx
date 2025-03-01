@@ -24,7 +24,8 @@ interface TabContentProps {
 }
 
 const PanelRight: React.FC<RightPanelProps> = ({ userType }) => {
-  const { pendingTx, modalState, setModalState } = useTransactionContext();
+  const { pendingTx, modalState, setModalState, statusModalProps } =
+    useTransactionContext();
   const { selectedRoundAddress } = useVaultState();
   const selectedRoundState = useRoundState(selectedRoundAddress);
 
@@ -87,40 +88,47 @@ const PanelRight: React.FC<RightPanelProps> = ({ userType }) => {
       : tabContent;
   };
 
+  const { txnHeader, txnOutcome, txnHash, version } = statusModalProps;
+
   useEffect(() => {
     setIsShowingTabs(true);
   }, [activeTab]);
 
   if (modalState.show) {
-    switch (modalState.type) {
-      case "confirmation":
-        return (
-          <ConfirmationModal
-            modalHeader={`${modalState.modalHeader} Confirmation`}
-            action={modalState.action}
-            onConfirm={handleConfirm}
-            onClose={hideModal}
-          />
-        );
-      case "pending":
-        if (pendingTx) return <LoadingSpinner />;
-      case "success":
-        return (
-          <TxnSuccess
-            onClose={() => {
-              hideModal();
-            }}
-          />
-        );
-      case "failure":
-        return (
-          <TxnFailure
-            onClose={() => {
-              hideModal();
-            }}
-          />
-        );
-    }
+    if (modalState.type === "confirmation")
+      return (
+        <ConfirmationModal
+          modalHeader={`${modalState.modalHeader} Confirmation`}
+          action={modalState.action}
+          onConfirm={handleConfirm}
+          onClose={hideModal}
+        />
+      );
+
+    if (pendingTx) return <LoadingSpinner />;
+
+    if (version === "success")
+      return (
+        <TxnSuccess
+          txnHeader={txnHeader}
+          txnOutcome={txnOutcome}
+          txnHash={txnHash}
+          onClose={() => {
+            hideModal();
+          }}
+        />
+      );
+
+    if (version === "failure")
+      return (
+        <TxnFailure
+          txnHeader={txnHeader}
+          txnOutcome={txnOutcome}
+          onClose={() => {
+            hideModal();
+          }}
+        />
+      );
   }
 
   return (
