@@ -9,7 +9,7 @@ import {
   CheckIcon,
 } from "@/components/Icons";
 import { History } from "lucide-react";
-import GasPriceChart from "@/components/Vault/VaultChart/ChartInnerV2";
+import GasPriceChart from "@/components/Vault/VaultChart/ChartInner";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import { useNewContext } from "@/context/NewProvider";

@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import GasPriceChart from "@/components/Vault/VaultChart/ChartInner";
 import { useChartContext } from "@/context/ChartProvider";
@@ -72,47 +72,25 @@ jest.mock("@/hooks/chart/useHistoricalRoundParams", () => ({
 jest.mock("@/hooks/chart/useChartData", () => ({
   __esModule: true,
   default: jest.fn(() => ({
-    gasData: [
+    parsedData: [
       { 
         timestamp: 1000, 
-        TWAP: 100, 
-        BASEFEE: 90, 
-        confirmedTwap: 100, 
+        confirmedTwap: 100,
         confirmedBasefee: 90,
         unconfirmedTwap: 110,
         unconfirmedBasefee: 95,
         STRIKE: 100,
-        CAP_LEVEL: 110,
-        twap: 100,
-        basefee: 90
-      },
-      { 
-        timestamp: 1500, 
-        TWAP: 200, 
-        BASEFEE: 180, 
-        confirmedTwap: 200, 
-        confirmedBasefee: 180,
-        unconfirmedTwap: 210,
-        unconfirmedBasefee: 185,
-        STRIKE: 100,
-        CAP_LEVEL: 110,
-        twap: 200,
-        basefee: 180
-      },
-      { 
-        timestamp: 2000, 
-        TWAP: 300, 
-        BASEFEE: 270, 
-        confirmedTwap: 300, 
-        confirmedBasefee: 270,
-        unconfirmedTwap: 310,
-        unconfirmedBasefee: 275,
-        STRIKE: 100,
-        CAP_LEVEL: 110,
-        twap: 300,
-        basefee: 270
+        CAP_LEVEL: 110
       }
-    ]
+    ],
+    verticalSegments: [],
+    roundAreas: [],
+    xTicks: [1000],
+    xTickLabels: {
+      1000: { label: "Round 1", roundId: "1" }
+    },
+    yMax: 200,
+    yTicks: [0, 50, 100, 150, 200]
   }))
 }));
 
@@ -203,7 +181,7 @@ describe("GasPriceChart", () => {
 
   it("renders chart with correct components and data visualization", () => {
     (useChart as jest.Mock).mockReturnValue({
-      gasData: [
+      parsedData: [
         { 
           timestamp: 1000, 
           confirmedTwap: 100,
@@ -213,7 +191,15 @@ describe("GasPriceChart", () => {
           STRIKE: 100,
           CAP_LEVEL: 110
         }
-      ]
+      ],
+      verticalSegments: [],
+      roundAreas: [],
+      xTicks: [1000],
+      xTickLabels: {
+        1000: { label: "Round 1", roundId: "1" }
+      },
+      yMax: 200,
+      yTicks: [0, 50, 100, 150, 200]
     });
 
     const { getByTestId } = renderWithProviders(
@@ -234,7 +220,7 @@ describe("GasPriceChart", () => {
   });
 
   it("handles missing data by showing loading state", () => {
-    (useChart as jest.Mock).mockReturnValue({ gasData: undefined });
+    (useChart as jest.Mock).mockReturnValue({ parsedData: undefined });
     (useHistoricalRoundParams as jest.Mock).mockReturnValue({ vaultData: undefined });
 
     const { container } = renderWithProviders(
@@ -251,7 +237,7 @@ describe("GasPriceChart", () => {
 
   it("renders only active data lines", () => {
     (useChart as jest.Mock).mockReturnValue({
-      gasData: [
+      parsedData: [
         { 
           timestamp: 1000, 
           confirmedTwap: 100,
@@ -262,23 +248,14 @@ describe("GasPriceChart", () => {
           CAP_LEVEL: 110
         }
       ],
-      isLoading: false
-    });
-
-    (useHistoricalRoundParams as jest.Mock).mockReturnValue({
-      vaultData: {
-        rounds: [
-          {
-            roundId: "1",
-            deploymentDate: "1000",
-            optionSettleDate: "2000",
-            strikePrice: "100000000000",
-            capLevel: "1000",
-            address: "0x123"
-          }
-        ]
+      verticalSegments: [],
+      roundAreas: [],
+      xTicks: [1000],
+      xTickLabels: {
+        1000: { label: "Round 1", roundId: "1" }
       },
-      isLoading: false
+      yMax: 200,
+      yTicks: [0, 50, 100, 150, 200]
     });
 
     const { getByTestId, queryByTestId } = renderWithProviders(
@@ -306,7 +283,7 @@ describe("GasPriceChart", () => {
     });
 
     (useChart as jest.Mock).mockReturnValue({
-      gasData: [
+      parsedData: [
         { 
           timestamp: 1000, 
           confirmedTwap: 100,
@@ -326,31 +303,15 @@ describe("GasPriceChart", () => {
           CAP_LEVEL: 110
         }
       ],
-      isLoading: false
-    });
-
-    (useHistoricalRoundParams as jest.Mock).mockReturnValue({
-      vaultData: {
-        rounds: [
-          {
-            roundId: "1",
-            deploymentDate: "1000",
-            optionSettleDate: "1500",
-            strikePrice: "100000000000",
-            capLevel: "1000",
-            address: "0x123"
-          },
-          {
-            roundId: "2",
-            deploymentDate: "1500",
-            optionSettleDate: "2000",
-            strikePrice: "100000000000",
-            capLevel: "1000",
-            address: "0x123"
-          }
-        ]
+      verticalSegments: [],
+      roundAreas: [{ start: 1000, end: 2000 }],
+      xTicks: [1000, 2000],
+      xTickLabels: {
+        1000: { label: "Round 1", roundId: "1" },
+        2000: { label: "Round 2", roundId: "2" }
       },
-      isLoading: false
+      yMax: 200,
+      yTicks: [0, 50, 100, 150, 200]
     });
 
     const { getByTestId } = renderWithProviders(

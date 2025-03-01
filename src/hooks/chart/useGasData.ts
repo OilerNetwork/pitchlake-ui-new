@@ -16,7 +16,7 @@ import {
 import demoGasData from "@/lib/demo/demo-gas-data.json";
 import useWebsocketChart from "../websocket/useChartWebsocket";
 
-export const useChartData = () => {
+export const useGasData = () => {
   const { conn, selectedRound } = useNewContext();
   const { selectedRoundAddress } = useVaultState();
   const selectedRoundState = useRoundState(selectedRoundAddress);
@@ -165,4 +165,4 @@ export const useChartData = () => {
   return { gasData };
 };
 
-export default useChartData;
+export default useGasData;
