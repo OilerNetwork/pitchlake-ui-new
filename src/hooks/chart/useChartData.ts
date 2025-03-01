@@ -63,7 +63,7 @@ export const useChartData = () => {
     else {
       const cutoff =
         Math.max(
-          fossilGasData[fossilGasData.length - (conn === "demo" ? 1 : 2)]
+          fossilGasData[fossilGasData.length - (conn === "demo" ? 1 : 1)]
             .timestamp,
           xMin,
         ) - 30;
