@@ -1,5 +1,7 @@
 import React from "react";
-import "@/app/globals.css";
+// Remove or comment out the CSS import since it's not needed for tests
+// The styles are likely already included in your app through other means
+// import "@/app/globals.css";
 
 const LoadingSpinner = () => {
   return (
