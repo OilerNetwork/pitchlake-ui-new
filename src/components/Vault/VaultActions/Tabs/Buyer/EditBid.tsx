@@ -256,7 +256,6 @@ const EditModal: React.FC<EditModalProps> = ({
                       <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
                     }
                     error={priceReason}
-                    disabled={!account}
                   />
                 </Hoverable>
               </div>

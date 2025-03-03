@@ -243,7 +243,6 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
                 />
               }
               error={amountReason}
-              disabled={!account}
             />
           </Hoverable>
           <Hoverable dataId="inputBidPrice">
@@ -257,7 +256,6 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
                 <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
               }
               error={priceReason}
-              disabled={!account}
             />
           </Hoverable>
         </div>

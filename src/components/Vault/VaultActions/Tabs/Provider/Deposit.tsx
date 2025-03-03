@@ -210,7 +210,6 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
                 <PersonIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
               }
               error={beneficiaryReason}
-              disabled={!account}
             />
           </Hoverable>
         )}
@@ -233,7 +232,6 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
             icon={
               <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
             }
-            disabled={!account}
           />
         </Hoverable>
       </div>

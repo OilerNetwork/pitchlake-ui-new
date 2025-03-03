@@ -141,7 +141,6 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
               <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
             }
             error={amountReason}
-            disabled={!account}
           />
         </Hoverable>
         {lpState?.unlockedBalance == 0 || !account ? null : (

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, XIcon } from "lucide-react";
 import { CheckIcon, GlobeIcon } from "@/components/Icons";
 import logo_full from "@/../public/logo_full.svg";
 import braavosIcon from "@/../public/braavos.svg";
@@ -30,26 +30,26 @@ import { useNewContext } from "@/context/NewProvider";
 import { useTimeContext } from "@/context/TimeProvider";
 
 export default function Header() {
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownChainRef = useRef<HTMLDivElement>(null);
   const { conn } = useNewContext();
   const { timestamp, mockTimeForward } = useTimeContext();
-  const { vaultState } = useVaultState();
   const lpState = useLPState();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownChainOpen, setIsDropdownChainOpen] = useState(false);
-  const isDropdownOpenRef = useRef(isDropdownOpen);
   const isDropdownChainOpenRef = useRef(isDropdownChainOpen);
   const { isMobile } = useIsMobile();
   const { isHelpBoxOpen, toggleHelpBoxOpen } = useHelpContext();
-  const { isBlurOpen, setBlurOpen } = useUiContext();
+  const {
+    isWalletLoginOpen,
+    closeWalletLogin,
+    walletLoginRef,
+    toggleWalletLogin,
+  } = useUiContext();
   const router = useRouter();
   const pathName = usePathname();
   const { connect, connectors } = useConnect();
-  // const { switchChainAsync } = useSwitchChain({});
   const { disconnect } = useDisconnect();
   const { chains, chain } = useNetwork();
-  //console.log("CHAINS", chains);
   const { account } = useAccount();
   const { balance } = useErc20Balance(
     "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
@@ -97,54 +97,8 @@ export default function Header() {
   ]);
 
   useEffect(() => {
-    isDropdownOpenRef.current = isDropdownOpen;
-  }, [isDropdownOpen]);
-
-  useEffect(() => {
     isDropdownChainOpenRef.current = isDropdownChainOpen;
   }, [isDropdownChainOpen]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isDropdownOpenRef.current &&
-        !dropdownRef?.current?.contains(event.target as HTMLDivElement)
-      ) {
-        setIsDropdownOpen(false);
-        setBlurOpen(false);
-      }
-    };
-    const handleClickOutsideChain = (event: MouseEvent) => {
-      if (
-        isDropdownChainOpenRef.current &&
-        !dropdownChainRef?.current?.contains(event.target as HTMLDivElement)
-      ) {
-        setIsDropdownChainOpen(false);
-        setBlurOpen(false);
-      }
-    };
-
-    const handleEscKey = (event: KeyboardEvent) => {
-      if (isDropdownOpenRef.current && event.key === "Escape") {
-        setIsDropdownOpen(false);
-        setBlurOpen(false);
-      }
-      if (isDropdownChainOpenRef.current && event.key === "Escape") {
-        setIsDropdownChainOpen(false);
-        setBlurOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("mousedown", handleClickOutsideChain);
-    document.addEventListener("keydown", handleEscKey);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("mousedown", handleClickOutsideChain);
-      document.removeEventListener("keydown", handleEscKey);
-    };
-  }, []);
 
   const handleSwitchChain = async (chainId: string) => {
     let chain: string | undefined = undefined;
@@ -161,16 +115,12 @@ export default function Header() {
     if (!chain) {
       return Error("Chain not found");
     }
-    // await switchChainAsync({
-    //   chainId: chain,
-    // });
     return;
   };
   const copyToClipboard = (text: string) => {
     navigator.clipboard
       .writeText(text)
       .then(() => {
-        // Add a toast message
         toast("Copied to clipboard", { type: "success" });
       })
       .catch((err) => {
@@ -181,11 +131,6 @@ export default function Header() {
   const shortenString = (str: string) => {
     return str ? `${str.slice(0, 6)}...${str.slice(-4)}` : "";
   };
-
-  useEffect(() => {
-    if (isDropdownChainOpen || isDropdownOpen) setBlurOpen(true);
-    else setBlurOpen(false);
-  }, [isDropdownChainOpen, isDropdownOpen]);
 
   return (
     !isMobile && (
@@ -213,11 +158,6 @@ export default function Header() {
               </button>
             </div>
           )}
-          {
-            //<div className="hover:cursor-pointer border-[1px] border-greyscale-800 p-2 rounded-md">
-            //  <BellIcon className="h-6 w-6 text-primary" />
-            //</div>
-          }
           <Hoverable
             dataId="networkSelector"
             className="relative"
@@ -233,22 +173,6 @@ export default function Header() {
               >
                 <GlobeIcon fill="none" />
                 <p className="pl-[0.5rem]">{`${chain.network.charAt(0).toUpperCase() + chain.network.slice(1)}`}</p>
-
-                {
-                  //  isDropdownChainOpen ? (
-                  //  <ArrowUpIcon
-                  //    stroke="#bfbfbf"
-                  //    strokeWidth="1"
-                  //    classname="flex flex-row justify-center items-center w-5 h-5 ml-auto"
-                  //  />
-                  //) : (
-                  //  <ArrowDownIcon
-                  //    stroke="#bfbfbf"
-                  //    strokeWidth="1"
-                  //    classname="flex flex-row justify-center items-center w-5 h-5 ml-auto"
-                  //  />
-                  //)
-                }
               </button>
             }
 
@@ -291,7 +215,7 @@ export default function Header() {
               </button>
             </div>
           )}
-          <div className="relative" ref={dropdownRef}>
+          <div className="relative" ref={walletLoginRef}>
             {account ? (
               <Hoverable dataId="accountDropdown">
                 <button
@@ -324,24 +248,14 @@ export default function Header() {
                       }}
                       copyToClipboard={copyToClipboard}
                     />
-                    {/* <ToastContainer
-                      autoClose={3000}
-                      closeOnClick
-                      hideProgressBar={false}
-                      transition={Bounce}
-                      //theme="dark"
-                    /> */}
                   </>
                 )}
               </Hoverable>
             ) : (
               <Hoverable dataId="loginButton">
                 <button
-                  className="flex flex-row min-w-16 bg-primary-400 text-black text-sm px-8 py-4 rounded-md w-[123px] h-[44px] items-center justify-center"
-                  onClick={() => {
-                    setBlurOpen(!isBlurOpen);
-                    setIsDropdownOpen((state) => !state);
-                  }}
+                  className={`flex flex-row min-w-16 bg-primary-400 text-black text-sm px-8 py-4 rounded-md w-[123px] h-[44px] items-center justify-center ${isWalletLoginOpen ? "border-[2px] border-[#ADA478]" : ""}`}
+                  onClick={toggleWalletLogin}
                 >
                   <p>Connect</p>
                   <div>
@@ -353,19 +267,23 @@ export default function Header() {
                   </div>
                 </button>
 
-                {isDropdownOpen && (
+                {isWalletLoginOpen && (
                   <div className="absolute right-0 h-[148px] w-[196px] text-sm flex flex-col mt-3 ">
                     <div className="bg-[#161616] rounded-md">
-                      <div className="p-4 font-regular text-[12px] border border-transparent border-b-[#454545] ">
+                      <div className="flex flex-row items-center px-4 py-2 font-regular text-[12px] border border-transparent border-b-[#454545] text-[#BFBFBF]">
                         CHOOSE A WALLET
+                        <XIcon
+                          className="ml-auto cursor-pointer"
+                          color="#FAFAFA"
+                          onClick={closeWalletLogin}
+                        />
                       </div>
                       {connectors.map((connector) => (
                         <div
                           key={connector.id}
                           onClick={() => {
                             connect({ connector });
-                            setIsDropdownOpen(false);
-                            setBlurOpen(false);
+                            closeWalletLogin();
                           }}
                           className="cursor-pointer sticky p-2 px-3 bg-[#161616] w-full text-[#FAFAFA] text-[14px] font-medium hover:bg-[#262626]"
                         >
