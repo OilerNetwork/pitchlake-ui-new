@@ -69,8 +69,8 @@ const RepeatEthIcon = ({
           gradientUnits="userSpaceOnUse"
           gradientTransform="translate(46 46.4893) rotate(90) scale(46)"
         >
-          <stop stop-color="#030303" />
-          <stop offset="1" stop-color="#171717" />
+          <stop stopColor="#030303" />
+          <stop offset="1" stopColor="#171717" />
         </radialGradient>
       </defs>
     </svg>

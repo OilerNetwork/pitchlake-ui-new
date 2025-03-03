@@ -109,8 +109,8 @@ const ExerciseOptionsIcon = ({
           gradientUnits="userSpaceOnUse"
           gradientTransform="translate(47.25 48.252) rotate(90) scale(47.25)"
         >
-          <stop stop-color="#030303" />
-          <stop offset="1" stop-color="#171717" />
+          <stop stopColor="#030303" />
+          <stop offset="1" stopColor="#171717" />
         </radialGradient>
         <clipPath id="clip0_1239_95939">
           <rect

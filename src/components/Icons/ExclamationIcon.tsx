@@ -52,8 +52,8 @@ const ExlamationIcon = ({
           gradientUnits="userSpaceOnUse"
           gradientTransform="translate(47 47.502) rotate(90) scale(47)"
         >
-          <stop stop-color="#030303" />
-          <stop offset="1" stop-color="#171717" />
+          <stop stopColor="#030303" />
+          <stop offset="1" stopColor="#171717" />
         </radialGradient>
         <clipPath id="clip0_1239_94805">
           <rect
