@@ -3,11 +3,8 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import Exercise from "@/components/Vault/VaultActions/Tabs/Buyer/Exercise";
 import { useAccount } from "@starknet-react/core";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import useERC20 from "@/hooks/erc20/useERC20";
-import {
-  TestWrapper,
-  renderWithProviders,
-} from "../../../../../utils/TestWrapper";
+import useErc20Balance from "@/hooks/erc20/useErc20Balance";
+import useErc20Allowance from "@/hooks/erc20/useErc20Allowance";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import useOBState from "@/hooks/vault_v2/states/useOBState";
@@ -55,7 +52,8 @@ jest.mock("@/context/TransactionProvider", () => ({
   useTransactionContext: jest.fn(),
 }));
 
-jest.mock("@/hooks/erc20/useERC20", () => jest.fn());
+jest.mock("@/hooks/erc20/useErc20Balance", () => jest.fn());
+jest.mock("@/hooks/erc20/useErc20Allowance", () => jest.fn());
 
 jest.mock("@/hooks/vault_v2/states/useVaultState", () => jest.fn());
 
@@ -106,7 +104,7 @@ describe("Exercise Component", () => {
       hasMinted: false,
     });
 
-    (useERC20 as jest.Mock).mockReturnValue({
+    (useErc20Balance as jest.Mock).mockReturnValue({
       balance: "100",
     });
 
@@ -118,7 +116,7 @@ describe("Exercise Component", () => {
   it("renders with initial state", () => {
     renderWithProviders(<Exercise showConfirmation={mockShowConfirmation} />);
 
-    const content = screen.getByText(/You currently have/i);
+    const content = screen.getByText(/You own/i);
     expect(content).toBeInTheDocument();
     expect(content).toHaveTextContent(/200/);
     expect(content).toHaveTextContent(/options worth/i);
@@ -172,7 +170,7 @@ describe("Exercise Component", () => {
     (useTransactionContext as jest.Mock).mockReturnValue({
       pendingTx: false,
     });
-    (useERC20 as jest.Mock).mockReturnValue({
+    (useErc20Balance as jest.Mock).mockReturnValue({
       balance: "0",
     });
     (useOBState as jest.Mock).mockReturnValue({
@@ -184,4 +182,3 @@ describe("Exercise Component", () => {
     expect(screen.getByRole("button", { name: "Exercise Now" })).toBeDisabled();
   });
 });
-

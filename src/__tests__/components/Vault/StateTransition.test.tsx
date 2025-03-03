@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import StateTransition from "@/components/Vault/NewStateTransition";
+import StateTransition from "@/components/Vault/DemoStateTransition";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useHelpContext } from "@/context/HelpProvider";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
@@ -278,11 +278,7 @@ const renderStateTransition = ({
 
   render(
     <QueryClientProvider client={queryClient}>
-      <StateTransition
-        isPanelOpen={true}
-        setModalState={mockSetModalState}
-        fossilDelay={300}
-      />
+      <StateTransition isPanelOpen={true} setModalState={mockSetModalState} />
     </QueryClientProvider>,
   );
 

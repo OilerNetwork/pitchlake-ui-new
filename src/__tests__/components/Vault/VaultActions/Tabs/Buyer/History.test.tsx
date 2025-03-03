@@ -145,11 +145,12 @@ describe("History Component", () => {
   it("renders history items correctly", () => {
     renderWithProviders(
       <History
-        items={mockConfig.hooks.optionBuyer.historyItems}
-        bidToEdit={null}
-        isTabsHidden={false}
-        setBidToEdit={mockSetBidToEdit}
-        setIsTabsHidden={mockSetIsTabsHidden}
+        //items={mockConfig.hooks.optionBuyer.historyItems}
+        //bidToEdit={null}
+        //isTabsHidden={false}
+        //setBidToEdit={mockSetBidToEdit}
+        showConfirmation={mockSetBidToEdit}
+        setIsShowingTabs={mockSetIsTabsHidden}
       />,
     );
 
@@ -174,11 +175,13 @@ describe("History Component", () => {
     useRoundState.mockReturnValue({ roundState: "Auctioning" });
     renderWithProviders(
       <History
-        items={mockConfig.hooks.optionBuyer.historyItems}
-        bidToEdit={null}
-        isTabsHidden={false}
-        setBidToEdit={mockSetBidToEdit}
-        setIsTabsHidden={mockSetIsTabsHidden}
+        showConfirmation={mockSetBidToEdit}
+        setIsShowingTabs={mockSetIsTabsHidden}
+        //items={mockConfig.hooks.optionBuyer.historyItems}
+        //bidToEdit={null}
+        //isTabsHidden={false}
+        //setBidToEdit={mockSetBidToEdit}
+        //setIsTabsHidden={mockSetIsTabsHidden}
       />,
     );
 
@@ -191,11 +194,13 @@ describe("History Component", () => {
     useRoundState.mockReturnValue({ roundState: "Settled" });
     renderWithProviders(
       <History
-        items={mockConfig.hooks.optionBuyer.historyItems}
-        bidToEdit={null}
-        isTabsHidden={false}
-        setBidToEdit={mockSetBidToEdit}
-        setIsTabsHidden={mockSetIsTabsHidden}
+        showConfirmation={mockSetBidToEdit}
+        setIsShowingTabs={mockSetIsTabsHidden}
+        //items={mockConfig.hooks.optionBuyer.historyItems}
+        //bidToEdit={null}
+        //isTabsHidden={false}
+        //setBidToEdit={mockSetBidToEdit}
+        //setIsTabsHidden={mockSetIsTabsHidden}
       />,
     );
 
@@ -212,11 +217,13 @@ describe("History Component", () => {
 
     renderWithProviders(
       <History
-        items={mockConfig.hooks.optionBuyer.historyItems}
-        bidToEdit={null}
-        isTabsHidden={false}
-        setBidToEdit={mockSetBidToEdit}
-        setIsTabsHidden={mockSetIsTabsHidden}
+        showConfirmation={mockSetBidToEdit}
+        setIsShowingTabs={mockSetIsTabsHidden}
+        //items={mockConfig.hooks.optionBuyer.historyItems}
+        //bidToEdit={null}
+        //isTabsHidden={false}
+        //setBidToEdit={mockSetBidToEdit}
+        //setIsTabsHidden={mockSetIsTabsHidden}
       />,
     );
 
@@ -232,11 +239,13 @@ describe("History Component", () => {
   it("handles empty history items array", () => {
     renderWithProviders(
       <History
-        items={[]}
-        bidToEdit={null}
-        isTabsHidden={false}
-        setBidToEdit={mockSetBidToEdit}
-        setIsTabsHidden={mockSetIsTabsHidden}
+        showConfirmation={mockSetBidToEdit}
+        setIsShowingTabs={mockSetIsTabsHidden}
+        //items={[]}
+        //bidToEdit={null}
+        //isTabsHidden={false}
+        //setBidToEdit={mockSetBidToEdit}
+        //setIsTabsHidden={mockSetIsTabsHidden}
       />,
     );
 
@@ -249,11 +258,13 @@ describe("History Component", () => {
   it("applies correct styling to history items", () => {
     renderWithProviders(
       <History
-        items={mockConfig.hooks.optionBuyer.historyItems}
-        bidToEdit={null}
-        isTabsHidden={false}
-        setBidToEdit={mockSetBidToEdit}
-        setIsTabsHidden={mockSetIsTabsHidden}
+        showConfirmation={mockSetBidToEdit}
+        setIsShowingTabs={mockSetIsTabsHidden}
+        //items={mockConfig.hooks.optionBuyer.historyItems}
+        //bidToEdit={null}
+        //isTabsHidden={false}
+        //setBidToEdit={mockSetBidToEdit}
+        //setIsTabsHidden={mockSetIsTabsHidden}
       />,
     );
 

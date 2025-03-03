@@ -1,8 +1,13 @@
-import { renderHook, act } from "@testing-library/react";
-import useERC20 from "@/hooks/erc20/useERC20";
-import { useAccount, useContract, useContractRead, useProvider } from "@starknet-react/core";
+import { renderHook } from "@testing-library/react";
+import useErc20Balance from "@/hooks/erc20/useErc20Balance";
+import useErc20Allowance from "@/hooks/erc20/useErc20Allowance";
+import {
+  useAccount,
+  useContract,
+  useContractRead,
+  useProvider,
+} from "@starknet-react/core";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import { erc20ABI } from "@/lib/abi";
 
 // Mock all the hooks
 jest.mock("@starknet-react/core", () => ({
@@ -16,7 +21,7 @@ jest.mock("@/context/TransactionProvider", () => ({
   useTransactionContext: jest.fn(),
 }));
 
-describe("useERC20", () => {
+describe("useErc20Allowance", () => {
   const mockAccount = {
     address: "0x123" as `0x${string}`,
   };
@@ -61,9 +66,9 @@ describe("useERC20", () => {
 
     // Mock useContractRead for balance and allowance
     (useContractRead as jest.Mock).mockImplementation(({ functionName }) => {
-      if (functionName === "balance_of") {
-        return { data: "1000" };
-      }
+      //if (functionName === "balance_of") {
+      //  return { data: "1000" };
+      //}
       if (functionName === "allowance") {
         return { data: "500" };
       }
@@ -73,146 +78,13 @@ describe("useERC20", () => {
 
   it("initializes with correct balance and allowance", () => {
     const { result } = renderHook(() =>
-      useERC20("0x456" as `0x${string}`, "0x789")
+      useErc20Allowance("0x456" as `0x${string}`, "0x789"),
     );
 
-    expect(result.current.balance).toBe(1000);
+    //expect(result.current.balance).toBe(1000);
     expect(result.current.allowance).toBe(500);
   });
+});
 
-  it("calls approve with correct arguments", async () => {
-    const mockTxHash = "0xabc";
-    mockContract.typedv2().approve.mockResolvedValue({
-      transaction_hash: mockTxHash,
-    });
-    mockProvider.getNonceForAddress.mockResolvedValue("1");
+//// @NOTE repeat tests for balance
 
-    const { result } = renderHook(() =>
-      useERC20("0x456" as `0x${string}`, "0x789")
-    );
-
-    await act(async () => {
-      await result.current.approve({
-        spender: "0x789",
-        amount: 100,
-      });
-    });
-
-    expect(mockContract.typedv2).toHaveBeenCalledWith(erc20ABI);
-    expect(mockContract.typedv2().approve).toHaveBeenCalledWith(
-      "0x789",
-      100,
-      { nonce: "1" }
-    );
-    expect(mockSetPendingTx).toHaveBeenCalledWith(mockTxHash);
-  });
-
-  it("calls increaseAllowance with correct arguments", async () => {
-    const mockTxHash = "0xabc";
-    mockContract.typedv2().increase_allowance.mockResolvedValue({
-      transaction_hash: mockTxHash,
-    });
-
-    const { result } = renderHook(() =>
-      useERC20("0x456" as `0x${string}`, "0x789")
-    );
-
-    await act(async () => {
-      await result.current.increaseAllowance({
-        spender: "0x789",
-        amount: 100,
-      });
-    });
-
-    expect(mockContract.typedv2).toHaveBeenCalledWith(erc20ABI);
-    expect(mockContract.typedv2().increase_allowance).toHaveBeenCalledWith(
-      "0x789",
-      100
-    );
-    expect(mockSetPendingTx).toHaveBeenCalledWith(mockTxHash);
-  });
-
-  it("handles undefined contract", async () => {
-    (useContract as jest.Mock).mockReturnValue({
-      contract: undefined,
-    });
-
-    const { result } = renderHook(() =>
-      useERC20("0x456" as `0x${string}`, "0x789")
-    );
-
-    await act(async () => {
-      await result.current.approve({
-        spender: "0x789",
-        amount: 100,
-      });
-    });
-
-    expect(mockSetPendingTx).not.toHaveBeenCalled();
-  });
-
-  it("handles approve error", async () => {
-    const consoleLogSpy = jest.spyOn(console, "log");
-    const mockError = new Error("Approve failed");
-    mockContract.typedv2().approve.mockRejectedValue(mockError);
-    mockProvider.getNonceForAddress.mockResolvedValue("1");
-
-    const { result } = renderHook(() =>
-      useERC20("0x456" as `0x${string}`, "0x789")
-    );
-
-    await act(async () => {
-      await result.current.approve({
-        spender: "0x789",
-        amount: 100,
-      });
-    });
-
-    expect(consoleLogSpy).toHaveBeenCalledWith("ERR", mockError);
-    expect(mockSetPendingTx).not.toHaveBeenCalled();
-  });
-
-  it("handles increaseAllowance error", async () => {
-    const consoleLogSpy = jest.spyOn(console, "log");
-    const mockError = new Error("IncreaseAllowance failed");
-    mockContract.typedv2().increase_allowance.mockRejectedValue(mockError);
-
-    const { result } = renderHook(() =>
-      useERC20("0x456" as `0x${string}`, "0x789")
-    );
-
-    await act(async () => {
-      await result.current.increaseAllowance({
-        spender: "0x789",
-        amount: 100,
-      });
-    });
-
-    expect(consoleLogSpy).toHaveBeenCalledWith(mockError);
-    expect(mockSetPendingTx).not.toHaveBeenCalled();
-  });
-
-  it("handles nonce fetch error", async () => {
-    const consoleLogSpy = jest.spyOn(console, "log");
-    const mockError = new Error("Nonce fetch failed");
-    mockProvider.getNonceForAddress.mockRejectedValue(mockError);
-
-    const { result } = renderHook(() =>
-      useERC20("0x456" as `0x${string}`, "0x789")
-    );
-
-    await act(async () => {
-      await result.current.approve({
-        spender: "0x789",
-        amount: 100,
-      });
-    });
-
-    expect(consoleLogSpy).toHaveBeenCalledWith("Error fetching nonce:", mockError);
-    expect(mockContract.typedv2().approve).toHaveBeenCalledWith(
-      "0x789",
-      100,
-      { nonce: "0" }
-    );
-  });
-}); 

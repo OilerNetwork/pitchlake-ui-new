@@ -1,20 +1,8 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import Header from "../../../components/LayoutComponents/Header";
 import useIsMobile from "../../../hooks/window/useIsMobile";
-import { useRouter } from "next/navigation";
-import useERC20 from "@/hooks/erc20/useERC20";
-import {
-  useAccount,
-  useConnect,
-  useDisconnect,
-  useNetwork,
-} from "@starknet-react/core";
-import { useHelpContext } from "@/context/HelpProvider";
-import { useUiContext } from "@/context/UiProvider";
-import useLPState from "@/hooks/vault_v2/states/useLPState";
+import { useAccount, useConnect } from "@starknet-react/core";
 import { useNewContext } from "@/context/NewProvider";
-import { useTimeContext } from "@/context/TimeProvider";
-import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 
 // Mock SVG imports
 jest.mock("@/../public/logo_full.svg", () => "logo_full");
@@ -84,7 +72,7 @@ jest.mock("next/navigation", () => ({
   usePathname: jest.fn().mockReturnValue("/"),
 }));
 
-jest.mock("@/hooks/erc20/useERC20", () => ({
+jest.mock("@/hooks/erc20/useErc20Balance", () => ({
   __esModule: true,
   default: jest.fn().mockReturnValue({
     balance: "1000000000000000000", // 1 ETH
@@ -313,4 +301,3 @@ describe("Header Component", () => {
     expect(container.firstChild).toBeFalsy();
   });
 });
-

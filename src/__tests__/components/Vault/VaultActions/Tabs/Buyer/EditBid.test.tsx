@@ -37,10 +37,15 @@ const mockHooks = {
   useTimeContext: () => ({
     timestamp: "1234567890",
   }),
-  useERC20: () => ({
-    allowance: "1000000000000000000",
+
+  useErc20Balance: () => ({
     balance: "2000000000000000000",
   }),
+
+  useErc20Allowance: () => ({
+    allowance: "1000000000000000000",
+  }),
+
   useVaultState: () => ({
     vaultState: {
       ethAddress: "0x123",
@@ -79,9 +84,14 @@ jest.mock("@/context/TransactionProvider", () => ({
   useTransactionContext: () => mockHooks.useTransactionContext(),
 }));
 
-jest.mock("@/hooks/erc20/useERC20", () => ({
+jest.mock("@/hooks/erc20/useErc20Balance", () => ({
   __esModule: true,
-  default: () => mockHooks.useERC20(),
+  default: () => mockHooks.useErc20Balance(),
+}));
+
+jest.mock("@/hooks/erc20/useErc20Allowance", () => ({
+  __esModule: true,
+  default: () => mockHooks.useErc20Allowance(),
 }));
 
 jest.mock("@/hooks/vault_v2/states/useVaultState", () => ({
