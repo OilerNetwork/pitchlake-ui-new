@@ -20,6 +20,7 @@ import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import { useTimeContext } from "@/context/TimeProvider";
 import { Bid } from "./History";
 import useEditBidMulticall from "@/hooks/txn/useEditBidMulticall";
+import { AuctionOverPanel } from "./PlaceBid";
 
 const LOCAL_STORAGE_KEY = "editBidPriceGwei";
 
@@ -203,17 +204,7 @@ const EditModal: React.FC<EditModalProps> = ({
           </h2>
         </div>
         {timestamp > Number(selectedRoundState?.auctionEndDate) && (
-          <div className="flex space-y-6 flex-col flex-grow items-center justify-center text-center p-6">
-            <HourglassIcon />
-            <div className="flex flex-col space-y-2">
-              <p className="text-[16px] font-medium text-[#FAFAFA] text-center">
-                Auction Ending
-              </p>
-              <p className="max-w-[290px] font-regular text-[14px] text-[#BFBFBF] pt-0">
-                No more bids can be placed.
-              </p>
-            </div>
-          </div>
+          <AuctionOverPanel />
         )}
 
         {timestamp < Number(selectedRoundState?.auctionEndDate) && (
@@ -249,7 +240,7 @@ const EditModal: React.FC<EditModalProps> = ({
                     type="number"
                     value={state.newPriceGwei}
                     label="Enter Price"
-                    label2={`Current: ${oldPriceGwei} GWEI`}
+                    label2={`Current: ${oldPriceGwei} Gwei`}
                     onChange={handlePriceChange}
                     placeholder={`e.g. ${oldPriceGwei}`}
                     icon={

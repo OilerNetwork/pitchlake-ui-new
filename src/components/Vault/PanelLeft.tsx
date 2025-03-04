@@ -1,8 +1,7 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import StateTransitionConfirmationModal from "@/components/Vault/Utils/StateTransitionConfirmationModal";
 import { PanelLeft as IconPanelLeft } from "lucide-react";
-import { useExplorer } from "@starknet-react/core";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
@@ -28,8 +27,6 @@ const PanelLeft = ({ userType }: { userType: string }) => {
     onConfirm: async () => {},
   });
 
-  const explorer = useExplorer();
-
   const hideModal = () => {
     setModalState({
       show: false,
@@ -49,14 +46,16 @@ const PanelLeft = ({ userType }: { userType: string }) => {
   const toggleOptionRoundOpen = () => {
     setOptionRoundIsOpen(!optionRoundIsOpen);
   };
-  const togglePanel = () => {
-    setIsPanelOpen(!isPanelOpen);
-  };
 
   const openAllTabs = () => {
     setIsPanelOpen(true);
     setVaultIsOpen(true);
     setOptionRoundIsOpen(true);
+  };
+  const closeAllTabs = () => {
+    setIsPanelOpen(false);
+    setVaultIsOpen(false);
+    setOptionRoundIsOpen(false);
   };
 
   const openJustVaultTab = () => {
@@ -81,15 +80,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
           <Hoverable
             dataId="leftPanelStatisticsBar"
             onClick={() => {
-              if (isPanelOpen) {
-                setIsPanelOpen(false);
-                setVaultIsOpen(false);
-                setOptionRoundIsOpen(false);
-              } else {
-                setIsPanelOpen(true);
-                setVaultIsOpen(true);
-                setOptionRoundIsOpen(true);
-              }
+              isPanelOpen ? closeAllTabs() : openAllTabs();
             }}
             className="flex items-center h-[56px] w-full border-b-1 p-4 border-white cursor-pointer"
           >

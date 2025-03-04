@@ -351,6 +351,14 @@
     "header": "Collect Stash",
     "text": "Collect your entire stashed balance."
   },
+  "auctionOverPlanel": {
+    "header": "Auction Ending",
+    "text": "The auction period is over, awaiting transaction to transition the round's state."
+  },
+  "noBids": {
+    "header": "No Bids Placed",
+    "text": "You have not placed any bids in this round."
+  },
   "inputBidAmount": {
     "header": "Bid Details",
     "text": "Enter the number of options you are bidding for. Each option is for a single unit of gas."

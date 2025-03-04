@@ -59,17 +59,6 @@ const History: React.FC<HistoryProps> = ({
     else setIsShowingTabs(true);
   }, [isEditOpen]);
 
-  if (bids.length === 0) {
-    return (
-      <div className="py-4 px-4 space-y-4 h-full flex flex-col justify-center items-center">
-        <ExclamationIcon />
-        <p className="text-[#BFBFBF] font-regular text-[14px] text-sm">
-          You have not placed any bids.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <>
       {bids.length === 0 && <NoBids />}
@@ -104,12 +93,20 @@ const History: React.FC<HistoryProps> = ({
 
 const NoBids = () => {
   return (
-    <div className="py-4 px-4 space-y-4 h-full flex flex-col justify-center items-center">
+    <Hoverable
+      dataId="noBids"
+      className="flex space-y-6 flex-col flex-grow items-center justify-center text-center p-6"
+    >
       <ExclamationIcon />
-      <p className="text-[#BFBFBF] font-regular text-[14px] text-sm">
-        You have not placed any bids.
-      </p>
-    </div>
+      <div className="flex flex-col space-y-2">
+        <p className="text-[16px] font-medium text-[#FAFAFA] text-center">
+          No Bids
+        </p>
+        <p className="max-w-[290px] font-regular text-[14px] text-[#BFBFBF] pt-0">
+          You have not placed any bids.
+        </p>
+      </div>
+    </Hoverable>
   );
 };
 
