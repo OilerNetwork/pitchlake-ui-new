@@ -56,7 +56,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
         bid
         <br />
         <span className="font-semibold text-[#fafafa]">
-          {bidPriceGwei} GWEI{" "}
+          {bidPriceGwei} Gwei{" "}
         </span>{" "}
         per
         <br />
@@ -82,7 +82,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
               <>
                 Your bid of{" "}
                 <span className="font-semibold text-[#fafafa]">
-                  {bidPriceGwei} GWEI{" "}
+                  {bidPriceGwei} Gwei{" "}
                 </span>{" "}
                 per{" "}
                 <span className="font-semibold text-[#fafafa]">
@@ -107,7 +107,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
               <>
                 Your bid of{" "}
                 <span className="font-semibold text-[#fafafa]">
-                  {bidPriceGwei} GWEI
+                  {bidPriceGwei} Gwei
                 </span>{" "}
                 per{" "}
                 <span className="font-semibold text-[#fafafa]">
@@ -188,7 +188,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
       return "Auction period is over; transaction pending...";
     else if (state.bidPrice == "") return "";
     else if (BigInt(bidPriceWei) < BigInt(reservePriceWei))
-      return `Price must be at least the reserve price (${Number(reservePriceGwei).toFixed(5)} GWEI)`;
+      return `Price must be at least the reserve price (${Number(reservePriceGwei).toFixed(5)} Gwei)`;
     else if (BigInt(BigInt(bidPriceWei) * BigInt(bidAmount)) > BigInt(balance))
       return `Exceeds balance (${parseFloat(
         formatEther(balance.toString() || "0"),
@@ -212,19 +212,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
   }, [pendingTx, priceReason, amountReason, state.bidAmount, state.bidPrice]);
 
   if (timestamp > Number(selectedRoundState?.auctionEndDate)) {
-    return (
-      <div className="flex space-y-6 flex-col flex-grow items-center justify-center text-center p-6">
-        <HourglassIcon />
-        <div className="flex flex-col space-y-2">
-          <p className="text-[16px] font-medium text-[#FAFAFA] text-center">
-            Auction Ending
-          </p>
-          <p className="max-w-[290px] font-regular text-[14px] text-[#BFBFBF] pt-0">
-            No more bids can be placed.
-          </p>
-        </div>
-      </div>
-    );
+    return <AuctionOverPanel />;
   } else
     return (
       <div className="flex flex-col h-full">
@@ -247,7 +235,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
           </Hoverable>
           <Hoverable dataId="inputBidPrice">
             <InputField
-              label="Enter Price (GWEI)"
+              label="Enter Price (Gwei)"
               type="number"
               value={state.bidPrice}
               onChange={handlePriceChange}
@@ -291,5 +279,22 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
       </div>
     );
 };
+
+export const AuctionOverPanel: React.FC = () => (
+  <Hoverable
+    dataId="auctionOverPlanel"
+    className="flex space-y-6 flex-col flex-grow items-center justify-center text-center p-6"
+  >
+    <HourglassIcon />
+    <div className="flex flex-col space-y-2">
+      <p className="text-[16px] font-medium text-[#FAFAFA] text-center">
+        Auction Ending
+      </p>
+      <p className="max-w-[290px] font-regular text-[14px] text-[#BFBFBF] pt-0">
+        No more bids can be placed.
+      </p>
+    </div>
+  </Hoverable>
+);
 
 export default PlaceBid;

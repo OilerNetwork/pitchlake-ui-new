@@ -269,7 +269,7 @@ const PanelLeftRoundSection = ({
                       "gwei",
                     ),
                   ).toFixed(2)}{" "}
-                GWEI
+                Gwei
               </p>
             </Hoverable>
           ) : (
@@ -288,7 +288,7 @@ const PanelLeftRoundSection = ({
                       "gwei",
                     ),
                   ).toFixed(2)}{" "}
-                GWEI
+                Gwei
               </p>
             </Hoverable>
           )}
@@ -305,7 +305,7 @@ const PanelLeftRoundSection = ({
                       selectedRoundState.strikePrice.toString(),
                       "gwei",
                     ),
-                  ).toFixed(2)} GWEI`
+                  ).toFixed(2)} Gwei`
                 : "Loading..."}
             </p>
           </Hoverable>
@@ -314,7 +314,7 @@ const PanelLeftRoundSection = ({
             className="max-h-full flex flex-row justify-between items-center   p-2 w-full"
           >
             <p className="text-[#BFBFBF]">Cap</p>
-            <p>{cap ? `${cap} GWEI` : "Loading..."}</p>
+            <p>{cap ? `${cap} Gwei` : "Loading..."}</p>
           </Hoverable>
           {roundState == "Auctioning" && (
             <>
@@ -362,7 +362,7 @@ const PanelLeftRoundSection = ({
                     ? lpPnL.toFixed(2)
                     : obPnL.toFixed(2)
                   : 0}{" "}
-                GWEI
+                Gwei
               </p>
             </Hoverable>
           )}
