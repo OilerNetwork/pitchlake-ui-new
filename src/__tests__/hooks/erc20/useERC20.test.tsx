@@ -66,11 +66,8 @@ describe("useErc20Allowance", () => {
 
     // Mock useContractRead for balance and allowance
     (useContractRead as jest.Mock).mockImplementation(({ functionName }) => {
-      //if (functionName === "balance_of") {
-      //  return { data: "1000" };
-      //}
       if (functionName === "allowance") {
-        return { data: "500" };
+        return { data: BigInt(500) };
       }
       return { data: undefined };
     });
@@ -81,8 +78,7 @@ describe("useErc20Allowance", () => {
       useErc20Allowance("0x456" as `0x${string}`, "0x789"),
     );
 
-    //expect(result.current.balance).toBe(1000);
-    expect(result.current.allowance).toBe(500);
+    expect(result.current.allowance).toBe(BigInt(500));
   });
 });
 

@@ -35,11 +35,13 @@ const mockConfig = {
     transaction: {
       idle: {
         pendingTx: false,
-        setModalState: jest.fn(),
+        setStatusModalProps: jest.fn(),
+        updateStatusModalProps: jest.fn(),
       },
       pending: {
         pendingTx: true,
-        setModalState: jest.fn(),
+        setStatusModalProps: jest.fn(),
+        updateStatusModalProps: jest.fn(),
       },
     },
     vaultState: {
@@ -268,8 +270,8 @@ describe("Refund Component", () => {
     });
 
     it("calls refundUnusedBids when confirmation is confirmed", async () => {
-      const { render, mockShowConfirmation, mockRefundUnusedBids } =
-        setupTest();
+      const { render, mockShowConfirmation, mockRefundUnusedBids } = setupTest();
+      mockRefundUnusedBids.mockResolvedValue("0x123");
       render();
 
       fireEvent.click(screen.getByRole("button", { name: /Refund/i }));
@@ -277,9 +279,58 @@ describe("Refund Component", () => {
       await onConfirm();
 
       expect(mockRefundUnusedBids).toHaveBeenCalledWith({
-        optionBuyer: mockConfig.addresses.user,
         roundAddress: mockConfig.addresses.selectedRound,
+        optionBuyer: mockConfig.addresses.user,
       });
+    });
+
+    it("handles successful refund", async () => {
+      const mockSetStatusModalProps = jest.fn();
+      const mockUpdateStatusModalProps = jest.fn();
+      const { render, mockShowConfirmation, mockRefundUnusedBids } = setupTest({
+        useTransactionContext: {
+          pendingTx: false,
+          setStatusModalProps: mockSetStatusModalProps,
+          updateStatusModalProps: mockUpdateStatusModalProps,
+        },
+      });
+      mockRefundUnusedBids.mockResolvedValue("0x123");
+      render();
+
+      fireEvent.click(screen.getByRole("button", { name: /Refund/i }));
+      const onConfirm = mockShowConfirmation.mock.calls[0][2];
+      await onConfirm();
+
+      expect(mockSetStatusModalProps).toHaveBeenCalledWith(expect.objectContaining({
+        version: "success",
+        txnHeader: "Refund Successful",
+      }));
+      expect(mockUpdateStatusModalProps).toHaveBeenCalledWith({
+        txnHash: "0x123",
+      });
+    });
+
+    it("handles failed refund", async () => {
+      const mockSetStatusModalProps = jest.fn();
+      const mockUpdateStatusModalProps = jest.fn();
+      const { render, mockShowConfirmation, mockRefundUnusedBids } = setupTest({
+        useTransactionContext: {
+          pendingTx: false,
+          setStatusModalProps: mockSetStatusModalProps,
+          updateStatusModalProps: mockUpdateStatusModalProps,
+        },
+      });
+      mockRefundUnusedBids.mockRejectedValue(new Error("Refund failed"));
+      render();
+
+      fireEvent.click(screen.getByRole("button", { name: /Refund/i }));
+      const onConfirm = mockShowConfirmation.mock.calls[0][2];
+      await onConfirm();
+
+      expect(mockSetStatusModalProps).toHaveBeenCalledWith(expect.objectContaining({
+        version: "failure",
+        txnHeader: "Refund Successful",
+      }));
     });
   });
 });

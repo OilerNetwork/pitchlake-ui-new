@@ -7,6 +7,12 @@ const mockwriteAsync = jest
   .fn()
   .mockResolvedValue({ transaction_hash: "0x123" });
 
+jest.mock("@/context/UiProvider", () => ({
+  useUiContext: () => ({
+    openWalletLogin: jest.fn(),
+  }),
+}));
+
 jest.mock("@starknet-react/core", () => ({
   useContract: () => ({
     contract: {
@@ -33,6 +39,8 @@ jest.mock("@/context/TransactionProvider", () => ({
   useTransactionContext: () => ({
     pendingTx: false,
     setPendingTx: jest.fn(),
+    setStatusModalProps: jest.fn(),
+    setModalState: jest.fn(),
   }),
 }));
 

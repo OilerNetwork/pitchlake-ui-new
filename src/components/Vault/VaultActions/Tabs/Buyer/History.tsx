@@ -118,14 +118,14 @@ const BidItem: React.FC<{
   isAuctionOver: boolean;
 }> = ({ bid, isLast, setIsEditOpen, setBidToEdit, isAuctionOver }) => (
   <div
-    className={`py-4 px-4 flex flex-row justify-between items-center ${!isLast ? "border-b border-[#262626]" : ""} m-0`}
+    className={`bid-item py-4 px-4 flex flex-row justify-between items-center ${!isLast ? "border-b border-[#262626]" : ""} m-0`}
   >
     <div className="flex align-center flex-col gap-1">
-      <p className="text-[#fafafa] font-regular text-[14px] text-sm">
+      <p className="bid-item-details text-[#fafafa] font-regular text-[14px] text-sm">
         {formatNumberText(Number(bid.amount))} options at{" "}
         {formatUnits(bid.price, "gwei")} GWEI each
       </p>
-      <p className="text-[12px] text-[var(--buttongrey)] font-regular">
+      <p className="bid-item-total text-[12px] text-[var(--buttongrey)] font-regular">
         Total:{" "}
         {formatNumber(
           Number(formatUnits(bid.price, "ether")) * Number(bid.amount),

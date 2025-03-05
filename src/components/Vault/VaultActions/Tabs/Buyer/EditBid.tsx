@@ -69,13 +69,14 @@ const EditModal: React.FC<EditModalProps> = ({
   const { priceIncreaseWei, totalNewCostWei, totalNewCostEth } = useMemo(() => {
     // Calculate price increase in Wei
     const newPriceWei = stringGweiToWei(state.newPriceGwei);
+    const oldPriceWeiBigInt = oldPriceWei ? BigInt(oldPriceWei) : BigInt(0);
     const priceIncreaseWei =
-      newPriceWei <= BigInt(oldPriceWei)
+      newPriceWei <= oldPriceWeiBigInt
         ? BigInt(0)
-        : BigInt(newPriceWei) - BigInt(oldPriceWei);
+        : newPriceWei - oldPriceWeiBigInt;
 
     // Calculate total new cost in Wei
-    const totalNewCostWei = BigInt(oldAmount) * priceIncreaseWei;
+    const totalNewCostWei = BigInt(oldAmount || "0") * priceIncreaseWei;
 
     // Convert total new cost to ETH
     const totalNewCostEth = formatUnits(totalNewCostWei, "ether");

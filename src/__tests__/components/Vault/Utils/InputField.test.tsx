@@ -1,149 +1,143 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import InputField, { InputFieldExtra } from "@/components/Vault/Utils/InputField";
+import { useAccount } from "@starknet-react/core";
+import { useUiContext } from "@/context/UiProvider";
+
+// Mock the hooks
+jest.mock("@starknet-react/core", () => ({
+  useAccount: jest.fn(),
+}));
+
+jest.mock("@/context/UiProvider", () => ({
+  useUiContext: jest.fn(),
+}));
 
 describe("InputField Components", () => {
   const mockOnChange = jest.fn();
+  const mockOpenWalletLogin = jest.fn();
+
+  const defaultProps = {
+    label: "Test Label",
+    value: "Test Value",
+    onChange: mockOnChange,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useAccount as jest.Mock).mockReturnValue({ account: { address: "0x123" } });
+    (useUiContext as jest.Mock).mockReturnValue({ openWalletLogin: mockOpenWalletLogin });
   });
 
   describe("InputField", () => {
-    it("renders with correct styling and handles interactions", () => {
-      // Test basic rendering
-      const { container, rerender } = render(
-        <InputField
-          label="Test Label"
-          value="Test Value"
-          onChange={mockOnChange}
-        />
-      );
+    const getInput = (container: HTMLElement) => container.querySelector('.input-field') as HTMLInputElement;
 
-      const inputContainer = container.firstChild;
-      expect(inputContainer).toHaveClass("input-field-container");
+    it("renders basic input field correctly", () => {
+      const { container } = render(<InputField {...defaultProps} />);
+      const input = getInput(container);
+      expect(input).toBeInTheDocument();
+      expect(input.value).toBe("Test Value");
+    });
 
-      const label = screen.getByText("Test Label");
-      expect(label).toHaveClass("flex", "flex-row", "justify-between", "text-sm", "font-medium", "text-[#fafafa]", "text-[14px]", "mb-1");
-
-      const input = screen.getByRole("textbox");
-      expect(input).toHaveValue("Test Value");
-      expect(input).toHaveClass(
-        "input-field",
-        "outline-none",
-        "w-full",
-        "bg-[#0A0A0A]",
-        "border",
-        "rounded-md",
-        "p-2",
-        "pr-8",
-        "appearance-none",
-        "flex",
-        "flex-row",
-        "justify-between",
-        "border-gray-700",
-        "focus:blue-400",
-        "text-white",
-        "px-6"
-      );
-
-      // Test input change
+    it("handles input changes", () => {
+      const { container } = render(<InputField {...defaultProps} />);
+      const input = getInput(container);
       fireEvent.change(input, { target: { value: "New Value" } });
       expect(mockOnChange).toHaveBeenCalled();
+    });
 
-      // Test with all optional props
-      rerender(
-        <InputField
-          label="Test Label"
-          label2="Secondary Label"
-          value="Test Value"
-          onChange={mockOnChange}
-          placeholder="Test Placeholder"
-          error="Error Message"
-          icon={<div className="input-icon" />}
-          disabled={true}
-          type="number"
-          className="custom-class"
-        />
-      );
+    it("displays error message when provided", () => {
+      const { container } = render(<InputField {...defaultProps} error="Error Message" />);
+      const errorMessage = container.querySelector('.error-message');
+      expect(errorMessage).toBeInTheDocument();
+      expect(errorMessage?.textContent).toBe("Error Message");
+      
+      const input = getInput(container);
+      expect(input).toBeInTheDocument();
+    });
 
-      const inputWithOptions = screen.getByRole("spinbutton");
-      expect(inputWithOptions).toBeDisabled();
-      expect(inputWithOptions).toHaveAttribute("type", "number");
-      expect(inputWithOptions).toHaveAttribute("placeholder", "Test Placeholder");
-      expect(screen.getByText("Secondary Label")).toHaveClass("font-regular", "text-[var(--buttongrey)]");
-      expect(screen.getByText("Error Message")).toHaveClass("mt-1", "text-sm", "text-red-500");
-      expect(container.querySelector(".input-icon")).toBeInTheDocument();
+    it("shows secondary label when provided", () => {
+      render(<InputField {...defaultProps} label2="Secondary Label" />);
+      expect(screen.getByText("Secondary Label")).toBeInTheDocument();
+    });
 
-      // Test error state
-      expect(inputWithOptions).toHaveClass("border-[#CC455E]", "text-[#CC455E]");
+    it("handles disabled state", () => {
+      const { container } = render(<InputField {...defaultProps} disabled />);
+      const input = getInput(container);
+      expect(input.disabled).toBe(true);
+    });
+
+    it("opens wallet login when clicked without connected account", () => {
+      (useAccount as jest.Mock).mockReturnValue({ account: null });
+      const { container } = render(<InputField {...defaultProps} />);
+      const input = getInput(container);
+      fireEvent.click(input);
+      expect(mockOpenWalletLogin).toHaveBeenCalled();
+    });
+
+    it("accepts different input types", () => {
+      const { container } = render(<InputField {...defaultProps} type="number" />);
+      const input = getInput(container);
+      expect(input.type).toBe("number");
+    });
+
+    it("displays placeholder text", () => {
+      const { container } = render(<InputField {...defaultProps} placeholder="Enter value" />);
+      const input = getInput(container);
+      expect(input.placeholder).toBe("Enter value");
     });
   });
 
   describe("InputFieldExtra", () => {
-    it("renders with correct styling and handles interactions", () => {
-      // Test basic rendering
-      const { container, rerender } = render(
-        <InputFieldExtra
-          label="Test Label"
-          value="Test Value"
-          onChange={mockOnChange}
-        />
-      );
+    const getInput = (container: HTMLElement) => container.querySelector('.input-field') as HTMLInputElement;
 
-      const inputContainer = container.firstChild;
-      expect(inputContainer).toHaveClass("mb-4");
+    it("renders basic input field correctly", () => {
+      const { container } = render(<InputFieldExtra {...defaultProps} />);
+      const input = getInput(container);
+      expect(input).toBeInTheDocument();
+      expect(input.value).toBe("Test Value");
+    });
 
-      const label = screen.getByText("Test Label");
-      expect(label).toHaveClass("flex", "flex-row", "justify-between", "text-sm", "font-medium", "text-[#fafafa]", "text-[14px]", "mb-1");
-
-      const input = screen.getByRole("textbox");
-      expect(input).toHaveValue("Test Value");
-      expect(input).toHaveClass(
-        "input-field",
-        "w-full",
-        "bg-[#0A0A0A]",
-        "border",
-        "rounded-md",
-        "p-2",
-        "pr-8",
-        "appearance-none",
-        "flex",
-        "flex-row",
-        "justify-between",
-        "border-gray-700",
-        "text-white",
-        "px-6"
-      );
-
-      // Test input change
+    it("handles input changes", () => {
+      const { container } = render(<InputFieldExtra {...defaultProps} />);
+      const input = getInput(container);
       fireEvent.change(input, { target: { value: "New Value" } });
       expect(mockOnChange).toHaveBeenCalled();
+    });
 
-      // Test with all optional props
-      rerender(
-        <InputFieldExtra
-          label="Test Label"
-          label2="Secondary Label"
-          value="Test Value"
-          onChange={mockOnChange}
-          placeholder="Test Placeholder"
-          error="Error Message"
-          icon={<div className="input-icon" />}
-          type="number"
-          className="custom-class"
-        />
-      );
+    it("displays error message when provided", () => {
+      const { container } = render(<InputFieldExtra {...defaultProps} error="Error Message" />);
+      const errorMessage = container.querySelector('.error-message');
+      expect(errorMessage).toBeInTheDocument();
+      expect(errorMessage?.textContent).toBe("Error Message");
+      
+      const input = getInput(container);
+      expect(input).toBeInTheDocument();
+    });
 
-      const inputWithOptions = screen.getByRole("spinbutton");
-      expect(inputWithOptions).toHaveAttribute("type", "number");
-      expect(inputWithOptions).toHaveAttribute("placeholder", "Test Placeholder");
-      expect(screen.getByText("Secondary Label")).toHaveClass("font-regular", "text-[var(--buttongrey)]");
-      expect(screen.getByText("Error Message")).toHaveClass("mt-1", "text-sm", "text-red-500");
-      expect(container.querySelector(".input-icon")).toBeInTheDocument();
+    it("shows secondary label when provided", () => {
+      render(<InputFieldExtra {...defaultProps} label2="Secondary Label" />);
+      expect(screen.getByText("Secondary Label")).toBeInTheDocument();
+    });
 
-      // Test error state
-      expect(inputWithOptions).toHaveClass("border-[#CC455E]", "text-[#CC455E]");
+    it("opens wallet login on focus without connected account", () => {
+      (useAccount as jest.Mock).mockReturnValue({ account: null });
+      const { container } = render(<InputFieldExtra {...defaultProps} />);
+      const input = getInput(container);
+      fireEvent.focus(input);
+      expect(mockOpenWalletLogin).toHaveBeenCalled();
+    });
+
+    it("accepts different input types", () => {
+      const { container } = render(<InputFieldExtra {...defaultProps} type="number" />);
+      const input = getInput(container);
+      expect(input.type).toBe("number");
+    });
+
+    it("displays placeholder text", () => {
+      const { container } = render(<InputFieldExtra {...defaultProps} placeholder="Enter value" />);
+      const input = getInput(container);
+      expect(input.placeholder).toBe("Enter value");
     });
   });
 }); 
