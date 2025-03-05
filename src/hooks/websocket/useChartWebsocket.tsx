@@ -26,7 +26,7 @@ const useWebsocketChart = ({
   const [unconfirmedGasData, setUnconfirmedGasData] = useState<Block[]>([]);
 
 
-  const handleUnconfirmedBlocks = useCallback((blockdata: Block[]) => {
+  const handleUnconfirmedBlocks = (blockdata: Block[]) => {
 
     console.log("blockdataUnconf",blockdata,lowerTimestampRef.current,upperTimestampRef.current)
     const blocks = blockdata.filter((block: Block) => {
@@ -41,36 +41,53 @@ const useWebsocketChart = ({
       );
       return newArray;
     });
-  }, [lowerTimestamp, upperTimestamp]);
+  }
 
-  const handleConfirmedBlocks = useCallback((blockdata: Block[]) => {
-    const usableData = blockdata.filter((block: Block) => {
-      return block.timestamp >= lowerTimestampRef.current && block.timestamp <= upperTimestampRef.current
-    })
-    
-          // Update only blocks within the timestamp range
-          setConfirmedGasData((prevData) => {
-            console.log("blockdataConf",prevData, usableData,lowerTimestampRef.current,upperTimestampRef.current)
-            // Create a map of existing blocks by blockNumber for quick lookup
-            if (!prevData || prevData.length === 0) {
-              return usableData;
-            }
-            const newArray = [...prevData, ...usableData].sort(
-              (a, b) => a.timestamp - b.timestamp
-            );
-            console.log("newArray",newArray)
-            return newArray;
-          });
-          //Remove the confirmed blocks from the unconfirmed blocks
-          setUnconfirmedGasData((prevData) => {
-            //filter the unconfirmed blocks that are in the usableData, match by blockNumber
-            return prevData.filter(
-              (block) => !usableData.some((usableBlock:any) => usableBlock.blockNumber === block.blockNumber)
-            ).sort((a, b) => a.timestamp - b.timestamp);
-          });
-  }, [lowerTimestamp, upperTimestamp]);
+  const handleConfirmedBlocks = (blockdata: Block[]) => {
+    // Filter blocks within timestamp range
+    const usableData = blockdata.filter((block: Block) => 
+      block.timestamp >= lowerTimestampRef.current && 
+      block.timestamp <= upperTimestampRef.current
+    );
+
+    // Create a Set of block numbers that are now confirmed
+    const confirmedBlockNumbers = new Set(
+      usableData
+        .map(block => block.blockNumber)
+        .filter((num): num is number => num !== undefined)
+    );
+
+    // Update both states in a single batch
+    setConfirmedGasData(prevConfirmed => {
+      // Create a map of existing confirmed blocks
+      const blocksMap = new Map(
+        prevConfirmed
+          .filter(block => block.blockNumber)
+          .map(block => [block.blockNumber, block])
+      );
+
+      // Add new confirmed blocks
+      usableData.forEach(block => {
+        if (block.blockNumber) {
+          blocksMap.set(block.blockNumber, block);
+        }
+      });
+
+      // Convert map back to sorted array
+      return Array.from(blocksMap.values())
+        .sort((a, b) => a.timestamp - b.timestamp);
+    });
+
+    // Remove confirmed blocks from unconfirmed data
+    setUnconfirmedGasData(prevUnconfirmed => 
+      prevUnconfirmed
+        .filter(block => 
+          !block.blockNumber || !confirmedBlockNumbers.has(block.blockNumber)
+        )
+        .sort((a, b) => a.timestamp - b.timestamp)
+    );
+  }
   useEffect(() => {
-    if (isLoaded) {
       ws.current = new WebSocket(
         `${process.env.NEXT_PUBLIC_WS_URL}/subscribeGas`
       );
@@ -105,12 +122,12 @@ const useWebsocketChart = ({
       ws.current.onclose = () => {
         console.log("WebSocket connection closed");
       };
-    }
+    
     // Cleanup function to close the WebSocket connection when the component unmounts
     return () => {
       ws.current?.close();
     };
-  }, [isLoaded]);
+  }, []);
 
   useEffect(() => {
     lowerTimestampRef.current = lowerTimestamp
@@ -126,9 +143,6 @@ const useWebsocketChart = ({
       })
     );
   }, [lowerTimestamp, upperTimestamp, roundDuration]);
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
 
   console.log("confirmedGasData", confirmedGasData);
   console.log("unconfirmedGasData", unconfirmedGasData);
