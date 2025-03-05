@@ -3,6 +3,7 @@ import { render } from "@testing-library/react";
 import { ReactNode } from "react";
 import { HelpProvider } from "@/context/HelpProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { UiProvider } from "@/context/UiProvider";
 
 // Mock the new context
 jest.mock("@/context/NewProvider", () => ({
@@ -39,7 +40,9 @@ const queryClient = new QueryClient({
 export const TestWrapper: React.FC<TestWrapperProps> = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <HelpProvider>{children}</HelpProvider>
+      <UiProvider>
+        <HelpProvider>{children}</HelpProvider>
+      </UiProvider>
     </QueryClientProvider>
   );
 };

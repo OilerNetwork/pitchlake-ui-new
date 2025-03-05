@@ -3,6 +3,7 @@ import Header from "../../../components/LayoutComponents/Header";
 import useIsMobile from "../../../hooks/window/useIsMobile";
 import { useAccount, useConnect } from "@starknet-react/core";
 import { useNewContext } from "@/context/NewProvider";
+import { useUiContext } from "@/context/UiProvider";
 
 // Mock SVG imports
 jest.mock("@/../public/logo_full.svg", () => "logo_full");
@@ -90,6 +91,10 @@ jest.mock("@/context/UiProvider", () => ({
   useUiContext: jest.fn().mockReturnValue({
     isBlurOpen: false,
     setBlurOpen: jest.fn(),
+    isWalletLoginOpen: false,
+    closeWalletLogin: jest.fn(),
+    walletLoginRef: { current: null },
+    toggleWalletLogin: jest.fn(),
   }),
 }));
 
@@ -210,6 +215,14 @@ describe("Header Component", () => {
   });
 
   it("handles connect wallet flow", () => {
+    const mockToggleWalletLogin = jest.fn();
+    (useUiContext as jest.Mock).mockReturnValue({
+      isWalletLoginOpen: true,
+      closeWalletLogin: jest.fn(),
+      walletLoginRef: { current: null },
+      toggleWalletLogin: mockToggleWalletLogin,
+    });
+
     renderHeader({
       isConnected: false,
       address: undefined,
@@ -223,6 +236,7 @@ describe("Header Component", () => {
 
     // Open wallet selection dropdown
     fireEvent.click(connectButton);
+    expect(mockToggleWalletLogin).toHaveBeenCalled();
 
     // Check wallet options
     const walletOptions = ["BRAAVOS", "ARGENT", "KEPLR"];

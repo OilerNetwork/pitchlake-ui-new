@@ -114,7 +114,9 @@ export const InputFieldExtra: React.FC<InputFieldProps> = ({
         />
         <div className="flex items-center pointer-events-none">{icon}</div>
       </div>
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      {error && (
+        <p className="mt-1 text-sm text-red-500 error-message">{error}</p>
+      )}
     </div>
   );
 };
