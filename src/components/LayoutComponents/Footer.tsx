@@ -45,13 +45,18 @@ const Footer: React.FC = () => {
               Privacy Policy
             </Link>
             <Link
-              href="/docs"
+              href="https://oilernetwork.github.io/pitchlake-docs/"
+              target="_blank"
               className="cursor-pointer hover:text-greyscale flex items-center px-4 border-r-[2px] border-[#262626] last:border-none"
             >
               Documentation
             </Link>
             <div className="flex items-center gap-4 ml-4">
-              <Link href="https://twitter.com/OilerNetwork" target="_blank" aria-label="twitter">
+              <Link
+                href="https://twitter.com/OilerNetwork"
+                target="_blank"
+                aria-label="twitter"
+              >
                 <FontAwesomeIcon
                   icon={faXTwitter}
                   className="h-5 w-5 cursor-pointer hover:text-greyscale"
@@ -67,7 +72,11 @@ const Footer: React.FC = () => {
                   className="h-5 w-5 cursor-pointer hover:text-greyscale"
                 />
               </Link>
-              <Link href="https://t.me/oiler_official" target="_blank" aria-label="telegram">
+              <Link
+                href="https://t.me/oiler_official"
+                target="_blank"
+                aria-label="telegram"
+              >
                 <FontAwesomeIcon
                   icon={faTelegramPlane}
                   className="h-5 w-5 cursor-pointer hover:text-greyscale"
