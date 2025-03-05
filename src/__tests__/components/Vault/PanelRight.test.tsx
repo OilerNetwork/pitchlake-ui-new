@@ -69,10 +69,14 @@ jest.mock("@/hooks/vault_v2/rpc/useOptionBuyerStateRPC", () => ({
 // Mock child components
 jest.mock("../../../components/Vault/VaultActions/Tabs/Tabs", () => ({
   __esModule: true,
-  default: ({ tabs, activeTab, setActiveTab }: { 
-    tabs: string[], 
-    activeTab: string, 
-    setActiveTab: (tab: string) => void 
+  default: ({
+    tabs,
+    activeTab,
+    setActiveTab,
+  }: {
+    tabs: string[];
+    activeTab: string;
+    setActiveTab: (tab: string) => void;
   }) => (
     <div className="vault-tabs">
       {tabs.map((tab: string) => (
@@ -93,7 +97,7 @@ jest.mock("../../../components/Vault/Utils/ConfirmationModal", () => ({
   default: jest.fn(() => <div>Mock Confirmation Modal</div>),
 }));
 
-jest.mock("../../../components/Vault/Utils/SuccessModal", () => ({
+jest.mock("../../../components/Vault/Utils/TxnSuccess", () => ({
   __esModule: true,
   default: jest.fn(() => <div>Mock Success Modal</div>),
 }));
@@ -121,6 +125,19 @@ describe("PanelRight Component", () => {
 
     (useTransactionContext as jest.Mock).mockReturnValue({
       pendingTx: false,
+      modalState: {
+        show: false,
+        type: "confirmation",
+        modalHeader: "mock header",
+        action: <div>mock action</div>,
+        onConfirm: () => {},
+      },
+      statusModalProps: {
+        version: null,
+        txnHeader: "mock success header",
+        txnHash: "0xasdf",
+        txnOutcome: <div>mock success outcome</div>,
+      },
     });
 
     (useAccount as jest.Mock).mockReturnValue({
@@ -137,13 +154,7 @@ describe("PanelRight Component", () => {
   });
 
   it("renders with initial state", () => {
-    render(
-      <PanelRight
-        userType="lp"
-        isEditOpen={false}
-        setIsEditOpen={jest.fn()}
-      />
-    );
+    render(<PanelRight userType="lp" />);
 
     expect(screen.getByText("Tab1")).toBeInTheDocument();
     expect(screen.getByText("Tab2")).toBeInTheDocument();
@@ -151,13 +162,7 @@ describe("PanelRight Component", () => {
   });
 
   it("handles tab changes", () => {
-    render(
-      <PanelRight
-        userType="lp"
-        isEditOpen={false}
-        setIsEditOpen={jest.fn()}
-      />
-    );
+    render(<PanelRight userType="lp" />);
 
     const tab2Button = screen.getByText("Tab2");
     fireEvent.click(tab2Button);
@@ -170,27 +175,17 @@ describe("PanelRight Component", () => {
       tabContent: null,
     });
 
-    render(
-      <PanelRight
-        userType="lp"
-        isEditOpen={false}
-        setIsEditOpen={jest.fn()}
-      />
-    );
+    render(<PanelRight userType="lp" />);
 
     expect(screen.getByText("Round In Process")).toBeInTheDocument();
-    expect(screen.getByText(/This round has not started yet/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/This round has not started yet/),
+    ).toBeInTheDocument();
   });
 
   it("updates active tab when round state changes", () => {
     const setIsEditOpen = jest.fn();
-    const { rerender } = render(
-      <PanelRight
-        userType="lp"
-        isEditOpen={false}
-        setIsEditOpen={setIsEditOpen}
-      />
-    );
+    const { rerender } = render(<PanelRight userType="lp" />);
 
     // Change round state and available tabs
     const newTabs = ["NewTab"];
@@ -200,16 +195,11 @@ describe("PanelRight Component", () => {
     });
 
     // Rerender to reflect changes
-    rerender(
-      <PanelRight
-        userType="lp"
-        isEditOpen={false}
-        setIsEditOpen={setIsEditOpen}
-      />
-    );
+    rerender(<PanelRight userType="lp" />);
 
     const tabsContainer = screen.getByText("NewTab").closest(".vault-tabs");
     expect(tabsContainer).toBeInTheDocument();
     expect(screen.getByText("New Tab Content")).toBeInTheDocument();
   });
-}); 
+});
+

@@ -1,23 +1,22 @@
-import React, { useState, ReactNode, useMemo, useEffect } from "react";
+import React, { useState, ReactNode, useMemo } from "react";
 import InputField from "@/components/Vault/Utils/InputField";
 import { Layers3 } from "lucide-react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
-import { formatUnits, parseUnits, formatEther, parseEther } from "ethers";
-import { useAccount, useContractWrite } from "@starknet-react/core";
-import useERC20 from "@/hooks/erc20/useERC20";
-import { num, Call } from "starknet";
+import { formatUnits, parseUnits, formatEther } from "ethers";
+import { useAccount } from "@starknet-react/core";
+import useErc20Balance from "@/hooks/erc20/useErc20Balance";
+import useErc20Allowance from "@/hooks/erc20/useErc20Allowance";
 import { formatNumber, formatNumberText } from "@/lib/utils";
 import { useTransactionContext } from "@/context/TransactionProvider";
-import { useContract } from "@starknet-react/core";
-import { erc20ABI, vaultABI } from "@/lib/abi";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import { useTimeContext } from "@/context/TimeProvider";
-import { EthereumIcon } from "@/components/Icons";
+import { EthereumIcon, HourglassIcon } from "@/components/Icons";
+import usePlaceBidMulticall from "@/hooks/txn/usePlaceBidMulticall";
 
-const LOCAL_STORAGE_KEY1 = "bidAmount";
-const LOCAL_STORAGE_KEY2 = "bidPriceGwei";
+const PLACE_BID_AMOUNT = "placeBidAmount";
+const PLACE_BID_PRICE = "placeBidPrice";
 
 interface PlaceBidProps {
   showConfirmation: (
@@ -28,106 +27,26 @@ interface PlaceBidProps {
 }
 
 const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
-  const { vaultState, selectedRoundAddress } = useVaultState();
-  const selectedRoundState = useRoundState(selectedRoundAddress);
-  const [state, setState] = useState({
-    bidAmount: localStorage.getItem(LOCAL_STORAGE_KEY1) || "",
-    bidPrice: localStorage.getItem(LOCAL_STORAGE_KEY2) || "",
-  });
-
   const { account } = useAccount();
-  const { pendingTx, setPendingTx } = useTransactionContext();
   const { timestamp } = useTimeContext();
+  const { vaultState, selectedRoundAddress } = useVaultState();
+  const { pendingTx, setStatusModalProps } = useTransactionContext();
 
-  const { allowance, balance } = useERC20(
+  const selectedRoundState = useRoundState(selectedRoundAddress);
+  const { balance } = useErc20Balance(vaultState?.ethAddress as `0x${string}`);
+  const { allowance } = useErc20Allowance(
     vaultState?.ethAddress as `0x${string}`,
     selectedRoundState?.address,
   );
 
-  // Vault Contract
-  const { contract: vaultContractRaw } = useContract({
-    abi: vaultABI,
-    address: vaultState?.address as `0x${string}`,
+  const [state, setState] = useState({
+    bidAmount: localStorage.getItem(PLACE_BID_AMOUNT) || "",
+    bidPrice: localStorage.getItem(PLACE_BID_PRICE) || "",
   });
-  const vaultContract = useMemo(() => {
-    if (!vaultContractRaw) return;
-    const typedContract = vaultContractRaw.typedv2(vaultABI);
-    if (account) typedContract.connect(account);
-    return typedContract;
-  }, [vaultContractRaw, account]);
-
-  // ETH Contract
-  const { contract: ethContractRaw } = useContract({
-    abi: erc20ABI,
-    address: vaultState?.ethAddress as `0x${string}`,
-  });
-  const ethContract = useMemo(() => {
-    if (!ethContractRaw) return;
-    const typedContract = ethContractRaw.typedv2(erc20ABI);
-    if (account) typedContract.connect(account);
-    return typedContract;
-  }, [ethContractRaw, account]);
 
   const updateState = (updates: Partial<typeof state>) => {
     setState((prevState) => ({ ...prevState, ...updates }));
   };
-
-  const needsApproving = useMemo(() => {
-    const priceWei = num.toBigInt(
-      parseUnits(state.bidPrice ? state.bidPrice : "0", "gwei"),
-    );
-    const amount = num.toBigInt(state.bidAmount ? state.bidAmount : "0");
-    const totalWei = priceWei * amount;
-
-    if (num.toBigInt(allowance) < num.toBigInt(totalWei))
-      return totalWei.toString();
-    else return "0";
-  }, [state.bidPrice, state.bidAmount, allowance]);
-
-  // Approve and Bid Multicall
-  const calls: Call[] = useMemo(() => {
-    const calls: Call[] = [];
-    if (
-      !account ||
-      !selectedRoundState?.address ||
-      !vaultContract ||
-      !ethContract ||
-      !state.bidPrice ||
-      !state.bidAmount ||
-      Number(state.bidAmount) <= 0 ||
-      Number(state.bidPrice) <= 0
-    ) {
-      return calls;
-    }
-
-    const priceWei = num.toBigInt(parseUnits(state.bidPrice, "gwei"));
-    const amount = num.toBigInt(state.bidAmount);
-    const totalWei = priceWei * amount;
-
-    const approveCall = ethContract.populateTransaction.approve(
-      selectedRoundState.address.toString(),
-      num.toBigInt(totalWei),
-    );
-    const bidCall = vaultContract.populateTransaction.place_bid(
-      BigInt(state.bidAmount),
-      parseUnits(state.bidPrice, "gwei"),
-    );
-
-    if (approveCall && BigInt(allowance) < BigInt(needsApproving))
-      calls.push(approveCall);
-    if (bidCall) calls.push(bidCall);
-
-    return calls;
-  }, [
-    state.bidPrice,
-    state.bidAmount,
-    selectedRoundState?.address,
-    account,
-    balance,
-    allowance,
-    needsApproving,
-  ]);
-  const { writeAsync } = useContractWrite({ calls });
 
   // Send confirmation
   const handleSubmitForMulticall = () => {
@@ -137,7 +56,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
         bid
         <br />
         <span className="font-semibold text-[#fafafa]">
-          {bidPriceGwei} GWEI{" "}
+          {bidPriceGwei} Gwei{" "}
         </span>{" "}
         per
         <br />
@@ -152,25 +71,80 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
         ?
       </>,
       async () => {
-        await handleMulticall();
-        setState((prevState) => ({ ...prevState, bidAmount: "" }));
+        try {
+          const hash = await handleMulticall();
+
+          setStatusModalProps({
+            version: "success",
+            txnHeader: "Bid Successful",
+            txnHash: hash,
+            txnOutcome: (
+              <>
+                Your bid of{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {bidPriceGwei} Gwei{" "}
+                </span>{" "}
+                per{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumberText(Number(bidAmount))} options
+                </span>
+                , totaling{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumber(bidTotalEth)} ETH
+                </span>{" "}
+                was successful.
+              </>
+            ),
+          });
+
+          setState((prevState) => ({ ...prevState, bidAmount: "" }));
+        } catch (e) {
+          setStatusModalProps({
+            version: "failure",
+            txnHeader: "Bid Failed",
+            txnHash: "",
+            txnOutcome: (
+              <>
+                Your bid of{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {bidPriceGwei} Gwei
+                </span>{" "}
+                per{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumberText(Number(bidAmount))} options
+                </span>
+                , totaling{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumber(bidTotalEth)} ETH
+                </span>{" "}
+                failed.
+              </>
+            ),
+          });
+
+          console.error("Error placing bid: ", e);
+        }
       },
     );
   };
 
-  // Open wallet
-  const handleMulticall = async () => {
-    const data = await writeAsync();
-    setPendingTx(data?.transaction_hash);
-    localStorage.removeItem(LOCAL_STORAGE_KEY1);
-    localStorage.removeItem(LOCAL_STORAGE_KEY2);
-  };
+  const { handleMulticall } = usePlaceBidMulticall({
+    accountAddress: account?.address,
+    vaultAddress: vaultState?.address,
+    roundAddress: selectedRoundState?.address,
+    ethAddress: vaultState?.ethAddress,
+    allowance,
+    bidAmount: state.bidAmount,
+    bidPrice: state.bidPrice,
+    localStorageToRemove: [PLACE_BID_AMOUNT, PLACE_BID_PRICE],
+  });
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     if (/^\d*$/.test(value)) {
       updateState({ bidAmount: value });
     }
+    localStorage?.setItem(PLACE_BID_AMOUNT, value);
   };
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -179,6 +153,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
       ? value.slice(0, value.indexOf(".") + 10)
       : value;
     updateState({ bidPrice: formattedValue });
+    localStorage?.setItem(PLACE_BID_PRICE, formattedValue);
   };
 
   const bidPriceWei = parseUnits(state.bidPrice ? state.bidPrice : "0", "gwei");
@@ -213,7 +188,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
       return "Auction period is over; transaction pending...";
     else if (state.bidPrice == "") return "";
     else if (BigInt(bidPriceWei) < BigInt(reservePriceWei))
-      return `Price must be at least the reserve price (${Number(reservePriceGwei).toFixed(5)} GWEI)`;
+      return `Price must be at least the reserve price (${Number(reservePriceGwei).toFixed(5)} Gwei)`;
     else if (BigInt(BigInt(bidPriceWei) * BigInt(bidAmount)) > BigInt(balance))
       return `Exceeds balance (${parseFloat(
         formatEther(balance.toString() || "0"),
@@ -236,76 +211,90 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
     return false;
   }, [pendingTx, priceReason, amountReason, state.bidAmount, state.bidPrice]);
 
-  useEffect(() => {
-    localStorage?.setItem(LOCAL_STORAGE_KEY1, state.bidAmount);
-  }, [state.bidAmount]);
-
-  useEffect(() => {
-    localStorage?.setItem(LOCAL_STORAGE_KEY2, state.bidPrice);
-  }, [state.bidPrice]);
-
-  return (
-    <div className="flex flex-col h-full">
-      <div className="flex-grow space-y-6 p-6">
-        <Hoverable dataId="inputBidAmount" className="place-bid-container">
-          <InputField
-            label="Enter Amount"
-            type="integer"
-            //value={state.bidAmount}
-            value={state.bidAmount}
-            onChange={handleAmountChange}
-            placeholder="e.g. 5000"
-            icon={
-              <Layers3
-                size="20px"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 stroke-[1px]"
-              />
-            }
-            error={amountReason}
-          />
-        </Hoverable>
-        <Hoverable dataId="inputBidPrice">
-          <InputField
-            label="Enter Price (GWEI)"
-            type="number"
-            value={state.bidPrice}
-            onChange={handlePriceChange}
-            placeholder="e.g. 0.3"
-            icon={
-              <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
-            }
-            error={priceReason}
-          />
-        </Hoverable>
-      </div>
-      <Hoverable dataId="newBidSummary" className="flex flex-col h-[full]">
-        <div className="flex justify-between text-sm px-6 pb-1">
-          <span className="text-gray-400 place-bid-total">Total</span>
-          <span>{formatNumber(bidTotalEth)} ETH</span>
+  if (timestamp > Number(selectedRoundState?.auctionEndDate)) {
+    return <AuctionOverPanel />;
+  } else
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex-grow space-y-6 p-6">
+          <Hoverable dataId="inputBidAmount" className="place-bid-container">
+            <InputField
+              label="Enter Amount"
+              type="integer"
+              value={state.bidAmount}
+              onChange={handleAmountChange}
+              placeholder="e.g. 5000"
+              icon={
+                <Layers3
+                  size="20px"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 stroke-[1px]"
+                />
+              }
+              error={amountReason}
+            />
+          </Hoverable>
+          <Hoverable dataId="inputBidPrice">
+            <InputField
+              label="Enter Price (Gwei)"
+              type="number"
+              value={state.bidPrice}
+              onChange={handlePriceChange}
+              placeholder="e.g. 0.3"
+              icon={
+                <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
+              }
+              error={priceReason}
+            />
+          </Hoverable>
         </div>
-      </Hoverable>
-      <Hoverable dataId="placingBidBalance" className="flex flex-col h-[full]">
-        <div className="flex justify-between text-sm px-6 pb-6">
-          <span className="text-gray-400">Balance</span>
-          <span>
-            {formatNumber(parseFloat(formatEther(BigInt(balance))))} ETH
-          </span>
-        </div>
-      </Hoverable>
-      <div className="mt-auto">
+        <Hoverable dataId="newBidSummary" className="flex flex-col h-[full]">
+          <div className="flex justify-between text-sm px-6 pb-1">
+            <span className="text-gray-400 place-bid-total">Total</span>
+            <span>{formatNumber(bidTotalEth)} ETH</span>
+          </div>
+        </Hoverable>
         <Hoverable
-          dataId="placeBidButton"
-          className="place-bid-action-button px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
+          dataId="placingBidBalance"
+          className="flex flex-col h-[full]"
         >
-          <ActionButton
-            onClick={handleSubmitForMulticall}
-            disabled={isButtonDisabled}
-            text="Place Bid"
-          />
+          <div className="flex justify-between text-sm px-6 pb-6">
+            <span className="text-gray-400">Balance</span>
+            <span>
+              {formatNumber(parseFloat(formatEther(BigInt(balance))))} ETH
+            </span>
+          </div>
         </Hoverable>
+        <div className="mt-auto">
+          <Hoverable
+            dataId="placeBidButton"
+            className="place-bid-action-button px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
+          >
+            <ActionButton
+              onClick={handleSubmitForMulticall}
+              disabled={isButtonDisabled}
+              text="Place Bid"
+            />
+          </Hoverable>
+        </div>
       </div>
-    </div>
-  );
+    );
 };
+
+export const AuctionOverPanel: React.FC = () => (
+  <Hoverable
+    dataId="auctionOverPlanel"
+    className="flex space-y-6 flex-col flex-grow items-center justify-center text-center p-6"
+  >
+    <HourglassIcon />
+    <div className="flex flex-col space-y-2">
+      <p className="text-[16px] font-medium text-[#FAFAFA] text-center">
+        Auction Ending
+      </p>
+      <p className="max-w-[290px] font-regular text-[14px] text-[#BFBFBF] pt-0">
+        No more bids can be placed.
+      </p>
+    </div>
+  </Hoverable>
+);
 
 export default PlaceBid;

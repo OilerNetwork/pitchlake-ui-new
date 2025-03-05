@@ -19,11 +19,6 @@ export const useTabContent = (
   userType: string,
   activeTab: string,
   selectedRoundState: OptionRoundStateType | undefined,
-  isTabsHidden: boolean,
-  bidToEdit: any,
-  userBids: any,
-  setIsTabsHidden: (open: boolean) => void,
-  setBidToEdit: (bid: any) => void,
 ) => {
   const { pendingTx } = useTransactionContext();
   const timestamp = new Date().getTime() / 1000;
@@ -39,10 +34,7 @@ export const useTabContent = (
         case "Open":
           return [];
         case "Auctioning":
-          // Hides bidding action while awaiting end_auction txn
-          if (timestamp > Number(selectedRoundState?.auctionEndDate))
-            return [BuyerTabs.History, ...commonTabs];
-          else return [BuyerTabs.PlaceBid, BuyerTabs.History, ...commonTabs];
+          return [BuyerTabs.PlaceBid, BuyerTabs.History, ...commonTabs];
         case "Running":
           return [
             BuyerTabs.Mint,
@@ -74,11 +66,8 @@ export const useTabContent = (
       case BuyerTabs.History:
         return (
           <History
-            items={userBids}
-            bidToEdit={bidToEdit}
-            isTabsHidden={isTabsHidden}
-            setIsTabsHidden={setIsTabsHidden}
-            setBidToEdit={setBidToEdit}
+            showConfirmation={(amount, action) => {}}
+            setIsShowingTabs={() => {}}
           />
         );
       case BuyerTabs.Refund:
@@ -95,13 +84,7 @@ export const useTabContent = (
           return <DepositContent showConfirmation={(amount, action) => {}} />;
         }
     }
-  }, [
-    userType,
-    activeTab,
-    selectedRoundState?.roundState,
-    pendingTx,
-    userBids,
-  ]);
+  }, [userType, activeTab, selectedRoundState?.roundState, pendingTx]);
 
   return { tabs, tabContent };
 };

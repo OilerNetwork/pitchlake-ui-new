@@ -166,9 +166,9 @@ describe("PanelLeft Component", () => {
     );
 
     expect(screen.getByText("Round 01")).toBeInTheDocument();
-    expect(screen.getByText("1.00 GWEI")).toBeInTheDocument(); // Strike Price
+    expect(screen.getByText("1.00 Gwei")).toBeInTheDocument(); // Strike Price
     // @NOTE: Why does 0.75 work here when it should be 0.5 ?
-    expect(screen.getByText("0.75 GWEI")).toBeInTheDocument(); // Reserve Price
+    expect(screen.getByText("0.75 Gwei")).toBeInTheDocument(); // Clearing Price
   });
 });
 

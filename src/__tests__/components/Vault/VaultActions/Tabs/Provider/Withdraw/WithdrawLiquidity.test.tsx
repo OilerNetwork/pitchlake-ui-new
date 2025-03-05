@@ -8,6 +8,7 @@ import { useNewContext } from "@/context/NewProvider";
 import useLPState from "@/hooks/vault_v2/states/useLPState";
 import { useHelpContext } from "@/context/HelpProvider";
 import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
+import { useUiContext } from "@/context/UiProvider";
 
 // Define types for our mocks
 type MockHooks = {
@@ -21,7 +22,8 @@ const mockHooks = {
   useVaultActions: jest.fn(),
   useTransactionContext: jest.fn(() => ({
     pendingTx: false,
-    setPendingTx: jest.fn()
+    setPendingTx: jest.fn(),
+    setStatusModalProps: jest.fn()
   })),
   useHelpContext: jest.fn(() => ({
     setContent: jest.fn(),
@@ -51,6 +53,9 @@ const mockHooks = {
       callContract: jest.fn(),
       getNonceForAddress: jest.fn().mockResolvedValue("0x1")
     }
+  })),
+  useUiContext: jest.fn(() => ({
+    openWalletLogin: jest.fn()
   }))
 } as const;
 
@@ -83,6 +88,10 @@ jest.mock("@starknet-react/core", () => ({
   useProvider: () => mockHooks.useProvider()
 }));
 
+jest.mock("@/context/UiProvider", () => ({
+  useUiContext: () => mockHooks.useUiContext()
+}));
+
 describe("WithdrawLiquidity", () => {
   // Reusable setup function for common test scenario
   const setupTest = (overrides: Partial<Record<keyof MockHooks, unknown>> = {}) => {
@@ -108,10 +117,14 @@ describe("WithdrawLiquidity", () => {
       useTransactionContext: {
         pendingTx: false,
         setPendingTx: jest.fn(),
+        setStatusModalProps: jest.fn(),
       },
       useAccount: {
         account: "0x123",
       },
+      useUiContext: {
+        openWalletLogin: jest.fn()
+      }
     };
 
     // Apply overrides to default mocks
@@ -195,6 +208,7 @@ describe("WithdrawLiquidity", () => {
       useTransactionContext: {
         pendingTx: true,
         setPendingTx: jest.fn(),
+        setStatusModalProps: jest.fn(),
       }
     });
 
@@ -215,5 +229,23 @@ describe("WithdrawLiquidity", () => {
 
     const withdrawButton = screen.getByRole("button", { name: /withdraw/i });
     expect(withdrawButton).toBeDisabled();
+  });
+
+  it("opens wallet login when input is clicked without connected account", () => {
+    const mockOpenWalletLogin = jest.fn();
+    const { mockShowConfirmation } = setupTest({
+      useAccount: {
+        account: null,
+      },
+      useUiContext: {
+        openWalletLogin: mockOpenWalletLogin
+      }
+    });
+
+    render(<WithdrawLiquidity showConfirmation={mockShowConfirmation} />);
+
+    const amountInput = screen.getByRole("spinbutton");
+    fireEvent.click(amountInput);
+    expect(mockOpenWalletLogin).toHaveBeenCalled();
   });
 }); 

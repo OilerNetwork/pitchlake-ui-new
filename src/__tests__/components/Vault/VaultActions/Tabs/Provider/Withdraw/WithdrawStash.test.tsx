@@ -73,6 +73,7 @@ describe("WithdrawStash", () => {
 
     (useTransactionContext as jest.Mock).mockReturnValue({
       pendingTx: false,
+      setStatusModalProps: jest.fn(),
     });
 
     (useAccount as jest.Mock).mockReturnValue({
@@ -81,29 +82,28 @@ describe("WithdrawStash", () => {
       },
     });
 
-    const { container } = render(
+    render(
       <TestWrapper>
         <WithdrawStash showConfirmation={mockShowConfirmation} />
       </TestWrapper>
     );
 
     // Check initial render with balance
-    expect(container.querySelector(".collect-eth-icon")).toBeInTheDocument();
-    expect(container.querySelector(".stash-balance-text")).toBeInTheDocument();
-    expect(container.querySelector(".stash-balance-amount")).toBeInTheDocument();
+    expect(screen.getByTestId("collect-eth-icon")).toBeInTheDocument();
+    expect(screen.getByText(/Your current stashed balance is/i)).toBeInTheDocument();
+    expect(screen.getByText(/1000 ETH/i)).toBeInTheDocument();
     
-    const collectButton = container.querySelector(".action-button");
+    const collectButton = screen.getByRole("button", { name: /collect/i });
     expect(collectButton).toBeInTheDocument();
+    expect(collectButton).not.toBeDisabled();
     
     // Test confirmation modal
-    if (collectButton) {
-      fireEvent.click(collectButton);
-      expect(mockShowConfirmation).toHaveBeenCalledWith(
-        "Withdraw Stashed",
-        expect.anything(),
-        expect.any(Function)
-      );
-    }
+    fireEvent.click(collectButton);
+    expect(mockShowConfirmation).toHaveBeenCalledWith(
+      "Withdraw Stashed",
+      expect.anything(),
+      expect.any(Function)
+    );
 
     // Get and call the onConfirm callback
     const onConfirm = mockShowConfirmation.mock.calls[0][2];
@@ -111,8 +111,9 @@ describe("WithdrawStash", () => {
     expect(mockWithdrawStash).toHaveBeenCalledWith({
       account: mockAccount,
     });
+  });
 
-    // Test with zero balance
+  it("disables button with zero balance", () => {
     (useLPState as jest.Mock).mockReturnValue({
       stashedBalance: parseEther("0"),
     });
@@ -127,40 +128,72 @@ describe("WithdrawStash", () => {
       withdrawStash: mockWithdrawStash,
     });
 
-    const { container: zeroBalanceContainer } = render(
-      <TestWrapper>
-        <WithdrawStash showConfirmation={mockShowConfirmation} />
-      </TestWrapper>
-    );
-    const zeroBalanceButton = zeroBalanceContainer.querySelector(".action-button");
-    const zeroBalanceAmount = zeroBalanceContainer.querySelector(".stash-balance-amount");
-    expect(zeroBalanceAmount?.textContent).toBe("0 ETH");
-    expect(zeroBalanceButton).toBeDisabled();
-
-    // Test with pending transaction
     (useTransactionContext as jest.Mock).mockReturnValue({
-      pendingTx: true,
+      pendingTx: false,
+      setStatusModalProps: jest.fn(),
     });
 
-    const { container: pendingContainer } = render(
+    (useAccount as jest.Mock).mockReturnValue({
+      account: {
+        address: mockAccount,
+      },
+    });
+
+    render(
       <TestWrapper>
         <WithdrawStash showConfirmation={mockShowConfirmation} />
       </TestWrapper>
     );
-    const pendingButton = pendingContainer.querySelector(".action-button");
-    expect(pendingButton).toBeDisabled();
 
-    // Test with no account
+    expect(screen.getByText("0 ETH")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /collect/i })).toBeDisabled();
+  });
+
+  it("disables button with pending transaction", () => {
+    (useLPState as jest.Mock).mockReturnValue({
+      stashedBalance: parseEther("1000"),
+    });
+
+    (useTransactionContext as jest.Mock).mockReturnValue({
+      pendingTx: true,
+      setStatusModalProps: jest.fn(),
+    });
+
+    (useAccount as jest.Mock).mockReturnValue({
+      account: {
+        address: mockAccount,
+      },
+    });
+
+    render(
+      <TestWrapper>
+        <WithdrawStash showConfirmation={mockShowConfirmation} />
+      </TestWrapper>
+    );
+
+    expect(screen.getByRole("button", { name: /collect/i })).toBeDisabled();
+  });
+
+  it("disables button with no account", () => {
+    (useLPState as jest.Mock).mockReturnValue({
+      stashedBalance: parseEther("1000"),
+    });
+
+    (useTransactionContext as jest.Mock).mockReturnValue({
+      pendingTx: false,
+      setStatusModalProps: jest.fn(),
+    });
+
     (useAccount as jest.Mock).mockReturnValue({
       account: null,
     });
 
-    const { container: noAccountContainer } = render(
+    render(
       <TestWrapper>
         <WithdrawStash showConfirmation={mockShowConfirmation} />
       </TestWrapper>
     );
-    const noAccountButton = noAccountContainer.querySelector(".action-button");
-    expect(noAccountButton).toBeDisabled();
+
+    expect(screen.getByRole("button", { name: /collect/i })).toBeDisabled();
   });
 }); 

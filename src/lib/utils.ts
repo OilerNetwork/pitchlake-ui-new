@@ -4,6 +4,7 @@ import { OptionRoundStateType, FossilParams } from "@/lib/types";
 import { num, Result } from "starknet";
 import { FormattedBlockData } from "@/app/api/getFossilGasData/route";
 import { formatUnits } from "ethers";
+import { getDemoRoundId } from "./demo/utils";
 
 export const createJobRequestParams = (
   targetTimestamp: number,
@@ -104,6 +105,27 @@ export const getDurationForRound = (
   let high = Number(roundState.optionSettleDate);
   let low = Number(roundState.auctionEndDate);
   return Number(high - low);
+};
+
+export const getProfitAndLoss = (
+  _premiums: bigint | string | number | undefined | Result,
+  _totalPayout: bigint | string | number | undefined | Result,
+  _optionsSold: bigint | string | number | undefined | Result,
+) => {
+  const premiums = Number(formatUnits(_premiums?.toString() || "0", "gwei"));
+  const totalPayout = Number(
+    formatUnits(_totalPayout?.toString() || "0", "gwei"),
+  );
+  const optionsSold = Number(_optionsSold?.toString() || "0");
+  let lpPnL = 0;
+  let obPnL = 0;
+
+  if (_optionsSold === 0) return { lpPnL, obPnL };
+
+  lpPnL = (premiums - totalPayout) / optionsSold;
+  obPnL = (totalPayout - premiums) / optionsSold;
+
+  return { lpPnL, obPnL };
 };
 
 export const getPerformanceLP = (
@@ -538,6 +560,16 @@ export const scaleInRange = (
   }
 
   return result;
+};
+
+export const roundIdFormatter = (roundId: string, conn: string): string => {
+  let id: string = roundId;
+
+  if (conn === "demo") id = getDemoRoundId(Number(roundId)).toString();
+
+  if (id.length === 1) id = `0${id}`;
+
+  return `Round ${id}`;
 };
 
 ///   function generateMockData(

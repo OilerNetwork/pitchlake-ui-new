@@ -1,5 +1,13 @@
 import { DemoFossilCallParams } from "@/app/api/sendMockFossilCallback/route";
+import { ReactNode } from "react";
 import { Account, CairoCustomEnum } from "starknet";
+
+export interface StatusModalProps {
+  txnHeader: string;
+  txnOutcome: ReactNode | string;
+  txnHash: string;
+  version: "success" | "failure" | "pending" | null;
+}
 
 export type FossilParams = {
   targetTimestamp: number | undefined;
@@ -101,22 +109,24 @@ export type OptionBuyerStateType = {
 
 export type VaultActionsType = {
   // LP
-  depositLiquidity: (depositArgs: DepositArgs) => Promise<void>;
-  withdrawLiquidity: (withdrawArgs: WithdrawLiquidityArgs) => Promise<void>;
-  withdrawStash: (collectArgs: CollectArgs) => Promise<void>;
-  queueWithdrawal: (queueArgs: QueueArgs) => Promise<void>;
+  depositLiquidity: (depositArgs: DepositArgs) => Promise<string>;
+  withdrawLiquidity: (withdrawArgs: WithdrawLiquidityArgs) => Promise<string>;
+  withdrawStash: (collectArgs: CollectArgs) => Promise<string>;
+  queueWithdrawal: (queueArgs: QueueArgs) => Promise<string>;
   // OB
-  placeBid: (placeBids: PlaceBidArgs) => Promise<void>;
-  updateBid: (updateBid: UpdateBidArgs) => Promise<void>;
-  refundUnusedBids: (refundBids: RefundBidsArgs) => Promise<void>;
-  mintOptions: (mintOptions: MintOptionsArgs) => Promise<void>;
-  exerciseOptions: (exerciseOptions: ExerciseOptionsArgs) => Promise<void>;
+  placeBid: (placeBids: PlaceBidArgs) => Promise<string>;
+  updateBid: (updateBid: UpdateBidArgs) => Promise<string>;
+  refundUnusedBids: (refundBids: RefundBidsArgs) => Promise<string>;
+  mintOptions: (mintOptions: MintOptionsArgs) => Promise<string>;
+  exerciseOptions: (exerciseOptions: ExerciseOptionsArgs) => Promise<string>;
   // STATE TRANSITION
   startAuction: () => Promise<void>;
   endAuction: () => Promise<void>;
   settleOptionRound: () => Promise<void>;
   demoFossilCallback: (fossilArgs: DemoFossilCallParams) => Promise<boolean>;
-  sendFossilRequest: (fossilRequest: SendFossiLRequestParams) => Promise<void>;
+  sendFossilRequest: (
+    fossilRequest: SendFossiLRequestParams,
+  ) => Promise<string>;
 };
 
 export type SendFossiLRequestParams = {

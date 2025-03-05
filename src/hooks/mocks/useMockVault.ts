@@ -59,7 +59,9 @@ const useMockVault = (
   // Function to update a specific field in the LP state
   const currentRoundAddress = "";
   //Round Addresses and States
-  const depositLiquidity = async (depositArgs: DepositArgs) => {
+  const depositLiquidity = async (
+    depositArgs: DepositArgs,
+  ): Promise<string> => {
     // setLPState((prevState) => {
     //   return {
     //     ...prevState,
@@ -69,18 +71,24 @@ const useMockVault = (
     //   };
     // });
     await new Promise((resolve) => setTimeout(resolve, 1500));
+    return "";
   };
 
-  const withdrawLiquidity = async (withdrawArgs: WithdrawLiquidityArgs) => {
+  const withdrawLiquidity = async (
+    withdrawArgs: WithdrawLiquidityArgs,
+  ): Promise<string> => {
     await new Promise((resolve) => setTimeout(resolve, 1500));
+    return "";
   };
 
-  const withdrawStash = async (collectArgs: CollectArgs) => {
+  const withdrawStash = async (collectArgs: CollectArgs): Promise<string> => {
     await new Promise((resolve) => setTimeout(resolve, 1500));
+    return "";
   };
 
-  const queueWithdrawal = async (queueArgs: QueueArgs) => {
+  const queueWithdrawal = async (queueArgs: QueueArgs): Promise<string> => {
     await new Promise((resolve) => setTimeout(resolve, 1500));
+    return "";
   };
 
   const startAuction = async () => {
@@ -168,9 +176,11 @@ const useMockVault = (
 
   const sendFossilRequest = async (
     fossilRequest: SendFossiLRequestParams,
-  ): Promise<void> => {};
+  ): Promise<string> => {
+    return "Ok";
+  };
 
-  const placeBid = async (placeBidArgs: PlaceBidArgs) => {
+  const placeBid = async (placeBidArgs: PlaceBidArgs): Promise<string> => {
     setBuyerStates((prevState) => {
       const newState = [...prevState];
       const buyerStateIndex = newState.findIndex(
@@ -201,22 +211,33 @@ const useMockVault = (
       ];
       return newState;
     });
+    return "";
   };
 
-  const refundUnusedBids = async (refundBidsArgs: RefundBidsArgs) => {
+  const refundUnusedBids = async (
+    refundBidsArgs: RefundBidsArgs,
+  ): Promise<string> => {
     await new Promise((resolve) => setTimeout(resolve, 2000));
+    return "";
   };
 
-  const updateBid = async (updateBidArgs: UpdateBidArgs) => {
+  const updateBid = async (updateBidArgs: UpdateBidArgs): Promise<string> => {
     await new Promise((resolve) => setTimeout(resolve, 2000));
+    return "";
   };
 
-  const mintOptions = async (mintOptionsArgs: MintOptionsArgs) => {
+  const mintOptions = async (
+    mintOptionsArgs: MintOptionsArgs,
+  ): Promise<string> => {
     await new Promise((resolve) => setTimeout(resolve, 2000));
+    return "";
   };
 
-  const exerciseOptions = async (exerciseOptionsArgs: ExerciseOptionsArgs) => {
+  const exerciseOptions = async (
+    exerciseOptionsArgs: ExerciseOptionsArgs,
+  ): Promise<string> => {
     await new Promise((resolve) => setTimeout(resolve, 2000));
+    return "";
   };
 
   const vaultActions: VaultActionsType = {
