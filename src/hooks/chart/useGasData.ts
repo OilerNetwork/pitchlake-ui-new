@@ -34,7 +34,7 @@ export const useGasData = () => {
   }, [selectedRoundState?.deploymentDate, xMin, xMax]);
 
   const { confirmedGasData, unconfirmedGasData } = useWebsocketChart({
-    lowerTimestamp: twapXMin,
+    lowerTimestamp: isExpandedView ? twapXMin : xMin,
     upperTimestamp: xMax,
     roundDuration: roundDuration,
   });
@@ -58,14 +58,14 @@ export const useGasData = () => {
         ? confirmedGasData.map(
             (d,index) =>
               ({
-                basefee: d.baseFee/10**9,
+                basefee: d.baseFee ? d.baseFee/10**9 : undefined,
                 blockNumber: d.blockNumber,
                 timestamp: d.timestamp,
-                twap: d.twap/10**9,
-                unconfirmedBasefee: index===confirmedGasData.length-1?d.baseFee/10**9:undefined,
-                unconfirmedTwap: index===confirmedGasData.length-1?d.twap/10**9:undefined,
-                confirmedBasefee: d.baseFee/10**9,
-                confirmedTwap: d.twap/10**9,
+                twap: d.twap ? d.twap/10**9 : undefined,
+                unconfirmedBasefee: index===confirmedGasData.length-1?d.baseFee ? d.baseFee/10**9 : undefined:undefined,
+                unconfirmedTwap: index===confirmedGasData.length-1?d.twap ? d.twap/10**9 : undefined:undefined,
+                confirmedBasefee: d.baseFee ? d.baseFee/10**9 : undefined,
+                confirmedTwap: d.twap ? d.twap/10**9 : undefined,
                 isUnconfirmed: false,
               } as FormattedBlockData)
           )
@@ -74,12 +74,12 @@ export const useGasData = () => {
         ? unconfirmedGasData.map(
             (d, index) =>
              {  return ({
-                basefee: d.baseFee/10**9,
+                basefee: d.baseFee ? d.baseFee/10**9 : undefined,
                 blockNumber: d.blockNumber,
                 timestamp: d.timestamp,
-                twap: d.twap/10**9,
-                unconfirmedBasefee: d.baseFee/10**9,
-                unconfirmedTwap: d.twap/10**9,
+                twap: d.twap ? d.twap/10**9 : undefined,
+                unconfirmedBasefee: d.baseFee ? d.baseFee/10**9 : undefined,
+                unconfirmedTwap: d.twap ? d.twap/10**9 : undefined,
                 confirmedBasefee: undefined,
                 confirmedTwap: undefined,
                 isUnconfirmed: true,
