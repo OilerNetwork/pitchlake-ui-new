@@ -200,7 +200,7 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
                 stroke={"var(--greyscale)"}
               />
               <p className="font-regular text-[14px] text-[#BFBFBF]">
-                Premium:
+                PREMIUM:
               </p>
             </div>
             <p
@@ -216,7 +216,7 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
                 classname="w-4 h-4 mr-2"
                 stroke={"var(--greyscale)"}
               />
-              <p className="font-regular text-[14px] text-[#BFBFBF]">Strike:</p>
+              <p className="font-regular text-[14px] text-[#BFBFBF]">STRIKE:</p>
             </div>
             <p
               data-testid="vault-strike"
@@ -235,7 +235,7 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
                 classname="w-4 h-4 mr-2"
                 stroke={"var(--greyscale)"}
               />
-              <p className="font-regular text-[14px] text-[#BFBFBF]">Cap:</p>
+              <p className="font-regular text-[14px] text-[#BFBFBF]">CAP:</p>
             </div>
             <p
               data-testid="vault-cap"
