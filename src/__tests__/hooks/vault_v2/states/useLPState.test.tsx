@@ -6,12 +6,12 @@ import { LiquidityProviderStateType } from "@/lib/types";
 
 // Mock dependencies
 jest.mock("@/context/NewProvider", () => ({
-  useNewContext: jest.fn()
+  useNewContext: jest.fn(),
 }));
 
 jest.mock("@/hooks/vault_v2/rpc/useLPStateRPC", () => ({
   __esModule: true,
-  default: jest.fn()
+  default: jest.fn(),
 }));
 
 describe("useLPState", () => {
@@ -35,7 +35,7 @@ describe("useLPState", () => {
       conn: config.conn,
       wsData: { wsLiquidityProviderState: config.wsState },
       mockData: { lpState: config.mockState },
-      vaultAddress: config.vaultAddress || "0x123"
+      vaultAddress: config.vaultAddress || "0x123",
     });
   };
 
@@ -127,7 +127,7 @@ describe("useLPState", () => {
       // Setup initial state
       const initialState = { ...mockLPState };
       const updatedState = { ...mockLPState, lockedBalance: "600000" };
-      
+
       mockContext({ conn: "rpc" });
       (useLPStateRPC as jest.Mock).mockReturnValue(initialState);
 
@@ -146,4 +146,5 @@ describe("useLPState", () => {
       expect(result.current).toBeUndefined();
     });
   });
-}); 
+});
+

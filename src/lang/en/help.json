@@ -95,6 +95,10 @@
     "header": "Vault Strike Level",
     "text": "The strike level of the vault. Determines the next round's strike price."
   },
+  "leftPanelVaultFees": {
+    "header": "Vault Strike Level",
+    "text": "The vault's fees."
+  },
   "leftPanelRoundBar": {
     "header": "Round Info",
     "text": "View selected round info."
@@ -115,6 +119,10 @@
     "header": "Round performance",
     "text": "The round's performance as a liquidity provider."
   },
+  "leftPanelPnL": {
+    "header": "Profit and Loss",
+    "text": "For liquidity providers, P&L is premium - payout. For option buyers, P&L is payout - premium."
+  },
   "leftPanelRoundPerf_OB": {
     "header": "Round performance",
     "text": "The round's performance as an option buyer."
@@ -124,24 +132,24 @@
     "text": "The max percentage above the strike this round will payout."
   },
   "leftPanelRoundMaxPayout": {
-    "header": "Max Payout",
-    "text": "The maximum payout per option, not including the price paid for each option."
+    "header": "Cap",
+    "text": "If the settlement TWAP is below the cap, the payout is strike - settlement TWAP. If the settlement TWAP is above the cap, the payout is cap - strike."
   },
   "leftPanelRoundStrikePrice": {
-    "header": "Strike Price",
-    "text": "The basefee TWAP that determines if the options may be exercised upon settlement."
+    "header": "Strike",
+    "text": "If the TWAP at settlement is above the strike, the options become exercisable."
   },
   "leftPanelRoundReservePrice": {
-    "header": "Reserve Price",
+    "header": "Minimum Premium",
     "text": "The minimum bid price per option."
   },
   "leftPanelRoundTotalOptions": {
-    "header": "Total Options",
+    "header": "Option Available",
     "text": "The total number of options available in the auction."
   },
   "leftPanelRoundClearingPrice": {
-    "header": "Clearing Price",
-    "text": "The realized price per option from the auction"
+    "header": "Premium",
+    "text": "The cost to purchase a single option."
   },
   "leftPanelRoundOptionsSold": {
     "header": "Options Sold",
@@ -158,6 +166,22 @@
   "leftPanelRoundTime": {
     "header": "Run Time",
     "text": "How much time remains before the round's state can transition."
+  },
+  "leftPanelVaultSchedule": {
+    "header": "Vault Schedule",
+    "text": "The schedule for the vault."
+  },
+  "vaultTransitionDuration": {
+    "header": "Cool Down Period",
+    "text": "The time between one round settling and the next auction starting."
+  },
+  "vaultAuctionDuration": {
+    "header": "Auction Duration",
+    "text": "The time between the auction starting and ending."
+  },
+  "vaultRoundDuration": {
+    "header": "Round Duration",
+    "text": "The time between the auction ending and the round settling."
   },
   "leftPanelRoundTime_Open_future": {
     "header": "Round Open",
@@ -287,6 +311,10 @@
     "header": "My Unlocked Balance",
     "text": "Your current unlocked balance."
   },
+  "lpActionTotalOptionsBalance": {
+    "header": "My Total Options",
+    "text": "Your current option balance (minted & non-minted)."
+  },
   "inputDepositAmount": {
     "header": "Deposit Details",
     "text": "Enter the amount of ETH you want to deposit."
@@ -322,6 +350,14 @@
   "collectStashButton": {
     "header": "Collect Stash",
     "text": "Collect your entire stashed balance."
+  },
+  "auctionOverPlanel": {
+    "header": "Auction Ending",
+    "text": "The auction period is over, awaiting transaction to transition the round's state."
+  },
+  "noBids": {
+    "header": "No Bids Placed",
+    "text": "You have not placed any bids in this round."
   },
   "inputBidAmount": {
     "header": "Bid Details",

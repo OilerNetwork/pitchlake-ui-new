@@ -1,15 +1,15 @@
-import React, { ReactNode, useEffect } from "react";
+import React, { ReactNode, useMemo } from "react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
 import { useAccount } from "@starknet-react/core";
 import { RepeatEthIcon } from "@/components/Icons";
 import { formatNumber } from "@/lib/utils";
-import { num } from "starknet";
 import { formatEther } from "ethers";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useOBState from "@/hooks/vault_v2/states/useOBState";
 import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
+import { useNewContext } from "@/context/NewProvider";
 
 interface RefundProps {
   showConfirmation: (
@@ -20,30 +20,44 @@ interface RefundProps {
 }
 
 const Refund: React.FC<RefundProps> = ({ showConfirmation }) => {
-  const { address, account } = useAccount();
+  const { account, address } = useAccount();
   const { selectedRoundAddress } = useVaultState();
-  const selectedRoundBuyerState = useOBState(selectedRoundAddress);
+  const { pendingTx, setStatusModalProps, updateStatusModalProps } =
+    useTransactionContext();
+  const obState = useOBState(selectedRoundAddress);
   const vaultActions = useVaultActions();
-  const { pendingTx } = useTransactionContext();
+  const { conn } = useNewContext();
 
-  const refundBalanceWei = selectedRoundBuyerState?.refundableOptions
-    ? process.env.NEXT_PUBLIC_ENVIRONMENT === "ws"
-      ? !selectedRoundBuyerState?.hasMinted
-        ? selectedRoundBuyerState?.refundableOptions
-        : "0"
-      : selectedRoundBuyerState?.refundableOptions
-    : "0";
+  const { refundBalanceWei, refundBalanceEth } = useMemo(() => {
+    const refundBalanceWei = obState?.refundableOptions
+      ? conn === "ws"
+        ? !obState?.hasMinted
+          ? obState?.refundableOptions
+          : "0"
+        : obState?.refundableOptions
+      : "0";
 
-  const refundBalanceEth = formatEther(num.toBigInt(refundBalanceWei));
+    const refundBalanceEth = formatEther(BigInt(refundBalanceWei));
 
-  const handleRefundBid = async (): Promise<void> => {
-    address &&
+    return { refundBalanceWei, refundBalanceEth };
+  }, [conn, obState?.hasMinted, obState?.refundableOptions]);
+
+  const isButtonDisabled = useMemo(() => {
+    if (!account) return true;
+    if (pendingTx) return true;
+    if (refundBalanceWei.toString() === "0") return true;
+
+    return false;
+  }, [account, pendingTx, refundBalanceWei]);
+
+  const handleRefundBid = async (): Promise<string> => {
+    return (
       (await vaultActions?.refundUnusedBids({
-        roundAddress: selectedRoundAddress ? selectedRoundAddress : "0x0",
-        optionBuyer: address,
-      }));
+        roundAddress: selectedRoundAddress || "0x0",
+        optionBuyer: address || "0x0",
+      })) || ""
+    );
   };
-
   const handleSubmit = () => {
     showConfirmation(
       "Refund",
@@ -53,35 +67,58 @@ const Refund: React.FC<RefundProps> = ({ showConfirmation }) => {
           {formatNumber(Number(refundBalanceEth))} ETH
         </span>
       </>,
-      handleRefundBid,
+      async () => {
+        try {
+          const hash = await handleRefundBid();
+          setStatusModalProps({
+            version: "success",
+            txnHeader: "Refund Successful",
+            txnHash: "",
+            txnOutcome: (
+              <>
+                You have successfully refunded your unused bids worth{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumber(Number(refundBalanceEth))} ETH
+                </span>
+                .
+              </>
+            ),
+          });
+          updateStatusModalProps({
+            txnHash: hash,
+          });
+        } catch (e) {
+          setStatusModalProps({
+            version: "failure",
+            txnHeader: "Refund Successful",
+            txnHash: "",
+            txnOutcome: (
+              <>
+                Your refund for{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumber(Number(refundBalanceEth))} ETH
+                </span>{" "}
+                failed.
+              </>
+            ),
+          });
+          console.error("Error refunding bids:", e);
+        }
+      },
     );
   };
-
-  const isButtonDisabled = (): boolean => {
-    if (!account) return true;
-    if (pendingTx) return true;
-    if (!selectedRoundBuyerState) return true;
-    if (Number(refundBalanceWei) === 0) return true;
-
-    return false;
-  };
-
-  useEffect(() => {}, [account]);
 
   return (
     <div className="flex flex-col h-full">
       <div className="flex flex-col flex-grow space-y-6 items-center justify-center">
-        <div className="w-[92px] h-[92px] p-6 rounded-2xl bg-icon-gradient border-[1px] border-greyscale-800 flex flex-row justify-center items-center">
-          <RepeatEthIcon classname="refund-icon" />
-        </div>
-        <p className="text-center text-[#bfbfbf]">
+        <RepeatEthIcon classname="refund-icon rounded-2xl bg-icon-gradient border-[1px] border-greyscale-800 flex flex-row justify-center items-center" />
+        <p className="text-center text-[#bfbfbf] font-regular text-[14px] ">
           Your refundable balance is <br />
-          <span className="font-semibold text-[#fafafa]">
+          <span className="font-semibold text-[#fafafa] font-regular text-[14px] ">
             {formatNumber(Number(refundBalanceEth))} ETH
           </span>
         </p>
       </div>
-
       <div className="mt-auto">
         <Hoverable
           dataId="refundButton"
@@ -89,7 +126,7 @@ const Refund: React.FC<RefundProps> = ({ showConfirmation }) => {
         >
           <ActionButton
             onClick={handleSubmit}
-            disabled={isButtonDisabled()}
+            disabled={isButtonDisabled}
             text="Refund Now"
           />
         </Hoverable>

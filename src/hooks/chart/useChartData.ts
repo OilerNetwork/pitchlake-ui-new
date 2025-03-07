@@ -170,7 +170,6 @@ const useChartData = (activeLines: any, vaultAddress?: string) => {
     // Find the maximum value in the data
 
     const _yMax = maxValue * 1.2; // 20% padding
-
     if (_yMax === 0) return { yMax: _yMax, yTicks: [] };
 
     // Define Y-axis ticks

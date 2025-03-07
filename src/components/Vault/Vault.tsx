@@ -18,8 +18,6 @@ import { ChartProvider } from "@/context/ChartProvider";
 import { useNewContext } from "@/context/NewProvider";
 export const Vault = () => {
   const [isProviderView, setIsProviderView] = useState(true);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const { setSelectedRound } = useNewContext();
   const { isMobile } = useIsMobile();
   const { isHelpBoxOpen } = useHelpContext();
   const { chain } = useNetwork();
@@ -35,7 +33,7 @@ export const Vault = () => {
   return (
     <div className="px-6 py-4 pt-[120px] bg-faded-black-alt flex-grow flex-box overflow-auto">
       <div className="flex flex-row-reverse text-primary">
-        <div className="flex flex-row rounded-md border-[1px] border-greyscale-800 h-[55px]">
+        <div className="flex flex-row rounded-md border-[1px] border-greyscale-800 h-[44px] w-[220px]">
           <Hoverable
             dataId="userToggleLP"
             className={`user-toggle-lp provider-tab flex flex-row items-center justify-center m-[1px] hover:cursor-pointer px-4 py-1 rounded-md text-[14px] w-[115px] ${
@@ -43,7 +41,6 @@ export const Vault = () => {
             }`}
             onClick={() => {
               setIsProviderView(true);
-              setIsEditOpen(false);
             }}
           >
             <CoinStackedIcon
@@ -65,7 +62,6 @@ export const Vault = () => {
             }`}
             onClick={() => {
               setIsProviderView(false);
-              //setIsEditOpen(false);
             }}
           >
             <AuctionIcon
@@ -91,8 +87,6 @@ export const Vault = () => {
         >
           <div
             onClick={() => {
-              //Reset query params
-
               router.push("/");
             }}
             className="back-button flex items-center justify-center w-[44px] h-[44px] border border-[#262626] rounded-lg cursor-pointer"
@@ -114,11 +108,7 @@ export const Vault = () => {
               ${isHelpBoxOpen ? "h-[60%]" : "h-[100%]"} transition-all duration-300
             `}
           >
-            <PanelRight
-              userType={isProviderView ? "lp" : "ob"}
-              isEditOpen={isEditOpen}
-              setIsEditOpen={setIsEditOpen}
-            />
+            <PanelRight userType={isProviderView ? "lp" : "ob"} />
           </div>
           {isHelpBoxOpen && (
             <div className="mt-6">

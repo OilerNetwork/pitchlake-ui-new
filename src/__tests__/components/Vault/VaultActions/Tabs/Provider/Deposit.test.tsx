@@ -1,11 +1,17 @@
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import Deposit from "@/components/Vault/VaultActions/Tabs/Provider/Deposit";
 import { HelpProvider } from "@/context/HelpProvider";
-import useVaultState from "@/hooks/vault_v2/states/useVaultState";
-import useLPState from "@/hooks/vault_v2/states/useLPState";
 
 // Mock all external dependencies
-const mockwriteAsync = jest.fn().mockResolvedValue({ transaction_hash: "0x123" });
+const mockwriteAsync = jest
+  .fn()
+  .mockResolvedValue({ transaction_hash: "0x123" });
+
+jest.mock("@/context/UiProvider", () => ({
+  useUiContext: () => ({
+    openWalletLogin: jest.fn(),
+  }),
+}));
 
 jest.mock("@starknet-react/core", () => ({
   useContract: () => ({
@@ -14,26 +20,28 @@ jest.mock("@starknet-react/core", () => ({
         connect: jest.fn().mockReturnThis(),
         populateTransaction: {
           approve: jest.fn().mockResolvedValue({ calldata: [] }),
-          deposit: jest.fn().mockResolvedValue({ calldata: [] })
-        }
-      })
-    }
+          deposit: jest.fn().mockResolvedValue({ calldata: [] }),
+        },
+      }),
+    },
   }),
   useAccount: () => ({
     account: {
-      address: "0x123"
-    }
+      address: "0x123",
+    },
   }),
   useContractWrite: () => ({
-    writeAsync: mockwriteAsync
-  })
+    writeAsync: mockwriteAsync,
+  }),
 }));
 
 jest.mock("@/context/TransactionProvider", () => ({
   useTransactionContext: () => ({
     pendingTx: false,
-    setPendingTx: jest.fn()
-  })
+    setPendingTx: jest.fn(),
+    setStatusModalProps: jest.fn(),
+    setModalState: jest.fn(),
+  }),
 }));
 
 jest.mock("@/hooks/vault_v2/states/useVaultState", () => ({
@@ -41,24 +49,30 @@ jest.mock("@/hooks/vault_v2/states/useVaultState", () => ({
   default: jest.fn().mockReturnValue({
     vaultState: {
       address: "0x123",
-      ethAddress: "0x456"
-    }
-  })
+      ethAddress: "0x456",
+    },
+  }),
 }));
 
 jest.mock("@/hooks/vault_v2/states/useLPState", () => ({
   __esModule: true,
   default: jest.fn().mockReturnValue({
-    unlockedBalance: BigInt("1000000000000000000") // 1 ETH
-  })
+    unlockedBalance: BigInt("1000000000000000000"), // 1 ETH
+  }),
 }));
 
-jest.mock("@/hooks/erc20/useERC20", () => ({
+jest.mock("@/hooks/erc20/useErc20Balance", () => ({
+  __esModule: true,
+  default: jest.fn().mockReturnValue({
+    balance: BigInt("2000000000000000000"), // 2 ETH
+  }),
+}));
+
+jest.mock("@/hooks/erc20/useErc20Allowance", () => ({
   __esModule: true,
   default: jest.fn().mockReturnValue({
     allowance: BigInt("1000000000000000000"), // 1 ETH
-    balance: BigInt("2000000000000000000"), // 2 ETH
-  })
+  }),
 }));
 
 describe("Deposit Component", () => {
@@ -73,7 +87,7 @@ describe("Deposit Component", () => {
     render(
       <HelpProvider>
         <Deposit showConfirmation={mockShowConfirmation} />
-      </HelpProvider>
+      </HelpProvider>,
     );
 
     // Enter valid deposit amount
@@ -88,7 +102,7 @@ describe("Deposit Component", () => {
     expect(mockShowConfirmation).toHaveBeenCalledWith(
       "Deposit",
       expect.anything(),
-      expect.any(Function)
+      expect.any(Function),
     );
 
     // Complete deposit flow
@@ -99,4 +113,5 @@ describe("Deposit Component", () => {
 
     expect(mockwriteAsync).toHaveBeenCalled();
   });
-}); 
+});
+

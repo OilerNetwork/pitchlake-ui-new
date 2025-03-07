@@ -25,6 +25,8 @@ jest.mock("@/hooks/vault_v2/states/useOBState", () => ({
 jest.mock("@/context/TransactionProvider", () => ({
   useTransactionContext: jest.fn().mockReturnValue({
     pendingTx: false,
+    setStatusModalProps: jest.fn(),
+    updateStatusModalProps: jest.fn(),
   }),
 }));
 
@@ -128,7 +130,7 @@ describe("Mint Component", () => {
   const mockShowConfirmation = jest.fn();
   const mockTokenizeOptions = jest
     .fn()
-    .mockImplementation(() => Promise.resolve());
+    .mockImplementation(() => Promise.resolve("0x123"));
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -152,16 +154,25 @@ describe("Mint Component", () => {
 
     // Check initial render
     expect(screen.getByTestId("mint-icon")).toBeInTheDocument();
-    expect(screen.getByText("1,000")).toBeInTheDocument();
+    
+    // Check mintable balance text
+    const mintableBalanceText = screen.getByText(/Your mintable option balance is/);
+    expect(mintableBalanceText).toBeInTheDocument();
+    expect(mintableBalanceText.querySelector('.text-\\[\\#fafafa\\]')).toHaveTextContent("1,000");
+
+    // Check total options
+    expect(screen.getByText("Total Options")).toBeInTheDocument();
+    const totalOptionsValue = screen.getByText("Total Options").parentElement?.querySelector('.text-white');
+    expect(totalOptionsValue).toHaveTextContent("1,000");
 
     // Initiate mint
     fireEvent.click(screen.getByRole("button", { name: "Mint Now" }));
 
-    // Verify confirmation modal was shown
+    // Verify confirmation modal was shown with correct text
     expect(mockShowConfirmation).toHaveBeenCalledWith(
       "Mint",
       expect.anything(),
-      expect.any(Function),
+      expect.any(Function)
     );
 
     // Complete mint flow
@@ -170,7 +181,9 @@ describe("Mint Component", () => {
       await onConfirm();
     });
 
-    expect(mockTokenizeOptions).toHaveBeenCalled();
+    expect(mockTokenizeOptions).toHaveBeenCalledWith({
+      roundAddress: expect.any(String),
+    });
   });
 });
 
