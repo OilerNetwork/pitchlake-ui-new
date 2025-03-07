@@ -15,10 +15,11 @@ import Hoverable from "../BaseComponents/Hoverable";
 import WrongNetworkScreen from "@/components/WrongNetworkScreen";
 import { useNetwork } from "@starknet-react/core";
 import { ChartProvider } from "@/context/ChartProvider";
-
+import { useNewContext } from "@/context/NewProvider";
 export const Vault = () => {
   const [isProviderView, setIsProviderView] = useState(true);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const { setSelectedRound } = useNewContext();
   const { isMobile } = useIsMobile();
   const { isHelpBoxOpen } = useHelpContext();
   const { chain } = useNetwork();
@@ -90,6 +91,8 @@ export const Vault = () => {
         >
           <div
             onClick={() => {
+              //Reset query params
+
               router.push("/");
             }}
             className="back-button flex items-center justify-center w-[44px] h-[44px] border border-[#262626] rounded-lg cursor-pointer"

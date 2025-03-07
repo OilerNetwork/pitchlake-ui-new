@@ -18,7 +18,7 @@ const useWebsocketChart = ({
   roundDuration: number;
 }) => {
   const ws = useRef<WebSocket | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
 
   const lowerTimestampRef = useRef(lowerTimestamp);
   const upperTimestampRef = useRef(upperTimestamp);
@@ -93,9 +93,7 @@ const useWebsocketChart = ({
       );
 
       ws.current.onopen = () => {
-        console.log("lowerTimestamp", lowerTimestamp);
-        console.log("upperTimestamp", upperTimestamp);
-        console.log("WebSocket connection established");
+       setIsConnected(true)
       };
 
       ws.current.onmessage = (event) => {
@@ -135,6 +133,9 @@ const useWebsocketChart = ({
     if (!lowerTimestamp || !upperTimestamp || !roundDuration) {
       return;
     }
+    if (!isConnected) {
+      return;
+    }
     ws.current?.send(
       JSON.stringify({
         startTimestamp: lowerTimestamp,
@@ -142,7 +143,7 @@ const useWebsocketChart = ({
         roundDuration: roundDuration,
       })
     );
-  }, [lowerTimestamp, upperTimestamp, roundDuration]);
+  }, [lowerTimestamp, upperTimestamp, roundDuration, isConnected]);
 
   console.log("confirmedGasData", confirmedGasData);
   console.log("unconfirmedGasData", unconfirmedGasData);
