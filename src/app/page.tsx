@@ -25,6 +25,7 @@ export default function Home() {
             "0x056c4bc4a501faab243c924638922ea08d07f3c2959371c4475a7d598f66d08f",
             "0x04f9996f98fc454ec733715787a9ac4bb771bf9dea608fc3f6ff37606f1f88c3",
           ];
+
   //process.env.NEXT_PUBLIC_VAULT_ADDRESSES?.split(",");
 
   const { isMobile } = useIsMobile();
