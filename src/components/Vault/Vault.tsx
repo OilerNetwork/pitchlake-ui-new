@@ -37,7 +37,7 @@ export const Vault = () => {
           <Hoverable
             dataId="userToggleLP"
             className={`user-toggle-lp provider-tab flex flex-row items-center justify-center m-[1px] hover:cursor-pointer px-4 py-1 rounded-md text-[14px] w-[115px] ${
-              isProviderView ? "bg-primary-900" : ""
+              isProviderView ? "bg-[#373632]" : ""
             }`}
             onClick={() => {
               setIsProviderView(true);
@@ -58,7 +58,7 @@ export const Vault = () => {
           <Hoverable
             dataId="userToggleOB"
             className={`user-toggle-ob buyer-tab flex flex-row items-center justify-center m-[1px] hover:cursor-pointer px-4 py-1 rounded-md text-[14px] w-[115px] ${
-              !isProviderView ? "bg-primary-900" : ""
+              !isProviderView ? "bg-[#373632]" : ""
             }`}
             onClick={() => {
               setIsProviderView(false);
