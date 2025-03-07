@@ -96,7 +96,7 @@ export const Vault = () => {
         </Hoverable>
       </div>
       <div className="mt-6 flex flex-row">
-        {<PanelLeft userType={isProviderView ? "lp" : "ob"} />}
+        <PanelLeft userType={isProviderView ? "lp" : "ob"} />
         <ChartProvider>
           <RoundPerformanceChart />
         </ChartProvider>

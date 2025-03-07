@@ -10,6 +10,7 @@ export default function Home() {
   const { vaults: wsVaults } = useWebSocketHome();
   const { chain } = useNetwork();
   // @NOTE filtering done in this order to maintain correct ordering (until proper vault sorting is implemented)
+  // TODO: Switch back to env var for this
   const vaults =
     process.env.NEXT_PUBLIC_ENVIRONMENT === "demo"
       ? ["0x0677ead18a571524525eb1d5fbb18431efe869f07d700f03aa66ad0abb5de01d"]
