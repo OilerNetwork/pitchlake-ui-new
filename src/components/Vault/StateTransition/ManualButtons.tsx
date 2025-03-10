@@ -2,22 +2,19 @@ import { useAccount } from "@starknet-react/core";
 import { useMemo, useState, useCallback, useEffect } from "react";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { getIconByRoundState } from "@/hooks/stateTransition/getIconByRoundState";
-import Hoverable from "../BaseComponents/Hoverable";
+import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
 import { useTimeContext } from "@/context/TimeProvider";
 import { useNewContext } from "@/context/NewProvider";
 
-// Will only be for demo in near future, cron job will take care of this otherwise
-const DemoStateTransition = ({
+const ManualButtons = ({
   isPanelOpen,
   setModalState,
-  //fossilDelay,
 }: {
   isPanelOpen: boolean;
   setModalState: any;
-  //fossilDelay: number;
 }) => {
   const { vaultState, selectedRoundAddress } = useVaultState();
   const vaultActions = useVaultActions();
@@ -125,6 +122,8 @@ const DemoStateTransition = ({
       show: false,
     }));
   }, [
+    conn,
+    roundState,
     account,
     vaultState?.address,
     selectedRoundState?.auctionStartDate,
@@ -162,37 +161,40 @@ const DemoStateTransition = ({
     return null;
 
   return (
-    <div
-      className={`${
-        isPanelOpen && roundState !== "Settled"
-          ? "border border-transparent border-t-[#262626]"
-          : "border border-transparent border-t-[#262626]"
-      } flex flex-col w-full mx-auto mt-auto mb-4 ${isPanelOpen ? "" : "items-center justify-center"}`}
-    >
-      <Hoverable dataId={`leftPanelStateTransitionButton_${roundState}`}>
-        <div className={`${isPanelOpen ? "px-6" : ""}`}>
-          <button
-            disabled={isDisabled}
-            className={`flex ${!isPanelOpen && !isDisabled ? "hover-zoom-small" : ""} ${
-              roundState === "Settled" ? "hidden" : ""
-            } ${isPanelOpen ? "p-2" : "w-[44px] h-[44px]"} border border-greyscale-700 text-primary disabled:text-greyscale rounded-md mt-4 justify-center items-center min-w-[44px] min-h-[44px] w-full`}
-            onClick={() => {
-              setModalState({
-                show: true,
-                action: actions[roundState],
-                onConfirm: handleAction,
-              });
-            }}
-          >
-            <p className={`${isPanelOpen ? "" : "hidden"}`}>
-              {actions[roundState]}
-            </p>
-            {icon}
-          </button>
-        </div>
-      </Hoverable>
-    </div>
+    <Hoverable dataId={`leftPanelStateTransitionButton_${roundState}`}>
+      <div>
+        {isPanelOpen && !expectedNextState && (
+          <div className="text-[#DA718C] pb-2">
+            Something went wrong,
+            {account ? " please manually " : " connect account to manually "}
+            {roundState === "Open"
+              ? "start the auction."
+              : roundState === "Auctioning"
+                ? "end the auction."
+                : "settle the round."}
+          </div>
+        )}
+        <button
+          disabled={isDisabled}
+          className={`flex ${!isPanelOpen && !isDisabled ? "hover-zoom-small" : ""} ${
+            roundState === "Settled" ? "hidden" : ""
+          } ${isPanelOpen ? "p-2" : "w-[44px] h-[44px]"} border border-greyscale-700 text-primary disabled:text-greyscale rounded-md justify-center items-center min-w-[44px] min-h-[44px] w-full`}
+          onClick={() => {
+            setModalState({
+              show: true,
+              action: actions[roundState],
+              onConfirm: handleAction,
+            });
+          }}
+        >
+          <p className={`${isPanelOpen ? "" : "hidden"}`}>
+            {actions[roundState]}
+          </p>
+          {icon}
+        </button>
+      </div>
+    </Hoverable>
   );
 };
 
-export default DemoStateTransition;
+export default ManualButtons;

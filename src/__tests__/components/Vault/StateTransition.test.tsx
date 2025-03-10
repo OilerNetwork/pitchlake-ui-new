@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import DemoStateTransition from "@/components/Vault/DemoStateTransition";
+import StateTransition from "@/components/Vault/StateTransition/StateTransition";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useHelpContext } from "@/context/HelpProvider";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
@@ -9,6 +9,7 @@ import { useNewContext } from "@/context/NewProvider";
 import { useAccount } from "@starknet-react/core";
 import { useTimeContext } from "@/context/TimeProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { OptionRoundStateType, VaultStateType } from "@/lib/types";
 
 // Mock all hooks
 jest.mock("@starknet-react/core", () => ({
@@ -23,16 +24,8 @@ jest.mock("@/context/HelpProvider");
 jest.mock("@/context/TransactionProvider");
 jest.mock("@/context/TimeProvider");
 
-// Default test states
-interface RoundStateData {
-  roundState: string;
-  auctionStartDate: string;
-  auctionEndDate: string;
-  optionSettleDate: string;
-  roundId: string;
-}
-
-const defaultRoundState: RoundStateData = {
+//// Default test states
+const defaultRoundState = {
   roundState: "Open",
   auctionStartDate: "1000",
   auctionEndDate: "2000",
@@ -63,8 +56,8 @@ const renderDemoStateTransition = ({
   vaultActions = defaultVaultActions,
   isPanelOpen = true,
 }: {
-  roundState?: Partial<RoundStateData>;
-  vaultState?: Partial<typeof defaultVaultState>;
+  roundState?: Partial<OptionRoundStateType>;
+  vaultState?: Partial<VaultStateType>;
   account?: { address: string | null; status: string };
   timestamp?: number;
   pendingTx?: string;
@@ -90,7 +83,8 @@ const renderDemoStateTransition = ({
   });
 
   (useAccount as jest.Mock).mockReturnValue({
-    account: account.status === "connected" ? { address: account.address } : null,
+    account:
+      account.status === "connected" ? { address: account.address } : null,
     status: account.status,
   });
 
@@ -112,8 +106,13 @@ const renderDemoStateTransition = ({
 
   render(
     <QueryClientProvider client={queryClient}>
-      <DemoStateTransition isPanelOpen={isPanelOpen} setModalState={mockSetModalState} />
-    </QueryClientProvider>
+      <StateTransition
+        isPanelOpen={isPanelOpen}
+        setModalState={mockSetModalState}
+        vaultState={vaultState as VaultStateType}
+        selectedRoundState={roundState as OptionRoundStateType}
+      />
+    </QueryClientProvider>,
   );
 
   return { mockSetModalState };
@@ -159,11 +158,10 @@ describe("DemoStateTransition", () => {
       renderDemoStateTransition({
         roundState: {
           roundState: "Settled",
+          optionSettleDate: "1000",
         },
       });
-
-      const button = screen.queryByRole("button");
-      expect(button).not.toBeInTheDocument();
+      expect(screen.getByText(/Settlement Date/)).toBeInTheDocument();
     });
   });
 
@@ -203,6 +201,7 @@ describe("DemoStateTransition", () => {
       renderDemoStateTransition({
         roundState: {
           roundState: "Open",
+          auctionStartDate: "1000",
         },
         pendingTx: "0xtx",
       });
