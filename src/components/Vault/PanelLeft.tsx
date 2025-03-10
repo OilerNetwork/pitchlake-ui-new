@@ -6,9 +6,9 @@ import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import { useNewContext } from "@/context/NewProvider";
-import DemoStateTransition from "./DemoStateTransition";
 import PanelLeftRoundSection from "@/components/Vault/PanelLeftRoundSection";
 import PanelLeftVaultSection from "./PanelLeftVaultSection";
+import StateTransition from "./StateTransition/StateTransition";
 
 const PanelLeft = ({ userType }: { userType: string }) => {
   const { conn } = useNewContext();
@@ -123,14 +123,16 @@ const PanelLeft = ({ userType }: { userType: string }) => {
             selectedRoundState={selectedRoundState}
             userType={userType}
           />
-          {conn === "demo" && (
-            <DemoStateTransition
-              isPanelOpen={isPanelOpen}
-              setModalState={setModalState}
-            />
-          )}
+
+          <StateTransition
+            vaultState={vaultState}
+            selectedRoundState={selectedRoundState}
+            isPanelOpen={isPanelOpen}
+            setModalState={setModalState}
+          />
         </div>
       </div>
+
       {modalState.show && (
         <StateTransitionConfirmationModal
           action={modalState.action}
