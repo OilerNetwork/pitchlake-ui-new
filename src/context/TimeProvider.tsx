@@ -1,11 +1,5 @@
 "use client";
-import {
-  ReactNode,
-  createContext,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import { ReactNode, createContext, useContext, useMemo, useState } from "react";
 import { useNewContext } from "./NewProvider";
 import { useBlock, useBlockNumber } from "@starknet-react/core";
 import { BlockTag } from "starknet";
@@ -23,7 +17,7 @@ export type TimeContextType = {
 };
 
 export const TimeContext = createContext<TimeContextType>(
-  {} as TimeContextType
+  {} as TimeContextType,
 );
 const TimeContextProvider = ({ children }: { children: ReactNode }) => {
   //Mock States
@@ -32,18 +26,16 @@ const TimeContextProvider = ({ children }: { children: ReactNode }) => {
   const [mockTimestamp, setMockTimestamp] = useState(0);
 
   const { data: block } = useBlock({
-    
     refetchInterval: 1000,
   });
   const blockNumber = useBlockNumber({
-    
     refetchInterval: 1000,
   });
 
   const timestamp = useMemo(() => {
     if (conn === "mock") return mockTimestamp;
     else return block?.timestamp ?? 0;
-  }, [conn, block?.timestamp]);
+  }, [conn, block?.timestamp, mockTimestamp]);
 
   const mockTimeForward = () => {
     if (conn === "mock") setMockTimestamp((prevState) => prevState + 100001);
