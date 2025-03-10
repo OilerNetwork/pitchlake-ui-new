@@ -115,7 +115,7 @@ const RoundPerformanceChart = () => {
           dataId="chartRoundSelector"
           ref={headerRef}
           onClick={() => setRoundNavIsOpen(!roundNavIsOpen)}
-          className="cursor-pointer font-medium text-[14px] text-primary flex flex-row items-center"
+          className="p-2 cursor-pointer font-medium text-[14px] text-primary flex flex-row items-center"
         >
           <p className="flex flex-row items-center">
             {roundHeaderFormatter(
@@ -135,11 +135,11 @@ const RoundPerformanceChart = () => {
             )}
           </div>
         </Hoverable>
-        <div className="flex flex-row items-center gap-4">
+        <div className="flex flex-row items-center gap-0">
           <Hoverable
             dataId="chartPreviousRound"
             onClick={decrementRound}
-            className="chart-previous-round"
+            className="p-2 previous-next-round"
           >
             <ArrowLeftIcon
               stroke={
@@ -161,7 +161,7 @@ const RoundPerformanceChart = () => {
           <Hoverable
             dataId="chartNextRound"
             onClick={incrementRound}
-            className="chart-next-round"
+            className="p-2 chart-next-round"
           >
             <ArrowRightIcon
               stroke={
@@ -189,11 +189,11 @@ const RoundPerformanceChart = () => {
           <Hoverable
             dataId="chartHistory"
             onClick={() => setIsExpandedView(!isExpandedView)}
-            className="chart-history-button"
+            className="p-2 chart-history-button"
           >
             <History
               className={classNames(
-                "w-5 h-5 mr-2 cursor-pointer",
+                "w-5 h-5 cursor-pointer",
                 isExpandedView ? "text-primary" : "text-greyscale",
               )}
             />
@@ -243,10 +243,14 @@ const RoundPerformanceChart = () => {
       )}
 
       {/* Line Toggle Buttons */}
-      <div className="flex justify-center items-center my-4">
+      <div className="flex justify-center items-center my-2">
         <div className="flex gap-4">
           {["TWAP", "BASEFEE", "STRIKE", "CAP_LEVEL"].map((line) => (
-            <Hoverable key={line} dataId={`chartLineButton_${line}`}>
+            <Hoverable
+              key={line}
+              dataId={`chartLineButton_${line}`}
+              className="p-2"
+            >
               <button
                 className={`hover-zoom-small flex flex-row items-center font-regular text-[12px]
                    ${

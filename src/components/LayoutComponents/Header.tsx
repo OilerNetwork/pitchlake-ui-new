@@ -135,7 +135,7 @@ export default function Header() {
   return (
     !isMobile && (
       <nav className="absolute top-0 z-50 w-full h-[84px] bg-[#121212] px-8 py-6 flex justify-between items-center border-b border-[#262626]">
-        <Hoverable dataId="logo" className="flex-shrink-0">
+        <Hoverable dataId="logo" className="flex-shrink-0 px-2">
           <Image
             onClick={() => {
               router.push("/");
