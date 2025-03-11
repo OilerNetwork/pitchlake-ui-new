@@ -3,6 +3,10 @@
     "header": "Home",
     "text": "Return to the homepage."
   },
+  "backButton": {
+    "header": "Home",
+    "text": "Return to the homepage."
+  },
   "networkSelector": {
     "header": "Network Selector",
     "text": "Select which network to connect to."
@@ -272,6 +276,22 @@
   "chartLineButton_CAP_LEVEL": {
     "header": "Chart: Cap Level",
     "text": "View the cap level."
+  },
+  "gotItButton": {
+    "header": "Go Back",
+    "text": "Return to the previous section."
+  },
+  "goBackButton": {
+    "header": "Go Back",
+    "text": "Return to the previous section."
+  },
+  "actionTabConfirm": {
+    "header": "Confirm Transaction",
+    "text": "Confirm the pending transaction."
+  },
+  "actionTabClose": {
+    "header": "Reject Transaction",
+    "text": "Reject the pending transaction."
   },
   "actionTab_Deposit": {
     "header": "Deposit Tab",

@@ -32,7 +32,7 @@ const TxnFailure = ({
       </div>
       <div className="mt-auto flex justify-center text-sm p-6 border-t border-[#262626] success-modal-button flex flex-row">
         <ActionButton
-          //dataId={null}
+          dataId={"gotItButton"}
           onClick={onClose}
           text="Got It"
           disabled={false}

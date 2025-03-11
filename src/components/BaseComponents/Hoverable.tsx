@@ -39,7 +39,7 @@ const Hoverable = forwardRef<HTMLDivElement, HoverableProps>(
 
     // On mouse enter, start the 300ms timer
     const handleMouseEnter = useCallback(() => {
-      if (isHoveringHelpBox) {
+      if (isHoveringHelpBox || !dataId) {
         // If the user is reading the InfoBox, do NOT auto-update
         return;
       }
@@ -82,7 +82,7 @@ const Hoverable = forwardRef<HTMLDivElement, HoverableProps>(
         className={`${isActive ? "rounded-lg border-[1px] border-[#8C8C8C]" : "border-[1px] border-transparent"} ${className} `}
         onClick={() => {
           onClick && onClick();
-          setActiveDataId(dataId);
+          dataId && setActiveDataId(dataId);
         }}
         ref={ref}
         //key={key_}
