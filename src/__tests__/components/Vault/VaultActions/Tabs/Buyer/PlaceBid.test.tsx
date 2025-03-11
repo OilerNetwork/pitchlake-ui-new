@@ -1,8 +1,9 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import PlaceBid from "@/components/Vault/VaultActions/Tabs/Buyer/PlaceBid";
-import { TestWrapper } from "../../../../../utils/TestWrapper";
 import { useContractWrite } from "@starknet-react/core";
+import { useHelpContext } from "@/context/HelpProvider";
+import { HelpProvider } from "@/context/HelpProvider";
 
 // Mock child components
 jest.mock("@/components/Vault/Utils/InputField", () => {
@@ -177,9 +178,24 @@ jest.mock("@/components/Vault/Utils/ActionButton", () => ({
   ),
 }));
 
+jest.mock("@/context/HelpProvider", () => ({
+  HelpProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useHelpContext: jest.fn().mockReturnValue({
+    setActiveDataId: jest.fn(),
+    activeDataId: null,
+    isHelpBoxOpen: false,
+    header: null,
+    isHoveringHelpBox: false,
+    content: null,
+    setIsHoveringHelpBox: jest.fn(),
+    toggleHelpBoxOpen: jest.fn(),
+  }),
+}));
+
 describe("PlaceBid", () => {
   const mockShowConfirmation = jest.fn();
   const mockWriteAsync = jest.fn();
+  const mockSetActiveDataId = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -189,13 +205,23 @@ describe("PlaceBid", () => {
     (useContractWrite as jest.Mock).mockReturnValue({
       writeAsync: mockWriteAsync,
     });
+
+    // Mock useHelpContext
+    (useHelpContext as jest.Mock).mockReturnValue({
+      setActiveDataId: mockSetActiveDataId,
+      activeDataId: null,
+      isHelpBoxOpen: false,
+      header: null,
+      isHoveringHelpBox: false,
+      content: null,
+      setIsHoveringHelpBox: jest.fn(),
+      toggleHelpBoxOpen: jest.fn(),
+    });
   });
 
   it("handles bid submission flow", () => {
     const { container } = render(
-      <TestWrapper>
-        <PlaceBid showConfirmation={mockShowConfirmation} />
-      </TestWrapper>,
+      <PlaceBid showConfirmation={mockShowConfirmation} />
     );
 
     // Enter valid bid details

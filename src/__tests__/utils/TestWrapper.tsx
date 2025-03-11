@@ -1,7 +1,7 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import { ReactNode } from "react";
-import { HelpProvider } from "@/context/HelpProvider";
+import { HelpProvider, useHelpContext } from "@/context/HelpProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { UiProvider } from "@/context/UiProvider";
 
@@ -25,6 +25,24 @@ jest.mock("@/context/NewProvider", () => ({
   }),
 }));
 
+// Mock the HelpContext
+jest.mock("@/context/HelpProvider", () => {
+  const mockSetActiveDataId = jest.fn();
+  return {
+    HelpProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    useHelpContext: jest.fn().mockReturnValue({
+      setActiveDataId: mockSetActiveDataId,
+      activeDataId: null,
+      isHelpBoxOpen: false,
+      header: null,
+      isHoveringHelpBox: false,
+      content: null,
+      setIsHoveringHelpBox: jest.fn(),
+      toggleHelpBoxOpen: jest.fn(),
+    }),
+  };
+});
+
 interface TestWrapperProps {
   children: ReactNode;
 }
@@ -41,7 +59,7 @@ export const TestWrapper: React.FC<TestWrapperProps> = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <UiProvider>
-        <HelpProvider>{children}</HelpProvider>
+        {children}
       </UiProvider>
     </QueryClientProvider>
   );

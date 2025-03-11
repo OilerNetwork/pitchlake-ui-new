@@ -34,6 +34,7 @@ describe("QueueWithdrawal", () => {
   const mockShowConfirmation = jest.fn();
   const mockQueueWithdrawal = jest.fn();
   const mockSetStatusModalProps = jest.fn();
+  const mockSetActiveDataId = jest.fn();
 
   const defaultMocks = {
     account: { address: "0x123" },
@@ -63,8 +64,14 @@ describe("QueueWithdrawal", () => {
     });
 
     (useHelpContext as jest.Mock).mockReturnValue({
-      setHelpContent: jest.fn(),
-      clearHelpContent: jest.fn(),
+      setActiveDataId: mockSetActiveDataId,
+      activeDataId: null,
+      isHelpBoxOpen: false,
+      header: null,
+      isHoveringHelpBox: false,
+      content: null,
+      setIsHoveringHelpBox: jest.fn(),
+      toggleHelpBoxOpen: jest.fn(),
     });
   };
 

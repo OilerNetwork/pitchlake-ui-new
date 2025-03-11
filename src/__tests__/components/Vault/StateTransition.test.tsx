@@ -99,8 +99,7 @@ const renderDemoStateTransition = ({
   (useNewContext as jest.Mock).mockReturnValue({ conn });
   (useVaultActions as jest.Mock).mockReturnValue(vaultActions);
   (useHelpContext as jest.Mock).mockReturnValue({
-    setContent: jest.fn(),
-    setHeader: jest.fn(),
+    setActiveDataId: jest.fn(),
     isHoveringHelpBox: false,
   });
 

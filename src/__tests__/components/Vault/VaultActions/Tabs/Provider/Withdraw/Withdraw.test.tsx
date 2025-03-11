@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import Withdraw from "@/components/Vault/VaultActions/Tabs/Provider/Withdraw/Withdraw";
-import { HelpProvider } from "@/context/HelpProvider";
+import { HelpProvider, useHelpContext } from "@/context/HelpProvider";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import { useContractRead } from "@starknet-react/core";
 
@@ -44,6 +44,16 @@ const mockImplementations = {
     useProvider: () => ({ provider: null }),
   },
   useRoundState: jest.fn(),
+  useHelpContext: jest.fn(() => ({
+    setActiveDataId: jest.fn(),
+    activeDataId: null,
+    isHelpBoxOpen: false,
+    header: null,
+    isHoveringHelpBox: false,
+    content: null,
+    setIsHoveringHelpBox: jest.fn(),
+    toggleHelpBoxOpen: jest.fn(),
+  })),
   useNewContext: jest.fn(() => ({
     conn: "mock",
     vaultAddress: "0x123",
@@ -78,6 +88,11 @@ jest.mock("@/hooks/vault_v2/states/useRoundState", () => ({
 
 jest.mock("@/context/NewProvider", () => ({
   useNewContext: () => mockImplementations.useNewContext(),
+}));
+
+jest.mock("@/context/HelpProvider", () => ({
+  HelpProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useHelpContext: () => mockImplementations.useHelpContext(),
 }));
 
 // Mock sub-components with descriptive test IDs
