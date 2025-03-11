@@ -41,8 +41,6 @@ const StateTransition = ({
     const _now = Number(now);
     const _target = Number(targetTimestamp);
 
-    //return "Countdown";
-
     if (roundState === "Settled" || _now < _target) return "Countdown";
     else if (
       roundState !== "Settled" &&
