@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import Deposit from "@/components/Vault/VaultActions/Tabs/Provider/Deposit";
 import { HelpProvider } from "@/context/HelpProvider";
+import { useHelpContext } from "@/context/HelpProvider";
 
 // Mock all external dependencies
 const mockwriteAsync = jest
@@ -10,6 +11,20 @@ const mockwriteAsync = jest
 jest.mock("@/context/UiProvider", () => ({
   useUiContext: () => ({
     openWalletLogin: jest.fn(),
+  }),
+}));
+
+jest.mock("@/context/HelpProvider", () => ({
+  HelpProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useHelpContext: jest.fn().mockReturnValue({
+    setActiveDataId: jest.fn(),
+    activeDataId: null,
+    isHelpBoxOpen: false,
+    header: null,
+    isHoveringHelpBox: false,
+    content: null,
+    setIsHoveringHelpBox: jest.fn(),
+    toggleHelpBoxOpen: jest.fn(),
   }),
 }));
 
@@ -85,9 +100,7 @@ describe("Deposit Component", () => {
 
   it("handles deposit flow correctly", async () => {
     render(
-      <HelpProvider>
-        <Deposit showConfirmation={mockShowConfirmation} />
-      </HelpProvider>,
+      <Deposit showConfirmation={mockShowConfirmation} />
     );
 
     // Enter valid deposit amount
