@@ -24,15 +24,18 @@ const Hoverable = forwardRef<HTMLDivElement, HoverableProps>(
     },
     ref,
   ) => {
-    const { setActiveDataId, isHelpBoxOpen, header, isHoveringHelpBox } =
-      useHelpContext();
+    const {
+      setActiveDataId,
+      activeDataId,
+      isHelpBoxOpen,
+      header,
+      isHoveringHelpBox,
+    } = useHelpContext();
     const hoverTimer = useRef<NodeJS.Timeout | null>(null);
     const lockTimer = useRef<NodeJS.Timeout | null>(null);
     const isLocked = useRef(false);
 
-    const isActive =
-      isHelpBoxOpen &&
-      header === helpData[dataId as keyof typeof helpData]?.header;
+    const isActive = isHelpBoxOpen && dataId === activeDataId;
 
     // On mouse enter, start the 300ms timer
     const handleMouseEnter = useCallback(() => {
