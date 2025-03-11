@@ -1,6 +1,7 @@
 import React from "react";
 import { useAccount } from "@starknet-react/core";
 import { useUiContext } from "@/context/UiProvider";
+import Hoverable from "@/components/BaseComponents/Hoverable";
 
 interface InputFieldProps {
   type?: string;
@@ -13,6 +14,7 @@ interface InputFieldProps {
   error?: string;
   className?: string;
   disabled?: boolean;
+  dataId: string;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -26,6 +28,7 @@ const InputField: React.FC<InputFieldProps> = ({
   error,
   className,
   disabled,
+  dataId,
 }) => {
   const { account } = useAccount();
   const { openWalletLogin } = useUiContext();
@@ -45,7 +48,7 @@ const InputField: React.FC<InputFieldProps> = ({
         {label}
         <p className="font-regular text-[var(--buttongrey)]">{label2}</p>
       </label>
-      <div className="relative w-full">
+      <Hoverable dataId={dataId} className="relative w-full">
         <input
           id={label}
           onWheel={(e) => e.currentTarget.blur()}
@@ -63,7 +66,7 @@ const InputField: React.FC<InputFieldProps> = ({
             px-6`}
         />
         <div className="flex items-center pointer-events-none">{icon}</div>
-      </div>
+      </Hoverable>
       {error && (
         <p className="mt-1 text-sm text-red-500 error-message">{error}</p>
       )}
