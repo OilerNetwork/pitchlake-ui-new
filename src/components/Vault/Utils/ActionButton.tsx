@@ -5,7 +5,7 @@ interface ActionButtonProps {
   onClick: () => void;
   disabled: boolean;
   text: string;
-  dataId: string | null;
+  dataId?: string | null;
 }
 
 const ActionButton: React.FC<ActionButtonProps> = ({

@@ -4,7 +4,7 @@ import { useHelpContext } from "@/context/HelpProvider";
 import helpData from "@/lang/en/help.json";
 
 interface HoverableProps {
-  dataId: string | null; // e.g. "item1"
+  dataId?: string | null; // e.g. "item1"
   delay?: number; // e.g. 300 (milliseconds)
   lockDuration?: number; // e.g. 3000 (3 seconds)
   children: React.ReactNode;

@@ -57,7 +57,7 @@ const TxnSuccess = ({
         </div>
         <div className="mt-auto flex justify-center text-sm p-6 border-t border-[#262626] success-modal-button flex flex-row">
           <ActionButton
-            dataId={null}
+            //dataId={null}
             onClick={onClose}
             text="Got It"
             disabled={false}

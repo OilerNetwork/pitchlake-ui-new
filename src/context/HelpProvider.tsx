@@ -26,12 +26,16 @@ export const HelpProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [isHelpBoxOpen, setIsHelpBoxOpen] = useState(false);
-  const [activeDataId, setActiveDataId] = useState<string | null>(null);
+  const [activeDataId, _setActiveDataId] = useState<string | null>(null);
   const [isHoveringHelpBox, setIsHoveringHelpBox] = useState(false);
 
   const toggleHelpBoxOpen = () => {
     setIsHelpBoxOpen((prev) => !prev);
-    setActiveDataId(null);
+    _setActiveDataId(null);
+  };
+
+  const setActiveDataId = (dataId: string | null) => {
+    if (dataId) _setActiveDataId(dataId);
   };
 
   const { content, header }: ContentAndHeader = useMemo(() => {
