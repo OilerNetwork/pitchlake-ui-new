@@ -1,8 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import InputField, {
-  InputFieldExtra,
-} from "@/components/Vault/Utils/InputField";
+import InputField from "@/components/Vault/Utils/InputField";
 import { useAccount } from "@starknet-react/core";
 import { useUiContext } from "@/context/UiProvider";
 import { useHelpContext } from "@/context/HelpProvider";
@@ -122,78 +120,4 @@ describe("InputField Components", () => {
       expect(mockSetActiveDataId).toHaveBeenCalledWith("test-id");
     });
   });
-
-  //describe("InputFieldExtra", () => {
-  //  const getInput = (container: HTMLElement) =>
-  //    container.querySelector(".input-field") as HTMLInputElement;
-
-  //  it("renders basic input field correctly", () => {
-  //    const { container } = render(<InputFieldExtra {...defaultProps} />);
-  //    const input = getInput(container);
-  //    expect(input).toBeInTheDocument();
-  //    expect(input.value).toBe("Test Value");
-  //  });
-
-  //  it("handles input changes", () => {
-  //    const { container } = render(<InputFieldExtra {...defaultProps} />);
-  //    const input = getInput(container);
-  //    fireEvent.change(input, { target: { value: "New Value" } });
-  //    expect(mockOnChange).toHaveBeenCalled();
-  //  });
-
-  //  it("displays error message when provided", () => {
-  //    const { container } = render(
-  //      <InputFieldExtra {...defaultProps} error="Error Message" />,
-  //    );
-  //    const errorMessage = container.querySelector(".error-message");
-  //    expect(errorMessage).toBeInTheDocument();
-  //    expect(errorMessage?.textContent).toBe("Error Message");
-
-  //    const input = getInput(container);
-  //    expect(input).toBeInTheDocument();
-  //  });
-
-  //  it("shows secondary label when provided", () => {
-  //    render(<InputFieldExtra {...defaultProps} label2="Secondary Label" />);
-  //    expect(screen.getByText("Secondary Label")).toBeInTheDocument();
-  //  });
-
-  //  it("opens wallet login on focus without connected account", () => {
-  //    (useAccount as jest.Mock).mockReturnValue({ account: null });
-  //    const { container } = render(<InputFieldExtra {...defaultProps} />);
-  //    const input = getInput(container);
-  //    fireEvent.focus(input);
-  //    expect(mockOpenWalletLogin).toHaveBeenCalled();
-  //  });
-
-  //  it("accepts different input types", () => {
-  //    const { container } = render(
-  //      <InputFieldExtra {...defaultProps} type="number" />,
-  //    );
-  //    const input = getInput(container);
-  //    expect(input.type).toBe("number");
-  //  });
-
-  //  it("displays placeholder text", () => {
-  //    const { container } = render(
-  //      <InputFieldExtra {...defaultProps} placeholder="Enter value" />,
-  //    );
-  //    const input = getInput(container);
-  //    expect(input.placeholder).toBe("Enter value");
-  //  });
-  //  
-  //  it("sets active data ID when hoverable is clicked", () => {
-  //    const { container } = render(<InputFieldExtra {...defaultProps} />);
-  //    const hoverable = container.querySelector("[data-item='test-id']");
-  //    expect(hoverable).toBeInTheDocument();
-  //    fireEvent.click(hoverable!);
-  //    expect(mockSetActiveDataId).toHaveBeenCalledWith("test-id");
-  //  });
-  //  
-  //  it("handles disabled state", () => {
-  //    const { container } = render(<InputFieldExtra {...defaultProps} disabled />);
-  //    const input = getInput(container);
-  //    expect(input.disabled).toBe(true);
-  //  });
-  //});
 });
