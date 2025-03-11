@@ -135,7 +135,7 @@ const PanelLeftRoundSection = ({
           className={`flex flex-col mt-2 overflow-scroll no-scrollbar ${
             isPanelOpen ? "" : "hidden"
           } ${
-            !optionRoundIsOpen ? "h-0" : "h-[260px]"
+            !optionRoundIsOpen ? "h-0" : "h-[238px]"
           } transition-all duration-900 max-h-full`}
         >
           <Hoverable

@@ -119,14 +119,14 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
       <div
         className={`flex flex-row px-6 items-start ${lpState?.unlockedBalance == 0 || !account ? "" : "gap-2"}`}
       >
-        <Hoverable
-          dataId="inputWithdrawalAmount"
+        <div
           className={`flex flex-col space-y-5 mb-[auto] ${lpState?.unlockedBalance == 0 || !account ? "w-[100%]" : ""}`}
         >
           <InputField
             type="number"
             value={withdrawAmount || ""}
             label="Enter Amount"
+            dataId="inputWithdrawalAmount"
             onChange={(e) => {
               const value = e.target.value;
               const formattedValue = value.includes(".")
@@ -142,7 +142,7 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
             }
             error={amountReason}
           />
-        </Hoverable>
+        </div>
         {lpState?.unlockedBalance == 0 || !account ? null : (
           <Hoverable dataId="maxButton" className="mt-[26px]">
             <button
@@ -176,16 +176,14 @@ const WithdrawLiquidity: React.FC<WithdrawLiquidityProps> = ({
             ETH
           </span>
         </Hoverable>
-        <Hoverable
-          dataId="withdrawButton"
-          className="mt-auto flex justify-center text-sm border-t border-[#262626] p-6"
-        >
+        <div className="mt-auto flex justify-center text-sm border-t border-[#262626] p-6">
           <ActionButton
             onClick={handleSubmit}
             disabled={isButtonDisabled}
             text="Withdraw"
+            dataId="withdrawButton"
           />
-        </Hoverable>
+        </div>
       </div>
     </>
   );

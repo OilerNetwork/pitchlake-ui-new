@@ -212,14 +212,12 @@ const EditModal: React.FC<EditModalProps> = ({
           <>
             <div className="flex flex-col h-full">
               <div className="flex-grow space-y-6 pt-2 px-4">
-                <Hoverable
-                  dataId="inputUpdateBidAmount"
-                  className="edit-bid-current-amount"
-                >
+                <div className="edit-bid-current-amount">
                   <InputField
                     type="number"
                     value={""}
                     label="Current Amount"
+                    dataId="inputUpdateBidAmount"
                     onChange={(_e) => {}}
                     placeholder={oldAmount.toString()}
                     disabled={true}
@@ -232,16 +230,14 @@ const EditModal: React.FC<EditModalProps> = ({
                       />
                     }
                   />
-                </Hoverable>
-                <Hoverable
-                  dataId="inputUpdateBidPrice"
-                  className="edit-bid-new-price"
-                >
+                </div>
+                <div className="edit-bid-new-price">
                   <InputField
                     type="number"
                     value={state.newPriceGwei}
                     label="Enter Price"
                     label2={`Current: ${oldPriceGwei} Gwei`}
+                    dataId="inputUpdateBidPrice"
                     onChange={handlePriceChange}
                     placeholder={`e.g. ${oldPriceGwei}`}
                     icon={
@@ -249,7 +245,7 @@ const EditModal: React.FC<EditModalProps> = ({
                     }
                     error={priceReason}
                   />
-                </Hoverable>
+                </div>
               </div>
             </div>
 
@@ -271,16 +267,14 @@ const EditModal: React.FC<EditModalProps> = ({
               </span>
             </Hoverable>
             <div className="mt-auto">
-              <Hoverable
-                dataId="updateBidButton"
-                className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
-              >
+              <div className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]">
                 <ActionButton
                   onClick={handleSubmitForMulticall}
                   disabled={isButtonDisabled}
                   text="Edit Bid"
+                  dataId="updateBidButton"
                 />
-              </Hoverable>
+              </div>
             </div>
           </>
         )}

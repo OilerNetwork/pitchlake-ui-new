@@ -8,9 +8,8 @@ export const HelpBoxPanel = () => {
     isHelpBoxOpen,
     toggleHelpBoxOpen,
     content,
-    setContent,
     header,
-    setHeader,
+    setActiveDataId,
     setIsHoveringHelpBox,
   } = useHelpContext();
 
@@ -20,10 +19,9 @@ export const HelpBoxPanel = () => {
   useEffect(() => {
     // If we just opened the help box
     if (isHelpBoxOpen) {
-      setContent(null);
-      setHeader(null);
+      setActiveDataId(null);
     }
-  }, [isHelpBoxOpen, setContent]);
+  }, [isHelpBoxOpen, setActiveDataId]);
 
   return (
     <>

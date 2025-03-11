@@ -66,28 +66,28 @@ const TimelineTooltip: React.FC<TimelineTooltipProps> = ({
             </div>
             {/* Tooltip Content */}
             <Hoverable dataId="leftPanelVaultSchedule">
-              <h2 className="text-sm p-3 px-4 border-b border-[#262626]">
+              <h2 className="text-sm p-3 border-b border-[#262626]">
                 Vault Schedule
               </h2>
             </Hoverable>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Hoverable
                 dataId="vaultTransitionDuration"
-                className="p-2 px-4 pb-0 flex justify-between"
+                className="py-1 px-4 flex justify-between"
               >
                 <span>Open</span>
                 <span>{roundTransitionDuration}</span>
               </Hoverable>
               <Hoverable
                 dataId="vaultAuctionDuration"
-                className="p-2 px-4 pb-0 flex justify-between"
+                className="py-1 px-4 flex justify-between"
               >
                 <span>Auctioning</span>
                 <span>{auctionDuration}</span>
               </Hoverable>
               <Hoverable
                 dataId="vaultRoundDuration"
-                className="p-2 px-4 pb-0 flex justify-between"
+                className="py-1 px-4 flex justify-between"
               >
                 <span>Running</span>
                 <span>{roundDuration}</span>

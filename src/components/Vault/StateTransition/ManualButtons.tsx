@@ -161,10 +161,10 @@ const ManualButtons = ({
     return null;
 
   return (
-    <Hoverable dataId={`leftPanelStateTransitionButton_${roundState}`}>
-      <div>
+    <div>
+      <Hoverable dataId="stateTransitionCronFail" className="px-2 p-2">
         {isPanelOpen && !expectedNextState && (
-          <div className="text-[#DA718C] pb-2">
+          <div className="text-[#DA718C] px-2 pb-2">
             Something went wrong,
             {account ? " please manually " : " connect account to manually "}
             {roundState === "Open"
@@ -192,8 +192,8 @@ const ManualButtons = ({
           </p>
           {icon}
         </button>
-      </div>
-    </Hoverable>
+      </Hoverable>
+    </div>
   );
 };
 

@@ -40,7 +40,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
   const { gasData } = useChart();
 
   // Help context
-  const { setContent, setHeader, isHoveringHelpBox } = useHelpContext();
+  const { isHoveringHelpBox } = useHelpContext();
 
   // Strike and cap for all possibly displayed rounds
   const { fromRound, toRound } = useMemo(() => {
@@ -51,7 +51,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
     const fromRound = !isExpandedView ? toRound : toRound > 4 ? toRound - 4 : 1;
 
     return { fromRound, toRound };
-  }, [selectedRound, isExpandedView]);
+  }, [conn, selectedRound, isExpandedView]);
 
   const { vaultData: _historicalData } = useHistoricalRoundParams({
     vaultAddress: vaultState?.address,
@@ -63,7 +63,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
     if (conn === "demo") {
       return { rounds: demoRoundData };
     } else return _historicalData;
-  }, [_historicalData]);
+  }, [conn, _historicalData]);
 
   // Add strike and cap to gas data
   const parsedData: FormattedBlockData[] = useMemo(() => {
@@ -103,7 +103,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
     let sorted = refined.sort((a, b) => a.timestamp - b.timestamp);
 
     return sorted;
-  }, [gasData, historicalData]);
+  }, [xMax, xMin, selectedRound, gasData, historicalData]);
 
   // Compute vertical segments and round areas based on historical data
   const { verticalSegments, roundAreas } = useMemo(() => {
@@ -210,7 +210,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
   //      }
   //    }, HOVER_DELAY);
   //  },
-  //  [isHoveringHelpBox, setContent],
+  //  [isHoveringHelpBox],
   //);
 
   //const handleMouseLeave = useCallback(() => {

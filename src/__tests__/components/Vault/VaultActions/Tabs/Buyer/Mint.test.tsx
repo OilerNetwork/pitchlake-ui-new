@@ -5,6 +5,7 @@ import { TestWrapper } from "../../../../../utils/TestWrapper";
 import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
 import useOptionBuyerStateRPC from "@/hooks/vault_v2/rpc/useOptionBuyerStateRPC";
 import useOBState from "@/hooks/vault_v2/states/useOBState";
+import { useHelpContext } from "@/context/HelpProvider";
 
 // Mock the hooks
 jest.mock("@/hooks/vault_v2/actions/useVaultActions", () => ({
@@ -20,6 +21,19 @@ jest.mock("@/hooks/vault_v2/rpc/useOptionBuyerStateRPC", () => ({
 jest.mock("@/hooks/vault_v2/states/useOBState", () => ({
   __esModule: true,
   default: jest.fn(),
+}));
+
+jest.mock("@/context/HelpProvider", () => ({
+  useHelpContext: jest.fn().mockReturnValue({
+    setActiveDataId: jest.fn(),
+    activeDataId: null,
+    isHelpBoxOpen: false,
+    header: null,
+    isHoveringHelpBox: false,
+    content: null,
+    setIsHoveringHelpBox: jest.fn(),
+    toggleHelpBoxOpen: jest.fn(),
+  }),
 }));
 
 jest.mock("@/context/TransactionProvider", () => ({

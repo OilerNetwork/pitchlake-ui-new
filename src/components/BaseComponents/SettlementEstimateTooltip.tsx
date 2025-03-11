@@ -18,11 +18,11 @@ const StateTransitionTooltip: React.FC<StateTransitionTooltipProps> = ({
   useEffect(() => {
     if (isHovered && iconRef.current) {
       const rect = iconRef.current.getBoundingClientRect();
-      const tooltipHeight = 73;
+      const tooltipHeight = 65;
       setTooltipStyles({
         position: "absolute",
-        top: rect.top + window.scrollY - tooltipHeight + 4, // Position above, accounting for triangle
-        left: rect.right + window.scrollX + 100,
+        top: rect.top + window.scrollY - tooltipHeight, // Position above, accounting for triangle
+        left: rect.right + window.scrollX + 4,
         transform: "translateX(-100%)",
         zIndex: 9999,
       });
@@ -36,15 +36,15 @@ const StateTransitionTooltip: React.FC<StateTransitionTooltipProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {children}
       {isHovered &&
+        msg &&
         createPortal(
           <div
             style={tooltipStyles}
             className="relative text-white text-[14px] font-regular rounded-md border border-[#262626] bg-[#161616] shadow-sm p-4"
           >
             {/* Triangle */}
-            <div className=" absolute -bottom-3.5 right-[100px]">
+            <div className="absolute bottom-[-15px] right-[5px] ">
               <svg
                 width="14"
                 height="14"
@@ -64,6 +64,7 @@ const StateTransitionTooltip: React.FC<StateTransitionTooltipProps> = ({
           </div>,
           document.body,
         )}
+      {children}
     </div>
   );
 };

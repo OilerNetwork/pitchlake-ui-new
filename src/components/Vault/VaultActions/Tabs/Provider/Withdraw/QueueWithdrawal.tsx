@@ -112,14 +112,14 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
 
   return (
     <div className="flex flex-col h-full">
-      <Hoverable dataId="queueSlider" className="flex-grow px-6">
+      <div className="flex-grow px-6">
         <label
           className="block text-sm font-medium text-[#fafafa] mb-2"
           htmlFor="percentage-slider"
         >
           Choose Percentage
         </label>
-        <div className="flex items-center space-x-4">
+        <Hoverable dataId="queueSlider" className="flex items-center space-x-4">
           <div className="border-[1px] border-[#595959] w-full h-[44px] bg-[#0A0A0A] rounded-md flex items-center px-4">
             <input
               id="percentage-slider"
@@ -148,8 +148,8 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
               {percentage}%
             </span>
           </div>
-        </div>
-      </Hoverable>
+        </Hoverable>
+      </div>
       <div className="flex flex-col h-[full] mt-[auto]">
         <Hoverable
           dataId="lpActionLockedBalance"
@@ -165,16 +165,14 @@ const QueueWithdrawal: React.FC<WithdrawQueueProps> = ({
             ETH
           </span>
         </Hoverable>
-        <Hoverable
-          dataId="queueButton"
-          className="mt-[auto] flex justify-between text-sm border-t border-[#262626] p-6"
-        >
+        <div className="mt-[auto] flex justify-between text-sm border-t border-[#262626] p-6">
           <ActionButton
             onClick={handleSubmit}
             disabled={isButtonDisabled}
             text="Queue"
+            dataId="queueButton"
           />
-        </Hoverable>
+        </div>
       </div>
     </div>
   );

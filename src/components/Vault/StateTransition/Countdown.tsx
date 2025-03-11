@@ -44,7 +44,7 @@ const Countdown = ({
   if (!isPanelOpen) return null;
   else
     return (
-      <div className="w-full flex flex-row justify-between items-center">
+      <div className="w-full flex flex-row justify-between items-center p-2">
         <div className="text-[#BFBFBF] w-fit text-nowrap font-regular">
           {msg}
         </div>

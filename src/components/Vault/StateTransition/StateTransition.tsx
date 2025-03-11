@@ -57,7 +57,7 @@ const StateTransition = ({
     return null;
   else
     return (
-      <div className="w-full border border-transparent border-t-[#262626] p-4">
+      <div className="w-full border border-transparent border-t-[#262626] p-2">
         {componentType() === "Countdown" ? (
           <Countdown
             roundState={roundState}

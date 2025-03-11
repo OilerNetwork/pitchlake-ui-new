@@ -82,7 +82,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
             onClick={() => {
               isPanelOpen ? closeAllTabs() : openAllTabs();
             }}
-            className="flex items-center h-[56px] w-full border-b-1 p-4 border-white cursor-pointer"
+            className="flex items-center h-[56px] w-full border-b-1 p-4 cursor-pointer"
           >
             <div
               className={`flex flex-row w-full items-center rounded-md hover:cursor-pointer ${

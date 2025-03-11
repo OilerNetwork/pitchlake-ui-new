@@ -217,9 +217,10 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
     return (
       <div className="flex flex-col h-full">
         <div className="flex-grow space-y-6 p-6">
-          <Hoverable dataId="inputBidAmount" className="place-bid-container">
+          <div className="place-bid-container">
             <InputField
               label="Enter Amount"
+              dataId="inputBidAmount"
               type="integer"
               value={state.bidAmount}
               onChange={handleAmountChange}
@@ -232,12 +233,13 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
               }
               error={amountReason}
             />
-          </Hoverable>
-          <Hoverable dataId="inputBidPrice">
+          </div>
+          <div>
             <InputField
               label="Enter Price (Gwei)"
               type="number"
               value={state.bidPrice}
+              dataId="inputBidPrice"
               onChange={handlePriceChange}
               placeholder="e.g. 0.3"
               icon={
@@ -245,7 +247,7 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
               }
               error={priceReason}
             />
-          </Hoverable>
+          </div>
         </div>
         <Hoverable dataId="newBidSummary" className="flex flex-col h-[full]">
           <div className="flex justify-between text-sm px-6 pb-1">
@@ -265,16 +267,14 @@ const PlaceBid: React.FC<PlaceBidProps> = ({ showConfirmation }) => {
           </div>
         </Hoverable>
         <div className="mt-auto">
-          <Hoverable
-            dataId="placeBidButton"
-            className="place-bid-action-button px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
-          >
+          <div className="place-bid-action-button px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]">
             <ActionButton
               onClick={handleSubmitForMulticall}
               disabled={isButtonDisabled}
               text="Place Bid"
+              dataId="placeBidButton"
             />
-          </Hoverable>
+          </div>
         </div>
       </div>
     );

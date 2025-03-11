@@ -4,6 +4,7 @@ import useIsMobile from "../../../hooks/window/useIsMobile";
 import { useRouter } from "next/navigation";
 import { TestWrapper } from "../../utils/TestWrapper";
 import { useNetwork } from "@starknet-react/core";
+import { useHelpContext } from "@/context/HelpProvider";
 
 // Mock the hooks
 jest.mock("../../../hooks/window/useIsMobile", () => ({
@@ -13,6 +14,21 @@ jest.mock("../../../hooks/window/useIsMobile", () => ({
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
+}));
+
+// Mock the HelpContext
+jest.mock("@/context/HelpProvider", () => ({
+  HelpProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useHelpContext: jest.fn().mockReturnValue({
+    setActiveDataId: jest.fn(),
+    activeDataId: null,
+    isHelpBoxOpen: false,
+    header: null,
+    isHoveringHelpBox: false,
+    content: null,
+    setIsHoveringHelpBox: jest.fn(),
+    toggleHelpBoxOpen: jest.fn(),
+  }),
 }));
 
 // Mock the child components
@@ -78,11 +94,22 @@ describe("Vault Component", () => {
   const mockRouter = {
     push: jest.fn(),
   };
+  const mockSetActiveDataId = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     (useIsMobile as jest.Mock).mockReturnValue({ isMobile: false });
     (useRouter as jest.Mock).mockReturnValue(mockRouter);
+    (useHelpContext as jest.Mock).mockReturnValue({
+      setActiveDataId: mockSetActiveDataId,
+      activeDataId: null,
+      isHelpBoxOpen: false,
+      header: null,
+      isHoveringHelpBox: false,
+      content: null,
+      setIsHoveringHelpBox: jest.fn(),
+      toggleHelpBoxOpen: jest.fn(),
+    });
   });
 
   it("renders mainnet warning when network is mainnet", () => {

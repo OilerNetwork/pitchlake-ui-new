@@ -120,16 +120,14 @@ const Refund: React.FC<RefundProps> = ({ showConfirmation }) => {
         </p>
       </div>
       <div className="mt-auto">
-        <Hoverable
-          dataId="refundButton"
-          className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
-        >
+        <div className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]">
           <ActionButton
             onClick={handleSubmit}
             disabled={isButtonDisabled}
             text="Refund Now"
+            dataId="refundButton"
           />
-        </Hoverable>
+        </div>
       </div>
     </div>
   );

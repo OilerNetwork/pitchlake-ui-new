@@ -66,14 +66,14 @@ const BalanceTooltip: React.FC<BalanceTooltipProps> = ({
             </div>
             {/* Tooltip Content */}
             <Hoverable dataId="leftPanelVaultBalance">
-              <h2 className="text-sm p-3 px-4 border-b border-[#262626]">
+              <h2 className="text-sm p-3 border-b border-[#262626]">
                 Balance Distribution
               </h2>
             </Hoverable>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Hoverable
                 dataId="vaultLockedBalance"
-                className="p-2 px-4 pb-0 flex justify-between"
+                className="py-1 px-4 flex justify-between"
               >
                 <span>Locked</span>
                 <span>
@@ -83,7 +83,7 @@ const BalanceTooltip: React.FC<BalanceTooltipProps> = ({
               </Hoverable>
               <Hoverable
                 dataId="vaultUnlockedBalance"
-                className="p-2 px-4 pb-0 flex justify-between"
+                className="py-1 px-4 flex justify-between"
               >
                 <span>Unlocked</span>
                 <span>
@@ -94,7 +94,7 @@ const BalanceTooltip: React.FC<BalanceTooltipProps> = ({
               </Hoverable>
               <Hoverable
                 dataId="vaultStashedBalance"
-                className="p-2 px-4 pb-0 flex justify-between"
+                className="py-1 px-4 flex justify-between"
               >
                 <span>Stashed</span>
                 <span>

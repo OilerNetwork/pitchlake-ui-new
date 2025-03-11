@@ -173,16 +173,14 @@ const Exercise: React.FC<ExerciseProps> = ({ showConfirmation }) => {
       </div>
 
       <div className="mt-auto">
-        <Hoverable
-          dataId="exerciseButton"
-          className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
-        >
+        <div className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]">
           <ActionButton
             onClick={handleSubmit}
             disabled={isButtonDisabled()}
             text="Exercise Now"
+            dataId="exerciseButton"
           />
-        </Hoverable>
+        </div>
       </div>
     </div>
   );
