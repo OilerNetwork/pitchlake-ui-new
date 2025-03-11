@@ -162,9 +162,9 @@ const ManualButtons = ({
 
   return (
     <div>
-      <Hoverable dataId="stateTransitionCronFail">
+      <Hoverable dataId="stateTransitionCronFail" className="px-2 p-2">
         {isPanelOpen && !expectedNextState && (
-          <div className="text-[#DA718C] p-2">
+          <div className="text-[#DA718C] px-2 pb-2">
             Something went wrong,
             {account ? " please manually " : " connect account to manually "}
             {roundState === "Open"

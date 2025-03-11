@@ -41,6 +41,8 @@ const StateTransition = ({
     const _now = Number(now);
     const _target = Number(targetTimestamp);
 
+    //return "Countdown";
+
     if (roundState === "Settled" || _now < _target) return "Countdown";
     else if (
       roundState !== "Settled" &&
@@ -57,7 +59,7 @@ const StateTransition = ({
     return null;
   else
     return (
-      <div className="w-full border border-transparent border-t-[#262626] p-4">
+      <div className="w-full border border-transparent border-t-[#262626] p-2">
         {componentType() === "Countdown" ? (
           <Countdown
             roundState={roundState}

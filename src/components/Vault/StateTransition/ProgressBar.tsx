@@ -1,3 +1,4 @@
+import Hoverable from "@/components/BaseComponents/Hoverable";
 import { StateTransitionTooltip } from "@/components/BaseComponents/SettlementEstimateTooltip";
 import { timeUntilTarget } from "@/lib/utils";
 import { Info } from "lucide-react";
@@ -41,7 +42,7 @@ const ProgressBar = ({
       msg = `Auction ending in ~${timeUntil}`;
     else if (roundState === "Running") {
       msg = `Round settling in ~${timeUntil}`;
-    }
+    } else msg = `Round settled ~${timeUntil}`;
 
     return msg;
   }, [timeEstimate, roundState, now, progressStart]);
@@ -65,7 +66,10 @@ const ProgressBar = ({
   if (!isPanelOpen) return null;
   else
     return (
-      <div className="w-full flex flex-col items-left gap-2">
+      <Hoverable
+        dataId={`progressBar_${roundState}`}
+        className="w-full flex flex-col items-left gap-2 p-2"
+      >
         <div className="w-full flex flex-row justify-between">
           <div>{msg}</div>
           <StateTransitionTooltip msg={tooltipMsg}>
@@ -84,7 +88,7 @@ const ProgressBar = ({
             style={{ width: `${progress}%` }}
           ></div>
         </div>
-      </div>
+      </Hoverable>
     );
 };
 
