@@ -52,7 +52,7 @@ const StateTransition = ({
     else {
       // Non-demo, show manual buttons after cron estimate
       if (conn !== "demo") {
-        if (_l2Now > _target + timeEstimate + errorEstimate)
+        if (_clientNow > _target + timeEstimate + errorEstimate)
           return "ManualButtons";
         else return "ProgressBar";
       }
