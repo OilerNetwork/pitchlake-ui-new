@@ -162,7 +162,7 @@ const ManualButtons = ({
   return (
     <div>
       <Hoverable dataId="stateTransitionCronFail" className="px-2 p-2">
-        {isPanelOpen && !expectedNextState && (
+        {isPanelOpen && !expectedNextState && conn !== "demo" && (
           <div className="text-[#DA718C] px-2 pb-2">
             Something went wrong,
             {account ? " please manually " : " connect account to manually "}
