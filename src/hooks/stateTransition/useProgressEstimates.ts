@@ -2,11 +2,9 @@ import { useMemo } from "react";
 import { useNewContext } from "@/context/NewProvider";
 import useVaultState from "../vault_v2/states/useVaultState";
 import useRoundState from "../vault_v2/states/useRoundState";
-import { useTimeContext } from "@/context/TimeProvider";
 
-export const useProgressEstimates = (clientNow: number) => {
+export const useProgressEstimates = () => {
   const { conn } = useNewContext();
-  const { timestamp: l2Now } = useTimeContext();
   const vaultState = useVaultState();
   const selectedRoundState = useRoundState(vaultState?.selectedRoundAddress);
 
@@ -26,14 +24,9 @@ export const useProgressEstimates = (clientNow: number) => {
     let errorEstimate = 0;
 
     if (conn === "demo") {
-      // How many seconds until l2Now is >= clientNow
-      const diff = clientNow - Number(l2Now);
-
-      // If l2Now is < clientNow, we are waiting for the next block
-      if (diff > 0) {
-        txnEstimate = diff;
-        fossilEstimate = diff;
-      }
+      txnEstimate = 30;
+      fossilEstimate = 30;
+      errorEstimate = 0;
     } else {
       txnEstimate = 90;
       errorEstimate = 30;
@@ -52,38 +45,9 @@ export const useProgressEstimates = (clientNow: number) => {
     return { txnEstimate, fossilEstimate, errorEstimate };
   }, [
     conn,
-    clientNow,
-    l2Now,
     selectedRoundState?.auctionEndDate,
     selectedRoundState?.optionSettleDate,
   ]);
-
-  //const canAuctionStart = useMemo(() => {
-  //  return BigInt(timestamp) >= Number(selectedRoundState?.auctionStartDate);
-  //}, [timestamp, selectedRoundState]);
-
-  //const canAuctionEnd = useMemo(() => {
-  //  return BigInt(timestamp) >= Number(selectedRoundState?.auctionEndDate);
-  //}, [timestamp, selectedRoundState]);
-
-  //const canRoundSettle = useMemo(() => {
-  //  const roundSettleDate =
-  //    Number(selectedRoundState?.optionSettleDate) + conn === "demo"
-  //      ? 0
-  //      : FOSSIL_DELAY;
-
-  //  return BigInt(timestamp) >= roundSettleDate;
-  //}, [timestamp, selectedRoundState]);
-
-  //// will rm
-  //const canSendFossilRequest = useMemo(() => {
-  //  const roundSettleDate =
-  //    Number(selectedRoundState?.optionSettleDate) + conn === "demo"
-  //      ? 0
-  //      : FOSSIL_DELAY;
-
-  //  return BigInt(timestamp) >= roundSettleDate;
-  //}, [timestamp, selectedRoundState]);
 
   return {
     txnEstimate,

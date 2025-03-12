@@ -5,6 +5,7 @@ import { Info } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 type ProgressBarProps = {
+  conn: string;
   roundState: string;
   now: number;
   progressStart: number;
