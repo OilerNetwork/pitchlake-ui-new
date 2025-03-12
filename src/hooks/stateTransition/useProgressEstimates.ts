@@ -19,7 +19,7 @@ export const useProgressEstimates = () => {
     const { auctionEndDate, optionSettleDate } = selectedRoundState;
     const roundDuration = Number(optionSettleDate) - Number(auctionEndDate);
 
-    let txnEstimate = 0; //90;
+    let txnEstimate = 0;
     let fossilEstimate = 0;
     let errorEstimate = 0;
 

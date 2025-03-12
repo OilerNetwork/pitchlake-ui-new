@@ -31,10 +31,7 @@ const ProgressBar = ({
 
   const tooltipMsg = useMemo(() => {
     let msg = "";
-    let timeUntil = timeUntilTarget(
-      now.toString(),
-      (progressStart + timeEstimate).toString(),
-    );
+    let timeUntil = timeUntilTarget("0", timeEstimate.toString());
 
     if (timeUntil === "Now" || timeUntil === "Just now") timeUntil = "0s";
 
