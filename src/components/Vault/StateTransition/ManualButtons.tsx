@@ -17,12 +17,12 @@ const ManualButtons = ({
   setModalState: any;
 }) => {
   const { vaultState, selectedRoundAddress } = useVaultState();
-  const vaultActions = useVaultActions();
-  const selectedRoundState = useRoundState(selectedRoundAddress);
   const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
   const { timestamp } = useTimeContext();
   const { conn } = useNewContext();
+  const vaultActions = useVaultActions();
+  const selectedRoundState = useRoundState(selectedRoundAddress);
 
   const [expectedNextState, setExpectedNextState] = useState<string | null>(
     null,
@@ -52,7 +52,6 @@ const ManualButtons = ({
     // Exit early if round settled
     if (roundState === "Settled") return { isDisabled: true, roundState };
 
-    // Is now >= targetTimestamp
     const targetTimestamp =
       roundState === "Open"
         ? auctionStartDate
