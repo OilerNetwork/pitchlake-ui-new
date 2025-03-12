@@ -1,13 +1,12 @@
 import { useMemo } from "react";
-import { num } from "starknet";
-import { OptionRoundStateType } from "@/lib/types";
 import { useNewContext } from "@/context/NewProvider";
 import useVaultState from "../vault_v2/states/useVaultState";
 import useRoundState from "../vault_v2/states/useRoundState";
+import { useTimeContext } from "@/context/TimeProvider";
 
-export const useProgressEstimates = () => {
+export const useProgressEstimates = (clientNow: number) => {
   const { conn } = useNewContext();
-
+  const { timestamp: l2Now } = useTimeContext();
   const vaultState = useVaultState();
   const selectedRoundState = useRoundState(vaultState?.selectedRoundAddress);
 
@@ -27,9 +26,14 @@ export const useProgressEstimates = () => {
     let errorEstimate = 0;
 
     if (conn === "demo") {
-      txnEstimate = 15;
-      fossilEstimate = 15;
-      errorEstimate = 5;
+      // How many seconds until l2Now is >= clientNow
+      const diff = clientNow - Number(l2Now);
+
+      // If l2Now is < clientNow, we are waiting for the next block
+      if (diff > 0) {
+        txnEstimate = diff;
+        fossilEstimate = diff;
+      }
     } else {
       txnEstimate = 90;
       errorEstimate = 30;
@@ -48,6 +52,8 @@ export const useProgressEstimates = () => {
     return { txnEstimate, fossilEstimate, errorEstimate };
   }, [
     conn,
+    clientNow,
+    l2Now,
     selectedRoundState?.auctionEndDate,
     selectedRoundState?.optionSettleDate,
   ]);

@@ -24,7 +24,8 @@ const StateTransition = ({
   setModalState,
 }: StateTransitionProps) => {
   const { demoNow: now } = useDemoTime(true, true, 1000);
-  const { txnEstimate, fossilEstimate, errorEstimate } = useProgressEstimates();
+  const { txnEstimate, fossilEstimate, errorEstimate } =
+    useProgressEstimates(now);
 
   if (!vaultState) return null;
   if (!selectedRoundState) return null;
