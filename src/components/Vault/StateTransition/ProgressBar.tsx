@@ -39,7 +39,7 @@ const ProgressBar = ({
     else if (roundState === "Auctioning")
       msg = `Auction ending in ~${timeUntil}`;
     else if (roundState === "Running") {
-      msg = `Round settling in ~${timeUntil}`;
+      msg = `Round settlement takes ~${timeUntil}`;
     } else msg = `Round settled ~${timeUntil}`;
 
     return msg;
