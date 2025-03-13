@@ -173,6 +173,12 @@ const ManualButtons = ({
                 : "settle the round."}
           </div>
         )}
+        {isPanelOpen && !expectedNextState && conn === "demo" && !account && (
+          <div className="text-[#DA718C] px-2 pb-2">
+            Connect account to transition the state.{" "}
+          </div>
+        )}
+
         <button
           disabled={isDisabled}
           className={`flex ${!isPanelOpen && !isDisabled ? "hover-zoom-small" : ""} ${
