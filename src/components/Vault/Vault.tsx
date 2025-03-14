@@ -15,7 +15,7 @@ import Hoverable from "../BaseComponents/Hoverable";
 import WrongNetworkScreen from "@/components/WrongNetworkScreen";
 import { useNetwork } from "@starknet-react/core";
 import { ChartProvider } from "@/context/ChartProvider";
-import { useNewContext } from "@/context/NewProvider";
+
 export const Vault = () => {
   const [isProviderView, setIsProviderView] = useState(true);
   const { isMobile } = useIsMobile();
