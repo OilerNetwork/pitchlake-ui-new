@@ -5,6 +5,7 @@ import { Info } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 type ProgressBarProps = {
+  conn: string;
   roundState: string;
   now: number;
   progressStart: number;
@@ -30,10 +31,7 @@ const ProgressBar = ({
 
   const tooltipMsg = useMemo(() => {
     let msg = "";
-    let timeUntil = timeUntilTarget(
-      now.toString(),
-      (progressStart + timeEstimate).toString(),
-    );
+    let timeUntil = timeUntilTarget("0", timeEstimate.toString());
 
     if (timeUntil === "Now" || timeUntil === "Just now") timeUntil = "0s";
 
@@ -41,7 +39,7 @@ const ProgressBar = ({
     else if (roundState === "Auctioning")
       msg = `Auction ending in ~${timeUntil}`;
     else if (roundState === "Running") {
-      msg = `Round settling in ~${timeUntil}`;
+      msg = `Round settlement takes ~${timeUntil}`;
     } else msg = `Round settled ~${timeUntil}`;
 
     return msg;

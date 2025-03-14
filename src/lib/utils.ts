@@ -259,7 +259,7 @@ export const timeUntilTarget = (
   } else {
     // Past time
     if (diffInSeconds > -60) {
-      return "Just now";
+      return "Now";
     }
     let timeString = "";
     if (days > 0) timeString += `${days}d `;

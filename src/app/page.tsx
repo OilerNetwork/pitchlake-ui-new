@@ -40,10 +40,10 @@ export default function Home() {
         //Disable mainnet
         chain.network !== "mainnet" && (
           <div>
-            <p className="my-2 text-base text-white-alt py-2 font-medium">
+            <p className="my-2 mt-4 text-base text-white-alt py-2 font-medium">
               Popular Vaults
             </p>
-            <div className="grid grid-cols-2 w-full pt-4 gap-x-6 gap-y-6">
+            <div className="grid grid-cols-2 w-full pt-2 gap-x-6 gap-y-6">
               {vaults?.map((vault: string, index: number) => (
                 // <VaultTimeline key={vault.address + idx.toString()} vault={vault} />
                 <VaultCard key={index} vaultAddress={vault} />

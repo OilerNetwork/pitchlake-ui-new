@@ -4,8 +4,10 @@ import ProgressBar from "./ProgressBar";
 import ManualButtons from "./ManualButtons";
 import { useProgressEstimates } from "@/hooks/stateTransition/useProgressEstimates";
 import { useDemoTime } from "@/lib/demo/useDemoTime";
+import { useTimeContext } from "@/context/TimeProvider";
 
 type StateTransitionProps = {
+  conn: string;
   vaultState: VaultStateType | undefined;
   selectedRoundState: OptionRoundStateType | undefined;
   isPanelOpen: boolean;
@@ -18,12 +20,14 @@ type StateTransitionComponentType =
   | "ManualButtons";
 
 const StateTransition = ({
+  conn,
   vaultState,
   selectedRoundState,
   isPanelOpen,
   setModalState,
 }: StateTransitionProps) => {
-  const { demoNow: now } = useDemoTime(true, true, 1000);
+  const { demoNow: clientNow } = useDemoTime(true, true, 1000);
+  const { timestamp: l2Now } = useTimeContext();
   const { txnEstimate, fossilEstimate, errorEstimate } = useProgressEstimates();
 
   if (!vaultState) return null;
@@ -38,16 +42,27 @@ const StateTransition = ({
       : fossilEstimate;
 
   const componentType = (): StateTransitionComponentType => {
-    const _now = Number(now);
+    const _clientNow = Number(clientNow);
+    const _l2Now = Number(l2Now);
     const _target = Number(targetTimestamp);
 
-    if (roundState === "Settled" || _now < _target) return "Countdown";
-    else if (
-      roundState !== "Settled" &&
-      _now < _target + txnEstimate + errorEstimate
-    )
-      return "ProgressBar";
-    else return "ManualButtons";
+    if (roundState === "Settled") return "Countdown";
+    else if (_clientNow < _target) return "Countdown";
+    // (Client) now is > target
+    else {
+      // Non-demo, show manual buttons after cron estimate
+      if (conn !== "demo") {
+        if (_clientNow > _target + timeEstimate + errorEstimate)
+          return "ManualButtons";
+        else return "ProgressBar";
+      }
+      // Demo, ignore cron estimate, show progress bar until block is ready for manual buttons
+      else {
+        // If l2Now > bounds, manual buttons, else progress bar
+        if (_l2Now > _target) return "ManualButtons";
+        else return "ProgressBar";
+      }
+    }
   };
 
   if (
@@ -61,16 +76,17 @@ const StateTransition = ({
         {componentType() === "Countdown" ? (
           <Countdown
             roundState={roundState}
-            now={now}
+            now={clientNow}
             targetTimestamp={Number(targetTimestamp)}
             isPanelOpen={isPanelOpen}
           />
         ) : componentType() === "ProgressBar" ? (
           <ProgressBar
+            conn={conn}
             roundState={roundState}
-            now={now}
-            progressStart={Number(targetTimestamp)}
             timeEstimate={timeEstimate}
+            now={clientNow}
+            progressStart={Number(targetTimestamp)}
             isPanelOpen={isPanelOpen}
           />
         ) : (

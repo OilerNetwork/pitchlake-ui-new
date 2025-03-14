@@ -125,6 +125,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
           />
 
           <StateTransition
+            conn={conn}
             vaultState={vaultState}
             selectedRoundState={selectedRoundState}
             isPanelOpen={isPanelOpen}

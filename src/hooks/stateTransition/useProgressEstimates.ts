@@ -1,13 +1,10 @@
 import { useMemo } from "react";
-import { num } from "starknet";
-import { OptionRoundStateType } from "@/lib/types";
 import { useNewContext } from "@/context/NewProvider";
 import useVaultState from "../vault_v2/states/useVaultState";
 import useRoundState from "../vault_v2/states/useRoundState";
 
 export const useProgressEstimates = () => {
   const { conn } = useNewContext();
-
   const vaultState = useVaultState();
   const selectedRoundState = useRoundState(vaultState?.selectedRoundAddress);
 
@@ -22,14 +19,14 @@ export const useProgressEstimates = () => {
     const { auctionEndDate, optionSettleDate } = selectedRoundState;
     const roundDuration = Number(optionSettleDate) - Number(auctionEndDate);
 
-    let txnEstimate = 0; //90;
+    let txnEstimate = 0;
     let fossilEstimate = 0;
     let errorEstimate = 0;
 
     if (conn === "demo") {
-      txnEstimate = 15;
-      fossilEstimate = 15;
-      errorEstimate = 5;
+      txnEstimate = 30;
+      fossilEstimate = 30;
+      errorEstimate = 0;
     } else {
       txnEstimate = 90;
       errorEstimate = 30;
@@ -51,33 +48,6 @@ export const useProgressEstimates = () => {
     selectedRoundState?.auctionEndDate,
     selectedRoundState?.optionSettleDate,
   ]);
-
-  //const canAuctionStart = useMemo(() => {
-  //  return BigInt(timestamp) >= Number(selectedRoundState?.auctionStartDate);
-  //}, [timestamp, selectedRoundState]);
-
-  //const canAuctionEnd = useMemo(() => {
-  //  return BigInt(timestamp) >= Number(selectedRoundState?.auctionEndDate);
-  //}, [timestamp, selectedRoundState]);
-
-  //const canRoundSettle = useMemo(() => {
-  //  const roundSettleDate =
-  //    Number(selectedRoundState?.optionSettleDate) + conn === "demo"
-  //      ? 0
-  //      : FOSSIL_DELAY;
-
-  //  return BigInt(timestamp) >= roundSettleDate;
-  //}, [timestamp, selectedRoundState]);
-
-  //// will rm
-  //const canSendFossilRequest = useMemo(() => {
-  //  const roundSettleDate =
-  //    Number(selectedRoundState?.optionSettleDate) + conn === "demo"
-  //      ? 0
-  //      : FOSSIL_DELAY;
-
-  //  return BigInt(timestamp) >= roundSettleDate;
-  //}, [timestamp, selectedRoundState]);
 
   return {
     txnEstimate,

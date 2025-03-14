@@ -17,12 +17,12 @@ const ManualButtons = ({
   setModalState: any;
 }) => {
   const { vaultState, selectedRoundAddress } = useVaultState();
-  const vaultActions = useVaultActions();
-  const selectedRoundState = useRoundState(selectedRoundAddress);
   const { pendingTx } = useTransactionContext();
   const { account } = useAccount();
   const { timestamp } = useTimeContext();
   const { conn } = useNewContext();
+  const vaultActions = useVaultActions();
+  const selectedRoundState = useRoundState(selectedRoundAddress);
 
   const [expectedNextState, setExpectedNextState] = useState<string | null>(
     null,
@@ -52,7 +52,6 @@ const ManualButtons = ({
     // Exit early if round settled
     if (roundState === "Settled") return { isDisabled: true, roundState };
 
-    // Is now >= targetTimestamp
     const targetTimestamp =
       roundState === "Open"
         ? auctionStartDate
@@ -163,7 +162,7 @@ const ManualButtons = ({
   return (
     <div>
       <Hoverable dataId="stateTransitionCronFail" className="px-2 p-2">
-        {isPanelOpen && !expectedNextState && (
+        {isPanelOpen && !expectedNextState && conn !== "demo" && (
           <div className="text-[#DA718C] px-2 pb-2">
             Something went wrong,
             {account ? " please manually " : " connect account to manually "}
@@ -174,6 +173,12 @@ const ManualButtons = ({
                 : "settle the round."}
           </div>
         )}
+        {isPanelOpen && !expectedNextState && conn === "demo" && !account && (
+          <div className="text-[#DA718C] px-2 pb-2">
+            Connect account to transition the state.{" "}
+          </div>
+        )}
+
         <button
           disabled={isDisabled}
           className={`flex ${!isPanelOpen && !isDisabled ? "hover-zoom-small" : ""} ${
