@@ -41,10 +41,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
     yMax,
     yTicks,
   } = useChartData(activeLines, vaultState?.address);
-  console.log(
-    "roundAreas",
-    roundAreas
-  )
+
   // Strike and cap for all possibly displayed rounds
 
   //// Hover logic //
@@ -87,7 +84,6 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
   //}, [clearHoverTimer]);
 
   // Compute the maximum Y value based on active lines
-  
 
   // Custom X-axis tick component
   const CustomizedXAxisTick = (props: any) => {
@@ -264,7 +260,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
             />
             <Line
               style={{
-                strokeDasharray: "1 0 1"
+                strokeDasharray: "1 0 1",
               }}
               className="chart-area-twap"
               height={400}
@@ -299,9 +295,9 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
               animationDuration={animationDuration}
             />
             <Line
-            style={{
-                strokeDasharray: "1 0 1"
-            }}
+              style={{
+                strokeDasharray: "1 0 1",
+              }}
               type="monotone"
               className="chart-area-basefee"
               dataKey="unconfirmedBasefee"
@@ -373,11 +369,11 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
                 activeLines.CAP_LEVEL
                   ? "none"
                   : area.roundId ===
-                    (conn === "demo"
-                      ? getDemoRoundId(selectedRound)
-                      : selectedRound)
-                  ? "#ADA478"
-                  : "#524F44"
+                      (conn === "demo"
+                        ? getDemoRoundId(selectedRound)
+                        : selectedRound)
+                    ? "#ADA478"
+                    : "#524F44"
               }
               fillOpacity={
                 area.roundId ===
@@ -449,8 +445,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                   {entry?.name?.includes("Basefee")
                     ? "BASEFEE"
                     : entry?.name?.includes("Twap")
-                    ? "TWAP"
-                    : entry?.name.replace("_", " ")}
+                      ? "TWAP"
+                      : entry?.name.replace("_", " ")}
                   {": "}
                   {entry?.value !== undefined
                     ? Number(entry?.value).toFixed(2)
