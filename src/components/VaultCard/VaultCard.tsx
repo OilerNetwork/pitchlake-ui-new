@@ -88,10 +88,10 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
       : timeUntilTarget(
           timestamp.toString(),
           roundState?.roundState === "Open"
-            ? roundState?.auctionStartDate.toString()
+            ? auctionStartDate.toString()
             : roundState?.roundState === "Auctioning"
-              ? roundState?.auctionEndDate.toString()
-              : roundState?.optionSettleDate.toString(),
+              ? auctionEndDate.toString()
+              : optionSettleDate.toString(),
         );
 
   const router = useRouter();
