@@ -21,7 +21,7 @@ const useChartData = (activeLines: any, vaultAddress?: string) => {
 
     const toRound =
       conn === "demo" ? getDemoRoundId(selectedRound) : Number(selectedRound);
-    const fromRound = !isExpandedView ? toRound : toRound > 4 ? toRound - 4 : 1;
+    const fromRound = !isExpandedView ? toRound : toRound > 6 ? toRound - 6 : 1;
 
     return { fromRound, toRound };
   }, [selectedRound, isExpandedView]);
@@ -39,8 +39,12 @@ const useChartData = (activeLines: any, vaultAddress?: string) => {
   }, [_historicalData]);
 
   // Add strike and cap to gas data
-  const {parsedData,maxValue}: {parsedData: FormattedBlockData[],maxValue: number} = useMemo(() => {
-    if (!selectedRound || !historicalData || !gasData) return {parsedData: [],maxValue: 0};
+  const {
+    parsedData,
+    maxValue,
+  }: { parsedData: FormattedBlockData[]; maxValue: number } = useMemo(() => {
+    if (!selectedRound || !historicalData || !gasData)
+      return { parsedData: [], maxValue: 0 };
 
     const dataPoints =
       gasData.length > 0 ? gasData : [{ timestamp: xMin }, { timestamp: xMax }];
@@ -49,7 +53,7 @@ const useChartData = (activeLines: any, vaultAddress?: string) => {
 
     const refined = dataPoints?.map((item: any) => {
       const newItem: any = { ...item };
-      
+
       // Find the round this gas point falls in
       const roundThisItemIsIn = historicalData.rounds.find((r: any) => {
         const lowerBound = Number(r.deploymentDate);
@@ -58,7 +62,9 @@ const useChartData = (activeLines: any, vaultAddress?: string) => {
       });
 
       if (roundThisItemIsIn) {
-        const strike = Number(formatUnits(roundThisItemIsIn.strikePrice, "gwei"));
+        const strike = Number(
+          formatUnits(roundThisItemIsIn.strikePrice, "gwei"),
+        );
         const cap = strike * (1 + Number(roundThisItemIsIn.capLevel) / 10000);
 
         newItem.STRIKE = strike;
@@ -74,21 +80,26 @@ const useChartData = (activeLines: any, vaultAddress?: string) => {
 
       // Calculate max for all other values
       if (newItem.TWAP !== null && newItem.TWAP > max) max = newItem.TWAP;
-      if (newItem.BASEFEE !== null && newItem.BASEFEE > max) max = newItem.BASEFEE;
+      if (newItem.BASEFEE !== null && newItem.BASEFEE > max)
+        max = newItem.BASEFEE;
       if (newItem.basefee && newItem.basefee > max) max = newItem.basefee;
-      if (newItem.unconfirmedBasefee && newItem.unconfirmedBasefee > max) max = newItem.unconfirmedBasefee;
-      if (newItem.confirmedBasefee && newItem.confirmedBasefee > max) max = newItem.confirmedBasefee;
-      if (newItem.unconfirmedTwap && newItem.unconfirmedTwap > max) max = newItem.unconfirmedTwap;
-      if (newItem.confirmedTwap && newItem.confirmedTwap > max) max = newItem.confirmedTwap;
+      if (newItem.unconfirmedBasefee && newItem.unconfirmedBasefee > max)
+        max = newItem.unconfirmedBasefee;
+      if (newItem.confirmedBasefee && newItem.confirmedBasefee > max)
+        max = newItem.confirmedBasefee;
+      if (newItem.unconfirmedTwap && newItem.unconfirmedTwap > max)
+        max = newItem.unconfirmedTwap;
+      if (newItem.confirmedTwap && newItem.confirmedTwap > max)
+        max = newItem.confirmedTwap;
 
       return newItem;
     });
 
     return {
       parsedData: refined,
-      maxValue: max
+      maxValue: max,
     };
-}, [selectedRound, historicalData, gasData, xMin, xMax]);
+  }, [selectedRound, historicalData, gasData, xMin, xMax]);
 
   // Compute vertical segments and round areas based on historical data
   const { verticalSegments, roundAreas } = useMemo(() => {
@@ -105,12 +116,12 @@ const useChartData = (activeLines: any, vaultAddress?: string) => {
     const segments: any = [];
     const areas: any = [];
     const sortedData: any = [...parsedData].sort(
-      (a, b) => a.timestamp - b.timestamp
+      (a, b) => a.timestamp - b.timestamp,
     );
 
     // Filter rounds based on fromRoundId and toRoundId
     const filteredRounds = historicalData.rounds.filter(
-      (round: any) => round.roundId >= fromRound && round.roundId <= toRound
+      (round: any) => round.roundId >= fromRound && round.roundId <= toRound,
     );
 
     filteredRounds.forEach((round: any) => {
@@ -118,7 +129,7 @@ const useChartData = (activeLines: any, vaultAddress?: string) => {
 
       const capLevel = Number(round.capLevel);
       const strikePriceGwei = parseFloat(
-        formatUnits(round.strikePrice, "gwei")
+        formatUnits(round.strikePrice, "gwei"),
       );
       const deploymentDate = Number(round.deploymentDate);
       const optionSettleDate = Number(round.optionSettleDate);
@@ -162,7 +173,14 @@ const useChartData = (activeLines: any, vaultAddress?: string) => {
     });
 
     return { verticalSegments: segments, roundAreas: areas };
-  }, [isExpandedView, historicalData, parsedData, maxValue, fromRound, toRound]);
+  }, [
+    isExpandedView,
+    historicalData,
+    parsedData,
+    maxValue,
+    fromRound,
+    toRound,
+  ]);
 
   const { yMax, yTicks } = useMemo((): { yMax: number; yTicks: number[] } => {
     if (!parsedData) return { yMax: 0, yTicks: [] };
@@ -201,7 +219,7 @@ const useChartData = (activeLines: any, vaultAddress?: string) => {
     const defaultTickFormat = { label: null };
 
     const filteredRounds = historicalData.rounds.filter(
-      (round: any) => round.roundId >= fromRound && round.roundId <= toRound
+      (round: any) => round.roundId >= fromRound && round.roundId <= toRound,
     );
 
     // Generate midpoints for round IDs
