@@ -66,10 +66,6 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
 
   const { auctionStartDate, auctionEndDate, optionSettleDate } = roundState;
 
-  //const { auctionStartDate, auctionEndDate, optionSettleDate } = useTimestamps(
-  //  currentRoundAddress ? currentRoundAddress : "",
-  //);
-
   const timeUntilText =
     roundState?.roundState === "Open"
       ? "AUCTION STARTS"
@@ -84,9 +80,9 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
   const timeUntilValue =
     roundState?.roundState === "Loading" ||
     roundState?.roundState === "" ||
-    !roundState?.auctionStartDate ||
-    !roundState?.auctionEndDate ||
-    !roundState?.optionSettleDate ||
+    !auctionStartDate ||
+    !auctionEndDate ||
+    !optionSettleDate ||
     !timestamp
       ? "0"
       : timeUntilTarget(
