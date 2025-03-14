@@ -21,9 +21,10 @@ import { useTimeContext } from "@/context/TimeProvider";
 import useVaultStateRPC from "@/hooks/vault_v2/rpc/useVaultStateRPC";
 import { useMemo } from "react";
 import useOptionRoundStateRPC from "@/hooks/vault_v2/rpc/useOptionRoundStateRPC";
+import { useDemoTime } from "@/lib/demo/useDemoTime";
 export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
   const { conn } = useNewContext();
-  const { timestamp } = useTimeContext();
+  const { demoNow: timestamp } = useDemoTime(true, true, 1000);
   const { vaultState } = useVaultStateRPC({
     vaultAddress,
   });
