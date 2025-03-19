@@ -61,13 +61,12 @@ const useWebsocketChart = ({
     setConfirmedGasData(prevConfirmed => {
       // Create a map of existing confirmed blocks
       const blocksMap = new Map(
-        prevConfirmed
-          .filter(block => block.blockNumber)
+        prevConfirmed?.filter(block => block.blockNumber)
           .map(block => [block.blockNumber, block])
       );
 
       // Add new confirmed blocks
-      usableData.forEach(block => {
+      usableData?.forEach(block => {
         if (block.blockNumber) {
           blocksMap.set(block.blockNumber, block);
         }
