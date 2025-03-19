@@ -1,6 +1,22 @@
 import { screen, fireEvent } from "@testing-library/react";
 import ButtonTabs from "@/components/Vault/VaultActions/Tabs/ButtonTabs";
 import { renderWithProviders } from "@/__tests__/utils/TestWrapper";
+import { useHelpContext } from "@/context/HelpProvider";
+
+// Mock the HelpContext
+jest.mock("@/context/HelpProvider", () => ({
+  HelpProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useHelpContext: jest.fn().mockReturnValue({
+    setActiveDataId: jest.fn(),
+    activeDataId: null,
+    isHelpBoxOpen: false,
+    header: null,
+    isHoveringHelpBox: false,
+    content: null,
+    setIsHoveringHelpBox: jest.fn(),
+    toggleHelpBoxOpen: jest.fn(),
+  }),
+}));
 
 describe("ButtonTabs", () => {
   const defaultProps = {
@@ -9,8 +25,20 @@ describe("ButtonTabs", () => {
     setActiveTab: jest.fn(),
   };
 
+  const mockSetActiveDataId = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
+    (useHelpContext as jest.Mock).mockReturnValue({
+      setActiveDataId: mockSetActiveDataId,
+      activeDataId: null,
+      isHelpBoxOpen: false,
+      header: null,
+      isHoveringHelpBox: false,
+      content: null,
+      setIsHoveringHelpBox: jest.fn(),
+      toggleHelpBoxOpen: jest.fn(),
+    });
   });
 
   it("renders all tabs and handles tab selection", () => {

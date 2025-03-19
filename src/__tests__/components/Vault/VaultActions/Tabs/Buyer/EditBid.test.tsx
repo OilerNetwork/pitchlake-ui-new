@@ -2,6 +2,7 @@ import { act } from "react";
 import { screen, fireEvent } from "@testing-library/react";
 import EditBid from "@/components/Vault/VaultActions/Tabs/Buyer/EditBid";
 import { renderWithProviders } from "@/__tests__/utils/TestWrapper";
+import { useHelpContext } from "@/context/HelpProvider";
 
 // Mock all external dependencies
 jest.mock("@starknet-react/core", () => ({
@@ -14,6 +15,19 @@ jest.mock("@/context/TransactionProvider", () => ({
     setPendingTx: jest.fn(),
     setStatusModalProps: jest.fn(),
     updateStatusModalProps: jest.fn(),
+  }),
+}));
+
+jest.mock("@/context/HelpProvider", () => ({
+  useHelpContext: jest.fn().mockReturnValue({
+    setActiveDataId: jest.fn(),
+    activeDataId: null,
+    isHelpBoxOpen: false,
+    header: null,
+    isHoveringHelpBox: false,
+    content: null,
+    setIsHoveringHelpBox: jest.fn(),
+    toggleHelpBoxOpen: jest.fn(),
   }),
 }));
 

@@ -4,7 +4,18 @@ import { useHelpContext } from "@/context/HelpProvider";
 
 // Mock the hooks
 jest.mock("@/context/HelpProvider", () => ({
-  useHelpContext: jest.fn(),
+  useHelpContext: jest.fn().mockReturnValue({
+    setActiveDataId: jest.fn(),
+    activeDataId: null,
+    isHelpBoxOpen: false,
+    header: null,
+    isHoveringHelpBox: false,
+    content: null,
+    setIsHoveringHelpBox: jest.fn(),
+    toggleHelpBoxOpen: jest.fn(),
+    setHelpContent: jest.fn(),
+    clearHelpContent: jest.fn(),
+  }),
 }));
 
 // Mock the icons
@@ -28,9 +39,19 @@ describe("ProfileDropdown Component", () => {
     copyToClipboard: jest.fn(),
   };
 
+  const mockSetActiveDataId = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
     (useHelpContext as jest.Mock).mockReturnValue({
+      setActiveDataId: mockSetActiveDataId,
+      activeDataId: null,
+      isHelpBoxOpen: false,
+      header: null,
+      isHoveringHelpBox: false,
+      content: null,
+      setIsHoveringHelpBox: jest.fn(),
+      toggleHelpBoxOpen: jest.fn(),
       setHelpContent: jest.fn(),
       clearHelpContent: jest.fn(),
     });

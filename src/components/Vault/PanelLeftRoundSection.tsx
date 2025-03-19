@@ -34,80 +34,6 @@ const PanelLeftRoundSection = ({
 }: PanelLeftRoundSectionProps) => {
   const explorer = useExplorer();
 
-  const RemainingTimeElement = () => {
-    if (
-      !selectedRoundState ||
-      !selectedRoundState.roundState ||
-      !selectedRoundState.auctionStartDate ||
-      !selectedRoundState.auctionEndDate ||
-      !selectedRoundState.optionSettleDate
-    )
-      return null;
-
-    const { roundState, auctionStartDate, auctionEndDate, optionSettleDate } =
-      selectedRoundState;
-    const now = new Date();
-    const currentTimestamp = now.getTime() / 1000;
-    //const currentTimestamp = Number(timestamp);
-
-    let header = "";
-    let timeText = "Loading...";
-    let targetTimestamp: number | null = null;
-    let key = "past";
-
-    const table: any = {
-      Open: {
-        future: "Auction Starts In",
-        past: "Auction Starting...",
-      },
-      Auctioning: {
-        future: "Auction Ends In",
-        past: "Auction Ending...",
-      },
-      Running: { future: "Round Settles In", past: "Round Settling..." },
-      Settled: { past: "Round Settled" },
-    };
-
-    switch (roundState) {
-      case "Open":
-        targetTimestamp = Number(auctionStartDate);
-        break;
-      case "Auctioning":
-        targetTimestamp = Number(auctionEndDate);
-        break;
-      case "Running":
-        targetTimestamp = Number(optionSettleDate);
-        break;
-      case "Settled":
-        targetTimestamp = Number(optionSettleDate);
-        break;
-    }
-
-    if (!targetTimestamp) return null;
-
-    if (currentTimestamp < targetTimestamp) {
-      key = "future";
-    }
-
-    header = table[roundState][key];
-    timeText = timeUntilTarget(
-      currentTimestamp.toString(),
-      targetTimestamp.toString(),
-    );
-
-    if (roundState === "Settled") return;
-
-    return (
-      <Hoverable
-        dataId={`leftPanelRoundTime_${roundState}_${key}`}
-        className="max-h-full flex flex-row justify-between items-center p-2 w-full"
-      >
-        <p className="text-[#BFBFBF]">{header}</p>
-        {key === "future" && <p>{timeText}</p>}
-      </Hoverable>
-    );
-  };
-
   const stateStyles: any = {
     Open: {
       bg: "bg-[#214C0B80]",
@@ -175,7 +101,7 @@ const PanelLeftRoundSection = ({
   ]);
 
   return (
-    <div className="align-center text-[14px] bg-black-alt border-[1px] border-greyscale-800 items-start rounded-lg w-full flex flex-col flex-grow h-full max-h-full">
+    <div className="align-center text-[14px] bg-black-alt border-greyscale-800 items-start w-full flex flex-col flex-grow h-full max-h-full">
       <div className="flex flex-col w-full px-3 border-t-[1px] border-greyscale-800">
         <Hoverable
           dataId="leftPanelRoundBar"
@@ -209,7 +135,7 @@ const PanelLeftRoundSection = ({
           className={`flex flex-col mt-2 overflow-scroll no-scrollbar ${
             isPanelOpen ? "" : "hidden"
           } ${
-            !optionRoundIsOpen ? "h-0" : "h-[250px]"
+            !optionRoundIsOpen ? "h-0" : "h-[238px]"
           } transition-all duration-900 max-h-full`}
         >
           <Hoverable
@@ -366,7 +292,6 @@ const PanelLeftRoundSection = ({
               </p>
             </Hoverable>
           )}
-          <RemainingTimeElement />
         </div>
       </div>
     </div>

@@ -23,18 +23,17 @@ const mockHooks = {
   useTransactionContext: jest.fn(() => ({
     pendingTx: false,
     setPendingTx: jest.fn(),
-    setStatusModalProps: jest.fn()
+    setStatusModalProps: jest.fn(),
   })),
   useHelpContext: jest.fn(() => ({
-    setContent: jest.fn(),
-    setHeader: jest.fn(),
+    setActiveDataId: jest.fn(),
     isHoveringHelpBox: false,
     isHelpBoxOpen: false,
     toggleHelpBoxOpen: jest.fn(),
     content: "",
     header: "",
     setIsHoveringHelpBox: jest.fn(),
-    severity: "info"
+    severity: "info",
   })),
   useAccount: jest.fn(),
   useContract: jest.fn(() => ({
@@ -42,59 +41,61 @@ const mockHooks = {
       typedv2: jest.fn().mockReturnValue({
         connect: jest.fn(),
         withdraw: jest.fn().mockResolvedValue({
-          transaction_hash: "0x123"
-        })
-      })
-    }
+          transaction_hash: "0x123",
+        }),
+      }),
+    },
   })),
   useProvider: jest.fn(() => ({
     provider: {
       getBlock: jest.fn(),
       callContract: jest.fn(),
-      getNonceForAddress: jest.fn().mockResolvedValue("0x1")
-    }
+      getNonceForAddress: jest.fn().mockResolvedValue("0x1"),
+    },
   })),
   useUiContext: jest.fn(() => ({
-    openWalletLogin: jest.fn()
-  }))
+    openWalletLogin: jest.fn(),
+  })),
 } as const;
 
 // Mock all hooks using the mockHooks object
 jest.mock("@/context/NewProvider", () => ({
-  useNewContext: () => mockHooks.useNewContext()
+  useNewContext: () => mockHooks.useNewContext(),
 }));
 
 jest.mock("@/hooks/vault_v2/states/useLPState", () => ({
   __esModule: true,
-  default: () => mockHooks.useLPState()
+  default: () => mockHooks.useLPState(),
 }));
 
 jest.mock("@/hooks/vault_v2/actions/useVaultActions", () => ({
   __esModule: true,
-  default: () => mockHooks.useVaultActions()
+  default: () => mockHooks.useVaultActions(),
 }));
 
 jest.mock("@/context/TransactionProvider", () => ({
-  useTransactionContext: () => mockHooks.useTransactionContext()
+  useTransactionContext: () => mockHooks.useTransactionContext(),
 }));
 
 jest.mock("@/context/HelpProvider", () => ({
-  useHelpContext: () => mockHooks.useHelpContext()
+  useHelpContext: () => mockHooks.useHelpContext(),
 }));
 
 jest.mock("@starknet-react/core", () => ({
   useAccount: () => mockHooks.useAccount(),
   useContract: () => mockHooks.useContract(),
-  useProvider: () => mockHooks.useProvider()
+  useProvider: () => mockHooks.useProvider(),
 }));
 
 jest.mock("@/context/UiProvider", () => ({
-  useUiContext: () => mockHooks.useUiContext()
+  useUiContext: () => mockHooks.useUiContext(),
 }));
 
 describe("WithdrawLiquidity", () => {
   // Reusable setup function for common test scenario
-  const setupTest = (overrides: Partial<Record<keyof MockHooks, unknown>> = {}) => {
+  const setupTest = (
+    overrides: Partial<Record<keyof MockHooks, unknown>> = {},
+  ) => {
     const mockShowConfirmation = jest.fn();
     const mockWithdrawLiquidity = jest.fn();
 
@@ -123,8 +124,8 @@ describe("WithdrawLiquidity", () => {
         account: "0x123",
       },
       useUiContext: {
-        openWalletLogin: jest.fn()
-      }
+        openWalletLogin: jest.fn(),
+      },
     };
 
     // Apply overrides to default mocks
@@ -188,11 +189,11 @@ describe("WithdrawLiquidity", () => {
     // Test confirmation flow
     fireEvent.change(amountInput, { target: { value: "5.0" } });
     fireEvent.click(withdrawButton);
-    
+
     expect(mockShowConfirmation).toHaveBeenCalledWith(
       "Liquidity Withdraw",
       expect.anything(),
-      expect.any(Function)
+      expect.any(Function),
     );
 
     // Test withdraw action
@@ -209,7 +210,7 @@ describe("WithdrawLiquidity", () => {
         pendingTx: true,
         setPendingTx: jest.fn(),
         setStatusModalProps: jest.fn(),
-      }
+      },
     });
 
     render(<WithdrawLiquidity showConfirmation={mockShowConfirmation} />);
@@ -222,7 +223,7 @@ describe("WithdrawLiquidity", () => {
     const { mockShowConfirmation } = setupTest({
       useAccount: {
         account: null,
-      }
+      },
     });
 
     render(<WithdrawLiquidity showConfirmation={mockShowConfirmation} />);
@@ -238,8 +239,8 @@ describe("WithdrawLiquidity", () => {
         account: null,
       },
       useUiContext: {
-        openWalletLogin: mockOpenWalletLogin
-      }
+        openWalletLogin: mockOpenWalletLogin,
+      },
     });
 
     render(<WithdrawLiquidity showConfirmation={mockShowConfirmation} />);
@@ -248,4 +249,4 @@ describe("WithdrawLiquidity", () => {
     fireEvent.click(amountInput);
     expect(mockOpenWalletLogin).toHaveBeenCalled();
   });
-}); 
+});

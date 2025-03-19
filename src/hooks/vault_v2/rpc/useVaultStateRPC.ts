@@ -25,35 +25,35 @@ const useVaultStateRPC = ({
   //States without a param
   const { data: alpha } = useContractRead({
     ...contractData,
-    
+
     functionName: "get_alpha",
     args: [],
     watch: true,
   });
   const { data: strikeLevel } = useContractRead({
     ...contractData,
-    
+
     functionName: "get_strike_level",
     args: [],
     watch: true,
   });
   const { data: ethAddress } = useContractRead({
     ...contractData,
-    
+
     functionName: "get_eth_address",
     args: [],
     watch: true,
   });
   const { data: fossilClientAddress } = useContractRead({
     ...contractData,
-    
+
     functionName: "get_fossil_client_address",
     args: [],
     watch: true,
   });
   const { data: currentRoundId } = useContractRead({
     ...contractData,
-    
+
     functionName: "get_current_round_id",
     args: [],
     watch: true,
@@ -63,25 +63,24 @@ const useVaultStateRPC = ({
     functionName: "get_vault_locked_balance",
     args: [],
     watch: true,
-    
   });
   const { data: unlockedBalance } = useContractRead({
     ...contractData,
-    
+
     functionName: "get_vault_unlocked_balance",
     args: [],
     watch: true,
   });
   const { data: stashedBalance } = useContractRead({
     ...contractData,
-    
+
     functionName: "get_vault_stashed_balance",
     args: [],
     watch: true,
   });
   const { data: queuedBps } = useContractRead({
     ...contractData,
-    
+
     functionName: "get_vault_queued_bps",
     args: [],
     watch: true,
@@ -89,7 +88,7 @@ const useVaultStateRPC = ({
 
   const { data: round1Address } = useContractRead({
     ...contractData,
-    
+
     functionName: "get_round_address",
     args: [1],
     watch: false,
@@ -98,7 +97,7 @@ const useVaultStateRPC = ({
   const { data: deploymentDate } = useContractRead({
     ...contractData,
     address: round1Address?.toString(),
-    
+
     abi: optionRoundABI,
     functionName: "get_deployment_date",
     args: [],
@@ -106,7 +105,7 @@ const useVaultStateRPC = ({
   });
   const { data: selectedRoundAddress } = useContractRead({
     ...contractData,
-    
+
     functionName: "get_round_address",
     args:
       selectedRound && selectedRound !== 0
@@ -116,7 +115,7 @@ const useVaultStateRPC = ({
   });
   const { data: currentRoundAddress } = useContractRead({
     ...contractData,
-    
+
     functionName: "get_round_address",
     args: currentRoundId ? [currentRoundId?.toString()] : [],
     watch: true,
@@ -130,12 +129,13 @@ const useVaultStateRPC = ({
 
   const k = useMemo(
     () => (strikeLevel ? Number(strikeLevel.toString()) : 0),
-    [strikeLevel]
+    [strikeLevel],
   );
   const vaultType = useMemo(
     () => (k > 0 ? "OTM" : k == 0 ? "ATM" : "ITM"),
-    [k]
+    [k],
   );
+
   return {
     vaultState: {
       address: vaultAddress,

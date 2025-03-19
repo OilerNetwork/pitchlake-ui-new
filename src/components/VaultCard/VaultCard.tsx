@@ -11,24 +11,20 @@ import {
   HourglassSimpleIcon,
   PieChartIcon,
   ShoppingCartIcon,
-  SpeedometerIcon,
   TagIcon,
 } from "@/components/Icons";
-import useVaultBalances from "@/hooks/vault/state/useVaultBalances";
 import { num } from "starknet";
 import { formatEther, formatUnits } from "ethers";
-import useStrikePrice from "@/hooks/optionRound/state/useStrikePrice";
-import useCapLevel from "@/hooks/optionRound/state/useCapLevel";
-import useRoundState from "@/hooks/optionRound/state/useRoundState";
 import useTimestamps from "@/hooks/optionRound/state/useTimestamps";
 import { useNewContext } from "@/context/NewProvider";
 import { useTimeContext } from "@/context/TimeProvider";
 import useVaultStateRPC from "@/hooks/vault_v2/rpc/useVaultStateRPC";
 import { useMemo } from "react";
 import useOptionRoundStateRPC from "@/hooks/vault_v2/rpc/useOptionRoundStateRPC";
+import { useDemoTime } from "@/lib/demo/useDemoTime";
 export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
   const { conn } = useNewContext();
-  const { timestamp } = useTimeContext();
+  const { demoNow: timestamp } = useDemoTime(true, true, 1000);
   const { vaultState } = useVaultStateRPC({
     vaultAddress,
   });
@@ -50,9 +46,10 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
     return { cap: cap.toFixed(2) };
   }, [roundState?.strikePrice, roundState?.capLevel]);
 
+  // Returns either the reserve price or the clearing price
+  // If round is Open | Auctioning => reserve price, if Running & options sell => clearing price, else reserve price
   const { premium } = useMemo(() => {
     const { reservePrice, clearingPrice } = roundState;
-    console.log("roundState", clearingPrice, reservePrice);
 
     if (clearingPrice == 0)
       return {
@@ -68,15 +65,18 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
       };
   }, [roundState?.reservePrice, roundState?.clearingPrice]);
 
-  const { auctionStartDate, auctionEndDate, optionSettleDate } = useTimestamps(
-    currentRoundAddress ? currentRoundAddress : "",
-  );
+  const { auctionStartDate, auctionEndDate, optionSettleDate } = roundState;
+
   const timeUntilText =
     roundState?.roundState === "Open"
       ? "AUCTION STARTS"
       : roundState?.roundState === "Auctioning"
         ? "AUCTION ENDS"
-        : "ROUND SETTLES";
+        : roundState?.roundState === "Running"
+          ? "ROUND SETTLES"
+          : roundState?.roundState === "Settled"
+            ? "ROUND SETTLED"
+            : "Loading...";
 
   const timeUntilValue =
     roundState?.roundState === "Loading" ||
@@ -112,7 +112,7 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
       <div className="bg-[#1A1A16] rounded-t-lg p-4 text-white group-hover:bg-[#1D1D18] transition duration-200">
         <div className="flex flex-row items-center">
           <p data-testid="vault-duration" className="text-[14px] font-semibold">
-            {auctionEndDate && optionSettleDate
+            {auctionEndDate !== "0" && optionSettleDate !== "0"
               ? timeUntilTargetFormal(
                   auctionEndDate.toString(),
                   optionSettleDate.toString(),
@@ -136,6 +136,14 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
       </div>
       <div className="flex flex-row w-full ">
         <div className="flex flex-col p-2 w-full border-r-[1px] border-greyscale-800">
+          <div className="flex flex-row justify-between m-2">
+            <div className="flex flex-row items-center">
+              <p className="font-medium text-[14px] text-[#FAFAFA]">
+                Vault Stats
+              </p>
+            </div>
+          </div>
+
           <div className="flex flex-row justify-between m-2">
             <div className="flex flex-row items-center">
               <TagIcon classname="w-4 h-4 mr-2" stroke={"var(--greyscale)"} />
@@ -195,12 +203,20 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
         <div className="flex flex-col p-2 w-full border-l-[1px] border-greyscale-800">
           <div className="flex flex-row justify-between m-2">
             <div className="flex flex-row items-center">
+              <p className="font-medium text-[14px] text-[#FAFAFA]">
+                Current Round Stats
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-row justify-between m-2">
+            <div className="flex flex-row items-center">
               <ShoppingCartIcon
                 classname="w-4 h-4 mr-2"
                 stroke={"var(--greyscale)"}
               />
               <p className="font-regular text-[14px] text-[#BFBFBF]">
-                Premium:
+                PREMIUM:
               </p>
             </div>
             <p
@@ -216,7 +232,7 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
                 classname="w-4 h-4 mr-2"
                 stroke={"var(--greyscale)"}
               />
-              <p className="font-regular text-[14px] text-[#BFBFBF]">Strike:</p>
+              <p className="font-regular text-[14px] text-[#BFBFBF]">STRIKE:</p>
             </div>
             <p
               data-testid="vault-strike"
@@ -235,7 +251,7 @@ export default function VaultCard({ vaultAddress }: { vaultAddress: string }) {
                 classname="w-4 h-4 mr-2"
                 stroke={"var(--greyscale)"}
               />
-              <p className="font-regular text-[14px] text-[#BFBFBF]">Cap:</p>
+              <p className="font-regular text-[14px] text-[#BFBFBF]">CAP:</p>
             </div>
             <p
               data-testid="vault-cap"

@@ -92,12 +92,13 @@ const PanelLeftVaultSection = ({
     <div
       className={`flex flex-col w-full px-3 border-t-[1px] border-greyscale-800`}
     >
-      <Hoverable dataId="leftPanelVaultBar">
-        <div
+      <div>
+        <Hoverable
           onClick={isPanelOpen ? toggleVaultOpen : openJustVaultTab}
           className={`flex flex-row w-full mt-3 rounded-md p-3 ${
             isPanelOpen ? "justify-between bg-faded-black" : "justify-center"
           } cursor-pointer`}
+          dataId="leftPanelVaultBar"
         >
           <div>
             <SafeIcon
@@ -118,7 +119,7 @@ const PanelLeftVaultSection = ({
               )}
             </div>
           </div>
-        </div>
+        </Hoverable>
         <div
           className={`flex flex-col mt-2 overflow-scroll no-scrollbar gap-1 ${
             isPanelOpen ? "" : "hidden"
@@ -243,7 +244,7 @@ const PanelLeftVaultSection = ({
             <p>0%</p>
           </Hoverable>
         </div>
-      </Hoverable>
+      </div>
     </div>
   );
 };

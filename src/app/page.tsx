@@ -10,6 +10,7 @@ export default function Home() {
   const { vaults: wsVaults } = useWebSocketHome();
   const { chain } = useNetwork();
   // @NOTE filtering done in this order to maintain correct ordering (until proper vault sorting is implemented)
+  // TODO: Switch back to env var for this
   const vaults =
     process.env.NEXT_PUBLIC_ENVIRONMENT === "demo"
       ? ["0x0677ead18a571524525eb1d5fbb18431efe869f07d700f03aa66ad0abb5de01d"]
@@ -24,6 +25,7 @@ export default function Home() {
             "0x056c4bc4a501faab243c924638922ea08d07f3c2959371c4475a7d598f66d08f",
             "0x04f9996f98fc454ec733715787a9ac4bb771bf9dea608fc3f6ff37606f1f88c3",
           ];
+
   //process.env.NEXT_PUBLIC_VAULT_ADDRESSES?.split(",");
 
   const { isMobile } = useIsMobile();
@@ -38,10 +40,10 @@ export default function Home() {
         //Disable mainnet
         chain.network !== "mainnet" && (
           <div>
-            <p className="my-2 text-base text-white-alt py-2 font-medium">
+            <p className="my-2 mt-4 text-base text-white-alt py-2 font-medium">
               Popular Vaults
             </p>
-            <div className="grid grid-cols-2 w-full pt-4 gap-x-6 gap-y-6">
+            <div className="grid grid-cols-2 w-full pt-2 gap-x-6 gap-y-6">
               {vaults?.map((vault: string, index: number) => (
                 // <VaultTimeline key={vault.address + idx.toString()} vault={vault} />
                 <VaultCard key={index} vaultAddress={vault} />

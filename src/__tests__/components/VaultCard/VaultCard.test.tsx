@@ -71,9 +71,7 @@ describe("VaultCard", () => {
       clearingPrice: "0",
       soldLiquidity: "1000000000",
       premiums: "100000000",
-      totalPayout: "50000000"
-    });
-    (useTimestamps as jest.Mock).mockReturnValue({
+      totalPayout: "50000000",
       auctionStartDate: "1234567890",
       auctionEndDate: "1234567899",
       optionSettleDate: "1234567999"
@@ -97,12 +95,10 @@ describe("VaultCard", () => {
       clearingPrice: "0",
       soldLiquidity: "0",
       premiums: "0",
-      totalPayout: "0"
-    });
-    (useTimestamps as jest.Mock).mockReturnValue({
-      auctionStartDate: undefined,
-      auctionEndDate: undefined,
-      optionSettleDate: undefined
+      totalPayout: "0",
+      auctionStartDate: "0",
+      auctionEndDate: "0",
+      optionSettleDate: "0"
     });
     
     render(<VaultCard vaultAddress="0x123" />);
@@ -132,7 +128,10 @@ describe("VaultCard", () => {
       clearingPrice: "0",
       soldLiquidity: "1000000000",
       premiums: "100000000",
-      totalPayout: "50000000"
+      totalPayout: "50000000",
+      auctionStartDate: "1234567890",
+      auctionEndDate: "1234567899",
+      optionSettleDate: "1234567999"
     });
     const { rerender } = render(<VaultCard vaultAddress="0x123" />);
     expect(screen.getByTestId("vault-time-label")).toHaveTextContent("AUCTION STARTS");
@@ -146,21 +145,27 @@ describe("VaultCard", () => {
       clearingPrice: "0",
       soldLiquidity: "1000000000",
       premiums: "100000000",
-      totalPayout: "50000000"
+      totalPayout: "50000000",
+      auctionStartDate: "1234567890",
+      auctionEndDate: "1234567899",
+      optionSettleDate: "1234567999"
     });
     rerender(<VaultCard vaultAddress="0x123" />);
     expect(screen.getByTestId("vault-time-label")).toHaveTextContent("AUCTION ENDS");
 
     // Test Active state
     (useOptionRoundStateRPC as jest.Mock).mockReturnValue({
-      roundState: "Active",
+      roundState: "Running",
       capLevel: "1000",
       strikePrice: "2000000000",
       reservePrice: "100000000",
       clearingPrice: "0",
       soldLiquidity: "1000000000",
       premiums: "100000000",
-      totalPayout: "50000000"
+      totalPayout: "50000000",
+      auctionStartDate: "1234567890",
+      auctionEndDate: "1234567899",
+      optionSettleDate: "1234567999"
     });
     rerender(<VaultCard vaultAddress="0x123" />);
     expect(screen.getByTestId("vault-time-label")).toHaveTextContent("ROUND SETTLES");

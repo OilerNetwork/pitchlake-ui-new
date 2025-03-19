@@ -3,6 +3,10 @@
     "header": "Home",
     "text": "Return to the homepage."
   },
+  "backButton": {
+    "header": "Home",
+    "text": "Return to the homepage."
+  },
   "networkSelector": {
     "header": "Network Selector",
     "text": "Select which network to connect to."
@@ -96,7 +100,7 @@
     "text": "The strike level of the vault. Determines the next round's strike price."
   },
   "leftPanelVaultFees": {
-    "header": "Vault Strike Level",
+    "header": "Vault Strike Fees",
     "text": "The vault's fees."
   },
   "leftPanelRoundBar": {
@@ -215,6 +219,24 @@
     "header": "Start Auction",
     "text": "Button to start the round's auction once the auction start date is reached."
   },
+  "stateTransitionCronFail": {
+    "header": "Something Went Wrong",
+    "text": "The transaction to transition the state should have happened by now. You can manually trigger the transition by clicking this button."
+  },
+  "progressBar_Open": {
+    "header": "Auction Starting",
+    "text": "The transaction to start the auction is in progress."
+  },
+  "progressBar_Auctioning": {
+    "header": "Auction Ending",
+    "text": "The transaction to end the auction is in progress."
+  },
+
+  "progressBar_Running": {
+    "header": "Round Settling",
+    "text": "The round is being settled. This process may take up to a couple hours while neccessary data are calculated, proven, and verified."
+  },
+
   "leftPanelStateTransitionButton_Auctioning": {
     "header": "End Auction",
     "text": "Button to end the round's auction once the auction end date is reached."
@@ -254,6 +276,22 @@
   "chartLineButton_CAP_LEVEL": {
     "header": "Chart: Cap Level",
     "text": "View the cap level."
+  },
+  "gotItButton": {
+    "header": "Go Back",
+    "text": "Return to the previous section."
+  },
+  "goBackButton": {
+    "header": "Go Back",
+    "text": "Return to the previous section."
+  },
+  "actionTabConfirm": {
+    "header": "Confirm Transaction",
+    "text": "Confirm the pending transaction."
+  },
+  "actionTabClose": {
+    "header": "Reject Transaction",
+    "text": "Reject the pending transaction."
   },
   "actionTab_Deposit": {
     "header": "Deposit Tab",

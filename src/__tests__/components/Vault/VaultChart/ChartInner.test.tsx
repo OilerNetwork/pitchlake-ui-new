@@ -11,9 +11,9 @@ jest.mock("@starknet-react/core", () => ({
   useProvider: jest.fn(() => ({
     provider: {
       getBlock: jest.fn(),
-      callContract: jest.fn()
-    }
-  }))
+      callContract: jest.fn(),
+    },
+  })),
 }));
 
 jest.mock("@/context/NewProvider", () => ({
@@ -23,13 +23,13 @@ jest.mock("@/context/NewProvider", () => ({
     wsData: {
       wsVaultState: {
         currentRoundId: "5",
-        address: "0x123"
-      }
+        address: "0x123",
+      },
     },
     mockData: {
       vaultState: {
         currentRoundId: "5",
-        address: "0x123"
+        address: "0x123",
       },
       optionRoundStates: [
         {
@@ -37,19 +37,18 @@ jest.mock("@/context/NewProvider", () => ({
           roundId: "1",
           startTimestamp: "1000",
           duration: "1000",
-          roundState: "Auctioning"
-        }
-      ]
-    }
-  }))
+          roundState: "Auctioning",
+        },
+      ],
+    },
+  })),
 }));
 
 jest.mock("@/context/HelpProvider", () => ({
   useHelpContext: jest.fn(() => ({
-    setContent: jest.fn(),
-    setHeader: jest.fn(),
+    setActiveDataId: jest.fn(),
     isHoveringHelpBox: false,
-  }))
+  })),
 }));
 
 jest.mock("@/hooks/chart/useHistoricalRoundParams", () => ({
@@ -62,11 +61,11 @@ jest.mock("@/hooks/chart/useHistoricalRoundParams", () => ({
           optionSettleDate: "2000",
           strikePrice: "100000000000",
           capLevel: "1000",
-          address: vaultAddress
-        }
-      ]
-    }
-  }))
+          address: vaultAddress,
+        },
+      ],
+    },
+  })),
 }));
 
 jest.mock("@/hooks/chart/useChartData", () => ({
@@ -100,7 +99,7 @@ jest.mock("@/context/ChartProvider", () => ({
     setIsExpandedView: jest.fn(),
     xMax: 2000,
     xMin: 1000,
-  }))
+  })),
 }));
 
 jest.mock("@/hooks/vault_v2/states/useRoundState", () => ({
@@ -110,7 +109,7 @@ jest.mock("@/hooks/vault_v2/states/useRoundState", () => ({
     optionSettleDate: "2000",
     strikePrice: "100000000000",
     capLevel: "1000",
-  }))
+  })),
 }));
 
 jest.mock("@/hooks/vault_v2/states/useVaultState", () => ({
@@ -118,11 +117,11 @@ jest.mock("@/hooks/vault_v2/states/useVaultState", () => ({
   default: jest.fn(() => ({
     vaultState: {
       address: "0x123",
-      currentRoundId: "5"
+      currentRoundId: "5",
     },
     isLoading: false,
-    error: null
-  }))
+    error: null,
+  })),
 }));
 
 // Mock recharts components
@@ -131,11 +130,11 @@ jest.mock("recharts", () => ({
     <div data-testid="composed-chart">{children}</div>
   ),
   Area: ({ dataKey }: { dataKey: string }) => {
-    const testId = `chart-area-${dataKey.toLowerCase().replace(/\./g, '')}`;
+    const testId = `chart-area-${dataKey.toLowerCase().replace(/\./g, "")}`;
     return <div data-testid={testId} />;
   },
   Line: ({ dataKey }: { dataKey: string }) => {
-    const testId = `chart-line-${dataKey.toLowerCase().replace(/\./g, '')}`;
+    const testId = `chart-line-${dataKey.toLowerCase().replace(/\./g, "")}`;
     return <div data-testid={testId} />;
   },
   XAxis: () => <div data-testid="x-axis" />,
@@ -150,9 +149,13 @@ jest.mock("recharts", () => ({
   Defs: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="defs">{children}</div>
   ),
-  LinearGradient: ({ children, id }: { children: React.ReactNode; id: string }) => (
-    <div data-testid="linear-gradient">{children}</div>
-  ),
+  LinearGradient: ({
+    children,
+    id,
+  }: {
+    children: React.ReactNode;
+    id: string;
+  }) => <div data-testid="linear-gradient">{children}</div>,
   Stop: ({ offset, stopColor }: { offset: string; stopColor: string }) => (
     <div data-testid="stop" style={{ offset, backgroundColor: stopColor }} />
   ),
@@ -168,9 +171,7 @@ const renderWithProviders = (ui: React.ReactElement) => {
   });
 
   return render(
-    <QueryClientProvider client={queryClient}>
-      {ui}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
   );
 };
 
@@ -181,6 +182,7 @@ describe("GasPriceChart", () => {
 
   it("renders chart with correct components and data visualization", () => {
     (useChart as jest.Mock).mockReturnValue({
+
       parsedData: [
         { 
           timestamp: 1000, 
@@ -203,14 +205,14 @@ describe("GasPriceChart", () => {
     });
 
     const { getByTestId } = renderWithProviders(
-      <GasPriceChart 
+      <GasPriceChart
         activeLines={{
           TWAP: true,
           BASEFEE: true,
           STRIKE: true,
           CAP_LEVEL: true,
         }}
-      />
+      />,
     );
 
     expect(getByTestId("responsive-container")).toBeInTheDocument();
@@ -224,15 +226,17 @@ describe("GasPriceChart", () => {
     (useHistoricalRoundParams as jest.Mock).mockReturnValue({ vaultData: undefined });
 
     const { container } = renderWithProviders(
-      <GasPriceChart 
+      <GasPriceChart
         activeLines={{
           TWAP: true,
           BASEFEE: true,
         }}
-      />
+      />,
     );
 
-    expect(container.querySelector(".gas-price-chart-loading")).toBeInTheDocument();
+    expect(
+      container.querySelector(".gas-price-chart-loading"),
+    ).toBeInTheDocument();
   });
 
   it("renders only active data lines", () => {
@@ -245,8 +249,8 @@ describe("GasPriceChart", () => {
           unconfirmedTwap: 110,
           unconfirmedBasefee: 95,
           STRIKE: 100,
-          CAP_LEVEL: 110
-        }
+          CAP_LEVEL: 110,
+        },
       ],
       verticalSegments: [],
       roundAreas: [],
@@ -259,19 +263,21 @@ describe("GasPriceChart", () => {
     });
 
     const { getByTestId, queryByTestId } = renderWithProviders(
-      <GasPriceChart 
+      <GasPriceChart
         activeLines={{
           TWAP: true,
           BASEFEE: false,
           STRIKE: false,
           CAP_LEVEL: false,
         }}
-      />
+      />,
     );
 
     expect(getByTestId("responsive-container")).toBeInTheDocument();
     expect(getByTestId("chart-area-confirmedtwap")).toBeInTheDocument();
-    expect(queryByTestId("chart-area-confirmedbasefee")).not.toBeInTheDocument();
+    expect(
+      queryByTestId("chart-area-confirmedbasefee"),
+    ).not.toBeInTheDocument();
   });
 
   it("handles expanded view with multiple rounds", () => {
@@ -291,17 +297,17 @@ describe("GasPriceChart", () => {
           unconfirmedTwap: 110,
           unconfirmedBasefee: 95,
           STRIKE: 100,
-          CAP_LEVEL: 110
+          CAP_LEVEL: 110,
         },
-        { 
-          timestamp: 2000, 
+        {
+          timestamp: 2000,
           confirmedTwap: 200,
           confirmedBasefee: 180,
           unconfirmedTwap: 210,
           unconfirmedBasefee: 185,
           STRIKE: 100,
-          CAP_LEVEL: 110
-        }
+          CAP_LEVEL: 110,
+        },
       ],
       verticalSegments: [],
       roundAreas: [{ start: 1000, end: 2000 }],
@@ -315,18 +321,18 @@ describe("GasPriceChart", () => {
     });
 
     const { getByTestId } = renderWithProviders(
-      <GasPriceChart 
+      <GasPriceChart
         activeLines={{
           TWAP: true,
           BASEFEE: true,
           STRIKE: true,
           CAP_LEVEL: true,
         }}
-      />
+      />,
     );
 
     expect(getByTestId("responsive-container")).toBeInTheDocument();
     expect(getByTestId("chart-area-confirmedtwap")).toBeInTheDocument();
     expect(getByTestId("reference-area")).toBeInTheDocument();
   });
-}); 
+});

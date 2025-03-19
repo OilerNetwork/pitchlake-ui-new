@@ -5,10 +5,11 @@ import { useTransactionContext } from "@/context/TransactionProvider";
 import { useAccount } from "@starknet-react/core";
 import { parseEther } from "ethers";
 import { num } from "starknet";
-import { TestWrapper } from "../../../../../../utils/TestWrapper";
+import { useHelpContext } from "@/context/HelpProvider";
 import useVaultActions from "@/hooks/vault_v2/actions/useVaultActions";
 import useLPState from "@/hooks/vault_v2/states/useLPState";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import { HelpProvider } from "@/context/HelpProvider";
 
 // Mock the hooks
 jest.mock("@/hooks/vault_v2/actions/useVaultActions", () => ({
@@ -40,6 +41,20 @@ jest.mock("@starknet-react/core", () => ({
   }),
 }));
 
+jest.mock("@/context/HelpProvider", () => ({
+  HelpProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useHelpContext: jest.fn().mockReturnValue({
+    setActiveDataId: jest.fn(),
+    activeDataId: null,
+    isHelpBoxOpen: false,
+    header: null,
+    isHoveringHelpBox: false,
+    content: null,
+    setIsHoveringHelpBox: jest.fn(),
+    toggleHelpBoxOpen: jest.fn(),
+  }),
+}));
+
 // Mock the Icons
 jest.mock("@/components/Icons", () => ({
   CollectEthIcon: ({ classname }: { classname: string }) => (
@@ -47,13 +62,29 @@ jest.mock("@/components/Icons", () => ({
   ),
 }));
 
+// Custom TestWrapper that includes HelpProvider
+const CustomTestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <HelpProvider>{children}</HelpProvider>
+);
+
 describe("WithdrawStash", () => {
   const mockShowConfirmation = jest.fn();
   const mockWithdrawStash = jest.fn();
   const mockAccount = "0x123";
+  const mockSetActiveDataId = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useHelpContext as jest.Mock).mockReturnValue({
+      setActiveDataId: mockSetActiveDataId,
+      activeDataId: null,
+      isHelpBoxOpen: false,
+      header: null,
+      isHoveringHelpBox: false,
+      content: null,
+      setIsHoveringHelpBox: jest.fn(),
+      toggleHelpBoxOpen: jest.fn(),
+    });
   });
 
   it("renders stash withdrawal with correct states and handles interactions", () => {
@@ -83,9 +114,7 @@ describe("WithdrawStash", () => {
     });
 
     render(
-      <TestWrapper>
-        <WithdrawStash showConfirmation={mockShowConfirmation} />
-      </TestWrapper>
+      <WithdrawStash showConfirmation={mockShowConfirmation} />
     );
 
     // Check initial render with balance
@@ -140,9 +169,7 @@ describe("WithdrawStash", () => {
     });
 
     render(
-      <TestWrapper>
-        <WithdrawStash showConfirmation={mockShowConfirmation} />
-      </TestWrapper>
+      <WithdrawStash showConfirmation={mockShowConfirmation} />
     );
 
     expect(screen.getByText("0 ETH")).toBeInTheDocument();
@@ -166,9 +193,7 @@ describe("WithdrawStash", () => {
     });
 
     render(
-      <TestWrapper>
-        <WithdrawStash showConfirmation={mockShowConfirmation} />
-      </TestWrapper>
+      <WithdrawStash showConfirmation={mockShowConfirmation} />
     );
 
     expect(screen.getByRole("button", { name: /collect/i })).toBeDisabled();
@@ -189,9 +214,7 @@ describe("WithdrawStash", () => {
     });
 
     render(
-      <TestWrapper>
-        <WithdrawStash showConfirmation={mockShowConfirmation} />
-      </TestWrapper>
+      <WithdrawStash showConfirmation={mockShowConfirmation} />
     );
 
     expect(screen.getByRole("button", { name: /collect/i })).toBeDisabled();

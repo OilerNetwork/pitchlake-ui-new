@@ -17,7 +17,13 @@ import useErc20Balance from "@/hooks/erc20/useErc20Balance";
 import useErc20Allowance from "@/hooks/erc20/useErc20Allowance";
 import useEditBidMulticall from "@/hooks/txn/useEditBidMulticall";
 import useOBState from "@/hooks/vault_v2/states/useOBState";
-import { VaultStateType, VaultActionsType, OptionRoundStateType, LiquidityProviderStateType, OptionBuyerStateType } from "@/lib/types";
+import {
+  VaultStateType,
+  VaultActionsType,
+  OptionRoundStateType,
+  LiquidityProviderStateType,
+  OptionBuyerStateType,
+} from "@/lib/types";
 
 interface HistoryProps {
   showConfirmation: (
@@ -33,9 +39,12 @@ const mockConfig = {
   hooks: {
     explorer: {
       transaction: (hash: string) => `https://testnet.starkscan.co/tx/${hash}`,
-      getTransactionUrl: (hash: string) => `https://testnet.starkscan.co/tx/${hash}`,
-      getAddressUrl: (address: string) => `https://testnet.starkscan.co/contract/${address}`,
-      contract: (address: string) => `https://testnet.starkscan.co/contract/${address}`,
+      getTransactionUrl: (hash: string) =>
+        `https://testnet.starkscan.co/tx/${hash}`,
+      getAddressUrl: (address: string) =>
+        `https://testnet.starkscan.co/contract/${address}`,
+      contract: (address: string) =>
+        `https://testnet.starkscan.co/contract/${address}`,
     },
     account: {
       account: { address: "0x123" },
@@ -68,8 +77,7 @@ const mockConfig = {
       toggleHelpBoxOpen: jest.fn(),
       content: "",
       header: "",
-      setContent: jest.fn(),
-      setHeader: jest.fn(),
+      setActiveDataId: jest.fn(),
       clearContent: jest.fn(),
     },
     optionBuyer: {
@@ -289,11 +297,13 @@ jest.mock("@/hooks/txn/useEditBidMulticall", () => ({
 
 jest.mock("ethers", () => ({
   formatUnits: (value: string | number | bigint, unit: string | number) => {
-    const decimals = typeof unit === "string" ? (unit === "gwei" ? 9 : 18) : unit;
+    const decimals =
+      typeof unit === "string" ? (unit === "gwei" ? 9 : 18) : unit;
     return Number(value) / Math.pow(10, decimals);
   },
   parseUnits: (value: string | number, unit: string | number) => {
-    const decimals = typeof unit === "string" ? (unit === "gwei" ? 9 : 18) : unit;
+    const decimals =
+      typeof unit === "string" ? (unit === "gwei" ? 9 : 18) : unit;
     return BigInt(Math.floor(Number(value) * Math.pow(10, decimals)));
   },
 }));
@@ -349,22 +359,32 @@ describe("History Component", () => {
     const { container } = render(
       <HelpProvider>
         <TransactionProvider>
-          <History showConfirmation={showConfirmation} setIsShowingTabs={setIsShowingTabs} />
+          <History
+            showConfirmation={showConfirmation}
+            setIsShowingTabs={setIsShowingTabs}
+          />
         </TransactionProvider>
-      </HelpProvider>
+      </HelpProvider>,
     );
 
-    expect(screen.getByText(/1.0b options at 500000 GWEI each/i)).toBeInTheDocument();
-    expect(screen.getByText(/2.0b options at 1000000 GWEI each/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/1.0b options at 500000 GWEI each/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/2.0b options at 1000000 GWEI each/i),
+    ).toBeInTheDocument();
   });
 
   it("shows edit button only when roundState is Auctioning", () => {
     render(
       <HelpProvider>
         <TransactionProvider>
-          <History showConfirmation={showConfirmation} setIsShowingTabs={setIsShowingTabs} />
+          <History
+            showConfirmation={showConfirmation}
+            setIsShowingTabs={setIsShowingTabs}
+          />
         </TransactionProvider>
-      </HelpProvider>
+      </HelpProvider>,
     );
 
     const editButtons = screen.getAllByRole("button", { name: /edit bid/i });
@@ -375,9 +395,12 @@ describe("History Component", () => {
     render(
       <HelpProvider>
         <TransactionProvider>
-          <History showConfirmation={showConfirmation} setIsShowingTabs={setIsShowingTabs} />
+          <History
+            showConfirmation={showConfirmation}
+            setIsShowingTabs={setIsShowingTabs}
+          />
         </TransactionProvider>
-      </HelpProvider>
+      </HelpProvider>,
     );
 
     const editButtons = screen.getAllByRole("button", { name: /edit bid/i });
@@ -395,12 +418,17 @@ describe("History Component", () => {
     render(
       <HelpProvider>
         <TransactionProvider>
-          <History showConfirmation={showConfirmation} setIsShowingTabs={setIsShowingTabs} />
+          <History
+            showConfirmation={showConfirmation}
+            setIsShowingTabs={setIsShowingTabs}
+          />
         </TransactionProvider>
-      </HelpProvider>
+      </HelpProvider>,
     );
 
-    expect(screen.queryByRole("button", { name: /edit bid/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /edit bid/i }),
+    ).not.toBeInTheDocument();
     expect(screen.queryByText(/options at/)).not.toBeInTheDocument();
     expect(screen.getByText(/No Bids/)).toBeInTheDocument();
   });
@@ -409,19 +437,26 @@ describe("History Component", () => {
     render(
       <HelpProvider>
         <TransactionProvider>
-          <History showConfirmation={showConfirmation} setIsShowingTabs={setIsShowingTabs} />
+          <History
+            showConfirmation={showConfirmation}
+            setIsShowingTabs={setIsShowingTabs}
+          />
         </TransactionProvider>
-      </HelpProvider>
+      </HelpProvider>,
     );
 
-    const bidItems = document.getElementsByClassName('bid-item');
+    const bidItems = document.getElementsByClassName("bid-item");
     expect(bidItems.length).toBe(2);
 
-    expect(bidItems[0]).toHaveClass('border-b');
-    expect(bidItems[1]).not.toHaveClass('border-b');
+    expect(bidItems[0]).toHaveClass("border-b");
+    expect(bidItems[1]).not.toHaveClass("border-b");
 
-    const bidDetails = document.getElementsByClassName('bid-item-details');
-    expect(bidDetails[0].textContent).toMatch(/1.0b options at 500000 GWEI each/i);
-    expect(bidDetails[1].textContent).toMatch(/2.0b options at 1000000 GWEI each/i);
+    const bidDetails = document.getElementsByClassName("bid-item-details");
+    expect(bidDetails[0].textContent).toMatch(
+      /1.0b options at 500000 GWEI each/i,
+    );
+    expect(bidDetails[1].textContent).toMatch(
+      /2.0b options at 1000000 GWEI each/i,
+    );
   });
 });

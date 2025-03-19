@@ -29,7 +29,9 @@ jest.mock("@/hooks/vault_v2/states/useVaultState");
 jest.mock("@/context/HelpProvider");
 jest.mock("@/context/ChartProvider", () => ({
   useChartContext: jest.fn(),
-  ChartProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
+  ChartProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
 }));
 
 // Mock ChartInner since it's a complex component with its own tests
@@ -42,15 +44,15 @@ jest.mock("@/components/Vault/VaultChart/ChartInner", () => ({
 const mockContext = {
   useNewContext: jest.fn(),
   useHelpContext: jest.fn(() => ({
-    setContent: jest.fn(),
-    setHeader: jest.fn(),
+    setActiveDataId: jest.fn(),
     isHoveringHelpBox: false,
     isHelpBoxOpen: false,
     toggleHelpBoxOpen: jest.fn(),
     content: "",
     header: "",
+    activeDataId: "",
     setIsHoveringHelpBox: jest.fn(),
-    severity: "info"
+    severity: "info",
   })),
   useChartContext: jest.fn(),
 };
@@ -67,7 +69,9 @@ jest.mocked(useHelpContext).mockImplementation(mockContext.useHelpContext);
 jest.mocked(useChartContext).mockImplementation(mockContext.useChartContext);
 jest.mocked(useRoundState).mockImplementation(mockHooks.useRoundState);
 jest.mocked(useVaultState).mockImplementation(mockHooks.useVaultState);
-jest.mocked(useHistoricalRoundParams).mockImplementation(mockHooks.useHistoricalRoundParams);
+jest
+  .mocked(useHistoricalRoundParams)
+  .mockImplementation(mockHooks.useHistoricalRoundParams);
 
 // Test setup
 const queryClient = new QueryClient();
@@ -75,10 +79,8 @@ const queryClient = new QueryClient();
 const renderWithProviders = (ui: React.ReactElement) => {
   return render(
     <QueryClientProvider client={queryClient}>
-      <ChartProvider>
-        {ui}
-      </ChartProvider>
-    </QueryClientProvider>
+      <ChartProvider>{ui}</ChartProvider>
+    </QueryClientProvider>,
   );
 };
 
@@ -103,21 +105,21 @@ describe("RoundPerformanceChart", () => {
         optionRoundStates: {
           "1": { address: "0x1" },
           "2": { address: "0x2" },
-          "3": { address: "0x3" }
-        }
-      }
+          "3": { address: "0x3" },
+        },
+      },
     });
 
     mockHooks.useVaultState.mockReturnValue({
       vaultState: {
         currentRoundId: "4",
-        address: "0x123"
-      }
+        address: "0x123",
+      },
     });
 
     mockContext.useChartContext.mockReturnValue({
       isExpandedView: false,
-      setIsExpandedView: jest.fn()
+      setIsExpandedView: jest.fn(),
     });
 
     // Act
@@ -135,7 +137,7 @@ describe("RoundPerformanceChart", () => {
 
     mockContext.useChartContext.mockReturnValue({
       isExpandedView: false,
-      setIsExpandedView: mockSetIsExpandedView
+      setIsExpandedView: mockSetIsExpandedView,
     });
 
     mockContext.useNewContext.mockReturnValue({
@@ -147,16 +149,16 @@ describe("RoundPerformanceChart", () => {
       mockData: {
         vaultState: {},
         optionRoundStates: {
-          "4": { address: "0x4" }
-        }
-      }
+          "4": { address: "0x4" },
+        },
+      },
     });
 
     mockHooks.useVaultState.mockReturnValue({
       vaultState: {
         currentRoundId: "4",
-        address: "0x123"
-      }
+        address: "0x123",
+      },
     });
 
     const { container } = renderWithProviders(<RoundPerformanceChart />);
@@ -177,7 +179,7 @@ describe("RoundPerformanceChart", () => {
     const mockSetIsExpandedView = jest.fn();
     mockContext.useChartContext.mockReturnValue({
       isExpandedView: false,
-      setIsExpandedView: mockSetIsExpandedView
+      setIsExpandedView: mockSetIsExpandedView,
     });
 
     mockContext.useNewContext.mockReturnValue({
@@ -189,16 +191,16 @@ describe("RoundPerformanceChart", () => {
       mockData: {
         vaultState: {},
         optionRoundStates: {
-          "2": { address: "0x2" }
-        }
-      }
+          "2": { address: "0x2" },
+        },
+      },
     });
 
     mockHooks.useVaultState.mockReturnValue({
       vaultState: {
         currentRoundId: "5",
-        address: "0x123"
-      }
+        address: "0x123",
+      },
     });
 
     const { container } = renderWithProviders(<RoundPerformanceChart />);
@@ -223,21 +225,21 @@ describe("RoundPerformanceChart", () => {
       mockData: {
         vaultState: {},
         optionRoundStates: {
-          "5": { address: "0x5" }
-        }
-      }
+          "5": { address: "0x5" },
+        },
+      },
     });
 
     mockHooks.useVaultState.mockReturnValue({
       vaultState: {
         currentRoundId: "5",
-        address: "0x123"
-      }
+        address: "0x123",
+      },
     });
 
     mockContext.useChartContext.mockReturnValue({
       isExpandedView: false,
-      setIsExpandedView: jest.fn()
+      setIsExpandedView: jest.fn(),
     });
 
     const { container } = renderWithProviders(<RoundPerformanceChart />);
@@ -262,27 +264,29 @@ describe("RoundPerformanceChart", () => {
       mockData: {
         vaultState: {},
         optionRoundStates: {
-          "1": { address: "0x1" }
-        }
-      }
+          "1": { address: "0x1" },
+        },
+      },
     });
 
     mockHooks.useVaultState.mockReturnValue({
       vaultState: {
         currentRoundId: "4",
-        address: "0x123"
-      }
+        address: "0x123",
+      },
     });
 
     mockContext.useChartContext.mockReturnValue({
       isExpandedView: false,
-      setIsExpandedView: jest.fn()
+      setIsExpandedView: jest.fn(),
     });
 
     const { container } = renderWithProviders(<RoundPerformanceChart />);
 
     // Act
-    const prevButton = container.querySelector('[data-item="chartPreviousRound"]');
+    const prevButton = container.querySelector(
+      '[data-item="chartPreviousRound"]',
+    );
     if (!prevButton) throw new Error("Previous button not found");
     fireEvent.click(prevButton);
 
@@ -303,21 +307,21 @@ describe("RoundPerformanceChart", () => {
         optionRoundStates: {
           "1": { address: "0x1" },
           "2": { address: "0x2" },
-          "3": { address: "0x3" }
-        }
-      }
+          "3": { address: "0x3" },
+        },
+      },
     });
 
     mockHooks.useVaultState.mockReturnValue({
       vaultState: {
         currentRoundId: "4",
-        address: "0x123"
-      }
+        address: "0x123",
+      },
     });
 
     mockContext.useChartContext.mockReturnValue({
       isExpandedView: false,
-      setIsExpandedView: jest.fn()
+      setIsExpandedView: jest.fn(),
     });
 
     const { container } = renderWithProviders(<RoundPerformanceChart />);
@@ -329,7 +333,9 @@ describe("RoundPerformanceChart", () => {
     expect(mockSetSelectedRound).toHaveBeenCalledWith(3);
 
     // Act & Assert - Previous Round
-    const prevButton = container.querySelector('[data-item="chartPreviousRound"]');
+    const prevButton = container.querySelector(
+      '[data-item="chartPreviousRound"]',
+    );
     if (!prevButton) throw new Error("Previous button not found");
     fireEvent.click(prevButton);
     expect(mockSetSelectedRound).toHaveBeenCalledWith(1);

@@ -4,6 +4,7 @@ import useIsMobile from "../../../hooks/window/useIsMobile";
 import { useAccount, useConnect } from "@starknet-react/core";
 import { useNewContext } from "@/context/NewProvider";
 import { useUiContext } from "@/context/UiProvider";
+import { useHelpContext } from "@/context/HelpProvider";
 
 // Mock SVG imports
 jest.mock("@/../public/logo_full.svg", () => "logo_full");
@@ -80,12 +81,21 @@ jest.mock("@/hooks/erc20/useErc20Balance", () => ({
   }),
 }));
 
-jest.mock("@/context/HelpProvider", () => ({
-  useHelpContext: jest.fn().mockReturnValue({
-    isHelpBoxOpen: false,
-    toggleHelpBoxOpen: jest.fn(),
-  }),
-}));
+jest.mock("@/context/HelpProvider", () => {
+  const mockSetActiveDataId = jest.fn();
+  return {
+    useHelpContext: jest.fn().mockReturnValue({
+      setActiveDataId: mockSetActiveDataId,
+      activeDataId: null,
+      isHelpBoxOpen: false,
+      toggleHelpBoxOpen: jest.fn(),
+      header: null,
+      content: null,
+      isHoveringHelpBox: false,
+      setIsHoveringHelpBox: jest.fn(),
+    }),
+  };
+});
 
 jest.mock("@/context/UiProvider", () => ({
   useUiContext: jest.fn().mockReturnValue({
@@ -183,6 +193,19 @@ const mockHooks = (overrides: MockOverrides = {}) => {
       conn,
     });
   }
+
+  // Reset the mockSetActiveDataId function for each test
+  const mockSetActiveDataId = jest.fn();
+  (useHelpContext as jest.Mock).mockReturnValue({
+    setActiveDataId: mockSetActiveDataId,
+    activeDataId: null,
+    isHelpBoxOpen: false,
+    toggleHelpBoxOpen: jest.fn(),
+    header: null,
+    content: null,
+    isHoveringHelpBox: false,
+    setIsHoveringHelpBox: jest.fn(),
+  });
 };
 
 // Common test setup helper

@@ -158,8 +158,14 @@ const setupTest = (overrides = {}) => {
     mockConfig.hooks.transaction.idle,
   );
   (useHelpContext as jest.Mock).mockReturnValue({
-    setHelpContent: jest.fn(),
-    clearHelpContent: jest.fn(),
+    setActiveDataId: jest.fn(),
+    activeDataId: null,
+    isHelpBoxOpen: false,
+    header: null,
+    isHoveringHelpBox: false,
+    content: null,
+    setIsHoveringHelpBox: jest.fn(),
+    toggleHelpBoxOpen: jest.fn(),
   });
   (useNewContext as jest.Mock).mockReturnValue(mockConfig.hooks.context.rpc);
 

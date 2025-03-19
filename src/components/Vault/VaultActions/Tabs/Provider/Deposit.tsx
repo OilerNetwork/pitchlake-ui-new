@@ -196,11 +196,12 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
           }
         />
         {state.isDepositAsBeneficiary && (
-          <Hoverable dataId="inputDepositAddress">
+          <div>
             <InputField
               type="text"
               value={state.beneficiaryAddress}
               label="Enter Address"
+              dataId="inputDepositAddress"
               onChange={(e) => {
                 updateState({ beneficiaryAddress: e.target.value });
                 localStorage.setItem(DEPOSIT_BENEFICIARY_KEY, e.target.value);
@@ -211,13 +212,14 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
               }
               error={beneficiaryReason}
             />
-          </Hoverable>
+          </div>
         )}
-        <Hoverable dataId="inputDepositAmount">
+        <div>
           <InputField
             type="number"
             value={state.amount}
             label="Enter Amount"
+            dataId="inputDepositAmount"
             onChange={(e) => {
               updateState({
                 amount: e.target.value.slice(
@@ -233,7 +235,7 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
               <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
             }
           />
-        </Hoverable>
+        </div>
       </div>
 
       <div className="mt-auto">
@@ -255,16 +257,14 @@ const Deposit: React.FC<DepositProps> = ({ showConfirmation }) => {
             </span>
           </Hoverable>
         )}
-        <Hoverable
-          dataId="depositButton"
-          className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]"
-        >
+        <div className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]">
           <ActionButton
             onClick={handleSubmitForMulticall}
             disabled={isButtonDisabled}
             text={pendingTx ? "Pending" : "Deposit"}
+            dataId="depositButton"
           />
-        </Hoverable>
+        </div>
       </div>
     </div>
   );

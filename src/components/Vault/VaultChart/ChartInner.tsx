@@ -75,7 +75,7 @@ const GasPriceChart: React.FC<GasPriceChartProps> = ({ activeLines }) => {
   //      }
   //    }, HOVER_DELAY);
   //  },
-  //  [isHoveringHelpBox, setContent],
+  //  [isHoveringHelpBox],
   //);
 
   //const handleMouseLeave = useCallback(() => {

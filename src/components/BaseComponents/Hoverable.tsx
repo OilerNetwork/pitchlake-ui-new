@@ -1,10 +1,10 @@
 "use client";
-import React, { useRef, useCallback, forwardRef } from "react";
+import React, { useMemo, useRef, useCallback, forwardRef } from "react";
 import { useHelpContext } from "@/context/HelpProvider";
 import helpData from "@/lang/en/help.json";
 
 interface HoverableProps {
-  dataId: string; // e.g. "item1"
+  dataId?: string | null; // e.g. "item1"
   delay?: number; // e.g. 300 (milliseconds)
   lockDuration?: number; // e.g. 3000 (3 seconds)
   children: React.ReactNode;
@@ -24,14 +24,22 @@ const Hoverable = forwardRef<HTMLDivElement, HoverableProps>(
     },
     ref,
   ) => {
-    const { setContent, setHeader, isHoveringHelpBox } = useHelpContext();
+    const {
+      setActiveDataId,
+      activeDataId,
+      isHelpBoxOpen,
+      header,
+      isHoveringHelpBox,
+    } = useHelpContext();
     const hoverTimer = useRef<NodeJS.Timeout | null>(null);
     const lockTimer = useRef<NodeJS.Timeout | null>(null);
     const isLocked = useRef(false);
 
+    const isActive = isHelpBoxOpen && dataId === activeDataId;
+
     // On mouse enter, start the 300ms timer
     const handleMouseEnter = useCallback(() => {
-      if (isHoveringHelpBox) {
+      if (isHoveringHelpBox || !dataId) {
         // If the user is reading the InfoBox, do NOT auto-update
         return;
       }
@@ -43,19 +51,7 @@ const Hoverable = forwardRef<HTMLDivElement, HoverableProps>(
       // Start the 300ms "activation" timer
       hoverTimer.current = setTimeout(() => {
         // If the user is still not inside the InfoBox, update content
-        if (!isHoveringHelpBox) {
-          setContent(
-            helpData[dataId as keyof typeof helpData]?.text ||
-              "No description available for " + dataId,
-          );
-
-          /// @NOTE: Comment out if needed
-
-          setHeader(
-            helpData[dataId as keyof typeof helpData]?.header ||
-              "No header available for " + dataId,
-          );
-        }
+        if (!isHoveringHelpBox) setActiveDataId(dataId);
 
         // Optionally "lock" the content for the next X ms
         lockTimer.current = setTimeout(() => {
@@ -63,7 +59,7 @@ const Hoverable = forwardRef<HTMLDivElement, HoverableProps>(
           isLocked.current = true;
         }, lockDuration);
       }, delay);
-    }, [dataId, delay, lockDuration, isHoveringHelpBox, setContent, setHeader]);
+    }, [dataId, delay, lockDuration, isHoveringHelpBox, setActiveDataId]);
 
     // On mouse leave, clear the timer if we haven't set content yet
     const handleMouseLeave = useCallback(() => {
@@ -83,8 +79,11 @@ const Hoverable = forwardRef<HTMLDivElement, HoverableProps>(
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         data-item={dataId}
-        className={className}
-        onClick={onClick}
+        className={`${isActive ? "rounded-lg border-[1px] border-[#8C8C8C]" : "border-[1px] border-transparent"} ${className} `}
+        onClick={() => {
+          onClick && onClick();
+          dataId && setActiveDataId(dataId);
+        }}
         ref={ref}
         //key={key_}
       >

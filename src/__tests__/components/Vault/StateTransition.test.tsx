@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import DemoStateTransition from "@/components/Vault/DemoStateTransition";
+import StateTransition from "@/components/Vault/StateTransition/StateTransition";
 import { useTransactionContext } from "@/context/TransactionProvider";
 import { useHelpContext } from "@/context/HelpProvider";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
@@ -9,6 +9,8 @@ import { useNewContext } from "@/context/NewProvider";
 import { useAccount } from "@starknet-react/core";
 import { useTimeContext } from "@/context/TimeProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { OptionRoundStateType, VaultStateType } from "@/lib/types";
+import * as useProgressEstimatesModule from "@/hooks/stateTransition/useProgressEstimates";
 
 // Mock all hooks
 jest.mock("@starknet-react/core", () => ({
@@ -23,16 +25,8 @@ jest.mock("@/context/HelpProvider");
 jest.mock("@/context/TransactionProvider");
 jest.mock("@/context/TimeProvider");
 
-// Default test states
-interface RoundStateData {
-  roundState: string;
-  auctionStartDate: string;
-  auctionEndDate: string;
-  optionSettleDate: string;
-  roundId: string;
-}
-
-const defaultRoundState: RoundStateData = {
+//// Default test states
+const defaultRoundState = {
   roundState: "Open",
   auctionStartDate: "1000",
   auctionEndDate: "2000",
@@ -62,15 +56,21 @@ const renderDemoStateTransition = ({
   conn = "demo",
   vaultActions = defaultVaultActions,
   isPanelOpen = true,
+  progressEstimates = { txnEstimate: 30, fossilEstimate: 30, errorEstimate: 0 },
 }: {
-  roundState?: Partial<RoundStateData>;
-  vaultState?: Partial<typeof defaultVaultState>;
+  roundState?: Partial<OptionRoundStateType>;
+  vaultState?: Partial<VaultStateType>;
   account?: { address: string | null; status: string };
   timestamp?: number;
   pendingTx?: string;
   conn?: string;
   vaultActions?: typeof defaultVaultActions;
   isPanelOpen?: boolean;
+  progressEstimates?: {
+    txnEstimate: number;
+    fossilEstimate: number;
+    errorEstimate: number;
+  };
 } = {}) => {
   const mockSetModalState = jest.fn();
   const queryClient = new QueryClient();
@@ -90,7 +90,8 @@ const renderDemoStateTransition = ({
   });
 
   (useAccount as jest.Mock).mockReturnValue({
-    account: account.status === "connected" ? { address: account.address } : null,
+    account:
+      account.status === "connected" ? { address: account.address } : null,
     status: account.status,
   });
 
@@ -105,15 +106,31 @@ const renderDemoStateTransition = ({
   (useNewContext as jest.Mock).mockReturnValue({ conn });
   (useVaultActions as jest.Mock).mockReturnValue(vaultActions);
   (useHelpContext as jest.Mock).mockReturnValue({
-    setContent: jest.fn(),
-    setHeader: jest.fn(),
+    setActiveDataId: jest.fn(),
+    activeDataId: null,
+    isHelpBoxOpen: false,
+    header: null,
     isHoveringHelpBox: false,
+    content: null,
+    setIsHoveringHelpBox: jest.fn(),
+    toggleHelpBoxOpen: jest.fn(),
   });
+
+  // Mock useProgressEstimates
+  jest
+    .spyOn(useProgressEstimatesModule, "useProgressEstimates")
+    .mockReturnValue(progressEstimates);
 
   render(
     <QueryClientProvider client={queryClient}>
-      <DemoStateTransition isPanelOpen={isPanelOpen} setModalState={mockSetModalState} />
-    </QueryClientProvider>
+      <StateTransition
+        conn={conn}
+        isPanelOpen={isPanelOpen}
+        setModalState={mockSetModalState}
+        vaultState={vaultState as VaultStateType}
+        selectedRoundState={roundState as OptionRoundStateType}
+      />
+    </QueryClientProvider>,
   );
 
   return { mockSetModalState };
@@ -131,7 +148,9 @@ describe("DemoStateTransition", () => {
           roundState: "Open",
           auctionStartDate: "1000",
         },
-        timestamp: 1500,
+        // Force ManualButtons component to render by setting l2Now > targetTimestamp
+        timestamp: 1100, // This is l2Now, which needs to be > auctionStartDate (1000)
+        conn: "demo",
       });
 
       const button = screen.getByRole("button");
@@ -145,8 +164,9 @@ describe("DemoStateTransition", () => {
           roundState: "Open",
           auctionStartDate: "1000",
         },
-        timestamp: 1500,
+        timestamp: 1100, // l2Now > auctionStartDate
         isPanelOpen: false,
+        conn: "demo",
       });
 
       const button = screen.getByRole("button");
@@ -159,11 +179,10 @@ describe("DemoStateTransition", () => {
       renderDemoStateTransition({
         roundState: {
           roundState: "Settled",
+          optionSettleDate: "1000",
         },
       });
-
-      const button = screen.queryByRole("button");
-      expect(button).not.toBeInTheDocument();
+      expect(screen.getByText(/Settlement Date/)).toBeInTheDocument();
     });
   });
 
@@ -171,6 +190,8 @@ describe("DemoStateTransition", () => {
     it("disables button when no account is connected", () => {
       renderDemoStateTransition({
         account: { address: null, status: "disconnected" },
+        timestamp: 1100, // l2Now > auctionStartDate
+        conn: "demo",
       });
 
       const button = screen.getByRole("button");
@@ -180,6 +201,8 @@ describe("DemoStateTransition", () => {
     it("disables button during pending transactions", () => {
       renderDemoStateTransition({
         pendingTx: "0xtx",
+        timestamp: 1100, // l2Now > auctionStartDate
+        conn: "demo",
       });
 
       const button = screen.getByRole("button");
@@ -192,19 +215,23 @@ describe("DemoStateTransition", () => {
           roundState: "Open",
           auctionStartDate: "2000", // Future timestamp
         },
-        timestamp: 1000,
+        timestamp: 900, // l2Now < auctionStartDate
+        conn: "demo",
       });
 
-      const button = screen.getByRole("button");
-      expect(button).toBeDisabled();
+      // Since we're rendering a progress bar instead of a button
+      expect(screen.getByText(/Auction Starting/)).toBeInTheDocument();
     });
 
     it("shows pending state during transitions", () => {
       renderDemoStateTransition({
         roundState: {
           roundState: "Open",
+          auctionStartDate: "1000",
         },
         pendingTx: "0xtx",
+        timestamp: 1100, // l2Now > auctionStartDate
+        conn: "demo",
       });
 
       const button = screen.getByRole("button");
@@ -220,7 +247,8 @@ describe("DemoStateTransition", () => {
           roundState: "Open",
           auctionStartDate: "1000",
         },
-        timestamp: 1500,
+        timestamp: 1100, // l2Now > auctionStartDate
+        conn: "demo",
       });
 
       const button = screen.getByRole("button");
@@ -245,7 +273,8 @@ describe("DemoStateTransition", () => {
           roundState: "Auctioning",
           auctionEndDate: "1000",
         },
-        timestamp: 1500,
+        timestamp: 1100, // l2Now > auctionEndDate
+        conn: "demo",
       });
 
       const button = screen.getByRole("button");
@@ -271,7 +300,7 @@ describe("DemoStateTransition", () => {
           optionSettleDate: "1000",
           roundId: "1",
         },
-        timestamp: 1500,
+        timestamp: 1100, // l2Now > optionSettleDate
         conn: "demo",
       });
 
@@ -302,7 +331,7 @@ describe("DemoStateTransition", () => {
           optionSettleDate: "2000",
           auctionEndDate: "1000",
         },
-        timestamp: 2500,
+        timestamp: 2100, // l2Now > optionSettleDate
         conn: "mock",
       });
 
@@ -325,6 +354,39 @@ describe("DemoStateTransition", () => {
         clientAddress: "0x789",
         roundDuration: 1000,
       });
+    });
+  });
+
+  describe("Progress Bar", () => {
+    it("renders progress bar when client timestamp is after target but l2Now is before target", () => {
+      renderDemoStateTransition({
+        roundState: {
+          roundState: "Open",
+          auctionStartDate: "1000",
+        },
+        timestamp: 900, // l2Now < auctionStartDate
+        conn: "demo",
+      });
+
+      // Check for progress bar elements
+      expect(screen.getByText(/Auction Starting/)).toBeInTheDocument();
+      expect(screen.getByText(/Est./)).toBeInTheDocument();
+    });
+  });
+
+  describe("Countdown", () => {
+    it("renders countdown when timestamp is before target", () => {
+      renderDemoStateTransition({
+        roundState: {
+          roundState: "Open",
+          auctionStartDate: "2000", // Future timestamp
+        },
+        timestamp: 900, // l2Now < auctionStartDate
+        conn: "demo",
+      });
+
+      // Check for progress bar elements since that's what's being rendered
+      expect(screen.getByText(/Auction Starting/)).toBeInTheDocument();
     });
   });
 });

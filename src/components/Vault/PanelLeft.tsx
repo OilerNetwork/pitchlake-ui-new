@@ -6,9 +6,9 @@ import Hoverable from "@/components/BaseComponents/Hoverable";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 import { useNewContext } from "@/context/NewProvider";
-import DemoStateTransition from "./DemoStateTransition";
 import PanelLeftRoundSection from "@/components/Vault/PanelLeftRoundSection";
 import PanelLeftVaultSection from "./PanelLeftVaultSection";
+import StateTransition from "./StateTransition/StateTransition";
 
 const PanelLeft = ({ userType }: { userType: string }) => {
   const { conn } = useNewContext();
@@ -82,7 +82,7 @@ const PanelLeft = ({ userType }: { userType: string }) => {
             onClick={() => {
               isPanelOpen ? closeAllTabs() : openAllTabs();
             }}
-            className="flex items-center h-[56px] w-full border-b-1 p-4 border-white cursor-pointer"
+            className="flex items-center h-[56px] w-full border-b-1 p-4 cursor-pointer"
           >
             <div
               className={`flex flex-row w-full items-center rounded-md hover:cursor-pointer ${
@@ -123,14 +123,17 @@ const PanelLeft = ({ userType }: { userType: string }) => {
             selectedRoundState={selectedRoundState}
             userType={userType}
           />
-          {conn === "demo" && (
-            <DemoStateTransition
-              isPanelOpen={isPanelOpen}
-              setModalState={setModalState}
-            />
-          )}
+
+          <StateTransition
+            conn={conn}
+            vaultState={vaultState}
+            selectedRoundState={selectedRoundState}
+            isPanelOpen={isPanelOpen}
+            setModalState={setModalState}
+          />
         </div>
       </div>
+
       {modalState.show && (
         <StateTransitionConfirmationModal
           action={modalState.action}

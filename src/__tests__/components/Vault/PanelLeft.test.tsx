@@ -1,7 +1,7 @@
 import { screen } from "@testing-library/react";
 import PanelLeft from "@/components/Vault/PanelLeft";
 import { renderWithProviders } from "@/__tests__/utils/TestWrapper";
-import { HelpProvider } from "@/context/HelpProvider";
+import { useHelpContext } from "@/context/HelpProvider";
 import { CairoCustomEnum } from "starknet";
 
 // Mock the hooks
@@ -99,15 +99,40 @@ jest.mock("@/context/NewProvider", () => ({
   }),
 }));
 
+jest.mock("@/context/HelpProvider", () => ({
+  HelpProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useHelpContext: jest.fn().mockReturnValue({
+    setActiveDataId: jest.fn(),
+    activeDataId: null,
+    isHelpBoxOpen: false,
+    header: null,
+    isHoveringHelpBox: false,
+    content: null,
+    setIsHoveringHelpBox: jest.fn(),
+    toggleHelpBoxOpen: jest.fn(),
+  }),
+}));
+
 describe("PanelLeft Component", () => {
+  const mockSetActiveDataId = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
+    (useHelpContext as jest.Mock).mockReturnValue({
+      setActiveDataId: mockSetActiveDataId,
+      activeDataId: null,
+      isHelpBoxOpen: false,
+      header: null,
+      isHoveringHelpBox: false,
+      content: null,
+      setIsHoveringHelpBox: jest.fn(),
+      toggleHelpBoxOpen: jest.fn(),
+    });
   });
+
   it("renders panel sections", () => {
     renderWithProviders(
-      <HelpProvider>
-        <PanelLeft userType="lp" />
-      </HelpProvider>,
+      <PanelLeft userType="lp" />
     );
 
     expect(screen.getByText("Statistics")).toBeInTheDocument();
@@ -116,9 +141,7 @@ describe("PanelLeft Component", () => {
 
   it("renders correctly for both user types", () => {
     const { rerender } = renderWithProviders(
-      <HelpProvider>
-        <PanelLeft userType="lp" />
-      </HelpProvider>,
+      <PanelLeft userType="lp" />
     );
 
     expect(screen.getByText("Balance")).toBeInTheDocument();
@@ -126,9 +149,7 @@ describe("PanelLeft Component", () => {
     expect(screen.getByText("Vault")).toBeInTheDocument();
 
     rerender(
-      <HelpProvider>
-        <PanelLeft userType="ob" />
-      </HelpProvider>,
+      <PanelLeft userType="ob" />
     );
 
     expect(screen.getByText("Balance")).toBeInTheDocument();
@@ -138,9 +159,7 @@ describe("PanelLeft Component", () => {
 
   it("displays correct balance values", () => {
     renderWithProviders(
-      <HelpProvider>
-        <PanelLeft userType="lp" />
-      </HelpProvider>,
+      <PanelLeft userType="lp" />
     );
 
     expect(screen.getByText("Balance")).toBeInTheDocument();
@@ -149,9 +168,7 @@ describe("PanelLeft Component", () => {
 
   it("displays correct round state", () => {
     renderWithProviders(
-      <HelpProvider>
-        <PanelLeft userType="lp" />
-      </HelpProvider>,
+      <PanelLeft userType="lp" />
     );
 
     expect(screen.getByText("Auctioning")).toBeInTheDocument();
@@ -160,9 +177,7 @@ describe("PanelLeft Component", () => {
 
   it("displays correct round information", () => {
     renderWithProviders(
-      <HelpProvider>
-        <PanelLeft userType="lp" />
-      </HelpProvider>,
+      <PanelLeft userType="lp" />
     );
 
     expect(screen.getByText("Round 01")).toBeInTheDocument();

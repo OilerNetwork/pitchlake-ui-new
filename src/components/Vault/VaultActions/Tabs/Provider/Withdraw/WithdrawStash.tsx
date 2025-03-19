@@ -137,16 +137,14 @@ const WithdrawStash: React.FC<WithdrawStashProps> = ({ showConfirmation }) => {
         </div>
       </div>
       <div className="mt-auto">
-        <Hoverable
-          dataId="collectStashButton"
-          className="flex justify-between text-sm border-t border-[#262626] p-6"
-        >
+        <div className="flex justify-between text-sm border-t border-[#262626] p-6">
           <ActionButton
             onClick={handleSubmit}
             disabled={isButtonDisabled}
             text="Collect"
+            dataId="collectStashButton"
           />
-        </Hoverable>
+        </div>
       </div>
     </div>
   );
