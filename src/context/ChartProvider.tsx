@@ -34,7 +34,7 @@ export const ChartProvider: React.FC<{ children: React.ReactNode }> = ({
     } else {
       const roundOpenDate = Number(selectedRoundState.deploymentDate);
       const roundDuration = xMax - roundOpenDate;
-      const expandedChartRange = 4 * roundDuration;
+      const expandedChartRange = 6 * roundDuration;
       const xMin = xMax - expandedChartRange;
 
       return {

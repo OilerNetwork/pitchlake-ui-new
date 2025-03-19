@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useEffect } from "react";
 import { useProvider } from "@starknet-react/core";
+import { useNewContext } from "@/context/NewProvider";
 
 // Return type(s) for data and hook
 export interface ReadVaultRoundsResponse {
@@ -52,6 +53,7 @@ export const useHistoricalRoundParams = ({
   toRound: number | undefined;
 }): UseVaultRoundsResult => {
   // Query UID
+  const { conn } = useNewContext();
   const queryKey = ["roundHistoricalData", vaultAddress, fromRound, toRound];
   const { provider } = useProvider();
 
@@ -62,7 +64,7 @@ export const useHistoricalRoundParams = ({
         vaultAddress,
         fromRound,
         toRound,
-        provider?.channel?.nodeUrl,
+        conn === "demo" ? undefined : provider?.channel?.nodeUrl,
       ),
     enabled: !!vaultAddress && !!fromRound && !!toRound,
   });
