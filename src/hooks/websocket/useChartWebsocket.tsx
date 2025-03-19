@@ -20,6 +20,7 @@ const useWebsocketChart = ({
   const ws = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
+  const [isLoaded, setIsLoaded] = useState(false);
   const lowerTimestampRef = useRef(lowerTimestamp);
   const upperTimestampRef = useRef(upperTimestamp);
   const [confirmedGasData, setConfirmedGasData] = useState<Block[]>([]);
@@ -65,6 +66,7 @@ const useWebsocketChart = ({
           .map(block => [block.blockNumber, block])
       );
 
+    
       // Add new confirmed blocks
       usableData?.forEach(block => {
         if (block.blockNumber) {
@@ -86,7 +88,13 @@ const useWebsocketChart = ({
         .sort((a, b) => a.timestamp - b.timestamp)
     );
   }
+
   useEffect(() => {
+    setIsLoaded(true)
+  },[])
+  useEffect(() => {
+    
+    if(!isLoaded) return
       ws.current = new WebSocket(
         `${process.env.NEXT_PUBLIC_WS_URL}/subscribeGas`
       );
@@ -122,9 +130,9 @@ const useWebsocketChart = ({
     
     // Cleanup function to close the WebSocket connection when the component unmounts
     return () => {
-      ws.current?.close();
+      ws.current?.close(1000,"Closing connection");
     };
-  }, []);
+  }, [isLoaded]);
 
   useEffect(() => {
     lowerTimestampRef.current = lowerTimestamp
