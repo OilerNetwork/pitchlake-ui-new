@@ -13,8 +13,8 @@ export const createJobRequestParams = (
   return {
     // TWAP duration is 1 x round duration
     twap: [targetTimestamp - roundDuration, targetTimestamp],
-    // Volatility duration is 3 x round duration
-    volatility: [targetTimestamp - 3 * roundDuration, targetTimestamp],
+    // Volatility duration is 5 x round duration (uses 3x for calculation)
+    volatility: [targetTimestamp - 5 * roundDuration, targetTimestamp],
     // Reserve price duration is 3 x round duration
     reserve_price: [targetTimestamp - 3 * roundDuration, targetTimestamp],
   };

@@ -102,7 +102,7 @@ const ManualButtons = ({
           const response = await vaultActions.sendFossilRequest({
             targetTimestamp: Number(selectedRoundState.optionSettleDate),
             vaultAddress: vaultState.address,
-            clientAddress: vaultState.fossilClientAddress,
+            clientAddress: vaultState.l1DataProcessorAddress,
             roundDuration:
               Number(selectedRoundState.optionSettleDate) -
               Number(selectedRoundState.auctionEndDate),

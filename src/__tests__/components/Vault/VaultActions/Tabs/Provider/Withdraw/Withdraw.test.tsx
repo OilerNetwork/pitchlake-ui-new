@@ -24,7 +24,7 @@ const mockData = {
     alpha: "1000",
     strikeLevel: "0",
     ethAddress: "0x456",
-    fossilClientAddress: "0x789",
+    l1DataProcessorAddress: "0x789",
     currentRoundId: "1",
     lockedBalance: "1000000000000000000",
     unlockedBalance: "2000000000000000000",
@@ -91,7 +91,9 @@ jest.mock("@/context/NewProvider", () => ({
 }));
 
 jest.mock("@/context/HelpProvider", () => ({
-  HelpProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  HelpProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
   useHelpContext: () => mockImplementations.useHelpContext(),
 }));
 
@@ -222,4 +224,3 @@ describe("Withdraw Component", () => {
     expect(screen.getByTestId("withdraw-stash-component")).toBeInTheDocument();
   });
 });
-

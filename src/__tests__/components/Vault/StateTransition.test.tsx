@@ -36,7 +36,7 @@ const defaultRoundState = {
 
 const defaultVaultState = {
   address: "0x123",
-  fossilClientAddress: "0x789",
+  l1DataProcessorAddress: "0x789",
 };
 
 const defaultVaultActions = {

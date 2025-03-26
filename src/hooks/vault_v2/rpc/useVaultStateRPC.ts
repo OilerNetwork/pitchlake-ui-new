@@ -44,10 +44,10 @@ const useVaultStateRPC = ({
     args: [],
     watch: true,
   });
-  const { data: fossilClientAddress } = useContractRead({
+  const { data: l1DataProcessorAddress } = useContractRead({
     ...contractData,
 
-    functionName: "get_fossil_client_address",
+    functionName: "get_l1_data_processor_address",
     args: [],
     watch: true,
   });
@@ -142,8 +142,8 @@ const useVaultStateRPC = ({
       alpha: alpha ? alpha.toString() : 0,
       strikeLevel: strikeLevel ? strikeLevel.toString() : 0,
       ethAddress: ethAddress ? stringToHex(ethAddress?.toString()) : "",
-      fossilClientAddress: fossilClientAddress
-        ? stringToHex(fossilClientAddress.toString())
+      l1DataProcessorAddress: l1DataProcessorAddress
+        ? stringToHex(l1DataProcessorAddress.toString())
         : "",
       currentRoundId: currentRoundId ? currentRoundId.toString() : 0,
       lockedBalance: lockedBalance ? lockedBalance.toString() : 0,

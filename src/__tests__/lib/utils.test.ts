@@ -12,7 +12,7 @@ import {
   createJobRequest,
   createJobId,
   getTargetTimestampForRound,
-  getDurationForRound
+  getDurationForRound,
 } from "@/lib/utils";
 import { OptionRoundStateType } from "@/lib/types";
 
@@ -70,7 +70,9 @@ describe("removeLeadingZeroes", () => {
   });
 
   it("throws error for invalid hex string", () => {
-    expect(() => removeLeadingZeroes("1234")).toThrow("Invalid hash: must start with 0x");
+    expect(() => removeLeadingZeroes("1234")).toThrow(
+      "Invalid hash: must start with 0x",
+    );
   });
 });
 
@@ -172,7 +174,7 @@ describe("createJobRequestParams", () => {
 
     expect(result).toEqual({
       twap: [targetTimestamp - roundDuration, targetTimestamp],
-      volatility: [targetTimestamp - 3 * roundDuration, targetTimestamp],
+      volatility: [targetTimestamp - 5 * roundDuration, targetTimestamp],
       reserve_price: [targetTimestamp - 3 * roundDuration, targetTimestamp],
     });
   });
@@ -197,7 +199,10 @@ describe("createJobRequest", () => {
       },
       body: JSON.stringify({
         identifiers: ["PITCH_LAKE_V1"],
-        params: createJobRequestParams(params.targetTimestamp, params.roundDuration),
+        params: createJobRequestParams(
+          params.targetTimestamp,
+          params.roundDuration,
+        ),
         client_info: {
           client_address: params.clientAddress,
           vault_address: params.vaultAddress,
@@ -255,7 +260,7 @@ describe("getTargetTimestampForRound", () => {
       payoutPerOption: "0",
       treeNonce: "0",
       performanceLP: "0",
-      performanceOB: "0"
+      performanceOB: "0",
     };
 
     expect(getTargetTimestampForRound(roundState)).toBe(1704067200);
@@ -287,7 +292,7 @@ describe("getTargetTimestampForRound", () => {
       payoutPerOption: "0",
       treeNonce: "0",
       performanceLP: "0",
-      performanceOB: "0"
+      performanceOB: "0",
     };
 
     expect(getTargetTimestampForRound(roundState)).toBe(1704070800);
@@ -330,7 +335,7 @@ describe("getDurationForRound", () => {
       payoutPerOption: "0",
       treeNonce: "0",
       performanceLP: "0",
-      performanceOB: "0"
+      performanceOB: "0",
     };
 
     expect(getDurationForRound(roundState)).toBe(2400); // 40 minutes
@@ -344,4 +349,4 @@ describe("getDurationForRound", () => {
     const roundState = {} as OptionRoundStateType;
     expect(getDurationForRound(roundState)).toBe(0);
   });
-}); 
+});

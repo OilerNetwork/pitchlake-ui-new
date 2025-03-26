@@ -66,7 +66,7 @@ jest.mock("@/context/NewProvider", () => ({
           alpha: "1000",
           strikeLevel: "0",
           ethAddress: "0x456",
-          fossilClientAddress: "0x789",
+          l1DataProcessorAddress: "0x789",
           currentRoundId: "1",
           lockedBalance: "1000000000000000000",
           unlockedBalance: "2000000000000000000",
@@ -168,15 +168,21 @@ describe("Mint Component", () => {
 
     // Check initial render
     expect(screen.getByTestId("mint-icon")).toBeInTheDocument();
-    
+
     // Check mintable balance text
-    const mintableBalanceText = screen.getByText(/Your mintable option balance is/);
+    const mintableBalanceText = screen.getByText(
+      /Your mintable option balance is/,
+    );
     expect(mintableBalanceText).toBeInTheDocument();
-    expect(mintableBalanceText.querySelector('.text-\\[\\#fafafa\\]')).toHaveTextContent("1,000");
+    expect(
+      mintableBalanceText.querySelector(".text-\\[\\#fafafa\\]"),
+    ).toHaveTextContent("1,000");
 
     // Check total options
     expect(screen.getByText("Total Options")).toBeInTheDocument();
-    const totalOptionsValue = screen.getByText("Total Options").parentElement?.querySelector('.text-white');
+    const totalOptionsValue = screen
+      .getByText("Total Options")
+      .parentElement?.querySelector(".text-white");
     expect(totalOptionsValue).toHaveTextContent("1,000");
 
     // Initiate mint
@@ -186,7 +192,7 @@ describe("Mint Component", () => {
     expect(mockShowConfirmation).toHaveBeenCalledWith(
       "Mint",
       expect.anything(),
-      expect.any(Function)
+      expect.any(Function),
     );
 
     // Complete mint flow
@@ -200,4 +206,3 @@ describe("Mint Component", () => {
     });
   });
 });
-

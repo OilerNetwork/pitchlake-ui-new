@@ -75,7 +75,7 @@ export type VaultStateType = {
   alpha: number | bigint | string;
   strikeLevel: number | bigint | string;
   ethAddress: string;
-  fossilClientAddress: string;
+  l1DataProcessorAddress: string;
   currentRoundId: number | bigint | string;
   lockedBalance: number | bigint | string;
   unlockedBalance: number | bigint | string;
