@@ -9,8 +9,14 @@ export async function POST(request: Request) {
   const body = await request.json();
   const params: FossilParams = body;
 
-  const { targetTimestamp, roundDuration, clientAddress, vaultAddress } =
-    params;
+  const {
+    targetTimestamp,
+    roundDuration,
+    clientAddress,
+    vaultAddress,
+    alpha,
+    k,
+  } = params;
 
   if (!targetTimestamp || !roundDuration || !clientAddress || !vaultAddress) {
     return NextResponse.json(
@@ -28,6 +34,8 @@ export async function POST(request: Request) {
     roundDuration,
     clientAddress,
     vaultAddress,
+    alpha,
+    k,
   });
 
   // Set API key (kept secret on the server side)

@@ -159,7 +159,7 @@ const useVaultActions = () => {
         return false;
       }
     },
-    [callContract],
+    [vaultAddress],
   );
 
   const sendFossilRequest = useCallback(
@@ -168,6 +168,8 @@ const useVaultActions = () => {
       roundDuration,
       clientAddress,
       vaultAddress,
+      alpha,
+      k,
     }: SendFossiLRequestParams): Promise<string> => {
       const OK = Promise.resolve("Ok");
       const NOT_OK = Promise.resolve("Not Ok");
@@ -182,6 +184,8 @@ const useVaultActions = () => {
             roundDuration,
             clientAddress,
             vaultAddress,
+            alpha,
+            k,
           }),
         });
 
@@ -191,7 +195,7 @@ const useVaultActions = () => {
       }
       return OK;
     },
-    [],
+    [conn],
   );
 
   // @NOTE: rm and consider adding demo_fossil_callback to actions

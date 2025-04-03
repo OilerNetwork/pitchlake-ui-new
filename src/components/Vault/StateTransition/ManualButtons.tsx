@@ -106,6 +106,8 @@ const ManualButtons = ({
             roundDuration:
               Number(selectedRoundState.optionSettleDate) -
               Number(selectedRoundState.auctionEndDate),
+            alpha: Number(vaultState.alpha),
+            k: Number(vaultState.strikeLevel),
           });
           if (response === "Ok") setExpectedNextState("Settled");
           else setExpectedNextState(null);
