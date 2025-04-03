@@ -37,6 +37,8 @@ const defaultRoundState = {
 const defaultVaultState = {
   address: "0x123",
   l1DataProcessorAddress: "0x789",
+  alpha: "3333",
+  strikeLevel: "0",
 };
 
 const defaultVaultActions = {
@@ -302,6 +304,11 @@ describe("DemoStateTransition", () => {
         },
         timestamp: 1100, // l2Now > optionSettleDate
         conn: "demo",
+        vaultState: {
+          ...defaultVaultState,
+          alpha: "3333",
+          strikeLevel: "0",
+        },
       });
 
       const button = screen.getByRole("button");
@@ -333,6 +340,11 @@ describe("DemoStateTransition", () => {
         },
         timestamp: 2100, // l2Now > optionSettleDate
         conn: "mock",
+        vaultState: {
+          ...defaultVaultState,
+          alpha: "3333",
+          strikeLevel: "0",
+        },
       });
 
       const button = screen.getByRole("button");
@@ -353,6 +365,8 @@ describe("DemoStateTransition", () => {
         vaultAddress: "0x123",
         clientAddress: "0x789",
         roundDuration: 1000,
+        alpha: 3333,
+        k: 0,
       });
     });
   });

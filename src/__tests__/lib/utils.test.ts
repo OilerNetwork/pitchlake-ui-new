@@ -167,15 +167,24 @@ describe("time utilities", () => {
 
 describe("createJobRequestParams", () => {
   it("creates correct job request parameters", () => {
+    const DAYS150 = 3600 * 24 * 150; // 150 days in seconds
     const targetTimestamp = 1704067200; // 2024-01-01T00:00:00Z
     const roundDuration = 3600; // 1 hour
+    const alpha = 2345;
+    const k = 0;
 
-    const result = createJobRequestParams(targetTimestamp, roundDuration);
+    const result = createJobRequestParams(
+      targetTimestamp,
+      roundDuration,
+      alpha,
+      k,
+    );
 
     expect(result).toEqual({
       twap: [targetTimestamp - roundDuration, targetTimestamp],
-      volatility: [targetTimestamp - 5 * roundDuration, targetTimestamp],
-      reserve_price: [targetTimestamp - 3 * roundDuration, targetTimestamp],
+      cap_level: [targetTimestamp - 5 * roundDuration, targetTimestamp],
+      reserve_price: [targetTimestamp - DAYS150, targetTimestamp],
+      alpha,k
     });
   });
 });
@@ -187,6 +196,8 @@ describe("createJobRequest", () => {
       roundDuration: 3600,
       clientAddress: "0x123",
       vaultAddress: "0x456",
+      alpha: 2345,
+      k: 0,
     };
 
     const result = createJobRequest(params);
@@ -202,6 +213,8 @@ describe("createJobRequest", () => {
         params: createJobRequestParams(
           params.targetTimestamp,
           params.roundDuration,
+          params.alpha,
+          params.k,
         ),
         client_info: {
           client_address: params.clientAddress,
@@ -221,15 +234,17 @@ describe("createJobId", () => {
   it("creates a job ID string", () => {
     const targetTimestamp = 1704067200;
     const roundDuration = 3600;
+    const alpha = 2345;
+    const k = 0;
 
-    const result = createJobId(targetTimestamp, roundDuration);
+    const result = createJobId(targetTimestamp, roundDuration, alpha, k);
 
     expect(typeof result).toBe("string");
     expect(result.length).toBeGreaterThan(0);
   });
 
   it("returns empty string when parameters are missing", () => {
-    expect(createJobId(0, 0)).toBe("");
+    expect(createJobId(0, 0, 0, 0)).toBe("");
   });
 });
 
