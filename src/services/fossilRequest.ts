@@ -4,14 +4,22 @@ import { createJobRequest } from "@/lib/utils";
 import { FossilParams } from "@/lib/types";
 
 export const makeFossilCall = async (params: FossilParams) => {
-  const { targetTimestamp, roundDuration, clientAddress, vaultAddress } =
-    params;
+  const {
+    targetTimestamp,
+    roundDuration,
+    clientAddress,
+    vaultAddress,
+    alpha,
+    k,
+  } = params;
   // Create request
   let request = createJobRequest({
     targetTimestamp,
     roundDuration,
     clientAddress,
     vaultAddress,
+    alpha,
+    k,
   });
 
   // Set API key

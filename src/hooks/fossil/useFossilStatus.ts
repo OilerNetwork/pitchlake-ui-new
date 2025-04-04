@@ -14,9 +14,9 @@ export interface StatusData {
 }
 
 const useFossilStatus = () => {
-  const {selectedRoundAddress} = useVaultState()
-  const selectedRoundState = useRoundState(selectedRoundAddress)
-  const {conn} = useNewContext()
+  const { selectedRoundAddress, vaultState } = useVaultState();
+  const selectedRoundState = useRoundState(selectedRoundAddress);
+  const { conn } = useNewContext();
   const targetTimestamp = getTargetTimestampForRound(selectedRoundState);
   const roundDuration = getDurationForRound(selectedRoundState);
   const [statusData, setStatusData] = useState<StatusData | null>(null);
@@ -40,8 +40,12 @@ const useFossilStatus = () => {
 
     setLoading(true);
     try {
-
-      const jobId = createJobId(targetTimestamp, roundDuration);
+      const jobId = createJobId(
+        targetTimestamp,
+        roundDuration,
+        Number(vaultState?.alpha || 0),
+        Number(vaultState?.strikeLevel || 0),
+      );
       const response = await fetch(`/api/getJobStatus?jobId=${jobId}`);
       if (!response.ok) throw new Error("Network response was not ok");
 
@@ -53,7 +57,7 @@ const useFossilStatus = () => {
     } finally {
       setLoading(false);
     }
-  }, [targetTimestamp, conn]);
+  }, [targetTimestamp, vaultState?.alpha, vaultState?.strikeLevel, conn]);
 
   useEffect(() => {
     if (
