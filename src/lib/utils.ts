@@ -9,14 +9,20 @@ import { getDemoRoundId } from "./demo/utils";
 export const createJobRequestParams = (
   targetTimestamp: number,
   roundDuration: number,
+  alpha: number,
+  k: number,
 ) => {
+  const DAYS_150 = 3600 * 24 * 150;
+
   return {
     // TWAP duration is 1 x round duration
     twap: [targetTimestamp - roundDuration, targetTimestamp],
-    // Volatility duration is 3 x round duration
-    volatility: [targetTimestamp - 3 * roundDuration, targetTimestamp],
-    // Reserve price duration is 3 x round duration
-    reserve_price: [targetTimestamp - 3 * roundDuration, targetTimestamp],
+    // Cap level duration is 5 months
+    cap_level: [targetTimestamp - 5 * roundDuration, targetTimestamp],
+    // Reserve price duration is 5 months
+    reserve_price: [targetTimestamp - DAYS_150, targetTimestamp],
+    alpha,
+    k,
   };
 };
 
@@ -25,6 +31,8 @@ export const createJobRequest = ({
   roundDuration,
   clientAddress,
   vaultAddress,
+  alpha,
+  k,
 }: FossilParams): any => {
   if (!targetTimestamp || !roundDuration || !clientAddress || !vaultAddress)
     return;
@@ -37,7 +45,12 @@ export const createJobRequest = ({
     },
     body: JSON.stringify({
       identifiers: ["PITCH_LAKE_V1"],
-      params: createJobRequestParams(targetTimestamp, roundDuration),
+      params: createJobRequestParams(
+        targetTimestamp,
+        roundDuration,
+        alpha || 0,
+        k || 0,
+      ),
       client_info: {
         client_address: clientAddress,
         vault_address: vaultAddress,
@@ -50,18 +63,25 @@ export const createJobRequest = ({
 export const createJobId = (
   targetTimestamp: number,
   roundDuration: number,
+  alpha: number,
+  k: number,
 ): string => {
   if (!targetTimestamp || !roundDuration) return "";
 
   const identifiers = ["PITCH_LAKE_V1"];
-  const params = createJobRequestParams(targetTimestamp, roundDuration);
+  const params = createJobRequestParams(
+    targetTimestamp,
+    roundDuration,
+    alpha,
+    k,
+  );
 
   const input = [
     ...identifiers,
     params.twap[0],
     params.twap[1],
-    params.volatility[0],
-    params.volatility[1],
+    params.cap_level[0],
+    params.cap_level[1],
     params.reserve_price[0],
     params.reserve_price[1],
   ].join("");

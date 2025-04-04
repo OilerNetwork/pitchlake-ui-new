@@ -12,7 +12,7 @@ import {
   createJobRequest,
   createJobId,
   getTargetTimestampForRound,
-  getDurationForRound
+  getDurationForRound,
 } from "@/lib/utils";
 import { OptionRoundStateType } from "@/lib/types";
 
@@ -70,7 +70,9 @@ describe("removeLeadingZeroes", () => {
   });
 
   it("throws error for invalid hex string", () => {
-    expect(() => removeLeadingZeroes("1234")).toThrow("Invalid hash: must start with 0x");
+    expect(() => removeLeadingZeroes("1234")).toThrow(
+      "Invalid hash: must start with 0x",
+    );
   });
 });
 
@@ -165,15 +167,24 @@ describe("time utilities", () => {
 
 describe("createJobRequestParams", () => {
   it("creates correct job request parameters", () => {
+    const DAYS150 = 3600 * 24 * 150; // 150 days in seconds
     const targetTimestamp = 1704067200; // 2024-01-01T00:00:00Z
     const roundDuration = 3600; // 1 hour
+    const alpha = 2345;
+    const k = 0;
 
-    const result = createJobRequestParams(targetTimestamp, roundDuration);
+    const result = createJobRequestParams(
+      targetTimestamp,
+      roundDuration,
+      alpha,
+      k,
+    );
 
     expect(result).toEqual({
       twap: [targetTimestamp - roundDuration, targetTimestamp],
-      volatility: [targetTimestamp - 3 * roundDuration, targetTimestamp],
-      reserve_price: [targetTimestamp - 3 * roundDuration, targetTimestamp],
+      cap_level: [targetTimestamp - 5 * roundDuration, targetTimestamp],
+      reserve_price: [targetTimestamp - DAYS150, targetTimestamp],
+      alpha,k
     });
   });
 });
@@ -185,6 +196,8 @@ describe("createJobRequest", () => {
       roundDuration: 3600,
       clientAddress: "0x123",
       vaultAddress: "0x456",
+      alpha: 2345,
+      k: 0,
     };
 
     const result = createJobRequest(params);
@@ -197,7 +210,12 @@ describe("createJobRequest", () => {
       },
       body: JSON.stringify({
         identifiers: ["PITCH_LAKE_V1"],
-        params: createJobRequestParams(params.targetTimestamp, params.roundDuration),
+        params: createJobRequestParams(
+          params.targetTimestamp,
+          params.roundDuration,
+          params.alpha,
+          params.k,
+        ),
         client_info: {
           client_address: params.clientAddress,
           vault_address: params.vaultAddress,
@@ -216,15 +234,17 @@ describe("createJobId", () => {
   it("creates a job ID string", () => {
     const targetTimestamp = 1704067200;
     const roundDuration = 3600;
+    const alpha = 2345;
+    const k = 0;
 
-    const result = createJobId(targetTimestamp, roundDuration);
+    const result = createJobId(targetTimestamp, roundDuration, alpha, k);
 
     expect(typeof result).toBe("string");
     expect(result.length).toBeGreaterThan(0);
   });
 
   it("returns empty string when parameters are missing", () => {
-    expect(createJobId(0, 0)).toBe("");
+    expect(createJobId(0, 0, 0, 0)).toBe("");
   });
 });
 
@@ -255,7 +275,7 @@ describe("getTargetTimestampForRound", () => {
       payoutPerOption: "0",
       treeNonce: "0",
       performanceLP: "0",
-      performanceOB: "0"
+      performanceOB: "0",
     };
 
     expect(getTargetTimestampForRound(roundState)).toBe(1704067200);
@@ -287,7 +307,7 @@ describe("getTargetTimestampForRound", () => {
       payoutPerOption: "0",
       treeNonce: "0",
       performanceLP: "0",
-      performanceOB: "0"
+      performanceOB: "0",
     };
 
     expect(getTargetTimestampForRound(roundState)).toBe(1704070800);
@@ -330,7 +350,7 @@ describe("getDurationForRound", () => {
       payoutPerOption: "0",
       treeNonce: "0",
       performanceLP: "0",
-      performanceOB: "0"
+      performanceOB: "0",
     };
 
     expect(getDurationForRound(roundState)).toBe(2400); // 40 minutes
@@ -344,4 +364,4 @@ describe("getDurationForRound", () => {
     const roundState = {} as OptionRoundStateType;
     expect(getDurationForRound(roundState)).toBe(0);
   });
-}); 
+});

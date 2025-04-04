@@ -14,6 +14,8 @@ export type FossilParams = {
   roundDuration: number | undefined;
   clientAddress: string | undefined;
   vaultAddress: string | undefined;
+  alpha: number | undefined;
+  k: number | undefined;
 };
 
 export type DepositArgs = {
@@ -39,11 +41,19 @@ export type U256 = {
   high: string | number | bigint;
 };
 
-export type L1Data = {
+export type L1DataVol = {
   twap: U256;
   volatility: number | string;
   reserve_price: U256;
 };
+
+export type L1DataCap = {
+  twap: U256;
+  cap_level: number | string;
+  reserve_price: U256;
+};
+
+export type L1Data = L1DataVol | L1DataCap;
 
 export type FossilCallbackArgs = {
   l1_data: L1Data;
@@ -75,7 +85,7 @@ export type VaultStateType = {
   alpha: number | bigint | string;
   strikeLevel: number | bigint | string;
   ethAddress: string;
-  fossilClientAddress: string;
+  l1DataProcessorAddress: string;
   currentRoundId: number | bigint | string;
   lockedBalance: number | bigint | string;
   unlockedBalance: number | bigint | string;
@@ -134,6 +144,8 @@ export type SendFossiLRequestParams = {
   roundDuration: number;
   clientAddress: string;
   vaultAddress: string;
+  alpha: number;
+  k: number;
 };
 
 export type OptionRoundStateType = {

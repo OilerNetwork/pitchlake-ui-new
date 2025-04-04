@@ -30,7 +30,7 @@ const useMockVault = ({ address }: { address?: string }) => {
     vaultType: "ITM",
     alpha: "5555",
     ethAddress: "0x00",
-    fossilClientAddress: "0x00",
+    l1DataProcessorAddress: "0x00",
     currentRoundId: 1,
     lockedBalance: "0",
     unlockedBalance: "123456789123456789123",

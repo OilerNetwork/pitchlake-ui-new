@@ -30,15 +30,12 @@ export const useProgressEstimates = () => {
     } else {
       txnEstimate = 90;
       errorEstimate = 30;
-      // Rounds < 15 minutes should settle in 20 min or less
-      // Rounds < 5 hours should settle in 30 min or less
-      // Rounds > 5 hours should settle in 2 hours or less
-      if (roundDuration <= 60 * 15) {
-        fossilEstimate = 60 * 20;
-      } else if (roundDuration <= 60 * 60 * 5) {
-        fossilEstimate = 60 * 30;
-      } else {
-        fossilEstimate = 60 * 60 * 2;
+      // Rounds < 5 hours should settle in 30 min or less (15 min confirmation latency + 5 min calculation time)
+      if (roundDuration <= 60 * 60 * 5) {
+        fossilEstimate = 60 * 25;
+      } // Rounds > 5 hours should settle in 1.5 hours or less
+      else {
+        fossilEstimate = 60 * 60 * 1.5;
       }
     }
 

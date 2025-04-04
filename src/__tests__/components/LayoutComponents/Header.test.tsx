@@ -138,7 +138,7 @@ jest.mock("@/hooks/vault_v2/states/useVaultState", () => ({
       alpha: "0",
       strikeLevel: "0",
       ethAddress: "0x0",
-      fossilClientAddress: "0x0",
+      l1DataProcessorAddress: "0x0",
       currentRoundId: "0",
       lockedBalance: "0",
       unlockedBalance: "0",
