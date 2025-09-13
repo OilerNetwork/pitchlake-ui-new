@@ -5,7 +5,7 @@ import { useChartContext } from "@/context/ChartProvider";
 import { useHistoricalRoundParams } from "./useHistoricalRoundParams";
 import { useNewContext } from "@/context/NewProvider";
 import demoRoundData from "@/lib/demo/demo-round-data.json";
-import { FormattedBlockData } from "@/app/api/getFossilGasData/route";
+import { FormattedBlockData } from "@/lib/types";
 import { formatUnits } from "ethers";
 
 const useChartData = (activeLines: any, vaultAddress?: string) => {

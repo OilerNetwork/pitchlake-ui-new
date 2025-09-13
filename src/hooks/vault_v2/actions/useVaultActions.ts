@@ -16,15 +16,13 @@ import {
 } from "@/lib/types";
 import { useCallback, useMemo } from "react";
 import {
-  ModalStateProps,
   useTransactionContext,
 } from "@/context/TransactionProvider";
 import { useNewContext } from "@/context/NewProvider";
 import { DemoFossilCallParams } from "@/app/api/sendMockFossilCallback/route";
-import { getTargetTimestampForRound } from "@/lib/utils";
 const useVaultActions = () => {
   const { vaultAddress, conn } = useNewContext();
-  const { setPendingTx, setModalState } = useTransactionContext();
+  const { setPendingTx } = useTransactionContext();
   const { account } = useAccount();
   const { provider } = useProvider();
   const { contract } = useContract({

@@ -1,8 +1,6 @@
 "use client";
-import { useMemo, useState } from "react";
-import { useFossilGasData } from "@/hooks/chart/useFossilGasData";
-import { useUnconfirmedBlocks } from "@/hooks/chart/useUnconfirmedBlocks";
-import { FormattedBlockData } from "@/app/api/getFossilGasData/route";
+import { useMemo} from "react";
+import { FormattedBlockData } from "@/lib/types";
 import { getTWAPs, scaleInRange } from "@/lib/utils";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";

@@ -3,24 +3,7 @@
 import { NextResponse } from "next/server";
 import { formatUnits } from "ethers";
 import { Pool } from "pg";
-
-interface RawBlockData {
-  block_number?: number;
-  base_fee_per_gas?: string;
-  timestamp: number;
-}
-
-export interface FormattedBlockData {
-  blockNumber?: number | undefined;
-  timestamp: number;
-  basefee?: number | undefined;
-  twap?: number | undefined;
-  confirmedBasefee?: number | undefined;
-  confrimedTwap?: number | undefined;
-  isUnconfirmed?: boolean;
-  unconfirmedBasefee?: number | undefined;
-  unconfrimedTwap?: number | undefined;
-}
+import { RawBlockData, FormattedBlockData } from "@/lib/types";
 
 // Helper to fetch data from the database
 async function fetchBlockData(
