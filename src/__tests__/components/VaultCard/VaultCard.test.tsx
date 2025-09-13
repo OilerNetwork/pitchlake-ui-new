@@ -22,8 +22,6 @@ jest.mock("next/navigation", () => ({
   useRouter: jest.fn()
 }));
 
-jest.mock("@/hooks/vault/state/useVaultBalances");
-jest.mock("@/hooks/optionRound/state/useRoundState");
 jest.mock("@/context/NewProvider");
 jest.mock("@/context/TimeProvider");
 jest.mock("@/hooks/vault_v2/rpc/useVaultStateRPC");
