@@ -1,24 +1,22 @@
 import { optionRoundABI } from "@/lib/abi";
-import useContractReads from "@/lib/useContractReads";
+import { useContractRead } from "@starknet-react/core";
 import { useMemo } from "react";
+import { BlockTag } from "starknet";
 
-const useCapLevel = (address: string, args?: { watch?: boolean }) => {
-  const watch = args?.watch ?? false;
+const useCapLevel = (address: string) => {
   const contractData = useMemo(() => {
     return { abi: optionRoundABI, address:address as `0x${string}` };
   }, [address]);
 
-  const { capLevel } = useContractReads({
-    contractData,
-    watch,
-    states: [
-      {
-        functionName: "get_cap_level",
-        key: "capLevel",
-      },
-    ],
-  });
+  const { data: capLevel } = useContractRead({
+    ...contractData,
 
+    functionName: "get_cap_level",
+    args:[],
+    watch: true,
+    
+  })
+  
   return { capLevel: capLevel ? capLevel.toString() : 0 };
 };
 

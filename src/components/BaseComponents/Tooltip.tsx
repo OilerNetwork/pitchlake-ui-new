@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { formatEther } from "ethers";
+import Hoverable from "./Hoverable";
+import { formatNumber } from "@/lib/utils";
 
 interface BalanceTooltipProps {
   balance: {
@@ -63,31 +65,44 @@ const BalanceTooltip: React.FC<BalanceTooltipProps> = ({
               </svg>
             </div>
             {/* Tooltip Content */}
-            <h2 className="text-sm p-3 px-4 border-b border-[#262626]">
-              Balance Distribution
-            </h2>
-            <div className="space-y-2">
-              <div className="p-2 px-4 pb-0 flex justify-between">
+            <Hoverable dataId="leftPanelVaultBalance">
+              <h2 className="text-sm p-3 border-b border-[#262626]">
+                Balance Distribution
+              </h2>
+            </Hoverable>
+            <div className="space-y-1">
+              <Hoverable
+                dataId="vaultLockedBalance"
+                className="py-1 px-4 flex justify-between"
+              >
                 <span>Locked</span>
                 <span>
-                  {parseFloat(formatEther(balance.locked)).toFixed(3) || "0"}{" "}
+                  {formatNumber(parseFloat(formatEther(balance.locked))) || "0"}{" "}
                   ETH
                 </span>
-              </div>
-              <div className="p-2 px-4 pb-0 flex justify-between">
+              </Hoverable>
+              <Hoverable
+                dataId="vaultUnlockedBalance"
+                className="py-1 px-4 flex justify-between"
+              >
                 <span>Unlocked</span>
                 <span>
-                  {parseFloat(formatEther(balance.unlocked)).toFixed(3) || "0"}{" "}
+                  {formatNumber(parseFloat(formatEther(balance.unlocked))) ||
+                    "0"}{" "}
                   ETH
                 </span>
-              </div>
-              <div className="p-2 px-4 pb-0 flex justify-between">
+              </Hoverable>
+              <Hoverable
+                dataId="vaultStashedBalance"
+                className="py-1 px-4 flex justify-between"
+              >
                 <span>Stashed</span>
                 <span>
-                  {parseFloat(formatEther(balance.stashed)).toFixed(3) || "0"}{" "}
+                  {formatNumber(parseFloat(formatEther(balance.stashed))) ||
+                    "0"}{" "}
                   ETH
                 </span>
-              </div>
+              </Hoverable>
             </div>
           </div>,
           document.body,
@@ -194,9 +209,9 @@ const BalanceTooltip: React.FC<BalanceTooltipProps> = ({
 
 const Tooltip: React.FC<MessageProps> = ({ text, children }) => {
   return (
-    <div className="relative group">
+    <div className="tooltip-container relative group">
       {children}
-      <div className="absolute bottom-full mb-2 hidden group-hover:block text-white p-2 rounded-md border border-[#262626] border-1 bg-[#121212] shadow-sm">
+      <div className="tooltip-content absolute bottom-full mb-2 hidden group-hover:block text-white p-2 rounded-md border border-[#262626] border-1 bg-[#121212] shadow-sm">
         {text}
       </div>
     </div>

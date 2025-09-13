@@ -36,7 +36,7 @@ To add tests to the codebase, follow these steps:
 
 1. **Create Test Files**: Place your test files in the `__tests__` directory, mirroring the structure of your codebase. For example, tests for `VaultCard.tsx` should be in `__tests__/components/VaultCard/VaultCard.test.tsx`.
 
-2. **Mock Dependencies**: Use Jest to mock any hooks, context, or components that the component under test depends on. This isolates the component and allows you to test it in isolation.
+2. **Mock Dependencies**: Use Jest to mock any hooks/ context that the component under test depends on. This isolates the component and allows you to test it in isolation.
 
 3. **Use `mockHooks` Abstraction**: Create a `mockHooks` function to set up mock return values for hooks used in your component. This helps streamline the setup for each test case.
 
