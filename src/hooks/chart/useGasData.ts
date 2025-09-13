@@ -1,8 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import { useFossilGasData } from "@/hooks/chart/useFossilGasData";
-import { useUnconfirmedBlocks } from "@/hooks/chart/useUnconfirmedBlocks";
-import { FormattedBlockData } from "@/app/api/getFossilGasData/route";
+import { FormattedBlockData } from "@/lib/types";
 import { getTWAPs, scaleInRange } from "@/lib/utils";
 import useVaultState from "@/hooks/vault_v2/states/useVaultState";
 import useRoundState from "@/hooks/vault_v2/states/useRoundState";
@@ -161,7 +159,6 @@ export const useGasData = () => {
     }
   }, [combinedGasData, selectedRound, demoNow]);
 
-  console.log("11gasData", gasData);
   return { gasData };
 };
 

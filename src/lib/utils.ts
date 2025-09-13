@@ -2,7 +2,7 @@ import { poseidonHashSingle } from "@scure/starknet";
 import { bytesToNumberBE } from "@noble/curves/abstract/utils";
 import { OptionRoundStateType, FossilParams } from "@/lib/types";
 import { num, Result } from "starknet";
-import { FormattedBlockData } from "@/app/api/getFossilGasData/route";
+import { FormattedBlockData } from "@/lib/types";
 import { formatUnits } from "ethers";
 import { getDemoRoundId } from "./demo/utils";
 

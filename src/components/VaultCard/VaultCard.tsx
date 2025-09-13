@@ -15,9 +15,7 @@ import {
 } from "@/components/Icons";
 import { num } from "starknet";
 import { formatEther, formatUnits } from "ethers";
-import useTimestamps from "@/hooks/optionRound/state/useTimestamps";
 import { useNewContext } from "@/context/NewProvider";
-import { useTimeContext } from "@/context/TimeProvider";
 import useVaultStateRPC from "@/hooks/vault_v2/rpc/useVaultStateRPC";
 import { useMemo } from "react";
 import useOptionRoundStateRPC from "@/hooks/vault_v2/rpc/useOptionRoundStateRPC";

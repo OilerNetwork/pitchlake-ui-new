@@ -1,6 +1,5 @@
 import { DemoFossilCallParams } from "@/app/api/sendMockFossilCallback/route";
 import { ReactNode } from "react";
-import { Account, CairoCustomEnum } from "starknet";
 
 export interface StatusModalProps {
   txnHeader: string;
@@ -303,4 +302,23 @@ export interface TabsProps {
   tabs: string[];
   activeTab: string;
   setActiveTab: (tab: string) => void;
+}
+
+
+export interface RawBlockData {
+  block_number?: number;
+  base_fee_per_gas?: string;
+  timestamp: number;
+}
+
+export interface FormattedBlockData {
+  blockNumber?: number | undefined;
+  timestamp: number;
+  basefee?: number | undefined;
+  twap?: number | undefined;
+  confirmedBasefee?: number | undefined;
+  confrimedTwap?: number | undefined;
+  isUnconfirmed?: boolean;
+  unconfirmedBasefee?: number | undefined;
+  unconfrimedTwap?: number | undefined;
 }

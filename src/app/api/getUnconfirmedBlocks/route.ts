@@ -1,6 +1,6 @@
 import { AlchemyProvider, formatUnits, toNumber } from "ethers";
 import { NextResponse } from "next/server";
-import { FormattedBlockData } from "@/app/api/getFossilGasData/route";
+import { FormattedBlockData } from "@/lib/types";
 
 interface FeeHistoryResult {
   oldestBlock: string;
