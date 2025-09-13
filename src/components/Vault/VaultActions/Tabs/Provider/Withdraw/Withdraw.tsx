@@ -4,7 +4,8 @@ import ButtonTabs from "../../ButtonTabs";
 import WithdrawLiquidity from "@/components/Vault/VaultActions/Tabs/Provider/Withdraw/WithdrawLiquidity";
 import QueueWithdrawal from "@/components/Vault/VaultActions/Tabs/Provider/Withdraw/QueueWithdrawal";
 import WithdrawStash from "@/components/Vault/VaultActions/Tabs/Provider/Withdraw/WithdrawStash";
-import { useProtocolContext } from "@/context/ProtocolProvider";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
 
 interface WithdrawProps {
   showConfirmation: (
@@ -15,14 +16,12 @@ interface WithdrawProps {
 }
 
 const Withdraw: React.FC<WithdrawProps> = ({ showConfirmation }) => {
-  const { selectedRoundState } = useProtocolContext();
-  const [state, setState] = useState({
-    activeWithdrawTab: "Liquidity" as WithdrawSubTabs,
-  });
+  const { selectedRoundAddress } = useVaultState();
+  const selectedRoundState = useRoundState(selectedRoundAddress);
 
-  const updateState = (updates: Partial<typeof state>) => {
-    setState((prevState) => ({ ...prevState, ...updates }));
-  };
+  const [activeWithdrawTab, setActiveWithdrawTab] = useState<WithdrawSubTabs>(
+    "Unlocked" as WithdrawSubTabs,
+  );
 
   return (
     <>
@@ -31,26 +30,27 @@ const Withdraw: React.FC<WithdrawProps> = ({ showConfirmation }) => {
           tabs={
             selectedRoundState?.roundState.toString() === "Auctioning" ||
             selectedRoundState?.roundState.toString() === "Running"
-              ? ["Liquidity", "Queue", "Collect"]
-              : ["Liquidity", "Collect"]
+              ? ["Unlocked", "Locked", "Stashed"]
+              : ["Unlocked", "Stashed"]
           }
-          activeTab={state.activeWithdrawTab}
-          setActiveTab={(tab) =>
-            updateState({ activeWithdrawTab: tab as WithdrawSubTabs })
-          }
+          activeTab={activeWithdrawTab}
+          setActiveTab={(newActiveTab: string) => {
+            setActiveWithdrawTab(newActiveTab as WithdrawSubTabs);
+          }}
         />
       </div>
       <div className="h-full flex flex-col">
-        {state.activeWithdrawTab === "Liquidity" && (
+        {activeWithdrawTab === "Unlocked" && (
           <WithdrawLiquidity showConfirmation={showConfirmation} />
         )}
 
         {(selectedRoundState?.roundState === "Auctioning" ||
           selectedRoundState?.roundState === "Running") &&
-          state.activeWithdrawTab === "Queue" && (
+          activeWithdrawTab === "Locked" && (
             <QueueWithdrawal showConfirmation={showConfirmation} />
           )}
-        {state.activeWithdrawTab === "Collect" && (
+
+        {activeWithdrawTab === "Stashed" && (
           <WithdrawStash showConfirmation={showConfirmation} />
         )}
       </div>

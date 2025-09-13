@@ -2,10 +2,12 @@ const ArrowDownIcon = ({
   classname,
   stroke,
   fill,
+  strokeWidth = "1.5",
 }: {
   classname?: string;
   fill?: string;
   stroke?: string;
+  strokeWidth?: string;
 }) => {
   return (
     <svg
@@ -19,7 +21,7 @@ const ArrowDownIcon = ({
       <path
         d="M4 6L8 10L12 6"
         stroke={stroke}
-        strokeWidth="1.5"
+        strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
       />

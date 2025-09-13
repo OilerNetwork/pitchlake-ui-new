@@ -9,8 +9,14 @@ export async function POST(request: Request) {
   const body = await request.json();
   const params: FossilParams = body;
 
-  const { targetTimestamp, roundDuration, clientAddress, vaultAddress } =
-    params;
+  const {
+    targetTimestamp,
+    roundDuration,
+    clientAddress,
+    vaultAddress,
+    alpha,
+    k,
+  } = params;
 
   if (!targetTimestamp || !roundDuration || !clientAddress || !vaultAddress) {
     return NextResponse.json(
@@ -28,6 +34,8 @@ export async function POST(request: Request) {
     roundDuration,
     clientAddress,
     vaultAddress,
+    alpha,
+    k,
   });
 
   // Set API key (kept secret on the server side)
@@ -40,15 +48,17 @@ export async function POST(request: Request) {
       fossilRequest,
     );
 
-    console.log("RAW", resp);
-
     if (!resp.ok) {
-      console.error("Fossil request failed:", resp.statusText);
-      // Return error response to the client
-      return NextResponse.json(
-        { error: "Fossil request failed: " + resp.statusText },
-        { status: resp.status },
-      );
+      if ((await resp.text()) === "Conflict") {
+        return NextResponse.json({ data: "Conflict" });
+      } else {
+        console.error("Fossil request failed:", resp.statusText);
+        // Return error response to the client
+        return NextResponse.json(
+          { error: "Fossil request failed: " + resp.statusText },
+          { status: resp.status },
+        );
+      }
     }
 
     const data = await resp.json();

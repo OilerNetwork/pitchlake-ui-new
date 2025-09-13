@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import classNames from "classnames";
-import axios from "axios";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import {
   ArrowDownIcon,
@@ -10,105 +9,34 @@ import {
   CheckIcon,
 } from "@/components/Icons";
 import { History } from "lucide-react";
-import { useProtocolContext } from "@/context/ProtocolProvider";
-import { formatUnits } from "ethers";
-import data from "@/chart_data.json";
 import GasPriceChart from "@/components/Vault/VaultChart/ChartInner";
-import { useGasData } from "@/hooks/chart/useGasData";
-import { useHistoricalRoundParams } from "@/hooks/chart/useHistoricalRoundParams";
+import Hoverable from "@/components/BaseComponents/Hoverable";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import { useNewContext } from "@/context/NewProvider";
+import { useChartContext } from "@/context/ChartProvider";
+import { getDemoRoundId } from "@/lib/demo/utils";
 
 const RoundPerformanceChart = () => {
-  const [isExpandedView, setIsExpandedView] = useState(false);
+  // Protocol context
+  const { conn, selectedRound, setSelectedRound } = useNewContext();
+  const { vaultState } = useVaultState();
+  // Chart context
+  const { isExpandedView, setIsExpandedView } = useChartContext();
 
-  const { selectedRound, selectedRoundState, setSelectedRound, vaultState } =
-    useProtocolContext();
-
-  const vaultAddress = useMemo(() => {
-    return vaultState?.address;
-  }, [vaultState?.address]);
-
-  const toRound = useMemo(() => {
-    return selectedRound
-      ? Number(selectedRound)
-      : vaultState?.currentRoundId
-        ? Number(vaultState.currentRoundId)
-        : 1;
-  }, [selectedRound]);
-
-  const fromRound = useMemo(() => {
-    if (!isExpandedView) {
-      return toRound;
-    } else {
-      return toRound > 3 ? toRound - 3 : 1;
-    }
-  }, [toRound, isExpandedView]);
-
-  const { vaultData: historicalData } = useHistoricalRoundParams({
-    vaultAddress,
-    fromRound,
-    toRound,
-  });
-
-  const maxDataPoints = 100;
-
-  //  const [maxDataPoints, setMaxDataPoints] = useState<number>(100);
-  const twapRange = useMemo(() => {
-    if (
-      !selectedRoundState?.auctionEndDate ||
-      !selectedRoundState?.optionSettleDate
-    )
-      return 1;
-
-    return (
-      Number(selectedRoundState.optionSettleDate) -
-      Number(selectedRoundState.auctionEndDate)
-    );
-  }, [
-    selectedRoundState?.auctionEndDate,
-    selectedRoundState?.optionSettleDate,
-  ]);
-
-  //const [twapRange, setTwapRange] = useState<number>(720); // Example TWAP range in seconds
-
-  const bounds = useMemo(() => {
-    if (!selectedRoundState) return;
-
-    const deploymentTimestamp = Number(selectedRoundState.deploymentDate);
-    const optionSettleTimestamp = Number(selectedRoundState.optionSettleDate);
-
-    if (!isExpandedView) return [deploymentTimestamp, optionSettleTimestamp];
-    else {
-      return [
-        deploymentTimestamp - 3 * (optionSettleTimestamp - deploymentTimestamp),
-        optionSettleTimestamp,
-      ];
-    }
-  }, [
-    selectedRoundState?.deploymentDate,
-    selectedRoundState?.optionSettleDate,
-    isExpandedView,
-  ]);
-
-  // Use the useGasData hook
-  const { gasData, isLoading, isError, error } = useGasData({
-    lowerTimestamp: bounds ? bounds[0] : 0,
-    upperTimestamp: bounds ? bounds[1] : 0,
-    maxDataPoints,
-    twapRange,
-    roundStart: Number(selectedRoundState?.deploymentDate),
-  });
-
+  // Chart toggles
   const [activeLines, setActiveLines] = useState<{ [key: string]: boolean }>({
     TWAP: true,
     BASEFEE: true,
     STRIKE: true,
     CAP_LEVEL: true,
   });
-  const [zoomDomain, setZoomDomain] = useState<any>(null);
-  const [roundNavIsOpen, setRoundNavIsOpen] = useState(false);
 
-  const headerRef = useRef<HTMLDivElement | null>(null);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const toggleLine = (line: string) => {
+    setActiveLines((prev) => ({ ...prev, [line]: !prev[line] }));
+  };
+
+  // Round selector dropdown and updators
+  const [roundNavIsOpen, setRoundNavIsOpen] = useState(false);
 
   const decrementRound = () => {
     if (selectedRound > 1) {
@@ -125,54 +53,9 @@ const RoundPerformanceChart = () => {
     }
   };
 
-  const handleZoom = (domain: any) => {
-    setZoomDomain(domain);
-  };
-
-  const handleResetZoom = () => {
-    setZoomDomain(null);
-  };
-
-  const parsedData = useMemo(() => {
-    if (!selectedRound || !gasData || !historicalData || !bounds) return [];
-
-    return gasData?.map((item: any) => {
-      const newItem: any = { ...item };
-
-      const round = historicalData.rounds.find((r: any) => {
-        const lowerBound = Number(r.deploymentDate);
-        const upperBound = Number(r.optionSettleDate);
-        return item.timestamp >= lowerBound && item.timestamp <= upperBound;
-      });
-
-      if (round) {
-        const strike = Number(formatUnits(round.strikePrice, "gwei"));
-        const cap =
-          Number(formatUnits(round.strikePrice, "gwei")) *
-          (1 + Number(round.capLevel) / 10000);
-
-        newItem.STRIKE = strike;
-        newItem.CAP_LEVEL = cap;
-      } else {
-        newItem.STRIKE = undefined;
-        newItem.CAP_LEVEL = undefined;
-      }
-
-      return newItem;
-    });
-  }, [
-    gasData,
-    selectedRound,
-    historicalData,
-    selectedRoundState?.deploymentDate,
-    selectedRoundState?.optionSettleDate,
-    selectedRoundState?.capLevel,
-    selectedRoundState?.strikePrice,
-  ]);
-
-  const toggleLine = (line: string) => {
-    setActiveLines((prev) => ({ ...prev, [line]: !prev[line] }));
-  };
+  // Refs
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Set initial selectedRound
   useEffect(() => {
@@ -185,8 +68,8 @@ const RoundPerformanceChart = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) &&
         headerRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
         !headerRef.current.contains(event.target as Node)
       ) {
         setRoundNavIsOpen(false);
@@ -204,20 +87,43 @@ const RoundPerformanceChart = () => {
     };
   }, [roundNavIsOpen]);
 
+  const roundHeaderFormatter = (
+    selectedRound: string | undefined,
+    currentRoundId: string | undefined,
+    conn: string,
+  ): string => {
+    if (!selectedRound || !currentRoundId) return "";
+
+    let str: string = `Round `;
+
+    if (conn === "demo")
+      str += `${getDemoRoundId(Number(selectedRound))} (${selectedRound})`;
+    else str += selectedRound;
+
+    if (selectedRound === currentRoundId) {
+      str += " (Live)";
+    }
+
+    return str;
+  };
+
   return (
     <div className="w-full h-[800px] bg-black-alt rounded-[12px] border border-greyscale-800 relative">
       {/* Round Navigation */}
       <div className="flex flex-row items-center p-5 justify-between border-b-[1px] border-greyscale-800 pb-4 h-[56px]">
-        <div
+        <Hoverable
+          dataId="chartRoundSelector"
           ref={headerRef}
           onClick={() => setRoundNavIsOpen(!roundNavIsOpen)}
-          className="cursor-pointer font-medium text-[14px] text-primary flex flex-row items-center"
+          className="p-2 cursor-pointer font-medium text-[14px] text-primary flex flex-row items-center"
         >
-          <p className="flex flex-row items-center">Round &nbsp;</p>
-          {selectedRound ? selectedRound : 1}
-          {Number(selectedRound) === Number(vaultState?.currentRoundId)
-            ? " (Live)"
-            : ""}
+          <p className="flex flex-row items-center">
+            {roundHeaderFormatter(
+              selectedRound.toString(),
+              vaultState?.currentRoundId.toString(),
+              conn,
+            )}
+          </p>
           <div className="flex items-center ">
             {!roundNavIsOpen ? (
               <ArrowDownIcon
@@ -228,9 +134,13 @@ const RoundPerformanceChart = () => {
               <ArrowUpIcon stroke="var(--primary)" classname="ml-2 w-4 h-4" />
             )}
           </div>
-        </div>
-        <div className="flex flex-row items-center gap-4">
-          <div onClick={decrementRound}>
+        </Hoverable>
+        <div className="flex flex-row items-center gap-0">
+          <Hoverable
+            dataId="chartPreviousRound"
+            onClick={decrementRound}
+            className="p-2 previous-next-round"
+          >
             <ArrowLeftIcon
               stroke={
                 !selectedRound || selectedRound === 1
@@ -247,46 +157,47 @@ const RoundPerformanceChart = () => {
                   : ""
               } `}
             />
-          </div>
-          <div onClick={incrementRound}>
+          </Hoverable>
+          <Hoverable
+            dataId="chartNextRound"
+            onClick={incrementRound}
+            className="p-2 chart-next-round"
+          >
             <ArrowRightIcon
               stroke={
-                selectedRound &&
-                vaultState?.currentRoundId &&
-                Number(vaultState.currentRoundId) > selectedRound
-                  ? "var(--primary)"
-                  : "var(--greyscale)"
+                !selectedRound ||
+                !vaultState?.currentRoundId ||
+                selectedRound === Number(vaultState.currentRoundId)
+                  ? "var(--greyscale)"
+                  : "var(--primary)"
               }
               classname={`${
-                selectedRound &&
-                vaultState?.currentRoundId &&
-                Number(vaultState.currentRoundId) > selectedRound
-                  ? "hover-zoom hover:cursor-pointer"
-                  : ""
-              } w-[15px] h-[15px] mr-2 ${
                 !selectedRound ||
-                selectedRound === Number(vaultState?.currentRoundId)
+                !vaultState?.currentRoundId ||
+                selectedRound === Number(vaultState.currentRoundId)
+                  ? ""
+                  : "hover:cursor-pointer hover-zoom"
+              } w-[15px] h-[15px] ml-2 ${
+                !selectedRound ||
+                !vaultState?.currentRoundId ||
+                selectedRound === Number(vaultState.currentRoundId)
                   ? "hover:cursor-default"
                   : ""
               }`}
             />
-          </div>
-          <div>
+          </Hoverable>
+          <Hoverable
+            dataId="chartHistory"
+            onClick={() => setIsExpandedView(!isExpandedView)}
+            className="p-2 chart-history-button"
+          >
             <History
-              onClick={() => setIsExpandedView(!isExpandedView)}
               className={classNames(
-                "w-5 h-5 mr-2 cursor-pointer",
-                {
-                  "stroke-[var(--primary)]": isExpandedView,
-                  "stroke-[var(--greyscale)]": !isExpandedView,
-                },
-                "hover:stroke-[var(--primary)]  hover-zoom",
+                "w-5 h-5 cursor-pointer",
+                isExpandedView ? "text-primary" : "text-greyscale",
               )}
             />
-            {
-              //hover:scale-105 transition-transform duration-200 ease-in-out
-            }
-          </div>
+          </Hoverable>
         </div>
       </div>
 
@@ -319,7 +230,7 @@ const RoundPerformanceChart = () => {
                   setRoundNavIsOpen(false);
                 }}
               >
-                Round {index + 1}
+                {`Round ${index + 1}${conn === "demo" ? ` (${getDemoRoundId(index + 1)})` : ""}`}
                 {index + 1 === Number(vaultState?.currentRoundId)
                   ? " (Live)"
                   : ""}
@@ -332,12 +243,16 @@ const RoundPerformanceChart = () => {
       )}
 
       {/* Line Toggle Buttons */}
-      <div className="flex justify-center items-center my-4">
+      <div className="flex justify-center items-center my-2">
         <div className="flex gap-4">
           {["TWAP", "BASEFEE", "STRIKE", "CAP_LEVEL"].map((line) => (
-            <button
+            <Hoverable
               key={line}
-              className={`hover-zoom-small flex flex-row items-center font-regular text-[12px]
+              dataId={`chartLineButton_${line}`}
+              className="p-2"
+            >
+              <button
+                className={`hover-zoom-small flex flex-row items-center font-regular text-[12px]
                    ${
                      line === "CAP_LEVEL"
                        ? "text-success"
@@ -347,33 +262,22 @@ const RoundPerformanceChart = () => {
                            ? "text-warning-300"
                            : "text-error-300"
                    }`}
-              onClick={() => toggleLine(line)}
-            >
-              {line === "CAP_LEVEL" ? "CAP LEVEL" : line}
-              {activeLines[line] ? (
-                <EyeIcon className="w-4 h-4 ml-2 mr-3" />
-              ) : (
-                <EyeOffIcon className="w-4 h-4 ml-2 mr-3" />
-              )}
-            </button>
+                onClick={() => toggleLine(line)}
+              >
+                {line === "CAP_LEVEL" ? "CAP LEVEL" : line}
+                {activeLines[line] ? (
+                  <EyeIcon className="w-4 h-4 ml-2 mr-3" />
+                ) : (
+                  <EyeOffIcon className="w-4 h-4 ml-2 mr-3" />
+                )}
+              </button>
+            </Hoverable>
           ))}
         </div>
       </div>
 
       {/* Chart */}
-      <GasPriceChart
-        data={parsedData}
-        historicalData={historicalData}
-        activeLines={activeLines}
-        fromRound={fromRound}
-        toRound={toRound}
-        isExpandedView={isExpandedView}
-        selectedRound={selectedRound}
-        setIsExpandedView={setIsExpandedView}
-        //zoomDomain={zoomDomain}
-        //handleZoom={handleZoom}
-        //handleResetZoom={handleResetZoom}
-      />
+      <GasPriceChart activeLines={activeLines} />
     </div>
   );
 };

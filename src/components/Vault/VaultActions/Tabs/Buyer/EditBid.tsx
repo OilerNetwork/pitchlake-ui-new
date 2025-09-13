@@ -1,156 +1,100 @@
 import React, { useState, useMemo, ReactNode, useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
 import ActionButton from "@/components/Vault/Utils/ActionButton";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEthereum } from "@fortawesome/free-brands-svg-icons";
 import InputField from "@/components/Vault/Utils/InputField";
-import { LayerStackIcon } from "@/components/Icons";
-import { formatUnits, parseUnits, formatEther } from "ethers";
-import { useProtocolContext } from "@/context/ProtocolProvider";
-import { num, Call } from "starknet";
-import useERC20 from "@/hooks/erc20/useERC20";
-import { useAccount } from "@starknet-react/core";
-import useLatestTimetamp from "@/hooks/chain/useLatestTimestamp";
-import { useTransactionContext } from "@/context/TransactionProvider";
-import { useProvider } from "@starknet-react/core";
 import {
-  useSendTransaction,
-  useContract,
-} from "@starknet-react/core";
-import { erc20ABI, optionRoundABI } from "@/lib/abi";
+  EthereumIcon,
+  HourglassIcon,
+  LayerStackIcon,
+} from "@/components/Icons";
+import { formatUnits, parseUnits, formatEther } from "ethers";
+import { num } from "starknet";
+import useErc20Allowance from "@/hooks/erc20/useErc20Allowance";
+import useErc20Balance from "@/hooks/erc20/useErc20Balance";
+import { useAccount } from "@starknet-react/core";
+import { useTransactionContext } from "@/context/TransactionProvider";
+import Hoverable from "@/components/BaseComponents/Hoverable";
+import { formatNumber } from "@/lib/utils";
+import useVaultState from "@/hooks/vault_v2/states/useVaultState";
+import useRoundState from "@/hooks/vault_v2/states/useRoundState";
+import { useTimeContext } from "@/context/TimeProvider";
+import { Bid } from "./History";
+import useEditBidMulticall from "@/hooks/txn/useEditBidMulticall";
+import { AuctionOverPanel } from "./PlaceBid";
+
+const LOCAL_STORAGE_KEY = "editBidPriceGwei";
 
 interface EditModalProps {
-  onConfirm: () => void;
   onClose: () => void;
   showConfirmation: (
     modalHeader: string,
     action: ReactNode,
     onConfirm: () => Promise<void>,
   ) => void;
-  bidToEdit: any;
+  bidToEdit: Bid;
 }
 
 function stringGweiToWei(gwei: string): bigint {
   return parseUnits(gwei ? gwei : "0", "gwei");
 }
 
-const LOCAL_STORAGE_KEY = "editBidPriceGwei";
-
 const EditModal: React.FC<EditModalProps> = ({
-  onConfirm,
   onClose,
   showConfirmation,
   bidToEdit,
 }) => {
   const { account } = useAccount();
-  const { pendingTx, setPendingTx } = useTransactionContext();
-  const { provider } = useProvider();
-  const { timestamp } = useLatestTimetamp(provider);
-  const bid = bidToEdit
-    ? bidToEdit.item
-    : { amount: "0", price: "0", bid_id: "" };
-  const bidId = bid.bid_id;
-
-  const oldAmount = num.toBigInt(bid.amount);
-  const oldPriceWei = num.toBigInt(bid.price);
-  const oldPriceGwei = formatUnits(oldPriceWei, "gwei");
-  const { vaultState, selectedRoundState } = useProtocolContext();
-  const [state, setState] = useState({
-    newPriceGwei: localStorage.getItem(LOCAL_STORAGE_KEY) || "",
-    isButtonDisabled: true,
-    error: "",
-  });
-  const { allowance, balance } = useERC20(
+  const { timestamp } = useTimeContext();
+  const { vaultState, selectedRoundAddress } = useVaultState();
+  const { pendingTx, setStatusModalProps, updateStatusModalProps } =
+    useTransactionContext();
+  const selectedRoundState = useRoundState(selectedRoundAddress);
+  const { balance } = useErc20Balance(vaultState?.ethAddress as `0x${string}`);
+  const { allowance } = useErc20Allowance(
     vaultState?.ethAddress as `0x${string}`,
     selectedRoundState?.address,
   );
+  const bid = bidToEdit || { amount: "0", price: "0", bid_id: "" };
+  const { bid_id: bidId, amount: oldAmount, price: oldPriceWei } = bid;
+  const oldPriceGwei = formatUnits(oldPriceWei, "gwei");
 
-  const [needsApproving, setNeedsApproving] = useState<string>("0");
-  // Option Round Contract
-  const { contract: optionRoundContractRaw } = useContract({
-    abi: optionRoundABI,
-    address: selectedRoundState?.address as `0x${string}`,
+  const [state, setState] = useState({
+    newPriceGwei: localStorage.getItem(LOCAL_STORAGE_KEY) || "",
   });
-  const optionRoundContract = useMemo(() => {
-    if (!optionRoundContractRaw) return;
-    const typedContract = optionRoundContractRaw.typedv2(optionRoundABI);
-    if (account) typedContract.connect(account);
-    return typedContract;
-  }, [optionRoundContractRaw, account]);
-  // ETH Contract
-  const { contract: ethContractRaw } = useContract({
-    abi: erc20ABI,
-    address: vaultState?.ethAddress as `0x${string}`,
-  });
-  const ethContract = useMemo(() => {
-    if (!ethContractRaw) return;
-    const typedContract = ethContractRaw.typedv2(erc20ABI);
-    if (account) typedContract.connect(account);
-    return typedContract;
-  }, [ethContractRaw, account]);
 
   const updateState = (updates: Partial<typeof state>) => {
     setState((prevState) => ({ ...prevState, ...updates }));
   };
 
-  const priceIncreaseWei = useMemo(() => {
+  const { priceIncreaseWei, totalNewCostWei, totalNewCostEth } = useMemo(() => {
+    // Calculate price increase in Wei
     const newPriceWei = stringGweiToWei(state.newPriceGwei);
-    if (newPriceWei <= oldPriceWei) return num.toBigInt(0);
-    else return newPriceWei - oldPriceWei;
-  }, [state.newPriceGwei, oldPriceWei]);
+    const oldPriceWeiBigInt = oldPriceWei ? BigInt(oldPriceWei) : BigInt(0);
+    const priceIncreaseWei =
+      newPriceWei <= oldPriceWeiBigInt
+        ? BigInt(0)
+        : newPriceWei - oldPriceWeiBigInt;
 
-  const totalNewCostWei = useMemo((): bigint => {
-    return num.toBigInt(oldAmount) * priceIncreaseWei;
-  }, [priceIncreaseWei, oldAmount]);
+    // Calculate total new cost in Wei
+    const totalNewCostWei = BigInt(oldAmount || "0") * priceIncreaseWei;
 
-  const totalNewCostEth = useMemo((): string => {
-    return formatUnits(totalNewCostWei, "ether");
-  }, [totalNewCostWei]);
+    // Convert total new cost to ETH
+    const totalNewCostEth = formatUnits(totalNewCostWei, "ether");
 
-  // Approve and Bid Multicall
-  const calls: Call[] = useMemo(() => {
-    const calls: Call[] = [];
-    if (
-      !account ||
-      !selectedRoundState?.address ||
-      !optionRoundContract ||
-      !ethContract ||
-      priceIncreaseWei <= 0
-    ) {
-      return calls;
-    }
+    return { priceIncreaseWei, totalNewCostWei, totalNewCostEth };
+  }, [state.newPriceGwei, oldPriceWei, oldAmount]);
 
-    const totalCostWei = num.toBigInt(totalNewCostWei);
-
-    const approveCall = ethContract.populateTransaction.approve(
-      selectedRoundState.address.toString(),
-      num.toBigInt(totalCostWei),
-    );
-    const editBidCall = optionRoundContract.populateTransaction.update_bid(
-      bidId,
-      priceIncreaseWei,
-    );
-
-    if (
-      approveCall &&
-      num.toBigInt(allowance) < num.toBigInt(needsApproving) &&
-      totalCostWei < num.toBigInt(balance)
-    )
-      calls.push(approveCall);
-    if (editBidCall) calls.push(editBidCall);
-
-    return calls;
-  }, [
-    needsApproving,
-    selectedRoundState?.address,
-    account,
-    balance,
+  const { handleMulticall } = useEditBidMulticall({
+    accountAddress: account?.address,
+    vaultAddress: vaultState?.address,
+    roundAddress: selectedRoundState?.address,
+    ethAddress: vaultState?.ethAddress,
     allowance,
-    optionRoundContract,
-    ethContract,
     bidId,
-  ]);
-  const { sendAsync} = useSendTransaction({ calls });
+    priceIncreaseWei,
+    totalNewCostWei,
+    localStorageToRemove: [LOCAL_STORAGE_KEY],
+  });
 
   // Send confirmation
   const handleSubmitForMulticall = () => {
@@ -161,23 +105,53 @@ const EditModal: React.FC<EditModalProps> = ({
         <br /> be spending an additional
         <br />
         <span className="font-semibold text-[#fafafa]">
-          {totalNewCostEth} ETH
+          {formatNumber(Number(totalNewCostEth))} ETH
         </span>
       </>,
       async () => {
-        await handleMulticall();
-        onClose();
+        try {
+          const hash = await handleMulticall();
+
+          setStatusModalProps({
+            version: "success",
+            txnHeader: "Edit Bid Successful",
+            txnHash: "",
+            txnOutcome: (
+              <>
+                Your bid was successfully increased for{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumber(Number(totalNewCostEth))} ETH
+                </span>
+                .
+              </>
+            ),
+          });
+          updateStatusModalProps({
+            txnHash: hash,
+          });
+
+          setState((prevState) => ({ ...prevState, bidAmount: "" }));
+          //onClose();
+        } catch (e) {
+          setStatusModalProps({
+            version: "failure",
+            txnHeader: "Edit Bid Failed",
+            txnHash: "",
+            txnOutcome: (
+              <>
+                Your bid increase of{" "}
+                <span className="font-semibold text-[#fafafa]">
+                  {formatNumber(Number(totalNewCostEth))} ETH
+                </span>{" "}
+                failed.
+              </>
+            ),
+          });
+          setState((prevState) => ({ ...prevState, bidAmount: "" }));
+          console.error("Error editting bid: ", e);
+        }
       },
     );
-  };
-
-  // Open wallet
-  const handleMulticall = async () => {
-    const data = await sendAsync();
-    setPendingTx(data?.transaction_hash);
-    setState((prevState) => ({ ...prevState, newPriceGwei: "" }));
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-    onClose();
   };
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -185,120 +159,127 @@ const EditModal: React.FC<EditModalProps> = ({
     const formattedValue = value.includes(".")
       ? value.slice(0, value.indexOf(".") + 10)
       : value;
-    updateState({ newPriceGwei: formattedValue });
     localStorage.setItem(LOCAL_STORAGE_KEY, formattedValue);
+    updateState({ newPriceGwei: formattedValue });
   };
 
-  useEffect(() => {
-    let error = "";
-    const newPriceGwei = state.newPriceGwei;
-    if (timestamp > Number(selectedRoundState?.auctionEndDate)) {
-      error = "Auction ended";
-    } else if (!account) {
-      error = "Connect account";
-    } else if (!state.newPriceGwei) {
-      // error = "Enter price";
-    } else if (parseFloat(newPriceGwei) <= parseFloat(oldPriceGwei)) {
-      error = "Bid price must increase";
-    }
-
-    const isButtonDisabled = (): boolean => {
-      if (pendingTx) return true;
-      if (error !== "") return true;
-      if (!state.newPriceGwei) return true;
-      return false;
-    };
-
-    const cost = num.toBigInt(totalNewCostWei);
-
-    updateState({ error, isButtonDisabled: isButtonDisabled() });
-    setNeedsApproving(
-      num.toBigInt(allowance) < num.toBigInt(cost) ? cost.toString() : "0",
-    );
+  const priceReason: string = useMemo(() => {
+    if (!account) return "Connect account";
+    else if (timestamp > Number(selectedRoundState?.auctionEndDate))
+      return "Auction period is over; transaction pending...";
+    else if (!state.newPriceGwei) return "";
+    else if (priceIncreaseWei === BigInt(0)) return "Bid price must increase";
+    else if (BigInt(totalNewCostWei) > BigInt(balance))
+      return `Exceeds balance (${parseFloat(
+        formatEther(balance.toString() || "0"),
+      ).toFixed(5)} ETH)`;
+    else return "";
   }, [
-    timestamp,
-    state.newPriceGwei,
-    oldPriceGwei,
     account,
-    allowance,
-    selectedRoundState?.address,
-    pendingTx,
+    timestamp,
+    selectedRoundState?.auctionEndDate,
+    state.newPriceGwei,
+    totalNewCostWei,
+    balance,
   ]);
 
+  const isButtonDisabled: boolean = useMemo(() => {
+    if (pendingTx) return true;
+    if (priceReason !== "") return true;
+    if (!state.newPriceGwei) return true;
+    return false;
+  }, [pendingTx, priceReason, state.newPriceGwei]);
+
   return (
-    <div className="bg-[#121212] border border-[#262626] rounded-xl p-0 w-full flex flex-col h-full">
-      <div className="flex items-center p-4">
-        <button
-          onClick={onClose}
-          className="flex justify-center items-center mr-4 w-[44px] h-[44px] rounded-lg border-[1px] border-[#262626] bg-[#0D0D0D]"
-        >
-          <ChevronLeft className="size-[16px] stroke-[4px] text-[#F5EBB8]" />
-        </button>
-        <h2 className="text-[#FAFAFA] text-[16px] font-medium text-md">
-          Edit Bid
-        </h2>
-      </div>
-
-      <div className="flex flex-col h-full">
-        <div className="flex-grow space-y-6 pt-2 px-4">
-          <div>
-            <InputField
-              type="number"
-              value={""}
-              label="Current Amount"
-              onChange={(_e) => {}}
-              placeholder={oldAmount.toString()}
-              disabled={true}
-              className="text-[#8c8c8c] bg-[#161616] border-[#262626]"
-              icon={
-                <LayerStackIcon
-                  stroke="#8C8C8C"
-                  fill="transparent"
-                  classname="absolute right-2 top-1/2 -translate-y-1/2"
-                />
-              }
-            />
-          </div>
-          <div>
-            <InputField
-              type="number"
-              value={state.newPriceGwei}
-              label="Enter Price"
-              label2={`Current: ${oldPriceGwei} GWEI`}
-              onChange={handlePriceChange}
-              placeholder={`e.g. ${oldPriceGwei}`}
-              icon={
-                <FontAwesomeIcon
-                  icon={faEthereum}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
-                />
-              }
-              error={state.error}
-            />
-          </div>
+    <>
+      <div className="bg-[#121212] border border-[#262626] rounded-xl p-0 w-full flex flex-col h-full edit-bid-modal">
+        <div className="flex items-center p-4">
+          <button
+            onClick={onClose}
+            className="flex justify-center items-center mr-4 w-[44px] h-[44px] rounded-lg border-[1px] border-[#262626] bg-[#0D0D0D] edit-bid-close"
+          >
+            <ChevronLeft className="size-[16px] stroke-[4px] text-[#F5EBB8]" />
+          </button>
+          <h2 className="text-[#FAFAFA] text-[16px] font-medium text-md edit-bid-header">
+            Edit Bid
+          </h2>
         </div>
-      </div>
+        {timestamp > Number(selectedRoundState?.auctionEndDate) && (
+          <AuctionOverPanel />
+        )}
 
-      <div className="flex justify-between text-sm px-6 pb-1">
-        <span className="text-gray-400">Total</span>
-        <span>{parseFloat(totalNewCostEth).toFixed(6)} ETH</span>
+        {timestamp < Number(selectedRoundState?.auctionEndDate) && (
+          <>
+            <div className="flex flex-col h-full">
+              <div className="flex-grow space-y-6 pt-2 px-4">
+                <div className="edit-bid-current-amount">
+                  <InputField
+                    type="number"
+                    value={""}
+                    label="Current Amount"
+                    dataId="inputUpdateBidAmount"
+                    onChange={(_e) => {}}
+                    placeholder={oldAmount.toString()}
+                    disabled={true}
+                    className="text-[#8c8c8c] bg-[#161616] border-[#262626]"
+                    icon={
+                      <LayerStackIcon
+                        stroke="#8C8C8C"
+                        fill="transparent"
+                        classname="absolute right-2 top-1/2 -translate-y-1/2"
+                      />
+                    }
+                  />
+                </div>
+                <div className="edit-bid-new-price">
+                  <InputField
+                    type="number"
+                    value={state.newPriceGwei}
+                    label="Enter Price"
+                    label2={`Current: ${oldPriceGwei} Gwei`}
+                    dataId="inputUpdateBidPrice"
+                    onChange={handlePriceChange}
+                    placeholder={`e.g. ${oldPriceGwei}`}
+                    icon={
+                      <EthereumIcon classname="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
+                    }
+                    error={priceReason}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <Hoverable
+              dataId="updateBidSummary"
+              className="flex justify-between text-sm px-6 pb-1 edit-bid-total"
+            >
+              <span className="text-gray-400">Total</span>
+              <span>{formatNumber(parseFloat(totalNewCostEth))} ETH</span>
+            </Hoverable>
+            <Hoverable
+              dataId="placingBidBalance"
+              className="flex justify-between text-sm px-6 pb-6 edit-bid-balance"
+            >
+              <span className="text-gray-400">Balance</span>
+              <span>
+                {formatNumber(parseFloat(formatEther(num.toBigInt(balance))))}{" "}
+                ETH
+              </span>
+            </Hoverable>
+            <div className="mt-auto">
+              <div className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]">
+                <ActionButton
+                  onClick={handleSubmitForMulticall}
+                  disabled={isButtonDisabled}
+                  text="Edit Bid"
+                  dataId="updateBidButton"
+                />
+              </div>
+            </div>
+          </>
+        )}
       </div>
-      <div className="flex justify-between text-sm px-6 pb-6">
-        <span className="text-gray-400">Balance</span>
-        <span>
-          {parseFloat(formatEther(num.toBigInt(balance))).toFixed(3)} ETH
-        </span>
-      </div>
-      <div className="mt-auto">
-        <div className="px-6 flex justify-between text-sm mb-6 pt-6 border-t border-[#262626]">
-          <ActionButton
-            onClick={handleSubmitForMulticall}
-            disabled={state.isButtonDisabled}
-            text="Edit Bid"
-          />
-        </div>
-      </div>
-    </div>
+    </>
   );
 };
 

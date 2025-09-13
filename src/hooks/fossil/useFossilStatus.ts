@@ -4,7 +4,9 @@ import {
   getDurationForRound,
   getTargetTimestampForRound,
 } from "@/lib/utils";
-import { useProtocolContext } from "@/context/ProtocolProvider";
+import useVaultState from "../vault_v2/states/useVaultState";
+import useRoundState from "../vault_v2/states/useRoundState";
+import { useNewContext } from "@/context/NewProvider";
 
 export interface StatusData {
   status?: string;
@@ -12,7 +14,9 @@ export interface StatusData {
 }
 
 const useFossilStatus = () => {
-  const { selectedRoundState, conn } = useProtocolContext();
+  const { selectedRoundAddress, vaultState } = useVaultState();
+  const selectedRoundState = useRoundState(selectedRoundAddress);
+  const { conn } = useNewContext();
   const targetTimestamp = getTargetTimestampForRound(selectedRoundState);
   const roundDuration = getDurationForRound(selectedRoundState);
   const [statusData, setStatusData] = useState<StatusData | null>(null);
@@ -36,12 +40,13 @@ const useFossilStatus = () => {
 
     setLoading(true);
     try {
-
-      const jobId = createJobId(targetTimestamp, roundDuration);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_FOSSIL_API_URL}/job_status/${jobId}`
+      const jobId = createJobId(
+        targetTimestamp,
+        roundDuration,
+        Number(vaultState?.alpha || 0),
+        Number(vaultState?.strikeLevel || 0),
       );
-
+      const response = await fetch(`/api/getJobStatus?jobId=${jobId}`);
       if (!response.ok) throw new Error("Network response was not ok");
 
       const data = await response.json();
@@ -52,7 +57,7 @@ const useFossilStatus = () => {
     } finally {
       setLoading(false);
     }
-  }, [targetTimestamp, conn]);
+  }, [targetTimestamp, vaultState?.alpha, vaultState?.strikeLevel, conn]);
 
   useEffect(() => {
     if (
@@ -68,7 +73,7 @@ const useFossilStatus = () => {
       if (statusData?.status === "Completed") {
         clearInterval(intervalId);
       }
-    }, 9999);
+    }, 100000);
 
     // Fetch immediately on mount
     fetchStatus();
@@ -78,7 +83,7 @@ const useFossilStatus = () => {
     };
   }, [fetchStatus, targetTimestamp, selectedRoundState?.roundState]);
 
-  return { status: statusData, error, loading, setStatusData };
+  return { status: statusData, error, loading, setStatusData, fetchStatus };
 };
 
 export default useFossilStatus;

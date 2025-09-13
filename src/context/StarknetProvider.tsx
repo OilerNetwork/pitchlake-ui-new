@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import { RpcProvider } from "starknet";
 import { sepolia, mainnet, devnet, Chain } from "@starknet-react/chains";
 import {
   StarknetConfig,
@@ -10,6 +9,8 @@ import {
   voyager,
   jsonRpcProvider,
 } from "@starknet-react/core";
+import { stringToHexString } from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const juno = {
   id: BigInt("0x534e5f4a554e4f5f53455155454e434552"), // SN_JUNO_SEQUENCER
@@ -75,13 +76,16 @@ export const StarknetProvider = ({
   }
   const provider = jsonRpcProvider({ rpc });
 
+  const queryClient = useQueryClient();
+  const newDevnet = {...devnet, id: BigInt(stringToHexString("SN_KATANA"))}
   return (
     <StarknetConfig
-      chains={[sepolia, devnet, juno, mainnet]}
+      chains={[sepolia, newDevnet, juno, mainnet]}
       provider={provider}
       connectors={connectors}
       explorer={voyager}
       autoConnect={true}
+      queryClient={queryClient}
     >
       {children}
     </StarknetConfig>

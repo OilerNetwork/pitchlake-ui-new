@@ -1,14 +1,8 @@
 import React, { useMemo } from "react";
 import {
-  VaultUserRole,
-  RoundState,
   ProviderTabs,
   BuyerTabs,
   CommonTabs,
-  VaultStateType,
-  LiquidityProviderStateType,
-  VaultActionsType,
-  OptionRoundActionsType,
   OptionRoundStateType,
 } from "@/lib/types";
 import DepositContent from "@/components/Vault/VaultActions/Tabs/Provider/Deposit";
@@ -25,14 +19,9 @@ export const useTabContent = (
   userType: string,
   activeTab: string,
   selectedRoundState: OptionRoundStateType | undefined,
-  isTabsHidden: boolean,
-  bidToEdit: any,
-  userBids: any,
-  setIsTabsHidden: (open: boolean) => void,
-  setBidToEdit: (bid: any) => void,
 ) => {
   const { pendingTx } = useTransactionContext();
-  const env = process.env.NEXT_PUBLIC_ENVIRONMENT;
+  const timestamp = new Date().getTime() / 1000;
 
   // @NOTE: For now we are hiding this panel, eventually we need to show it in WS mode and possibly RPC mode as well
   //const commonTabs = env === "ws" || env === "rpc" ? [] : [CommonTabs.MyInfo];
@@ -64,7 +53,7 @@ export const useTabContent = (
           return [];
       }
     }
-  }, [userType, selectedRoundState?.roundState]);
+  }, [userType, selectedRoundState?.roundState, timestamp]);
 
   const tabContent = useMemo(() => {
     switch (activeTab) {
@@ -77,11 +66,8 @@ export const useTabContent = (
       case BuyerTabs.History:
         return (
           <History
-            items={userBids}
-            bidToEdit={bidToEdit}
-            isTabsHidden={isTabsHidden}
-            setIsTabsHidden={setIsTabsHidden}
-            setBidToEdit={setBidToEdit}
+            showConfirmation={(amount, action) => {}}
+            setIsShowingTabs={() => {}}
           />
         );
       case BuyerTabs.Refund:
@@ -98,13 +84,7 @@ export const useTabContent = (
           return <DepositContent showConfirmation={(amount, action) => {}} />;
         }
     }
-  }, [
-    userType,
-    activeTab,
-    selectedRoundState?.roundState,
-    pendingTx,
-    userBids,
-  ]);
+  }, [userType, activeTab, selectedRoundState?.roundState, pendingTx]);
 
   return { tabs, tabContent };
 };

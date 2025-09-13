@@ -1,6 +1,6 @@
 "use client";
 import { Vault } from "@/components/Vault/Vault";
-import { useProtocolContext } from "@/context/ProtocolProvider";
+import { useNewContext } from "@/context/NewProvider";
 import { useEffect } from "react";
 
 export default function Home({
@@ -8,7 +8,7 @@ export default function Home({
 }: {
   params: { address: string };
 }) {
-  const { setVaultAddress } = useProtocolContext();
+  const { setVaultAddress } = useNewContext();
 
   useEffect(() => {
     if (address) {

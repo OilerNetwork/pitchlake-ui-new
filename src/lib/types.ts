@@ -1,10 +1,20 @@
-import { Account, CairoCustomEnum } from "starknet";
+import { DemoFossilCallParams } from "@/app/api/sendMockFossilCallback/route";
+import { ReactNode } from "react";
+
+export interface StatusModalProps {
+  txnHeader: string;
+  txnOutcome: ReactNode | string;
+  txnHash: string;
+  version: "success" | "failure" | "pending" | null;
+}
 
 export type FossilParams = {
   targetTimestamp: number | undefined;
   roundDuration: number | undefined;
   clientAddress: string | undefined;
   vaultAddress: string | undefined;
+  alpha: number | undefined;
+  k: number | undefined;
 };
 
 export type DepositArgs = {
@@ -23,6 +33,30 @@ export type CollectArgs = { account: string };
 export type ApprovalArgs = {
   amount: number | bigint;
   spender: string;
+};
+
+export type U256 = {
+  low: string | number | bigint;
+  high: string | number | bigint;
+};
+
+export type L1DataVol = {
+  twap: U256;
+  volatility: number | string;
+  reserve_price: U256;
+};
+
+export type L1DataCap = {
+  twap: U256;
+  cap_level: number | string;
+  reserve_price: U256;
+};
+
+export type L1Data = L1DataVol | L1DataCap;
+
+export type FossilCallbackArgs = {
+  l1_data: L1Data;
+  timestamp: number | string;
 };
 
 export type TransactionResult = {
@@ -46,11 +80,11 @@ export const RoundStateLabels: { [key in RoundState]: string } = {
 export type VaultStateType = {
   address: string;
   vaultType: string;
-  latestBlock?:string;
+  latestBlock?: string;
   alpha: number | bigint | string;
   strikeLevel: number | bigint | string;
   ethAddress: string;
-  fossilClientAddress: string;
+  l1DataProcessorAddress: string;
   currentRoundId: number | bigint | string;
   lockedBalance: number | bigint | string;
   unlockedBalance: number | bigint | string;
@@ -58,6 +92,7 @@ export type VaultStateType = {
   queuedBps: number | bigint | string;
   now: number | bigint | string;
   deploymentDate: string;
+  currentRoundAddress: string;
 };
 
 export type LiquidityProviderStateType = {
@@ -70,11 +105,11 @@ export type LiquidityProviderStateType = {
 
 export type OptionBuyerStateType = {
   address: string;
-  bidHashes?:string
-  bids?:Bid[]|any;
+  bidHashes?: string;
+  bids?: Bid[] | any;
   roundAddress: string;
-  hasMinted?:boolean;
-  hasRefunded?:boolean;
+  hasMinted?: boolean;
+  hasRefunded?: boolean;
   mintableOptions: bigint | number | string;
   refundableOptions: bigint | number | string;
   totalOptions: bigint | number | string;
@@ -82,13 +117,34 @@ export type OptionBuyerStateType = {
 };
 
 export type VaultActionsType = {
-  depositLiquidity: (depositArgs: DepositArgs) => Promise<void>;
-  withdrawLiquidity: (withdrawArgs: WithdrawLiquidityArgs) => Promise<void>;
-  withdrawStash: (collectArgs: CollectArgs) => Promise<void>;
-  queueWithdrawal: (queueArgs: QueueArgs) => Promise<void>;
+  // LP
+  depositLiquidity: (depositArgs: DepositArgs) => Promise<string>;
+  withdrawLiquidity: (withdrawArgs: WithdrawLiquidityArgs) => Promise<string>;
+  withdrawStash: (collectArgs: CollectArgs) => Promise<string>;
+  queueWithdrawal: (queueArgs: QueueArgs) => Promise<string>;
+  // OB
+  placeBid: (placeBids: PlaceBidArgs) => Promise<string>;
+  updateBid: (updateBid: UpdateBidArgs) => Promise<string>;
+  refundUnusedBids: (refundBids: RefundBidsArgs) => Promise<string>;
+  mintOptions: (mintOptions: MintOptionsArgs) => Promise<string>;
+  exerciseOptions: (exerciseOptions: ExerciseOptionsArgs) => Promise<string>;
+  // STATE TRANSITION
   startAuction: () => Promise<void>;
   endAuction: () => Promise<void>;
   settleOptionRound: () => Promise<void>;
+  demoFossilCallback: (fossilArgs: DemoFossilCallParams) => Promise<boolean>;
+  sendFossilRequest: (
+    fossilRequest: SendFossiLRequestParams,
+  ) => Promise<string>;
+};
+
+export type SendFossiLRequestParams = {
+  targetTimestamp: number;
+  roundDuration: number;
+  clientAddress: string;
+  vaultAddress: string;
+  alpha: number;
+  k: number;
 };
 
 export type OptionRoundStateType = {
@@ -117,7 +173,6 @@ export type OptionRoundStateType = {
   treeNonce: bigint | number | string;
   performanceLP: string;
   performanceOB: string;
-  //queuedLiquidity?: bigint | number | string;
 };
 
 export type Bid = {
@@ -153,27 +208,42 @@ export interface VaultDetailsProps {
   optionSettleDate?: string | number | bigint;
 }
 
-export type OptionRoundActionsType = {
-  placeBid: (placeBids: PlaceBidArgs) => Promise<void>;
-  updateBid: (updateBid: UpdateBidArgs) => Promise<void>;
-  refundUnusedBids: (refundBids: RefundBidsArgs) => Promise<void>;
-  tokenizeOptions: () => Promise<void>;
-  exerciseOptions: () => Promise<void>;
+export type WebSocketData = {
+  wsVaultState: VaultStateType | undefined;
+  wsOptionRoundStates: OptionRoundStateType[];
+  wsLiquidityProviderState: LiquidityProviderStateType | undefined;
+  wsOptionBuyerStates: OptionBuyerStateType[];
 };
 
-export type UpdateBidArgs = {
-  bidId: string;
-  priceIncrease: number | bigint;
+export type MockData = {
+  vaultState: VaultStateType;
+  lpState: LiquidityProviderStateType;
+  vaultActions: VaultActionsType;
+  optionRoundStates: OptionRoundStateType[];
+  optionBuyerStates: OptionBuyerStateType[];
 };
+
 export type PlaceBidArgs = {
   amount: number | bigint;
   price: number | bigint;
 };
+export type UpdateBidArgs = {
+  bidId: string;
+  priceIncrease: number | bigint;
+};
+export type MintOptionsArgs = {
+  roundAddress: string;
+};
 export type RefundableBidsArgs = {
+  roundAddress: string;
   optionBuyer: string;
 };
 export type RefundBidsArgs = {
+  roundAddress: string;
   optionBuyer: string;
+};
+export type ExerciseOptionsArgs = {
+  roundAddress: string;
 };
 
 export interface InfoItemProps {
@@ -208,9 +278,9 @@ export enum BuyerTabs {
 }
 
 export enum WithdrawSubTabs {
-  Liquidity = "Liquidity",
-  Queue = "Queue",
-  Collect = "Collect",
+  Unlocked = "Unlocked",
+  Locked = "Locked",
+  Stashed = "Stashed",
 }
 
 // Define a type for the user role
@@ -232,4 +302,23 @@ export interface TabsProps {
   tabs: string[];
   activeTab: string;
   setActiveTab: (tab: string) => void;
+}
+
+
+export interface RawBlockData {
+  block_number?: number;
+  base_fee_per_gas?: string;
+  timestamp: number;
+}
+
+export interface FormattedBlockData {
+  blockNumber?: number | undefined;
+  timestamp: number;
+  basefee?: number | undefined;
+  twap?: number | undefined;
+  confirmedBasefee?: number | undefined;
+  confrimedTwap?: number | undefined;
+  isUnconfirmed?: boolean;
+  unconfirmedBasefee?: number | undefined;
+  unconfrimedTwap?: number | undefined;
 }

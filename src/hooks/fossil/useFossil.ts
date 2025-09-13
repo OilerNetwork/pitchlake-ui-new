@@ -1,6 +1,4 @@
-import {
-  useContract,
-} from "@starknet-react/core";
+import { useContract } from "@starknet-react/core";
 import { useEffect, useCallback, useMemo, useState } from "react";
 import { ApprovalArgs, TransactionResult } from "@/lib/types";
 import { fossilClientABI } from "@/lib/abi";
@@ -9,12 +7,12 @@ import { useTransactionContext } from "@/context/TransactionProvider";
 import { getDevAccount } from "@/lib/constants";
 
 const useFossil = (
-  fossilClientAddress: string | undefined,
+  l1DataProcessorAddress: string | undefined,
   account?: AccountInterface | undefined,
 ) => {
   const contractData = {
     abi: fossilClientABI,
-    address: fossilClientAddress as `0x${string}`,
+    address: l1DataProcessorAddress as `0x${string}`,
   };
 
   const { contract } = useContract({ ...contractData });
